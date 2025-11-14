@@ -1,0 +1,188 @@
+# =====================================================
+# âš™ï¸ NETLIFY CONFIGURATION
+# =====================================================
+# 
+# This file configures how Netlify builds and deploys your site
+# Place this in the ROOT of your project
+# 
+# ðŸŽ“ LEARNING NOTE:
+# - [build] section: How to build your site
+# - [functions] section: Serverless functions config
+# - [[redirects]] section: URL routing rules
+# 
+# =====================================================
+
+# =====================================================
+# BUILD SETTINGS
+# =====================================================
+
+[build]
+  # Command to build your React app
+  command = "npm run build"
+  
+  # Directory containing the built files
+  publish = "dist"
+  
+  # Directory containing serverless functions
+  functions = "netlify/functions"
+
+[build.environment]
+  SUPABASE_SERVICE_ROLE_KEY = "your_service_role_key"
+# ðŸŽ“ Build Process:
+# 1. Netlify runs: npm install
+# 2. Then runs: npm run build (your command)
+# 3. Deploys files from 'dist' folder
+# 4. Makes functions available at /.netlify/functions/
+
+# =====================================================
+# FUNCTIONS SETTINGS
+# =====================================================
+
+[functions]
+  # Node.js version for functions
+  node_bundler = "esbuild"
+  
+  # Directory for functions (already set in [build] but can override)
+  directory = "netlify/functions"
+
+# ðŸŽ“ Why esbuild?
+# - Super fast bundler for serverless functions
+# - Automatically includes dependencies
+# - Smaller bundle sizes = faster cold starts
+
+# =====================================================
+# ENVIRONMENT VARIABLES (set in Netlify dashboard)
+# =====================================================
+
+# Don't put actual values here! Set them in:
+# Netlify Dashboard â†’ Site settings â†’ Environment variables
+#
+# Required variables:
+# - VITE_SUPABASE_URL
+# - VITE_SUPABASE_ANON_KEY
+# - SUPABASE_SERVICE_ROLE_KEY (functions only, never frontend!)
+
+# =====================================================
+# REDIRECTS & REWRITES
+# =====================================================
+
+# SPA (Single Page Application) routing
+# All routes should serve index.html for client-side routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = false
+  conditions = {Role = [""], Country = [""]}
+
+# ðŸŽ“ Why this redirect?
+# React Router (or similar) handles routing on client
+# Without this, refreshing /jobs would return 404
+# This serves index.html for all routes, then React Router takes over
+
+# API routes are automatically handled at /.netlify/functions/*
+
+# =====================================================
+# HEADERS
+# =====================================================
+
+# Security headers for all pages
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+
+# ðŸŽ“ Security Headers Explained:
+# - X-Frame-Options: Prevents clickjacking (embedding site in iframe)
+# - X-Content-Type-Options: Prevents MIME type sniffing
+# - X-XSS-Protection: Enables browser's XSS filter
+# - Referrer-Policy: Controls referrer information
+# - Permissions-Policy: Restricts browser features
+
+# Cache static assets
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# ðŸŽ“ Cache-Control:
+# - public: Can be cached by browsers and CDNs
+# - max-age=31536000: Cache for 1 year (in seconds)
+# - immutable: Content will never change
+# Perfect for hashed assets (e.g., app.abc123.js)
+
+# Don't cache HTML
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+# ðŸŽ“ Why no-cache for HTML?
+# index.html should always be fresh
+# It loads the hashed assets (which are cached)
+# Ensures users always get latest app version
+
+# =====================================================
+# DEVELOPMENT SETTINGS
+# =====================================================
+
+[dev]
+  # Port for local development
+  port = 5173  # Vite's default port
+  
+  # Automatically open browser
+  autoLaunch = true
+  
+  # Functions port (if different from main port)
+  functionsPort = 8888
+
+# ðŸŽ“ Local Development:
+# Run: netlify dev
+# - Starts your app on port 5173
+# - Functions available at localhost:5173/.netlify/functions/
+# - Loads environment variables from .env file
+
+# =====================================================
+# PLUGINS (OPTIONAL)
+# =====================================================
+
+# Example: Lighthouse plugin for performance monitoring
+# [[plugins]]
+#   package = "@netlify/plugin-lighthouse"
+#
+#   [plugins.inputs]
+#     output_path = "reports/lighthouse.html"
+
+# Example: Sitemap plugin
+# [[plugins]]
+#   package = "@netlify/plugin-sitemap"
+
+# ðŸŽ“ Netlify Plugins:
+# Extend build process with additional functionality
+# Install with: npm install --save-dev @netlify/plugin-name
+# Configure in this file
+# Browse plugins: https://app.netlify.com/plugins
+
+# =====================================================
+# CONFIGURATION COMPLETE! âœ…
+# =====================================================
+# 
+# ðŸŽ“ Next Steps:
+# 1. Place this file in project root (next to package.json)
+# 2. Set environment variables in Netlify dashboard
+# 3. Connect GitHub repo to Netlify
+# 4. Deploy!
+# 
+# Netlify will automatically:
+# - Run npm install
+# - Build your React app
+# - Deploy to CDN
+# - Set up serverless functions
+# - Enable HTTPS
+# - Give you a .netlify.app domain
+# 
+# =====================================================
