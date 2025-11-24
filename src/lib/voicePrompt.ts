@@ -11,7 +11,7 @@ export type VoicePreset =
     | 'academic';
 
 export type UserVoiceProfile = {
-    voice_preset?: VoicePreset | null;
+    voice_preset?: VoicePreset;
     voice_custom_sample?: string | null;
     voice_formality?: number | null;     // 0 - 100
     voice_playfulness?: number | null;   // 0 - 100
@@ -62,14 +62,15 @@ export function buildUserVoiceSystemPrompt(
 
     const { taskType = 'generic', language = 'English' } = options;
 
-    const preset = voice_preset ?? 'natural';
+    // This line guarantees a non-null preset value
+    const preset: VoicePreset = voice_preset ?? 'natural';
+
     const presetDescription = describePreset(preset);
     const toneDescription = describeToneSliders({
         formality: clamp(voice_formality, 0, 100),
         playfulness: clamp(voice_playfulness, 0, 100),
         conciseness: clamp(voice_conciseness, 0, 100),
-    });
-
+      });
     const sampleText = (voice_custom_sample || '').trim();
 
     const identityLine =
