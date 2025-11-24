@@ -64,7 +64,6 @@ export function buildUserVoiceSystemPrompt(
 
     // This line guarantees a non-null preset value
     const preset: VoicePreset = voice_preset ?? 'natural';
-
     const presetDescription = describePreset(preset);
     const toneDescription = describeToneSliders({
         formality: clamp(voice_formality, 0, 100),
@@ -85,7 +84,7 @@ export function buildUserVoiceSystemPrompt(
         identityLine,
         ``,
         `VOICE PRESET AND STYLE`,
-        `- Base voice preset: ${voice_preset}`,
+        `- Base voice preset: ${preset}`,
         `- Preset description: ${presetDescription}`,
         `- Tone sliders: ${toneDescription}`,
         sampleText
