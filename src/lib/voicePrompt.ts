@@ -11,7 +11,7 @@ export type VoicePreset =
     | 'academic';
 
 export type UserVoiceProfile = {
-    voice_preset?: VoicePreset;
+    voice_preset?: VoicePreset | null;
     voice_custom_sample?: string | null;
     voice_formality?: number | null;     // 0 - 100
     voice_playfulness?: number | null;   // 0 - 100
