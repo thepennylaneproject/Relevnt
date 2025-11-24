@@ -204,9 +204,9 @@ const COLORS = {
 
 const lightModeColors: ColorTokens = {
   // 🏙️ BACKGROUNDS & SURFACES
-  background: COLORS.warmNeutral,    // #F3F1ED - Main page background
+  background: '#F7F4ED',             // Ivory page background to match Jobs/Settings
   surface: COLORS.white,             // #FFFFFF - Cards, panels
-  surfaceHover: '#F9F8F6',           // Slightly darker white on hover
+  surfaceHover: '#FFFDF8',           // Soft ivory hover/fill
 
   // 📝 TEXT
   textPrimary: COLORS.black,         // #0B0B0B - Headlines, body text

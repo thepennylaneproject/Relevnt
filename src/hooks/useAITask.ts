@@ -32,6 +32,9 @@ import type {
   UserTierForAI,
 } from '../types/ai-responses.types';
 import { getTaskLimit } from '../types/ai-responses.types';
+import { getAIClient } from '../services/aiClient';
+import type { UserVoiceProfile, VoiceTaskType, VoicePreset } from '../lib/voicePrompt';
+import { useCareerProfile } from './useCareerProfile';
 
 // ============================================================================
 // CONFIGURATION
@@ -61,14 +64,23 @@ const DEFAULT_RETRY_CONFIG: RetryConfig = {
  */
 export interface UseAITaskReturn {
   /**
-   * Execute an AI task
-   * 
+   * Execute an AI task with optional voice profile integration
+   *
    * @param taskName - Name of the task (e.g., 'analyze-resume')
    * @param input - Task input data
+   * @param options - Optional voice profile and task type
    * @returns Parsed response data or null if failed
    * @throws AIError with details about failure
    */
-  execute: (taskName: TaskName, input: unknown) => Promise<AITaskResponse>;
+  execute: (
+    taskName: TaskName,
+    input: unknown,
+    options?: {
+      voiceProfile?: UserVoiceProfile;
+      taskType?: VoiceTaskType;
+      systemPrompt?: string;
+    }
+  ) => Promise<AITaskResponse>;
 
   /**
    * Is a request currently in progress?
@@ -94,6 +106,11 @@ export interface UseAITaskReturn {
    * Retry the last failed request
    */
   retry: () => Promise<AITaskResponse | null>;
+
+  /**
+   * User's voice profile from career profile (if available)
+   */
+  voiceProfile: UserVoiceProfile | null;
 }
 
 // ============================================================================
@@ -103,6 +120,9 @@ export interface UseAITaskReturn {
 interface StoredRequest {
   taskName: TaskName;
   input: unknown;
+  voiceProfile?: UserVoiceProfile;
+  taskType?: VoiceTaskType;
+  systemPrompt?: string;
 }
 
 // ============================================================================
@@ -111,6 +131,7 @@ interface StoredRequest {
 
 export function useAITask(): UseAITaskReturn {
   const { user } = useAuth();
+  const { profile } = useCareerProfile();
 
   // =========================================================================
   // STATE
@@ -120,6 +141,23 @@ export function useAITask(): UseAITaskReturn {
   const [error, setError] = useState<AIError | null>(null);
   const [usageStats, setUsageStats] = useState<UsageStats | null>(null);
   const [lastRequest, setLastRequest] = useState<StoredRequest | null>(null);
+
+  // =========================================================================
+  // VOICE PROFILE
+  // =========================================================================
+
+  // Convert career profile to voice profile format
+  const voiceProfile: UserVoiceProfile | null = profile?.voice_profile
+    ? {
+        voice_preset: profile.voice_profile.voice_preset as VoicePreset | null,
+        voice_custom_sample: profile.voice_profile.writing_sample || null,
+        voice_formality: profile.voice_profile.formality_level || null,
+        voice_playfulness: profile.voice_profile.warmth_level || null,
+        voice_conciseness: profile.voice_profile.conciseness_level || null,
+        full_name: profile.full_name || null,
+        headline: profile.current_title || null,
+      }
+    : null;
 
   // =========================================================================
   // QUOTA CHECKING
@@ -248,12 +286,45 @@ export function useAITask(): UseAITaskReturn {
   // =========================================================================
 
   const execute = useCallback(
-    async (taskName: TaskName, input: unknown): Promise<AITaskResponse> => {
+    async (
+      taskName: TaskName,
+      input: unknown,
+      options?: {
+        voiceProfile?: UserVoiceProfile;
+        taskType?: VoiceTaskType;
+        systemPrompt?: string;
+      }
+    ): Promise<AITaskResponse> => {
       setLoading(true);
       setError(null);
-      setLastRequest({ taskName, input });
+
+      // Use provided voice profile or fall back to user's profile
+      const effectiveVoiceProfile = options?.voiceProfile || voiceProfile;
+      const effectiveTaskType = options?.taskType;
+      const effectiveSystemPrompt = options?.systemPrompt;
+
+      setLastRequest({
+        taskName,
+        input,
+        voiceProfile: effectiveVoiceProfile || undefined,
+        taskType: effectiveTaskType,
+        systemPrompt: effectiveSystemPrompt,
+      });
 
       let lastError: AIError | null = null;
+
+      // Get AI client
+      const aiClient = getAIClient();
+
+      // Set auth token
+      const token =
+        (user as any)?.session?.access_token ||
+        localStorage.getItem('auth_token') ||
+        '';
+
+      if (token) {
+        aiClient.setToken(token);
+      }
 
       // Try up to maxRetries times
       for (
@@ -268,39 +339,14 @@ export function useAITask(): UseAITaskReturn {
             throw new Error(`Quota exceeded: ${quotaCheck.reason}`);
           }
 
-          // Get auth token from context or localStorage
-          const token =
-            // Try getting from session in context first
-            (user as any)?.session?.access_token ||
-            // Fall back to localStorage
-            localStorage.getItem('auth_token') ||
-            // If nothing, use empty string (will fail at API level)
-            '';
-
-          // Make request with retry and timeout
-          const response = await fetchWithTimeout(
-            '/.netlify/functions/ai',
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                ...(token && { Authorization: `Bearer ${token}` }),
-              },
-              body: JSON.stringify({
-                task: taskName,
-                input,
-              }),
-            },
-            DEFAULT_RETRY_CONFIG.timeoutMs
-          );
-
-          // Check response status
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-          }
-
-          // Parse response
-          const data = await response.json();
+          // Make request using AIClient with voice support
+          const data = await aiClient.call({
+            task: taskName,
+            input: input as string | undefined,
+            voiceProfile: effectiveVoiceProfile || undefined,
+            taskType: effectiveTaskType,
+            systemPrompt: effectiveSystemPrompt,
+          });
 
           // Check if response indicates success
           if (!data.success) {
@@ -308,12 +354,12 @@ export function useAITask(): UseAITaskReturn {
           }
 
           // Update usage stats from response
-          if (data.usage) {
-            setUsageStats(data.usage);
+          if ((data as any).usage) {
+            setUsageStats((data as any).usage);
           }
 
           setLoading(false);
-          return data;
+          return data as AITaskResponse;
         } catch (err) {
           lastError = createError(err, attempt);
 
@@ -345,7 +391,7 @@ export function useAITask(): UseAITaskReturn {
 
       throw new Error('Unknown error occurred');
     },
-    [user, createError, checkQuota]
+    [user, voiceProfile, createError, checkQuota]
   );
 
   // =========================================================================
@@ -390,6 +436,7 @@ export function useAITask(): UseAITaskReturn {
     clearError,
     usageStats,
     retry,
+    voiceProfile,
   };
 }
 

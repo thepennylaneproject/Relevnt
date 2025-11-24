@@ -192,8 +192,12 @@ export function RelevntThemeProvider({
   useEffect(() => {
     try {
       localStorage.setItem('relevnt-theme-mode', mode)
-      // Also set data attribute on document root for CSS to access
-      document.documentElement.setAttribute('data-theme-mode', mode.toLowerCase())
+      // Set data-theme attribute for CSS token switching
+      if (mode === 'Dark') {
+        document.documentElement.setAttribute('data-theme', 'dark')
+      } else {
+        document.documentElement.removeAttribute('data-theme')
+      }
     } catch (error) {
       console.error('Failed to save theme mode:', error)
     }

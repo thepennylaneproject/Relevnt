@@ -1,13 +1,33 @@
-import { useState } from 'react';
-import { usePrepareInterview } from '../hooks/usePrepareInterview';
-import { useTheme } from '../contexts/useTheme';
+/**
+ * ============================================================================
+ * APPLICATION QUESTIONS HELPER (REFACTORED - PHASE 6.2)
+ * ============================================================================
+ * 🎯 PURPOSE: Generate interview prep questions and talking points
+ *
+ * Features:
+ * - AI-generated practice questions based on job + resume
+ * - Answering tips and strategies
+ * - Focus areas to highlight
+ * - Voice engine integration for authentic responses
+ *
+ * Backend Integration:
+ * - usePrepareInterview hook (uses voice engine via useAITask)
+ *
+ * Theme Integration:
+ * - useRelevntColors for centralized color system
+ * - PageBackground wrapper
+ * - PageHeader component
+ * ============================================================================
+ */
 
-const textareaClass =
-  'w-full min-h-[120px] rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-slate-50 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 resize-vertical';
+import { useState, CSSProperties } from 'react';
+import { usePrepareInterview } from '../hooks/usePrepareInterview';
+import { useRelevntColors } from '../hooks';
+import { PageBackground } from '../components/shared/PageBackground';
+import { PageHeader } from '../components/shared/PageHeader';
 
 export default function ApplicationQuestionsHelper(): JSX.Element {
-  const { mode } = useTheme();
-  const isDark = mode === 'Dark';
+  const colors = useRelevntColors();
   const { prepare, loading, error } = usePrepareInterview();
 
   const [jobTitle, setJobTitle] = useState('');
@@ -30,11 +50,9 @@ export default function ApplicationQuestionsHelper(): JSX.Element {
       const result = await prepare(jobTitle, company, resumeContent);
 
       if (result && result.success && result.data) {
-        // data: { questions: string[]; tips: string[]; commonAnswers: Record<string, string> }
         setQuestions(result.data.questions || []);
         setTips(result.data.tips || []);
 
-        // [Inference] Use the keys of commonAnswers as “focus areas” to drill into
         const commonAnswers = result.data.commonAnswers || {};
         setFocusAreas(Object.keys(commonAnswers));
       }
@@ -47,139 +65,227 @@ export default function ApplicationQuestionsHelper(): JSX.Element {
     touched &&
     (!jobTitle.trim() || !company.trim() || !resumeContent.trim());
 
+  // ============================================================
+  // STYLES
+  // ============================================================
+
+  const containerStyles: CSSProperties = {
+    maxWidth: '1000px',
+    margin: '0 auto',
+    padding: '60px 20px',
+    color: colors.text,
+  };
+
+  const inputStyles: CSSProperties = {
+    width: '100%',
+    padding: '0.75rem 1rem',
+    fontSize: '14px',
+    border: `1px solid ${colors.border}`,
+    borderRadius: '8px',
+    background: colors.background,
+    color: colors.text,
+  };
+
+  const textareaStyles: CSSProperties = {
+    ...inputStyles,
+    minHeight: '120px',
+    resize: 'vertical' as const,
+  };
+
+  const labelStyles: CSSProperties = {
+    display: 'block',
+    fontSize: '12px',
+    fontWeight: 600,
+    color: colors.text,
+    marginBottom: '0.5rem',
+  };
+
+  const buttonStyles: CSSProperties = {
+    padding: '0.75rem 1.5rem',
+    fontSize: '14px',
+    fontWeight: 600,
+    color: '#fff',
+    background: loading ? colors.textSecondary : colors.primary,
+    border: 'none',
+    borderRadius: '8px',
+    cursor: loading ? 'not-allowed' : 'pointer',
+    transition: 'all 0.2s ease',
+  };
+
+  const gridStyles: CSSProperties = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+    gap: '1.5rem',
+    marginBottom: '1.5rem',
+  };
+
+  const resultCardStyles: CSSProperties = {
+    padding: '1.5rem',
+    background: colors.surface,
+    borderRadius: '12px',
+    border: `1px solid ${colors.border}`,
+  };
+
+  const sectionTitleStyles: CSSProperties = {
+    fontSize: '14px',
+    fontWeight: 600,
+    color: colors.text,
+    marginBottom: '1rem',
+  };
+
+  // ============================================================
+  // RENDER
+  // ============================================================
+
   return (
-    <div
-      className="min-h-screen px-4 py-8 flex justify-center"
-      style={{ backgroundColor: isDark ? '#020617' : '#f3f4f6' }}
-    >
-      <div className="w-full max-w-4xl space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-50">
-            Application Questions Helper
-          </h1>
-          <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">
-            Use your resume and the role you are applying for to generate
-            practice questions and talking points you can reuse in written
-            applications and interviews.
-          </p>
-        </div>
+    <PageBackground>
+      <div style={containerStyles}>
+        {/* PAGE HEADER */}
+        <PageHeader
+          title="Application Questions Helper"
+          subtitle="Generate practice questions and talking points based on your resume and the role you're applying for. Powered by your authentic voice."
+          
+          textPosition="left"
+        />
 
-        <div className="grid md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-200">
-              Job title
-            </label>
-            <input
-              type="text"
-              value={jobTitle}
-              onChange={(e) => setJobTitle(e.target.value)}
-              className="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-slate-50 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-              placeholder="Senior Marketing Manager"
-            />
+        {/* INPUT FORM */}
+        <div style={{ ...gridStyles, marginTop: '2rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div>
+              <label style={labelStyles}>Job Title</label>
+              <input
+                type="text"
+                value={jobTitle}
+                onChange={(e) => setJobTitle(e.target.value)}
+                style={inputStyles}
+                placeholder="e.g., Senior Marketing Manager"
+              />
+            </div>
 
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-200">
-              Company
-            </label>
-            <input
-              type="text"
-              value={company}
-              onChange={(e) => setCompany(e.target.value)}
-              className="w-full rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-slate-50 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
-              placeholder="Relevnt"
-            />
+            <div>
+              <label style={labelStyles}>Company</label>
+              <input
+                type="text"
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+                style={inputStyles}
+                placeholder="e.g., Relevnt"
+              />
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="block text-xs font-medium text-slate-700 dark:text-slate-200">
-              Resume snapshot or highlights
-            </label>
+          <div>
+            <label style={labelStyles}>Resume Snapshot or Highlights</label>
             <textarea
-              className={textareaClass}
               value={resumeContent}
               onChange={(e) => setResumeContent(e.target.value)}
+              style={textareaStyles}
               placeholder="Paste the most relevant parts of your resume or a summary here..."
             />
           </div>
         </div>
 
+        {/* VALIDATION ERROR */}
         {showValidation && (
-          <div className="text-xs text-rose-600">
-            Fill in job title, company, and a resume snapshot before generating.
+          <div style={{ padding: '0.75rem', background: colors.error + '20', borderRadius: '8px', marginBottom: '1rem' }}>
+            <p style={{ fontSize: '12px', color: colors.error }}>
+              Please fill in job title, company, and resume snapshot before generating.
+            </p>
           </div>
         )}
 
-        <div className="flex items-center gap-3">
+        {/* GENERATE BUTTON */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
           <button
             type="button"
             onClick={handleGenerate}
             disabled={loading}
-            className={`inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium text-white ${loading
-                ? 'bg-slate-400 cursor-not-allowed'
-                : 'bg-sky-700 hover:bg-sky-800'
-              } transition`}
+            style={buttonStyles}
+            onMouseEnter={(e) => {
+              if (!loading) {
+                e.currentTarget.style.background = colors.primaryHover;
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!loading) {
+                e.currentTarget.style.background = colors.primary;
+              }
+            }}
           >
-            {loading ? 'Generating…' : 'Generate questions and prompts'}
+            {loading ? 'Generating…' : 'Generate Questions & Prompts'}
           </button>
 
           {error && (
-            <span className="text-xs text-rose-600">
-              There was a problem talking to the AI service. Try again later.
+            <span style={{ fontSize: '12px', color: colors.error }}>
+              Error: Unable to generate questions. Please try again.
             </span>
           )}
         </div>
 
-        <div className="grid md:grid-cols-2 gap-4">
-          <div>
-            <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-2">
-              Suggested questions
-            </h2>
+        {/* RESULTS */}
+        <div style={gridStyles}>
+          {/* Suggested Questions */}
+          <div style={resultCardStyles}>
+            <h2 style={sectionTitleStyles}>Suggested Questions</h2>
             {questions.length === 0 ? (
-              <p className="text-xs text-slate-500">
-                Questions will appear here once generated. You can reuse them
-                for written applications and interviews.
+              <p style={{ fontSize: '12px', color: colors.textSecondary }}>
+                Questions will appear here once generated. You can reuse them for written applications and interviews.
               </p>
             ) : (
-              <ul className="list-disc list-inside text-xs text-slate-700 dark:text-slate-200 space-y-1">
+              <ul style={{ paddingLeft: '1.25rem', margin: 0, color: colors.text, fontSize: '12px', lineHeight: '1.6' }}>
                 {questions.map((q, idx) => (
-                  <li key={idx}>{q}</li>
+                  <li key={idx} style={{ marginBottom: '0.5rem' }}>
+                    {q}
+                  </li>
                 ))}
               </ul>
             )}
           </div>
 
-          <div className="space-y-3">
+          {/* Tips and Focus Areas */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {/* Answering Tips */}
             {tips.length > 0 && (
-              <div>
-                <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-1">
-                  Answering tips
-                </h2>
-                <ul className="list-disc list-inside text-xs text-slate-700 dark:text-slate-200 space-y-1">
+              <div style={resultCardStyles}>
+                <h2 style={sectionTitleStyles}>Answering Tips</h2>
+                <ul style={{ paddingLeft: '1.25rem', margin: 0, color: colors.text, fontSize: '12px', lineHeight: '1.6' }}>
                   {tips.map((t, idx) => (
-                    <li key={idx}>{t}</li>
+                    <li key={idx} style={{ marginBottom: '0.5rem' }}>
+                      {t}
+                    </li>
                   ))}
                 </ul>
               </div>
             )}
 
+            {/* Focus Areas */}
             {focusAreas.length > 0 && (
-              <div>
-                <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-1">
-                  Focus areas to highlight
-                </h2>
-                <ul className="list-disc list-inside text-xs text-slate-700 dark:text-slate-200 space-y-1">
+              <div style={resultCardStyles}>
+                <h2 style={sectionTitleStyles}>Focus Areas to Highlight</h2>
+                <ul style={{ paddingLeft: '1.25rem', margin: 0, color: colors.text, fontSize: '12px', lineHeight: '1.6' }}>
                   {focusAreas.map((f, idx) => (
-                    <li key={idx}>{f}</li>
+                    <li key={idx} style={{ marginBottom: '0.5rem' }}>
+                      {f}
+                    </li>
                   ))}
                 </ul>
-                <p className="text-[11px] text-slate-500 mt-1">
-                  These usually map to themes the system thinks you should
-                  emphasize or answer consistently.
+                <p style={{ fontSize: '11px', color: colors.textSecondary, marginTop: '0.75rem' }}>
+                  These themes are suggested areas you should emphasize or answer consistently.
                 </p>
               </div>
             )}
           </div>
         </div>
+
+        {/* VOICE ENGINE NOTE */}
+        {(questions.length > 0 || tips.length > 0) && (
+          <div style={{ padding: '1rem', background: colors.surface, borderRadius: '8px', border: `1px solid ${colors.border}`, marginTop: '1.5rem' }}>
+            <p style={{ fontSize: '12px', color: colors.textSecondary }}>
+              💡 These responses are generated using your authentic voice profile to help you communicate in a way that feels natural to you.
+            </p>
+          </div>
+        )}
       </div>
-    </div>
+    </PageBackground>
   );
 }

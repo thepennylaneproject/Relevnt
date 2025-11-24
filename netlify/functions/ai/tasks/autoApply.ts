@@ -1,7 +1,7 @@
 // netlify/functions/autoApply.ts
 import { Handler } from '@netlify/functions';
 import { createClient } from '@supabase/supabase-js';
-
+import type { JobRow } from '../../../../src/shared/types'
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL as string;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
 
@@ -35,15 +35,6 @@ type JobMatchRow = {
   values_alignment: number | null;
 };
 
-type JobRow = {
-  id: string;
-  apply_url: string | null;
-  canonical_apply_url: string | null;
-  salary_min: number | null;
-  salary_max: number | null;
-  company_name: string | null;
-  title: string;
-};
 
 const handler: Handler = async (event) => {
   // Basic guard
@@ -153,9 +144,7 @@ const handler: Handler = async (event) => {
       // Fetch jobs with those ids
       const { data: jobRows, error: jobsError } = await supabase
         .from('jobs')
-        .select(
-          'id, title, company_name, apply_url, canonical_apply_url, salary_min, salary_max'
-        )
+        .select('id, title, company, external_url, salary_min, salary_max')
         .in('id', jobIds);
 
       if (jobsError) {
@@ -207,23 +196,22 @@ const handler: Handler = async (event) => {
         }
 
         // Apply URL rule
-        const canonical = job.canonical_apply_url || job.apply_url;
-        if (settings.apply_only_canonical && !job.canonical_apply_url) {
-          // skip if we require canonical but only have generic
+        // For now we only have a single external_url for the job.
+        // Later, if we add canonical employer URLs, we can treat those as preferred.
+        const applyUrl = job.external_url;
+
+        if (!applyUrl) {
+          // no way to apply, skip
           continue;
         }
 
-        if (!canonical) continue;
+        // If apply_only_canonical is true, we currently just require that an external_url exists.
+        // Once canonical URLs are in the schema, we can tighten this.
+        if (settings.apply_only_canonical && !applyUrl) {
+          continue;
+        }
 
         eligible.push({ job, match });
-      }
-
-      if (eligible.length === 0) {
-        summary.push({
-          user_id: settings.user_id,
-          status: 'no_jobs_after_filters',
-        });
-        continue;
       }
 
       // Sort by match score and take up to remaining
@@ -234,9 +222,11 @@ const handler: Handler = async (event) => {
       const applicationsPayload = toUse.map(({ job, match }) => {
         const now = new Date().toISOString();
 
+        const applyUrl = job.external_url;
+
         const baseDetails = {
-          apply_url_used: job.canonical_apply_url || job.apply_url,
-          company_name: job.company_name,
+          apply_url_used: applyUrl,
+          company_name: job.company ?? null,
           job_title: job.title,
         };
 

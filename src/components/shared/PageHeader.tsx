@@ -1,116 +1,116 @@
 /**
  * ============================================================================
- * PAGE HEADER COMPONENT - FIXED
+ * PAGE HEADER COMPONENT - HERO SECTION
  * ============================================================================
- * ðŸŽ¯ PURPOSE: Consistent page headers with title + illustration
- * 
- * FIXES APPLIED:
- * - Line 51: Changed 'theme' to 'currentTheme' (or removed if not needed)
- * - Line 54: Use lowercase mode for asset lookup [mode.toLowerCase()]
- * - Simplified styling since we're using inline styles
+ * 🎯 PURPOSE: Hero section with large background image and overlaid text
+ *
+ * Uses Hero asset (16:9, ~1200x675px) as background with title/subtitle overlay
  * ============================================================================
  */
 
 import { CSSProperties } from 'react';
-import { useTheme } from '../../contexts/useTheme';
-import { assets } from '../../themes/assets';
+import { useRelevntColors } from '../../hooks/useRelevntColors';
+import { getAsset } from '../../themes/assets';
 
 interface PageHeaderProps {
   title: string;
   subtitle?: string;
-  illustrationVersion: 'v1' | 'v2' | 'v3' | 'v4';
-  illustrationPosition?: 'left' | 'right';
+  /** Position of the text within the hero section */
+  textPosition?: 'left' | 'center' | 'right';
+  /** Height of the hero section */
+  minHeight?: string;
 }
 
 export function PageHeader({
   title,
   subtitle,
-  illustrationVersion,
-  illustrationPosition = 'right',
+  textPosition = 'left',
+  minHeight = '400px',
 }: PageHeaderProps): JSX.Element {
-  const { mode } = useTheme();
+  const colors = useRelevntColors();
+  const isDark = colors.background === '#1A1A1A';
 
-  // ✅ FIX: Removed 'theme' property - it doesn't exist on useTheme()
-  // Only 'mode' and other properties are available
-  // If you need theme colors, use mode to determine light/dark colors
+  // Get Hero image for current mode
+  const mode = isDark ? 'dark' : 'light';
+  const heroUrl = getAsset('Hero', mode);
 
-  // ✅ FIX: Convert ThemeMode to lowercase for asset lookup
-  const normalizedMode = mode.toLowerCase() as 'light' | 'dark';
+  // Determine text alignment based on position
+  const getJustifyContent = () => {
+    switch (textPosition) {
+      case 'center':
+        return 'center';
+      case 'right':
+        return 'flex-end';
+      default:
+        return 'flex-start';
+    }
+  };
 
-  // Get illustration URL for current mode
-  const illustrationAsset = assets.illustrations[normalizedMode][illustrationVersion];
-  if (!illustrationAsset) {
-    console.warn(`Illustration not found: ${normalizedMode}.${illustrationVersion}`);
-  }
-
-  const illustrationUrl = illustrationAsset?.svg || '';
-
-  // Determine text colors based on mode
-  const isDark = mode === 'Dark';
-  const textColor = isDark ? '#F5F5F5' : '#1a1a1a';
-  const secondaryTextColor = isDark ? '#D0D0D0' : '#666';
-
-  // Styles
-  const containerStyles: CSSProperties = {
+  // Styles - Hero section with background image
+  const heroContainerStyles: CSSProperties = {
+    position: 'relative',
+    minHeight: minHeight,
     display: 'flex',
-    gap: '3rem',
     alignItems: 'center',
+    justifyContent: getJustifyContent(),
     marginBottom: '3rem',
-    flexWrap: 'wrap',
-    flexDirection: illustrationPosition === 'right' ? 'row' : 'row-reverse',
+    padding: '4rem 2rem',
+    borderRadius: '16px',
+    overflow: 'hidden',
+    backgroundImage: heroUrl ? `url(${heroUrl})` : undefined,
+    backgroundSize: 'cover',
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'center',
+  };
+
+  // Overlay for better text readability
+  const overlayStyles: CSSProperties = {
+    position: 'absolute',
+    inset: 0,
+    background: isDark
+      ? 'linear-gradient(135deg, rgba(26, 26, 26, 0.85) 0%, rgba(26, 26, 26, 0.4) 100%)'
+      : 'linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.4) 100%)',
+    pointerEvents: 'none',
   };
 
   const textContainerStyles: CSSProperties = {
-    flex: 1,
-    minWidth: '300px',
+    position: 'relative',
+    zIndex: 1,
+    maxWidth: '700px',
+    padding: '2rem',
+    textAlign: textPosition === 'center' ? 'center' : 'left',
   };
 
   const titleStyles: CSSProperties = {
-    fontSize: '2.5rem',
+    fontSize: 'clamp(2rem, 5vw, 3.5rem)',
     fontWeight: 700,
     marginBottom: '1rem',
-    color: textColor,  // ✅ Use determined color, not theme.colors.text
+    color: colors.text,
     lineHeight: 1.2,
+    textShadow: isDark
+      ? '0 2px 12px rgba(0, 0, 0, 0.7)'
+      : '0 2px 12px rgba(255, 255, 255, 0.7)',
   };
 
   const subtitleStyles: CSSProperties = {
-    fontSize: '1.125rem',
-    color: secondaryTextColor,  // ✅ Use determined color
+    fontSize: 'clamp(1rem, 3vw, 1.5rem)',
+    color: colors.textSecondary,
     lineHeight: 1.6,
     marginTop: 0,
-  };
-
-  const illustrationContainerStyles: CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-    width: 'clamp(150px, 30%, 250px)',
-    height: 'clamp(150px, 30%, 250px)',
-  };
-
-  const illustrationStyles: CSSProperties = {
-    width: '100%',
-    height: '100%',
-    objectFit: 'contain',
+    textShadow: isDark
+      ? '0 1px 8px rgba(0, 0, 0, 0.7)'
+      : '0 1px 8px rgba(255, 255, 255, 0.7)',
   };
 
   return (
-    <div style={containerStyles}>
+    <div style={heroContainerStyles}>
+      {/* Overlay for text readability */}
+      <div style={overlayStyles} />
+
       {/* Text Content */}
       <div style={textContainerStyles}>
         <h1 style={titleStyles}>{title}</h1>
         {subtitle && <p style={subtitleStyles}>{subtitle}</p>}
-      </div>
-
-      {/* Illustration */}
-      <div style={illustrationContainerStyles}>
-        <img
-          src={illustrationUrl}
-          alt={title}
-          style={illustrationStyles}
-          loading="lazy"
-        />
       </div>
     </div>
   );

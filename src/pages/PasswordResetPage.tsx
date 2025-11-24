@@ -264,7 +264,7 @@ export function PasswordResetPage(): JSX.Element {
   // ============================================================
 
   return (
-    <PageBackground version="v2">
+    <PageBackground>
       <div style={containerStyles}>
         <div style={cardStyles}>
           {/* Step 1: Email Entry */}

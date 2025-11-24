@@ -1,6 +1,4 @@
 import React from 'react';
-import { useIsDarkMode } from '../../themes';
-
 
 export interface ButtonProps {
   children: React.ReactNode;
@@ -27,31 +25,38 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
-    const isDark = useIsDarkMode();
-
-    const variantColors = {
-      primary: {
-        light: { bg: '#CDAA70', text: '#0B0B0B', hover: '#B89456' },
-        dark: { bg: '#CDAA70', text: '#0B0B0B', hover: '#E0C495' },
-      },
-      secondary: {
-        light: { bg: 'transparent', text: '#CDAA70', border: '1px solid #CDAA70', hover: '#F3F1ED' },
-        dark: { bg: 'transparent', text: '#CDAA70', border: '1px solid #CDAA70', hover: 'rgba(205,170,112,0.1)' },
-      },
-      ghost: {
-        light: { bg: 'transparent', text: '#0B0B0B', hover: 'rgba(0,0,0,0.05)' },
-        dark: { bg: 'transparent', text: '#F3F1ED', hover: 'rgba(255,255,255,0.1)' },
-      },
-    };
-
     const sizes = {
-      sm: { padding: '6px 12px', fontSize: '12px', height: '32px' },
-      md: { padding: '10px 20px', fontSize: '14px', height: '40px' },
-      lg: { padding: '12px 28px', fontSize: '16px', height: '48px' },
+      sm: { padding: '0.5rem 1rem', fontSize: '0.875rem' },
+      md: { padding: '0.6rem 1.2rem', fontSize: '0.95rem' },
+      lg: { padding: '0.75rem 1.5rem', fontSize: '1rem' },
     };
 
-    const colors = variantColors[variant][isDark ? 'dark' : 'light'];
     const sizeStyle = sizes[size];
+
+    // Variant-specific styles using CSS tokens
+    const getVariantStyle = () => {
+      switch (variant) {
+        case 'secondary':
+          return {
+            background: 'transparent',
+            color: 'var(--accent)',
+            border: '1px solid var(--accent)',
+          };
+        case 'ghost':
+          return {
+            background: 'transparent',
+            color: 'var(--text)',
+            border: 'none',
+          };
+        case 'primary':
+        default:
+          return {
+            background: 'var(--accent)',
+            color: 'var(--bg)',
+            border: 'none',
+          };
+      }
+    };
 
     return (
       <button
@@ -62,11 +67,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         className={className}
         style={{
           ...sizeStyle,
-          background: colors.bg,
-          color: colors.text,
-          border: 'none',
-          borderRadius: '8px',
-          fontWeight: 600,
+          ...getVariantStyle(),
+          borderRadius: '999px',
+          fontWeight: 500,
           cursor: disabled ? 'not-allowed' : 'pointer',
           opacity: disabled ? 0.5 : 1,
           transition: 'all 0.2s ease',
@@ -76,10 +79,32 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           appearance: 'none',
         }}
         onMouseEnter={(e) => {
-          if (!disabled) (e.currentTarget as HTMLElement).style.background = colors.hover;
+          if (!disabled) {
+            if (variant === 'ghost') {
+              (e.currentTarget as HTMLElement).style.background = 'var(--surface-soft)';
+            } else {
+              (e.currentTarget as HTMLElement).style.opacity = '0.9';
+              (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)';
+            }
+          }
         }}
         onMouseLeave={(e) => {
-          if (!disabled) (e.currentTarget as HTMLElement).style.background = colors.bg;
+          if (!disabled) {
+            if (variant === 'ghost') {
+              (e.currentTarget as HTMLElement).style.background = 'transparent';
+            }
+            (e.currentTarget as HTMLElement).style.opacity = disabled ? '0.5' : '1';
+            (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
+          }
+        }}
+        onFocus={(e) => {
+          if (!disabled) {
+            (e.currentTarget as HTMLElement).style.outline = '2px solid var(--focus-ring)';
+            (e.currentTarget as HTMLElement).style.outlineOffset = '2px';
+          }
+        }}
+        onBlur={(e) => {
+          (e.currentTarget as HTMLElement).style.outline = 'none';
         }}
       >
         {children}

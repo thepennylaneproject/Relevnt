@@ -62,7 +62,7 @@ export function buildUserVoiceSystemPrompt(
 
     const { taskType = 'generic', language = 'English' } = options;
 
-    const presetDescription = describePreset(voice_preset);
+    const presetDescription = voice_preset ? describePreset(voice_preset) : describePreset('natural');
     const toneDescription = describeToneSliders({
         formality: clamp(voice_formality, 0, 100),
         playfulness: clamp(voice_playfulness, 0, 100),

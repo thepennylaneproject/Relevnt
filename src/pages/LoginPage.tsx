@@ -23,12 +23,12 @@
  * ============================================================================
  */
 
-import { useState, CSSProperties, useMemo } from 'react';
+import { useState, CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/useTheme';
 import { copy } from '../config/i18n.config';
 import { PageBackground } from '../components/shared/PageBackground';
+import { useRelevntColors } from '../hooks';
 
 interface LoginFormData {
   email: string;
@@ -45,10 +45,10 @@ interface LoginError {
  */
 export function LoginPage(): JSX.Element {
   const navigate = useNavigate();
-  const { mode } = useTheme();
   const { signInWithEmail } = useAuth();
+  const colors = useRelevntColors();
 
-  const isDark = mode === 'Dark';
+  const isDark = colors.background === '#1A1A1A';
 
   // ============================================================
   // STATE
@@ -62,22 +62,6 @@ export function LoginPage(): JSX.Element {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<LoginError | null>(null);
   const [submitted, setSubmitted] = useState(false);
-
-  // ============================================================
-  // THEME COLORS
-  // ============================================================
-
-  const themeColors = useMemo(() => ({
-    bg: isDark ? '#0f0f0f' : '#ffffff',
-    surface: isDark ? '#1a1a1a' : '#f9fafb',
-    text: isDark ? '#f5f5f5' : '#1a1a1a',
-    textSecondary: isDark ? '#b0b0b0' : '#666666',
-    border: isDark ? '#333333' : '#e5e7eb',
-    primary: '#4E808D',
-    accent: '#D4A574',
-    error: '#ef4444',
-    success: '#10b981',
-  }), [isDark]);
 
   // ============================================================
   // VALIDATION & SUBMISSION
@@ -150,7 +134,7 @@ export function LoginPage(): JSX.Element {
   };
 
   const cardStyles: CSSProperties = {
-    backgroundColor: themeColors.surface,
+    backgroundColor: colors.surface,
     borderRadius: '12px',
     padding: '48px',
     width: '100%',
@@ -161,14 +145,14 @@ export function LoginPage(): JSX.Element {
   const titleStyles: CSSProperties = {
     fontSize: '28px',
     fontWeight: 700,
-    color: themeColors.text,
+    color: colors.text,
     marginBottom: '8px',
     textAlign: 'center',
   };
 
   const subtitleStyles: CSSProperties = {
     fontSize: '14px',
-    color: themeColors.textSecondary,
+    color: colors.textSecondary,
     marginBottom: '32px',
     textAlign: 'center',
   };
@@ -181,7 +165,7 @@ export function LoginPage(): JSX.Element {
     display: 'block',
     fontSize: '14px',
     fontWeight: 500,
-    color: themeColors.text,
+    color: colors.text,
     marginBottom: '8px',
   };
 
@@ -189,9 +173,9 @@ export function LoginPage(): JSX.Element {
     width: '100%',
     padding: '12px',
     borderRadius: '8px',
-    border: `1px solid ${themeColors.border}`,
+    border: `1px solid ${colors.border}`,
     backgroundColor: isDark ? '#0f0f0f' : '#ffffff',
-    color: themeColors.text,
+    color: colors.text,
     fontSize: '14px',
     fontFamily: 'inherit',
     transition: 'all 0.2s ease',
@@ -200,20 +184,20 @@ export function LoginPage(): JSX.Element {
 
   const inputErrorStyles: CSSProperties = {
     ...inputStyles,
-    borderColor: themeColors.error,
+    borderColor: colors.error,
     backgroundColor: isDark ? 'rgba(239, 68, 68, 0.05)' : 'rgba(239, 68, 68, 0.05)',
   };
 
   const errorTextStyles: CSSProperties = {
     fontSize: '13px',
-    color: themeColors.error,
+    color: colors.error,
     marginTop: '6px',
   };
 
   const buttonStyles: CSSProperties = {
     width: '100%',
     padding: '12px',
-    backgroundColor: themeColors.accent,
+    backgroundColor: colors.accent,
     color: '#000000',
     border: 'none',
     borderRadius: '8px',
@@ -227,7 +211,7 @@ export function LoginPage(): JSX.Element {
   };
 
   const linkStyles: CSSProperties = {
-    color: themeColors.primary,
+    color: colors.primary,
     textDecoration: 'none',
     fontSize: '14px',
     fontWeight: 500,
@@ -239,7 +223,7 @@ export function LoginPage(): JSX.Element {
     textAlign: 'center',
     marginTop: '24px',
     fontSize: '14px',
-    color: themeColors.textSecondary,
+    color: colors.textSecondary,
   };
 
   const signupLinkStyles: CSSProperties = {
@@ -252,7 +236,7 @@ export function LoginPage(): JSX.Element {
   // ============================================================
 
   return (
-    <PageBackground version="v2">
+    <PageBackground>
       <div style={containerStyles}>
         <div style={cardStyles}>
           {/* Header */}
@@ -264,7 +248,7 @@ export function LoginPage(): JSX.Element {
             <div
               style={{
                 backgroundColor: isDark ? 'rgba(239, 68, 68, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                borderLeft: `3px solid ${themeColors.error}`,
+                borderLeft: `3px solid ${colors.error}`,
                 padding: '12px',
                 borderRadius: '6px',
                 marginBottom: '20px',
@@ -289,10 +273,10 @@ export function LoginPage(): JSX.Element {
                 onChange={(e) => handleChange('email', e.target.value)}
                 style={error?.field === 'email' ? inputErrorStyles : inputStyles}
                 onFocus={(e) =>
-                  (e.currentTarget.style.borderColor = themeColors.primary)
+                  (e.currentTarget.style.borderColor = colors.primary)
                 }
                 onBlur={(e) =>
-                  (e.currentTarget.style.borderColor = error?.field === 'email' ? themeColors.error : themeColors.border)
+                  (e.currentTarget.style.borderColor = error?.field === 'email' ? colors.error : colors.border)
                 }
                 disabled={loading}
               />
@@ -314,10 +298,10 @@ export function LoginPage(): JSX.Element {
                 onChange={(e) => handleChange('password', e.target.value)}
                 style={error?.field === 'password' ? inputErrorStyles : inputStyles}
                 onFocus={(e) =>
-                  (e.currentTarget.style.borderColor = themeColors.primary)
+                  (e.currentTarget.style.borderColor = colors.primary)
                 }
                 onBlur={(e) =>
-                  (e.currentTarget.style.borderColor = error?.field === 'password' ? themeColors.error : themeColors.border)
+                  (e.currentTarget.style.borderColor = error?.field === 'password' ? colors.error : colors.border)
                 }
                 disabled={loading}
               />

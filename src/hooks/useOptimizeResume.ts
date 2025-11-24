@@ -1,28 +1,68 @@
-import { useCallback } from 'react';
-import { useAITask } from './useAITask';
+/**
+ * ============================================================================
+ * useOptimizeResume Hook
+ * ============================================================================
+ *
+ * Optimizes a resume for ATS and human readers:
+ * - Rewrites content for clarity and impact
+ * - Improves keyword alignment with a target job description
+ * - Surfaces an updated ATS score and suggestions
+ *
+ * Built on the shared useAITask engine so we inherit:
+ * - Retry logic
+ * - Quota / usage tracking
+ * - Centralized error handling
+ * ============================================================================
+ */
+
+import { useCallback } from 'react'
+import { useAITask } from './useAITask'
 import type {
   ResumeOptimizationResponse,
-} from '../types/ai-responses.types';
+  UsageStats,
+  AIError,
+} from '../types/ai-responses.types'
 
 // ============================================================================
-// useOptimizeResume
+// Return type
 // ============================================================================
 
-/**
- * Optimize resume for ATS and hiring managers
- */
 export interface UseOptimizeResumeReturn {
+  /**
+   * Optimize resume content, optionally against a specific job description.
+   */
   optimize: (
     resumeContent: string,
     jobDescription?: string
-  ) => Promise<ResumeOptimizationResponse | null>;
-  loading: boolean;
-  error: any;
-  retry: () => Promise<ResumeOptimizationResponse | null>;
+  ) => Promise<ResumeOptimizationResponse | null>
+
+  /**
+   * True while optimization is in progress.
+   */
+  loading: boolean
+
+  /**
+   * Last error from the AI engine, if any.
+   */
+  error: AIError | null
+
+  /**
+   * Current usage / quota stats, if available.
+   */
+  usageStats: UsageStats | null
+
+  /**
+   * Retry the last failed optimize-resume call.
+   */
+  retry: () => Promise<ResumeOptimizationResponse | null>
 }
 
+// ============================================================================
+// Hook implementation
+// ============================================================================
+
 export function useOptimizeResume(): UseOptimizeResumeReturn {
-  const { execute, loading, error, retry } = useAITask();
+  const { execute, loading, error, usageStats, retry } = useAITask()
 
   const optimize = useCallback(
     async (
@@ -30,21 +70,25 @@ export function useOptimizeResume(): UseOptimizeResumeReturn {
       jobDescription?: string
     ): Promise<ResumeOptimizationResponse | null> => {
       try {
-        return (await execute('optimize-resume', {
+        const response = (await execute('optimize-resume', {
           resumeContent,
           jobDescription,
-        })) as ResumeOptimizationResponse;
-      } catch (err) {
-        return null;
+        })) as ResumeOptimizationResponse
+
+        return response
+      } catch {
+        // useAITask already logs and stores the error
+        return null
       }
     },
     [execute]
-  );
+  )
 
   return {
     optimize,
     loading,
-    error,
+    error: error as AIError | null,
+    usageStats: usageStats as UsageStats | null,
     retry: () => retry() as Promise<ResumeOptimizationResponse | null>,
-  };
+  }
 }

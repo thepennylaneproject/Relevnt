@@ -1,437 +1,257 @@
-/**
- * ============================================================================
- * DASHBOARD PAGE (FULLY REFACTORED - PHASE 6.1)
- * ============================================================================
- * 🎯 PURPOSE: User's main hub after login - quick access to all features
- * 
- * Layout:
- * - Welcome banner with user name + tier badge
- * - Quick stats card (resumes, jobs, applications)
- * - Feature cards linking to main pages (Resumes, Jobs, Applications)
- * - Getting started guide
- * 
- * Brand Integration:
- * - PageBackground wrapper
- * - PageHeader with illustration (v2)
- * - Tier-aware badge colors
- * - Theme-aware styling
- * 
- * 🎓 LEARNING NOTE: This page demonstrates:
- * - Tier badges (color-coded by tier)
- * - Card grid layout
- * - Link navigation with styling
- * - Interactive hover effects
- * ============================================================================
- */
+// src/pages/HomePage.tsx
+import React from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useRelevntColors } from '../hooks'
+import { useAuth } from '../contexts/AuthContext'
+import { Container } from '../components/shared/Container'
 
-import { CSSProperties, useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/useTheme';
-import { copy } from '../config/i18n.config';
-import { TIERS } from '../config/tiers';
-import { supabase } from '../lib/supabase';
-import { PageBackground } from '../components/shared/PageBackground';
-import { PageHeader } from '../components/shared/PageHeader';
-import { UsageStats } from '../components/shared/UsageStats';
+const HomePage: React.FC = () => {
+  const colors = useRelevntColors()
+  const { user } = useAuth()
+  const navigate = useNavigate()
 
-/**
- * DashboardPage Component
- */
-export function DashboardPage(): JSX.Element {
-  const { user } = useAuth();
-  const { mode } = useTheme();
-
-  const isDark = mode === 'Dark';
-  const userTier = (user?.user_metadata?.tier as string) || 'starter';
-
-  // ============================================================
-  // THEME COLORS
-  // ============================================================
-
-  const themeColors = useMemo(() => ({
-    bg: isDark ? '#0f0f0f' : '#ffffff',
-    surface: isDark ? '#1a1a1a' : '#f9fafb',
-    text: isDark ? '#f5f5f5' : '#1a1a1a',
-    textSecondary: isDark ? '#b0b0b0' : '#666666',
-    border: isDark ? '#333333' : '#e5e7eb',
-    primary: '#4E808D',
-    accent: '#D4A574',
-    tierStarter: { bg: isDark ? '#2a2a2a' : '#f5f5f5', text: isDark ? '#e0e0e0' : '#333' },
-    tierPro: { bg: isDark ? '#0d3a3a' : '#e0f2f1', text: isDark ? '#4db8c4' : '#009b9b' },
-    tierPremium: { bg: isDark ? '#3d3d1a' : '#fef9e7', text: isDark ? '#e6d580' : '#b8860b' },
-  }), [isDark]);
-
-  // ============================================================
-  // HELPER FUNCTIONS
-  // ============================================================
-
-  const getTierColors = (tier: string) => {
-    switch (tier) {
-      case 'pro':
-        return themeColors.tierPro;
-      case 'premium':
-        return themeColors.tierPremium;
-      default:
-        return themeColors.tierStarter;
-    }
-  };
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    window.location.href = '/';
-  };
-
-  // ============================================================
-  // MOCK DATA (replace with real data from Supabase in Phase 6.2)
-  // ============================================================
-
-  const stats = {
-    resumesCount: 1,
-    jobsCount: 0,
-    applicationsCount: 0,
-  };
-
-  // ============================================================
-  // STYLES
-  // ============================================================
-
-  const containerStyles: CSSProperties = {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    padding: '60px 20px',
-    color: themeColors.text,
-  };
-
-  // ─────────────────────────────────────────────────────────
-  // HEADER WITH TIER BADGE
-  // ─────────────────────────────────────────────────────────
-
-  const headerStyles: CSSProperties = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: '40px',
-    flexWrap: 'wrap',
-    gap: '20px',
-  };
-
-  const welcomeSectionStyles: CSSProperties = {
+  const wrapper: React.CSSProperties = {
     flex: 1,
-    minWidth: '300px',
-  };
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.background,
+  }
 
-  const welcomeTitleStyles: CSSProperties = {
-    fontSize: '32px',
-    fontWeight: 700,
-    marginBottom: '8px',
-    color: themeColors.text,
-  };
+  const card: React.CSSProperties = {
+    maxWidth: 720,
+    width: '100%',
+    backgroundColor: colors.surface,
+    borderRadius: 24,
+    padding: '32px 32px 28px',
+    boxShadow: '0 22px 45px rgba(15, 18, 20, 0.14)',
+    border: `1px solid ${colors.borderLight}`,
+  }
 
-  const welcomeSubtitleStyles: CSSProperties = {
-    fontSize: '16px',
-    color: themeColors.textSecondary,
-    marginBottom: '16px',
-  };
+  const badgeRow: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 8,
+    padding: '4px 10px',
+    borderRadius: 999,
+    backgroundColor: colors.surfaceHover,
+    border: `1px solid ${colors.borderLight}`,
+    fontSize: 11,
+    letterSpacing: '0.18em',
+    textTransform: 'uppercase',
+    color: colors.textSecondary,
+    marginBottom: 16,
+  }
 
-  const tierBadgeStyles = useMemo(() => {
-    const tierColors = getTierColors(userTier);
-    return {
-      display: 'inline-block',
-      padding: '8px 16px',
-      backgroundColor: tierColors.bg,
-      color: tierColors.text,
-      borderRadius: '20px',
-      fontSize: '14px',
-      fontWeight: 600,
-      border: `1px solid ${tierColors.text}`,
-    } as CSSProperties;
-  }, [userTier, themeColors]);
+  const badgeDot: React.CSSProperties = {
+    width: 9,
+    height: 9,
+    borderRadius: '999px',
+    backgroundColor: colors.accent,
+  }
 
-  const signOutButtonStyles: CSSProperties = {
-    padding: '10px 20px',
-    backgroundColor: 'transparent',
-    color: themeColors.accent,
-    border: `2px solid ${themeColors.accent}`,
-    borderRadius: '6px',
-    fontSize: '14px',
+  const title: React.CSSProperties = {
+    fontSize: 30,
+    lineHeight: 1.2,
+    letterSpacing: '0.02em',
+    marginBottom: 12,
+    color: colors.text,
+  }
+
+  const subtitle: React.CSSProperties = {
+    fontSize: 15,
+    lineHeight: 1.6,
+    color: colors.textSecondary,
+    maxWidth: 520,
+    marginBottom: 24,
+  }
+
+  const strong: React.CSSProperties = {
+    color: colors.text,
     fontWeight: 600,
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-  };
+  }
 
-  // ─────────────────────────────────────────────────────────
-  // USAGE STATS SECTION
-  // ─────────────────────────────────────────────────────────
-
-  const usageStatsContainerStyles: CSSProperties = {
-    marginBottom: '40px',
-  };
-
-  // ─────────────────────────────────────────────────────────
-  // CARDS GRID
-  // ─────────────────────────────────────────────────────────
-
-  const cardsGridStyles: CSSProperties = {
+  const grid: React.CSSProperties = {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-    gap: '24px',
-    marginBottom: '40px',
-  };
+    gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1.6fr)',
+    gap: 24,
+  }
 
-  const cardStyles: CSSProperties = {
-    padding: '28px',
-    backgroundColor: themeColors.surface,
-    borderRadius: '12px',
-    border: `1px solid ${themeColors.border}`,
-    transition: 'all 0.3s ease',
-    cursor: 'pointer',
-    textDecoration: 'none',
-    color: 'inherit',
-    display: 'block',
-  };
+  const column: React.CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 12,
+    fontSize: 13,
+    color: colors.textSecondary,
+  }
 
-  const cardIconStyles: CSSProperties = {
-    fontSize: '40px',
-    marginBottom: '12px',
-    display: 'block',
-  };
-
-  const cardTitleStyles: CSSProperties = {
-    fontSize: '18px',
-    fontWeight: 600,
-    marginBottom: '8px',
-    color: themeColors.text,
-  };
-
-  const cardDescriptionStyles: CSSProperties = {
-    fontSize: '14px',
-    color: themeColors.textSecondary,
-    marginBottom: '12px',
-  };
-
-  const cardCountStyles: CSSProperties = {
-    fontSize: '24px',
-    fontWeight: 700,
-    color: themeColors.accent,
-  };
-
-  // ─────────────────────────────────────────────────────────
-  // GETTING STARTED SECTION
-  // ─────────────────────────────────────────────────────────
-
-  const gettingStartedStyles: CSSProperties = {
-    padding: '32px',
-    backgroundColor: themeColors.surface,
-    borderRadius: '12px',
-    border: `1px solid ${themeColors.border}`,
-  };
-
-  const gettingStartedTitleStyles: CSSProperties = {
-    fontSize: '20px',
-    fontWeight: 600,
-    marginBottom: '16px',
-    color: themeColors.text,
-  };
-
-  const stepsListStyles: CSSProperties = {
+  const list: React.CSSProperties = {
     listStyle: 'none',
     padding: 0,
     margin: 0,
-  };
-
-  const stepItemStyles: CSSProperties = {
-    padding: '12px 0',
     display: 'flex',
-    gap: '12px',
+    flexDirection: 'column',
+    gap: 8,
+  }
+
+  const listItem: React.CSSProperties = {
+    display: 'flex',
     alignItems: 'flex-start',
-    fontSize: '14px',
-    color: themeColors.textSecondary,
-    borderBottom: `1px solid ${themeColors.border}`,
-  };
+    gap: 8,
+  }
 
-  const stepNumberStyles: CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '24px',
-    height: '24px',
-    minWidth: '24px',
-    backgroundColor: themeColors.accent,
-    color: '#000',
-    borderRadius: '50%',
-    fontSize: '12px',
-    fontWeight: 700,
-  };
+  const bulletDot: React.CSSProperties = {
+    width: 7,
+    height: 7,
+    borderRadius: '999px',
+    marginTop: 5,
+    backgroundColor: colors.accent,
+    opacity: 0.7,
+  }
 
-  // ============================================================
-  // RENDER
-  // ============================================================
+  const ctaRow: React.CSSProperties = {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: 12,
+    marginTop: 24,
+  }
 
-  if (!user) {
-    return (
-      <PageBackground>
-        <div style={containerStyles}>
-          <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-            <h2 style={{ fontSize: '24px', color: themeColors.text }}>Loading...</h2>
-          </div>
-        </div>
-      </PageBackground>
-    );
+  const primaryButton: React.CSSProperties = {
+    padding: '10px 18px',
+    borderRadius: 999,
+    border: 'none',
+    backgroundColor: colors.primary,
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: 600,
+    cursor: 'pointer',
+  }
+
+  const secondaryButton: React.CSSProperties = {
+    padding: '9px 16px',
+    borderRadius: 999,
+    border: `1px solid ${colors.borderLight}`,
+    backgroundColor: colors.surfaceHover,
+    color: colors.textSecondary,
+    fontSize: 13,
+    cursor: 'pointer',
+  }
+
+  const footnote: React.CSSProperties = {
+    marginTop: 12,
+    fontSize: 11,
+    color: colors.mutedText,
+  }
+
+  const signedInHint: React.CSSProperties = {
+    marginTop: 4,
+    fontSize: 11,
+    color: colors.textSecondary,
+  }
+
+  const handlePrimary = () => {
+    if (user) {
+      navigate('/dashboard')
+    } else {
+      navigate('/signup')
+    }
+  }
+
+  const handleSecondary = () => {
+    if (user) {
+      navigate('/jobs')
+    } else {
+      navigate('/login')
+    }
   }
 
   return (
-    <PageBackground version="v2" overlayOpacity={0.15}>
-      <div style={containerStyles}>
-        {/* PAGE HEADER */}
-        <PageHeader
-          title="Your Career Dashboard"
-          subtitle="All your job search tools in one place"
-          illustrationVersion="v2"
-          illustrationPosition="left"
-        />
+    <div style={wrapper}>
+      <Container maxWidth="lg" padding="md">
+        <div style={card}>
+          <div style={badgeRow}>
+            <div style={badgeDot} />
+            <span>Authentic intelligence for real people</span>
+          </div>
 
-        {/* ═══════════════════════════════════════════════════════════ */
-        /* HEADER WITH TIER */
-        /* ═══════════════════════════════════════════════════════════ */}
+          <h1 style={title}>
+            Job search tools that tell you the truth
+            <span style={{ color: colors.accent }}>.</span>
+          </h1>
 
-        <div style={headerStyles}>
-          <div style={welcomeSectionStyles}>
-            <h1 style={welcomeTitleStyles}>
-              Welcome back, {user.email?.split('@')[0]}! 👋
-            </h1>
-            <p style={welcomeSubtitleStyles}>
-              {copy.onboarding.tagline}
-            </p>
-            <div style={tierBadgeStyles}>
-              ✨ {TIERS[userTier as 'starter' | 'pro' | 'premium'].name} Plan
+          <p style={subtitle}>
+            Relevnt reads job descriptions the way a recruiter would,
+            compares them to your real experience, and helps you decide whether
+            to apply, what to say, and how to update your story so it still
+            feels like you.
+          </p>
+
+          <div style={grid}>
+            <div style={column}>
+              <p style={strong}>You bring the experience. Relevnt handles:</p>
+              <ul style={list}>
+                <li style={listItem}>
+                  <div style={bulletDot} />
+                  <span>
+                    <strong>Match clarity</strong> instead of guesswork on whether a role is worth your time.
+                  </span>
+                </li>
+                <li style={listItem}>
+                  <div style={bulletDot} />
+                  <span>
+                    <strong>Resume and answer drafts</strong> in a voice that actually sounds like you, not a corporate bot.
+                  </span>
+                </li>
+                <li style={listItem}>
+                  <div style={bulletDot} />
+                  <span>
+                    <strong>Skills gap insights</strong> plus learning suggestions so a “no” turns into your next “yes.”
+                  </span>
+                </li>
+              </ul>
+            </div>
+
+            <div style={column}>
+              <p style={strong}>What Relevnt will never do:</p>
+              <ul style={list}>
+                <li style={listItem}>
+                  <div style={bulletDot} />
+                  <span>Invent experience you do not have.</span>
+                </li>
+                <li style={listItem}>
+                  <div style={bulletDot} />
+                  <span>Hide how a match score was calculated.</span>
+                </li>
+                <li style={listItem}>
+                  <div style={bulletDot} />
+                  <span>Pressure you into auto apply without clear guardrails.</span>
+                </li>
+              </ul>
             </div>
           </div>
 
-          <button
-            style={signOutButtonStyles}
-            onClick={handleSignOut}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = themeColors.accent;
-              e.currentTarget.style.color = '#000';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-              e.currentTarget.style.color = themeColors.accent;
-            }}
-          >
-            Sign Out
-          </button>
-        </div>
+          <div style={ctaRow}>
+            <button type="button" style={primaryButton} onClick={handlePrimary}>
+              {user ? 'Go to dashboard' : 'Get started free'}
+            </button>
+            <button type="button" style={secondaryButton} onClick={handleSecondary}>
+              {user ? 'Browse jobs' : 'Log in to your account'}
+            </button>
+          </div>
 
-        {/* ═══════════════════════════════════════════════════════════ */
-        /* USAGE STATS */
-        /* ═══════════════════════════════════════════════════════════ */}
+          <div style={footnote}>
+            No spam. No fake urgency. Just tools that help you get past the bots and in front of real humans.
+          </div>
 
-        <div style={usageStatsContainerStyles}>
-          <UsageStats variant="expanded" />
-        </div>
-
-        {/* ═══════════════════════════════════════════════════════════ */
-        /* FEATURE CARDS GRID */
-        /* ═══════════════════════════════════════════════════════════ */}
-
-        <div style={cardsGridStyles}>
-          {/* RESUMES CARD */}
-          <Link to="/resumes" style={{ textDecoration: 'none', color: 'inherit' }}>
-            <div
-              style={cardStyles}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-8px)';
-                e.currentTarget.style.boxShadow = `0 12px 24px ${isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)'}`;
-                e.currentTarget.style.borderColor = themeColors.accent;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.borderColor = themeColors.border;
-              }}
-            >
-              <span style={cardIconStyles}>📄</span>
-              <h2 style={cardTitleStyles}>Resumes</h2>
-              <p style={cardDescriptionStyles}>Create and manage your resumes</p>
-              <div style={cardCountStyles}>{stats.resumesCount}</div>
+          {user && (
+            <div style={signedInHint}>
+              You are already signed in. We will send you to your dashboard or jobs when you continue.
             </div>
-          </Link>
-
-          {/* JOBS CARD */}
-          <Link to="/jobs" style={{ textDecoration: 'none', color: 'inherit' }}>
-            <div
-              style={cardStyles}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-8px)';
-                e.currentTarget.style.boxShadow = `0 12px 24px ${isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)'}`;
-                e.currentTarget.style.borderColor = themeColors.accent;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.borderColor = themeColors.border;
-              }}
-            >
-              <span style={cardIconStyles}>💼</span>
-              <h2 style={cardTitleStyles}>Jobs</h2>
-              <p style={cardDescriptionStyles}>Track job opportunities</p>
-              <div style={cardCountStyles}>{stats.jobsCount}</div>
-            </div>
-          </Link>
-
-          {/* APPLICATIONS CARD */}
-          <Link to="/applications" style={{ textDecoration: 'none', color: 'inherit' }}>
-            <div
-              style={cardStyles}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-8px)';
-                e.currentTarget.style.boxShadow = `0 12px 24px ${isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)'}`;
-                e.currentTarget.style.borderColor = themeColors.accent;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.borderColor = themeColors.border;
-              }}
-            >
-              <span style={cardIconStyles}>📊</span>
-              <h2 style={cardTitleStyles}>Applications</h2>
-              <p style={cardDescriptionStyles}>Monitor your application status</p>
-              <div style={cardCountStyles}>{stats.applicationsCount}</div>
-            </div>
-          </Link>
+          )}
         </div>
-
-        {/* ═══════════════════════════════════════════════════════════ */
-        /* GETTING STARTED GUIDE */
-        /* ═══════════════════════════════════════════════════════════ */}
-
-        <div style={gettingStartedStyles}>
-          <h2 style={gettingStartedTitleStyles}>🚀 Getting Started</h2>
-          <ol style={stepsListStyles}>
-            <li style={{ ...stepItemStyles, borderBottom: `1px solid ${themeColors.border}` }}>
-              <span style={stepNumberStyles}>1</span>
-              <span>Create or upload your first resume</span>
-            </li>
-            <li style={{ ...stepItemStyles, borderBottom: `1px solid ${themeColors.border}` }}>
-              <span style={stepNumberStyles}>2</span>
-              <span>Analyze your resume for ATS compatibility</span>
-            </li>
-            <li style={{ ...stepItemStyles, borderBottom: `1px solid ${themeColors.border}` }}>
-              <span style={stepNumberStyles}>3</span>
-              <span>Search for jobs that match your skills</span>
-            </li>
-            <li style={{ ...stepItemStyles, borderBottom: 'none' }}>
-              <span style={stepNumberStyles}>4</span>
-              <span>Track your applications and build momentum</span>
-            </li>
-          </ol>
-        </div>
-      </div>
-    </PageBackground>
-  );
+      </Container>
+    </div>
+  )
 }
 
-export default DashboardPage;
+export default HomePage

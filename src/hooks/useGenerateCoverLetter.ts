@@ -23,7 +23,7 @@ export interface UseGenerateCoverLetterReturn {
 }
 
 export function useGenerateCoverLetter(): UseGenerateCoverLetterReturn {
-  const { execute, loading, error, retry } = useAITask();
+  const { execute, loading, error, retry, voiceProfile } = useAITask();
 
   const generate = useCallback(
     async (
@@ -32,16 +32,23 @@ export function useGenerateCoverLetter(): UseGenerateCoverLetterReturn {
       companyName: string
     ): Promise<CoverLetterResponse | null> => {
       try {
-        return (await execute('generate-cover-letter', {
-          resumeContent,
-          jobDescription,
-          companyName,
-        })) as CoverLetterResponse;
+        return (await execute(
+          'generate-cover-letter',
+          {
+            resumeContent,
+            jobDescription,
+            companyName,
+          },
+          {
+            voiceProfile: voiceProfile || undefined,
+            taskType: 'cover_letter',
+          }
+        )) as CoverLetterResponse;
       } catch (err) {
         return null;
       }
     },
-    [execute]
+    [execute, voiceProfile]
   );
 
   return {

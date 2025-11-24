@@ -1,217 +1,151 @@
-/**
- * 🎨 HEADER COMPONENT
- * 
- * Main navigation header with theme toggle.
- * Integrated with RelevntThemeProvider for light/dark mode support.
- * 
- * 📚 LEARNING NOTE: This component demonstrates how to properly use
- * the new theme system - destructure toggleMode from the hook!
- */
-
+// src/components/layout/Header.tsx
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useRelevntTheme } from '../../contexts/RelevntThemeProvider'
+import { useRelevntColors } from '../../hooks'
+import { useAuth } from '../../contexts/AuthContext'
 
 export interface HeaderProps {
-    userInitial?: string
-    onLogout?: () => void
+  userInitial?: string
 }
 
-export function Header({ userInitial = 'U', onLogout }: HeaderProps) {
-    // ============================================================================
-    // GET THEME
-    // ============================================================================
+export function Header({ userInitial }: HeaderProps) {
+  const { isDark, toggleMode } = useRelevntTheme()
+  const colors = useRelevntColors()
+  const { user, signOut } = useAuth()
+  const navigate = useNavigate()
 
-    /**
-     * 📚 KEY FIX: Destructure toggleMode from the theme hook!
-     * This was missing, causing "toggleMode is not defined" error
-     */
-    const { colors, mode, toggleMode, isDark } = useRelevntTheme()
+  const initial =
+    userInitial ||
+    (user?.email ? user.email.charAt(0).toUpperCase() : 'R')
 
-    // ============================================================================
-    // STYLES
-    // ============================================================================
+  const wrapper: React.CSSProperties = {
+    maxWidth: 1200,
+    margin: '0 auto',
+    padding: '12px 20px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 24,
+  }
 
-    const styles: Record<string, React.CSSProperties> = {
-        header: {
-            background: colors.surface,
-            borderBottom: `1px solid ${colors.border}`,
-            padding: '16px 24px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
-        } as React.CSSProperties,
+  const left: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 16,
+  }
 
-        logoSection: {
-            display: 'flex',
-            alignItems: 'center',
-            gap: '24px',
-        } as React.CSSProperties,
+  const brandDot: React.CSSProperties = {
+    width: 24,
+    height: 24,
+    borderRadius: '999px',
+    background: colors.surfaceHover,
+    border: `1px solid ${colors.borderLight}`,
+  }
 
-        logo: {
-            fontSize: '20px',
-            fontWeight: 700,
-            color: colors.primary,
-            textDecoration: 'none',
-        } as React.CSSProperties,
+  const brandText: React.CSSProperties = {
+    fontSize: 18,
+    fontWeight: 700,
+    letterSpacing: '0.08em',
+    textTransform: 'uppercase',
+  }
 
-        nav: {
-            display: 'flex',
-            gap: '32px',
-            alignItems: 'center',
-            background: 'none',
-        } as React.CSSProperties,
+  const right: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+  }
 
-        navLink: {
-            color: colors.text,
-            textDecoration: 'none',
-            fontSize: '14px',
-            fontWeight: 500,
-            transition: 'color 0.2s ease',
-            cursor: 'pointer',
-        } as React.CSSProperties,
+  const pillButton: React.CSSProperties = {
+    padding: '6px 12px',
+    borderRadius: 999,
+    border: `1px solid ${colors.border}`,
+    background: colors.surface,
+    color: colors.textSecondary,
+    fontSize: 13,
+    cursor: 'pointer',
+  }
 
-        rightSection: {
-            display: 'flex',
-            alignItems: 'center',
-            gap: '16px',
-        } as React.CSSProperties,
+  const primaryButton: React.CSSProperties = {
+    padding: '6px 14px',
+    borderRadius: 999,
+    border: 'none',
+    background: colors.primary,
+    color: colors.text,
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: 'pointer',
+  }
 
-        themeToggle: {
-            background: 'none',
-            border: `1px solid ${colors.border}`,
-            color: colors.text,
-            padding: '8px 12px',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '14px',
-            fontWeight: 500,
-            transition: 'all 0.2s ease',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-        } as React.CSSProperties,
+  const avatar: React.CSSProperties = {
+    width: 28,
+    height: 28,
+    borderRadius: '50%',
+    background: colors.focus,
+    color: colors.accent,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: 13,
+    fontWeight: 600,
+  }
 
-        userBadge: {
-            background: colors.primary,
-            color: '#fff',
-            width: '32px',
-            height: '32px',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '14px',
-            fontWeight: 600,
-        } as React.CSSProperties,
+  const iconButton: React.CSSProperties = {
+    padding: 6,
+    borderRadius: 999,
+    border: `1px solid ${colors.borderLight}`,
+    background: colors.surface,
+    cursor: 'pointer',
+    fontSize: 14,
+  }
 
-        logoutButton: {
-            background: colors.error,
-            color: '#fff',
-            border: 'none',
-            padding: '8px 16px',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '14px',
-            fontWeight: 500,
-            transition: 'opacity 0.2s ease',
-        } as React.CSSProperties,
-    }
+  const handleLogout = async () => {
+    await signOut()
+    navigate('/login')
+  }
 
-    // ============================================================================
-    // RENDER
-    // ============================================================================
+  return (
+    <div style={wrapper}>
+      <div style={left}>
+        <Link to="/" style={{ textDecoration: 'none', color: colors.text }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={brandDot} />
+            <div style={brandText}>relevnt</div>
+          </div>
+        </Link>
+      </div>
 
-    return (
-        <header style={styles.header}>
-            {/* Logo Section */}
-            <div style={styles.logoSection}>
-                <Link to="/" style={styles.logo}>
-                    ✨ Relevnt
-                </Link>
+      <div style={right}>
+        <button type="button" onClick={toggleMode} style={iconButton}>
+          {isDark ? '☾' : '☼'}
+        </button>
 
-                {/* Navigation Links */}
-                <nav style={styles.nav}>
-                    {[
-                        { label: 'Jobs', href: '/jobs' },
-                        { label: 'Resumes', href: '/resumes' },
-                        { label: 'Applications', href: '/applications' },
-                    ].map((link) => (
-                        <Link
-                            key={link.label}
-                            to={link.href}
-                            style={styles.navLink}
-                        >
-                            {link.label}
-                        </Link>
-                    ))}
-                </nav>
-            </div>
-
-            {/* Right Section */}
-            <div style={styles.rightSection}>
-                {/* Theme Toggle Button - FIXED */}
-                <button
-                    onClick={toggleMode}
-                    style={styles.themeToggle}
-                    title={`Switch to ${isDark ? 'Light' : 'Dark'} mode`}
-                    aria-label="Toggle dark mode"
-                >
-                    {isDark ? '☀️' : '🌙'}
-                    <span>{mode}</span>
-                </button>
-
-                {/* User Badge */}
-                <div style={styles.userBadge} title={`User: ${userInitial}`}>
-                    {userInitial.toUpperCase()}
-                </div>
-
-                {/* Logout Button */}
-                {onLogout && (
-                    <button
-                        onClick={onLogout}
-                        style={styles.logoutButton}
-                        title="Log out"
-                    >
-                        Logout
-                    </button>
-                )}
-            </div>
-        </header>
-    )
+        {user ? (
+          <>
+            <div style={avatar}>{initial}</div>
+            <button type="button" onClick={handleLogout} style={pillButton}>
+              Log out
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              type="button"
+              style={pillButton}
+              onClick={() => navigate('/login')}
+            >
+              Log in
+            </button>
+            <button
+              type="button"
+              style={primaryButton}
+              onClick={() => navigate('/signup')}
+            >
+              Get started
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  )
 }
-
-// ============================================================================
-// USAGE
-// ============================================================================
-
-/**
- * 📚 HOW TO USE:
- * 
- * Basic usage:
- * ```tsx
- * import { Header } from '@/components/layout/Header'
- * 
- * <Header userInitial="S" />
- * ```
- * 
- * With logout handler:
- * ```tsx
- * <Header
- *   userInitial="Sarah"
- *   onLogout={() => {
- *     // Handle logout
- *     localStorage.removeItem('auth_token')
- *     navigate('/login')
- *   }}
- * />
- * ```
- * 
- * The component automatically:
- * - ✅ Gets theme colors from RelevntThemeProvider
- * - ✅ Provides theme toggle button
- * - ✅ Switches between Light/Dark mode
- * - ✅ Shows current mode emoji (☀️ or 🌙)
- * - ✅ Saves preference to localStorage
- */

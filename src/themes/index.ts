@@ -16,5 +16,11 @@ export { useTheme, useIsDarkMode } from '../contexts/useTheme'
 
 // Assets
 export {
-    getAssetUrl,    // ← Changed: capital URL → lowercase url
+    getAsset,
+    getAllAssets,
+    getAssetVariants,
+    assets,
+    type AssetType,
+    type AssetLibrary,
+    type ModeAsset,
 } from './assets'

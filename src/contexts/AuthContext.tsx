@@ -21,6 +21,10 @@ export interface AuthContextType {
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+export function isUserAdmin(profile: any) {
+  return profile?.is_admin === true || profile?.admin_level === 'super';
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [, setSession] = useState<Session | null>(null);

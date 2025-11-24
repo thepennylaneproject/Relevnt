@@ -41,7 +41,11 @@
 [functions]
   # Node.js version for functions
   node_bundler = "esbuild"
-  
+
+[[scheduled.functions]]
+function = "ingest_jobs"
+cron = "0 * * * *"
+
   # Directory for functions (already set in [build] but can override)
   directory = "netlify/functions"
 
@@ -49,6 +53,9 @@
 # - Super fast bundler for serverless functions
 # - Automatically includes dependencies
 # - Smaller bundle sizes = faster cold starts
+
+
+
 
 # =====================================================
 # ENVIRONMENT VARIABLES (set in Netlify dashboard)
@@ -131,15 +138,17 @@
 # =====================================================
 
 [dev]
-  # Port for local development
-  port = 5173  # Vite's default port
-  
-  # Automatically open browser
-  autoLaunch = true
-  
-  # Functions port (if different from main port)
-  functionsPort = 8888
+  # Netlify Dev main server (where you’ll open the browser)
+  port = 8888
 
+  # Let Netlify detect and run Vite on 5173
+  # (no need to set frameworkPort explicitly unless it complains)
+
+  autoLaunch = true
+
+  # Functions server (Netlify will spin this up for functions)
+  functionsPort = 9999
+  
 # ðŸŽ“ Local Development:
 # Run: netlify dev
 # - Starts your app on port 5173

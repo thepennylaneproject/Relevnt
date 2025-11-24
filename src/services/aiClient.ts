@@ -3,10 +3,30 @@
  * AI CLIENT - HTTP COMMUNICATION WITH BACKEND
  * ============================================================================
  * Handles all communication with Netlify Functions AI endpoints
+ * Integrates unified voice engine for consistent user voice across all AI tasks
  * ============================================================================
  */
 
 import { AIResponse } from './aiTypes';
+import {
+  buildUserVoiceSystemPrompt,
+  UserVoiceProfile,
+  VoiceTaskType,
+  VoicePromptOptions,
+} from '../lib/voicePrompt';
+
+export interface AICallOptions {
+  task: string;
+  input?: string;
+
+  // Voice engine integration
+  voiceProfile?: UserVoiceProfile;
+  taskType?: VoiceTaskType;
+  systemPrompt?: string; // Manual override if needed
+
+  // Other parameters
+  [key: string]: unknown;
+}
 
 export class AIClient {
   private baseUrl: string;
@@ -24,16 +44,35 @@ export class AIClient {
   }
 
   /**
-   * Execute an AI task via the backend
+   * Execute an AI task via the backend with optional voice profile integration
    */
-  async call<T = unknown>(
-    data: {
-      task: string;
-      input?: string;
-      [key: string]: unknown;
-    }
-  ): Promise<AIResponse<T>> {
+  async call<T = unknown>(options: AICallOptions): Promise<AIResponse<T>> {
     const url = `${this.baseUrl}/ai`;
+
+    const {
+      task,
+      input,
+      voiceProfile,
+      taskType,
+      systemPrompt: manualSystemPrompt,
+      ...otherOptions
+    } = options;
+
+    // Build system prompt from voice profile if provided
+    let systemPrompt = manualSystemPrompt;
+
+    if (voiceProfile && !systemPrompt) {
+      const voiceOptions: VoicePromptOptions = taskType ? { taskType } : {};
+      systemPrompt = buildUserVoiceSystemPrompt(voiceProfile, voiceOptions);
+    }
+
+    // Prepare request data
+    const requestData = {
+      task,
+      input,
+      systemPrompt, // Pass system prompt to backend
+      ...otherOptions,
+    };
 
     try {
       const response = await fetch(url, {
@@ -42,7 +81,7 @@ export class AIClient {
           'Content-Type': 'application/json',
           ...(this.token && { Authorization: `Bearer ${this.token}` }),
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(requestData),
       });
 
       if (!response.ok) {
@@ -61,7 +100,8 @@ export class AIClient {
   }
 
   /**
-   * Execute a task with just task name and input
+   * Execute a task with just task name and input (legacy method)
+   * For voice-aware tasks, use call() with voiceProfile instead
    */
   async executeTask(
     taskName: string,
@@ -69,6 +109,25 @@ export class AIClient {
     options?: Record<string, unknown>
   ): Promise<AIResponse> {
     return this.call({ task: taskName, input, ...options });
+  }
+
+  /**
+   * Execute a task with voice profile integration
+   */
+  async executeWithVoice<T = unknown>(
+    taskName: string,
+    input: string,
+    voiceProfile: UserVoiceProfile,
+    taskType: VoiceTaskType,
+    additionalOptions?: Record<string, unknown>
+  ): Promise<AIResponse<T>> {
+    return this.call<T>({
+      task: taskName,
+      input,
+      voiceProfile,
+      taskType,
+      ...additionalOptions,
+    });
   }
 }
 

@@ -1,68 +1,252 @@
+/* ============================================================================
+   RELEVNT GLOBAL STYLES
+   Warm minimal, human-first career platform
+   ============================================================================ */
+
+/* ============================================================================
+   THEME TOKENS - LIGHT MODE
+   ============================================================================ */
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  /* Base */
+  --bg: #F7F4ED;            /* warm ivory, less green */
+  --surface: #FFFFFF;
+  --surface-soft: #FFFDF8;
+  --surface-strong: #F0EEEA;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* Text */
+  --text: #0F1214;          /* ink */
+  --text-muted: #5C6670;
+  --text-subtle: #8A929A;
 
+  /* Accent (champagne by default, but overridable) */
+  --accent: #C7A56A;        /* champagne */
+  --accent-soft: rgba(199, 165, 106, 0.12);
+
+  /* Borders and lines */
+  --border-subtle: rgba(15, 18, 20, 0.08);
+  --border-strong: rgba(15, 18, 20, 0.14);
+
+  /* Focus and states */
+  --focus-ring: rgba(199, 165, 106, 0.45);
+  --danger: #C44A4A;
+  --danger-soft: rgba(196, 74, 74, 0.1);
+
+  /* Icon accent dot can read from this */
+  --accent-dot: var(--accent);
+
+  /* Typography & Rendering */
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+/* ============================================================================
+   THEME TOKENS - DARK MODE
+   ============================================================================ */
+
+[data-theme="dark"] {
+  --bg: #0F1214;              /* ink */
+  --surface: #15191C;
+  --surface-soft: #181D21;
+  --surface-strong: #1E2429;
+
+  --text: #F3F4E6;            /* ivory */
+  --text-muted: #B4BBC4;
+  --text-subtle: #7C848E;
+
+  --accent: #C7A56A;          /* champagne still works on dark */
+  --accent-soft: rgba(199, 165, 106, 0.2);
+
+  --border-subtle: rgba(243, 244, 230, 0.12);
+  --border-strong: rgba(243, 244, 230, 0.2);
+
+  --focus-ring: rgba(199, 165, 106, 0.55);
+  --danger: #F47A7A;
+  --danger-soft: rgba(244, 122, 122, 0.18);
 }
-a:hover {
-  color: #535bf2;
+
+/* ============================================================================
+   GREEN ACCENT ALTERNATIVE
+   ============================================================================ */
+
+.relevnt-green {
+  --accent: #C7A56A;         /* normalized to champagne accent */
+  --accent-dot: var(--accent);
 }
+
+/* ============================================================================
+   BASE TYPOGRAPHY
+   ============================================================================ */
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif;
+  color: var(--text);
+  background: var(--bg);
 }
 
 h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+  font-size: 1.8rem;
+  letter-spacing: 0.02em;
+  font-weight: 600;
+  margin: 0;
 }
+
+h2 {
+  font-size: 1.4rem;
+  letter-spacing: 0.01em;
+  font-weight: 600;
+  margin: 0;
+}
+
+h3 {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+p,
+span {
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* ============================================================================
+   SECTION TITLES
+   ============================================================================ */
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--text-subtle);
+}
+
+.section-title::before {
+  content: "";
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 999px;
+  background: var(--accent);
+  opacity: 0.6;
+}
+
+/* ============================================================================
+   LINKS
+   ============================================================================ */
+
+a {
+  color: var(--text);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+a:hover {
+  color: var(--accent);
+}
+
+/* ============================================================================
+   INPUTS & FORMS
+   ============================================================================ */
+
+input,
+textarea,
+select {
+  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface);
+  color: var(--text);
+  padding: 0.55rem 0.9rem;
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+
+textarea {
+  border-radius: 0.75rem;
+  line-height: 1.5;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+
+/* ============================================================================
+   BUTTONS
+   ============================================================================ */
 
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
+  border-radius: 999px;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  transition: all 0.2s;
+  background: var(--accent);
+  color: var(--text);
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+button:focus,
+button:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ============================================================================
+   UTILITY CLASSES
+   ============================================================================ */
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.grid-2 {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.error {
+  color: var(--danger);
+  padding: 1rem;
+  background: var(--danger-soft);
+  border-radius: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.success {
+  color: var(--accent);
+  padding: 1rem;
+  background: var(--accent-soft);
+  border-radius: 0.75rem;
+  margin-bottom: 1rem;
 }

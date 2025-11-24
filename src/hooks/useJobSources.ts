@@ -1,29 +1,92 @@
 // src/hooks/useJobSources.ts
-import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { useState, useEffect, useCallback } from 'react'
+import { supabase } from '../lib/supabase'
 
-export function useJobSources() {
-  const [sources, setSources] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+// Shape taken from your job_sources table
+export interface JobSource {
+  id: string
+  name: string
+  source_key: string
+  api_url: string | null
+  active: boolean | null
+  last_fetch: string | null
+  rate_limit_per_minute: number | null
+  created_at: string | null
+  updated_at: string | null
+  slug: string | null
+  website: string | null
+  mode: string | null               // 'rss' | 'api' but string is fine for now
+  api_key_required: boolean | null
+  api_key: string | null
+  update_frequency: string | null    // e.g. 'daily'
+  enabled: boolean | null
+  last_sync: string | null
+  last_error: string | null
+}
 
-  async function fetchSources() {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from('job_sources')
-      .select('*')
-      .order('name', { ascending: true });
-    setLoading(false);
-    if (!error && data) setSources(data);
-  }
+interface UseJobSourcesReturn {
+  sources: JobSource[]
+  loading: boolean
+  error: string | null
+  updateSource: (id: string, patch: Partial<JobSource>) => Promise<void>
+  refetch: () => Promise<void>
+}
 
-  async function updateSource(id: string, patch: Record<string, any>) {
-    await supabase.from('job_sources').update(patch).eq('id', id);
-    await fetchSources();
-  }
+export function useJobSources(): UseJobSourcesReturn {
+  const [sources, setSources] = useState<JobSource[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchSources = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      const { data, error: fetchError } = await supabase
+        .from('job_sources')
+        .select('*')
+        .order('name', { ascending: true })
+
+      if (fetchError) throw fetchError
+
+      setSources((data ?? []) as JobSource[])
+    } catch (err) {
+      console.error('Error fetching job sources:', err)
+      const msg =
+        err instanceof Error ? err.message : 'Failed to load job sources'
+      setError(msg)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  const updateSource = useCallback(
+    async (id: string, patch: Partial<JobSource>) => {
+      try {
+        const { error: updateError } = await supabase
+          .from('job_sources')
+          .update(patch)
+          .eq('id', id)
+
+        if (updateError) throw updateError
+
+        // Optimistic local update
+        setSources(prev =>
+          prev.map(src =>
+            src.id === id ? ({ ...src, ...patch } as JobSource) : src
+          )
+        )
+      } catch (err) {
+        console.error('Error updating job source:', err)
+        throw err
+      }
+    },
+    []
+  )
 
   useEffect(() => {
-    fetchSources();
-  }, []);
+    fetchSources()
+  }, [fetchSources])
 
-  return { sources, loading, updateSource, refetch: fetchSources };
+  return { sources, loading, error, updateSource, refetch: fetchSources }
 }

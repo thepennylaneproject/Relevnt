@@ -1,47 +1,87 @@
-import { useCallback } from 'react';
-import { useAITask } from './useAITask';
+/**
+ * ============================================================================
+ * useRefineBulletPoints Hook
+ * ============================================================================
+ *
+ * Refines resume bullet points for:
+ * - Clarity
+ * - Impact
+ * - Quantification and results
+ *
+ * Built on the shared useAITask engine so we inherit:
+ * - Retry logic
+ * - Quota / usage tracking
+ * - Centralized error handling
+ * ============================================================================
+ */
+
+import { useCallback } from 'react'
+import { useAITask } from './useAITask'
 import type {
   BulletPointRefinementResponse,
-} from '../types/ai-responses.types';
+  UsageStats,
+  AIError,
+} from '../types/ai-responses.types'
 
 // ============================================================================
-// useRefineBulletPoints
+// Return type
 // ============================================================================
 
-/**
- * Refine resume bullet points for impact and clarity
- */
 export interface UseRefineBulletPointsReturn {
-  refine: (
-    bulletPoints: string[]
-  ) => Promise<BulletPointRefinementResponse | null>;
-  loading: boolean;
-  error: any;
-  retry: () => Promise<BulletPointRefinementResponse | null>;
+  /**
+   * Refine a list of resume bullet points for clarity and impact.
+   */
+  refine: (bulletPoints: string[]) => Promise<BulletPointRefinementResponse | null>
+
+  /**
+   * True while refinement is in progress.
+   */
+  loading: boolean
+
+  /**
+   * Last error from the AI engine, if any.
+   */
+  error: AIError | null
+
+  /**
+   * Current usage / quota stats, if available.
+   */
+  usageStats: UsageStats | null
+
+  /**
+   * Retry the last failed refine-bullet-points call.
+   */
+  retry: () => Promise<BulletPointRefinementResponse | null>
 }
 
+// ============================================================================
+// Hook implementation
+// ============================================================================
+
 export function useRefineBulletPoints(): UseRefineBulletPointsReturn {
-  const { execute, loading, error, retry } = useAITask();
+  const { execute, loading, error, usageStats, retry } = useAITask()
 
   const refine = useCallback(
-    async (
-      bulletPoints: string[]
-    ): Promise<BulletPointRefinementResponse | null> => {
+    async (bulletPoints: string[]): Promise<BulletPointRefinementResponse | null> => {
       try {
-        return (await execute('refine-bullet-points', {
+        const response = (await execute('refine-bullet-points', {
           bulletPoints,
-        })) as BulletPointRefinementResponse;
-      } catch (err) {
-        return null;
+        })) as BulletPointRefinementResponse
+
+        return response
+      } catch {
+        // useAITask already logs and stores the error
+        return null
       }
     },
     [execute]
-  );
+  )
 
   return {
     refine,
     loading,
-    error,
+    error: error as AIError | null,
+    usageStats: usageStats as UsageStats | null,
     retry: () => retry() as Promise<BulletPointRefinementResponse | null>,
-  };
+  }
 }

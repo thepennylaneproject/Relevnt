@@ -338,7 +338,7 @@ export type TaskName = keyof typeof TASK_RESPONSE_TYPES;
  * Usage limits per tier per month
  */
 export const TIER_LIMITS = {
-  starter: {
+  free: {
     'extract-resume': 5,
     'analyze-resume': 5,
     'optimize-resume': 3,
@@ -382,7 +382,7 @@ export const TIER_LIMITS = {
 /**
  * Map user tier to usage limits
  */
-export type UserTierForAI = 'starter' | 'pro' | 'premium';
+export type UserTierForAI = 'free' | 'pro' | 'premium';
 
 /**
  * Get limit for a specific task and tier

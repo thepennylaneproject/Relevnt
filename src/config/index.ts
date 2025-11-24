@@ -15,8 +15,8 @@
 export { copy, getCopy } from './i18n.config';
 export type { CopyKey, CopyPath } from './i18n.config';
 
-export { assets, getAssetUrl } from '../themes/assets';
-export type { BrandAssets, ModeAssets, ThemeAssets } from '../themes/assets';
+export { assets, getAsset, getAllAssets, getAssetVariants } from '../themes/assets';
+export type { AssetLibrary, AssetType, ModeAsset } from '../themes/assets';
 
 export {
   TIERS,

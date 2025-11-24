@@ -71,8 +71,15 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { trackJobAction, trackApplicationAction, trackToolUsage, trackAIInteraction, trackEvent } from "@/components/analytics";
 import UpgradePrompt from "../components/UpgradePrompt"; // Added import
+import { SkillLearningModal } from "../components/learning/SkillLearningModal";
 
 export default function JobDetail() {
+  const slugify = (value) =>
+    value
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
   const [job, setJob] = useState(null);
   const [application, setApplication] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -94,6 +101,8 @@ export default function JobDetail() {
   const [portfolioCuration, setPortfolioCuration] = useState(null);
   const [isCuratingPortfolio, setIsCuratingPortfolio] = useState(false);
   const [portfolioProjects, setPortfolioProjects] = useState([]);
+  const [selectedSkill, setSelectedSkill] = useState(null);
+  const [showCoursesModal, setShowCoursesModal] = useState(false);
 
   const [user, setUser] = useState(null); // Added state for user
 
@@ -791,11 +800,21 @@ export default function JobDetail() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-3">
                   {job.skills_extracted.map((skill, index) => (
-                    <Badge key={index} variant="secondary" className="bg-indigo-50 text-indigo-700 border-indigo-200">
-                      {skill}
-                    </Badge>
+                    <div key={index} className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-full px-3 py-2">
+                      <span className="text-sm text-slate-800 font-medium">{skill}</span>
+                      <button
+                        type="button"
+                        className="text-xs text-indigo-600 hover:text-indigo-800 underline"
+                        onClick={() => {
+                          setSelectedSkill({ slug: slugify(skill), name: skill });
+                          setShowCoursesModal(true);
+                        }}
+                      >
+                        See learning options
+                      </button>
+                    </div>
                   ))}
                 </div>
               </CardContent>
@@ -1191,6 +1210,14 @@ export default function JobDetail() {
       </div>
 
       {/* Portfolio Curation Results Dialog */}
+      <Dialog open={showCoursesModal} onOpenChange={setShowCoursesModal}>
+        <SkillLearningModal
+          open={showCoursesModal}
+          onClose={() => setShowCoursesModal(false)}
+          skillSlug={selectedSkill ? selectedSkill.slug : null}
+          skillName={selectedSkill ? selectedSkill.name : null}
+        />
+
       <Dialog open={showCuratePortfolioDialog} onOpenChange={setShowCuratePortfolioDialog}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>

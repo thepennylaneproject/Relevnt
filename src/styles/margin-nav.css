@@ -1,0 +1,113 @@
+.margin-nav {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 96px;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 12px 8px;
+  z-index: 100;
+  pointer-events: none;
+  background: var(--nav-bg, var(--bg, #f3f4e6));
+  border-right: 1px solid var(--nav-border, rgba(0, 0, 0, 0.06));
+  box-shadow: 6px 0 26px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(12px);
+}
+
+.margin-nav__doodle {
+  display: none; /* hide doodle overlay so it doesn't introduce extra shapes behind items */
+}
+
+.margin-nav__doodle img {
+  max-height: 95%;
+  width: auto;
+  filter: saturate(0.9);
+}
+
+.margin-nav__nav {
+  position: relative;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.margin-nav__nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.margin-nav__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--nav-ink, #0f1214);
+  text-decoration: none;
+  font-family: "Patrick Hand", "Handlee", sans-serif;
+  font-size: 11px;
+  padding: 8px 6px;
+  border-radius: 14px;
+  position: relative;
+  transition: transform 0.16s ease-out, box-shadow 0.16s ease-out, background-color 0.16s ease-out;
+}
+
+.margin-nav__item.active {
+  background-color: var(--nav-active-bg, rgba(199, 165, 106, 0.14));
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.08);
+}
+
+.margin-nav__item.active::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: 12px;
+  border: 1px dashed var(--nav-accent, rgba(199, 165, 106, 0.8));
+  box-shadow: 0 0 0 1px var(--nav-accent, rgba(199, 165, 106, 0.3));
+}
+
+.margin-nav__item.active::after {
+  content: "";
+  position: absolute;
+  left: -7px;
+  top: 16px;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--nav-accent, var(--champagne));
+  animation: navPulse 1.6s ease-in-out infinite;
+}
+
+.margin-nav__item:hover {
+  transform: translateY(-1px) scale(1.04);
+  background-color: var(--nav-hover-bg, rgba(0, 0, 0, 0.03));
+}
+
+.margin-nav__icon svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 1.7;
+}
+
+.margin-nav__label {
+  margin-top: 1px;
+  letter-spacing: 0.08em;
+  color: var(--nav-muted, #4a4a4a);
+}
+
+.margin-nav__item.active .margin-nav__label {
+  color: var(--nav-ink, #0f1214);
+  font-weight: 600;
+}
+
+@keyframes navPulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.4); opacity: 0.6; }
+  100% { transform: scale(1); opacity: 0.8; }
+}

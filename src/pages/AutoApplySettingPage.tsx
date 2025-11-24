@@ -1,278 +1,285 @@
-// src/pages/AutoApplySettingsPage.tsx
-
-import React from 'react';
-import { PageBackground } from '../components/shared/PageBackground';
-import { useTheme } from '../contexts/useTheme';
-import { useAuth } from '../contexts/AuthContext';
-import {
-    FeatureGate,
-    type TierLevel,
-} from '../components/features/FeatureGate';
-import { useAutoApplySettings } from '../hooks/useAutoApplySettings';
+import React, { CSSProperties } from 'react'
+import { useAuth } from '../contexts/AuthContext'
+import { Container } from '../components/shared/Container'
+import { FeatureGate, type TierLevel } from '../components/features/FeatureGate'
+import { useAutoApplySettings } from '../hooks/useAutoApplySettings'
+import { useRelevntColors } from '../hooks'
+import { AutoApplyIcon, PreferencesIcon } from '../components/icons/RelevntIcons'
 
 export default function AutoApplySettingsPage(): JSX.Element {
-    const { mode } = useTheme();
-    const { user } = useAuth();
-    const { settings, loading, error, saveSettings } = useAutoApplySettings();
+  const { user } = useAuth()
+  const colors = useRelevntColors()
+  const { settings, loading, error, saveSettings } = useAutoApplySettings()
 
-    const isDark = mode === 'Dark';
+  const userTier: TierLevel =
+    user?.user_metadata?.tier && ['starter', 'pro', 'premium'].includes(user.user_metadata.tier)
+      ? (user.user_metadata.tier as TierLevel)
+      : 'starter'
 
-    // Derive tier from auth user metadata (same pattern as DashboardPage)
-    const userTier = ((user?.user_metadata?.tier as string) ||
-        'starter') as TierLevel;
+  const wrapper: CSSProperties = {
+    flex: 1,
+    backgroundColor: colors.background,
+  }
 
-    if (!user) {
-        return (
-            <PageBackground version="v2" overlayOpacity={0.12}>
-                <div className="min-h-screen flex items-center justify-center px-4">
-                    <p className="text-sm text-slate-600 dark:text-slate-300">
-                        You need to be signed in to manage Auto Apply settings.
-                    </p>
-                </div>
-            </PageBackground>
-        );
-    }
+  const pageHeader: CSSProperties = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 16,
+    marginBottom: 24,
+    flexWrap: 'wrap',
+  }
 
-    async function handleToggleEnabled(
-        e: React.ChangeEvent<HTMLInputElement>,
-    ) {
-        await saveSettings({ enabled: e.target.checked });
-    }
+  const titleRow: CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 6,
+  }
 
+  const title: CSSProperties = {
+    fontSize: 22,
+    fontWeight: 600,
+    letterSpacing: '0.02em',
+    color: colors.text,
+  }
+
+  const subtitle: CSSProperties = {
+    fontSize: 13,
+    color: colors.textSecondary,
+    maxWidth: 560,
+    lineHeight: 1.5,
+  }
+
+  const badge: CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 8,
+    padding: '4px 10px',
+    borderRadius: 999,
+    border: `1px solid ${colors.borderLight}`,
+    backgroundColor: colors.surfaceHover,
+    fontSize: 11,
+    letterSpacing: '0.16em',
+    textTransform: 'uppercase',
+    color: colors.textSecondary,
+  }
+
+  const card: CSSProperties = {
+    padding: '16px 16px 14px',
+    borderRadius: 16,
+    backgroundColor: colors.surface,
+    border: `1px solid ${colors.borderLight}`,
+    display: 'grid',
+    gap: 12,
+  }
+
+  const label: CSSProperties = {
+    fontSize: 13,
+    fontWeight: 600,
+    color: colors.text,
+    marginBottom: 4,
+  }
+
+  const input: CSSProperties = {
+    width: '100%',
+    borderRadius: 12,
+    border: `1px solid ${colors.border}`,
+    backgroundColor: colors.background,
+    color: colors.text,
+    padding: '10px 12px',
+    fontSize: 13,
+  }
+
+  const hint: CSSProperties = {
+    fontSize: 12,
+    color: colors.textSecondary,
+  }
+
+  const grid: CSSProperties = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+    gap: 12,
+  }
+
+  if (!user) {
     return (
-        <PageBackground version="v2" overlayOpacity={0.12}>
-            <div
-                className="min-h-screen px-4 py-8 flex justify-center"
-                style={{
-                    backgroundColor: isDark ? '#020617' : 'transparent',
-                }}
-            >
-                <div className="w-full max-w-3xl space-y-8">
-                    {/* Header */}
-                    <header className="space-y-2">
-                        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50">
-                            Auto Apply Assistant
-                        </h1>
-                        <p className="text-sm text-slate-600 dark:text-slate-300 max-w-xl">
-                            Let Relevnt apply on your behalf for high-confidence matches,
-                            using your authentic voice and rules that you control.
-                        </p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                            Current plan tier:{' '}
-                            <span className="font-medium">
-                                {userTier.charAt(0).toUpperCase() + userTier.slice(1)}
-                            </span>
-                        </p>
-                    </header>
+      <div style={wrapper}>
+        <Container maxWidth="lg" padding="md">
+          <div style={{ fontSize: 14, color: colors.textSecondary, padding: '20px 0' }}>
+            Please log in to manage auto-apply preferences.
+          </div>
+        </Container>
+      </div>
+    )
+  }
 
-                    {/* Gated content – only Pro+ gets access to Auto Apply */}
-                    <FeatureGate
-                        feature="batch-applications"
-                        requiredTier="pro"
-                        userTier={userTier}
-                        onUpgradeClick={() => {
-                            // TODO: route to pricing or open upgrade modal
-                            // For now this can be a no-op or console.log
-                            console.log('Upgrade flow not implemented yet');
-                        }}
-                    >
-                        <div className="space-y-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 px-4 py-5 shadow-sm">
-                            {loading && (
-                                <p className="text-xs text-slate-500 mb-2">
-                                    Loading your Auto Apply settings…
-                                </p>
-                            )}
-                            {error && (
-                                <p className="text-xs text-rose-500 mb-2">
-                                    {error}
-                                </p>
-                            )}
+  return (
+    <div style={wrapper}>
+      <Container maxWidth="lg" padding="md">
+        <header style={pageHeader}>
+          <div style={titleRow}>
+            <h1 style={title}>Auto-apply preferences</h1>
+            <p style={subtitle}>
+              Set guardrails for when Relevnt can apply on your behalf. Keep control, require high
+              match scores, and make sure voice and values stay intact.
+            </p>
+          </div>
+          <div style={badge}>
+            <PreferencesIcon size={16} strokeWidth={1.6} />
+            <span>Guardrails</span>
+          </div>
+        </header>
 
-                            {/* Enable / disable */}
-                            <section className="space-y-3">
-                                <div className="flex items-center justify-between gap-4">
-                                    <div>
-                                        <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-50">
-                                            Enable Auto Apply
-                                        </h2>
-                                        <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md">
-                                            When enabled, Relevnt can submit applications on your
-                                            behalf for roles that meet your rules and pass a match
-                                            threshold.
-                                        </p>
-                                    </div>
-                                    <label className="inline-flex items-center gap-2">
-                                        <input
-                                            type="checkbox"
-                                            checked={settings?.enabled || false}
-                                            onChange={handleToggleEnabled}
-                                        />
-                                        <span className="text-xs text-slate-700 dark:text-slate-200">
-                                            {settings?.enabled ? 'Enabled' : 'Disabled'}
-                                        </span>
-                                    </label>
-                                </div>
-                            </section>
+        <div style={{ fontSize: 12, color: colors.textSecondary, marginBottom: 12 }}>
+          Current tier: <strong style={{ color: colors.text }}>{userTier}</strong>
+        </div>
 
-                            <hr className="border-slate-200 dark:border-slate-800" />
-
-                            {/* Core thresholds */}
-                            <section className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <label className="block text-xs font-medium text-slate-700 dark:text-slate-200">
-                                        Mode
-                                    </label>
-                                    <select
-                                        value={settings?.mode || 'review'}
-                                        onChange={(e) =>
-                                            saveSettings({
-                                                mode: e.target.value as 'review' | 'full',
-                                            })
-                                        }
-                                        className="w-full text-sm rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2"
-                                    >
-                                        <option value="review">
-                                            Review mode: you approve before submit
-                                        </option>
-                                        <option value="full">
-                                            Full Auto: Relevnt submits within your rules
-                                        </option>
-                                    </select>
-                                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                                        Start in review mode until you trust the agent, then switch
-                                        to full auto when you are ready.
-                                    </p>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="block text-xs font-medium text-slate-700 dark:text-slate-200">
-                                        Maximum applications per week
-                                    </label>
-                                    <input
-                                        type="number"
-                                        min={1}
-                                        max={50}
-                                        value={settings?.max_per_week ?? 5}
-                                        onChange={(e) =>
-                                            saveSettings({
-                                                max_per_week: Number(e.target.value),
-                                            })
-                                        }
-                                        className="w-full text-sm rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2"
-                                    />
-                                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                                        Hard cap to prevent spam and keep your search intentional.
-                                    </p>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="block text-xs font-medium text-slate-700 dark:text-slate-200">
-                                        Minimum match score
-                                    </label>
-                                    <input
-                                        type="number"
-                                        min={50}
-                                        max={100}
-                                        step={1}
-                                        value={settings?.min_match_score ?? 75}
-                                        onChange={(e) =>
-                                            saveSettings({
-                                                min_match_score: Number(e.target.value),
-                                            })
-                                        }
-                                        className="w-full text-sm rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2"
-                                    />
-                                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                                        Relevnt will only auto apply when your match score meets or
-                                        exceeds this level.
-                                    </p>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="block text-xs font-medium text-slate-700 dark:text-slate-200">
-                                        Minimum salary (optional, yearly)
-                                    </label>
-                                    <input
-                                        type="number"
-                                        min={0}
-                                        value={settings?.min_salary ?? ''}
-                                        onChange={(e) =>
-                                            saveSettings({
-                                                min_salary: e.target.value
-                                                    ? Number(e.target.value)
-                                                    : null,
-                                            })
-                                        }
-                                        className="w-full text-sm rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2"
-                                    />
-                                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                                        If set, Relevnt will skip roles that clearly advertise
-                                        compensation below this.
-                                    </p>
-                                </div>
-                            </section>
-
-                            <hr className="border-slate-200 dark:border-slate-800" />
-
-                            {/* Safety & alignment */}
-                            <section className="space-y-3">
-                                <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-50">
-                                    Safety and alignment
-                                </h2>
-
-                                <label className="flex items-start gap-3 text-xs text-slate-700 dark:text-slate-200">
-                                    <input
-                                        type="checkbox"
-                                        className="mt-1"
-                                        checked={settings?.apply_only_canonical ?? true}
-                                        onChange={(e) =>
-                                            saveSettings({
-                                                apply_only_canonical: e.target.checked,
-                                            })
-                                        }
-                                    />
-                                    <span>
-                                        Only apply on the company or canonical ATS site when
-                                        available.
-                                        <span className="block text-slate-500 dark:text-slate-400">
-                                            Relevnt prefers employer sites over job boards to maximize
-                                            signal to real recruiters.
-                                        </span>
-                                    </span>
-                                </label>
-
-                                <label className="flex items-start gap-3 text-xs text-slate-700 dark:text-slate-200">
-                                    <input
-                                        type="checkbox"
-                                        className="mt-1"
-                                        checked={settings?.require_values_alignment ?? true}
-                                        onChange={(e) =>
-                                            saveSettings({
-                                                require_values_alignment: e.target.checked,
-                                            })
-                                        }
-                                    />
-                                    <span>
-                                        Require values alignment for auto apply.
-                                        <span className="block text-slate-500 dark:text-slate-400">
-                                            Relevnt will ignore roles at companies or in industries
-                                            that do not match your values profile.
-                                        </span>
-                                    </span>
-                                </label>
-                            </section>
-
-                            {/* Footer note */}
-                            <div className="pt-2 flex items-center justify-between gap-3">
-                                <p className="text-[11px] text-slate-500 dark:text-slate-400 max-w-xs">
-                                    You can pause Auto Apply at any time. Your agent will always
-                                    follow these rules when searching and applying on your behalf.
-                                </p>
-                            </div>
-                        </div>
-                    </FeatureGate>
-                </div>
+        <FeatureGate
+          feature="batch-applications"
+          requiredTier="pro"
+          userTier={userTier}
+          onUpgradeClick={() => {}}
+        >
+          {loading && (
+            <div style={card}>
+              <span style={{ fontSize: 13, color: colors.textSecondary }}>Loading your settings…</span>
             </div>
-        </PageBackground>
-    );
+          )}
+
+          {error && (
+            <div style={card}>
+              <span style={{ fontSize: 13, color: colors.error }}>{error}</span>
+            </div>
+          )}
+
+          <section style={{ display: 'grid', gap: 12 }}>
+            <article style={card}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <AutoApplyIcon size={18} strokeWidth={1.7} />
+                  <span style={{ fontWeight: 600, color: colors.text }}>Enable auto-apply</span>
+                </div>
+                <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={settings?.enabled ?? false}
+                    onChange={(e) => saveSettings({ enabled: e.target.checked })}
+                    style={{ width: 18, height: 18 }}
+                  />
+                  <span style={{ fontSize: 13, color: colors.text }}>
+                    {settings?.enabled ? 'On' : 'Off'}
+                  </span>
+                </label>
+              </div>
+              <p style={hint}>
+                Relevnt submits only when rules and thresholds are met. You can pause anytime.
+              </p>
+            </article>
+
+            <article style={card}>
+              <div style={{ fontWeight: 600, color: colors.text }}>Core rules</div>
+              <div style={grid}>
+                <div>
+                  <div style={label}>Mode</div>
+                  <select
+                    value={settings?.mode || 'review'}
+                    onChange={(e) => saveSettings({ mode: e.target.value as 'review' | 'full' })}
+                    style={input}
+                  >
+                    <option value="review">Review first</option>
+                    <option value="full">Full auto</option>
+                  </select>
+                  <p style={hint}>Start in review to build trust, then switch to full auto.</p>
+                </div>
+                <div>
+                  <div style={label}>Max applications per week</div>
+                  <input
+                    type="number"
+                    min={1}
+                    max={50}
+                    value={settings?.max_per_week ?? 5}
+                    onChange={(e) => saveSettings({ max_per_week: Number(e.target.value) })}
+                    style={input}
+                  />
+                  <p style={hint}>Prevent spam and keep your search intentional.</p>
+                </div>
+                <div>
+                  <div style={label}>Minimum match score</div>
+                  <input
+                    type="number"
+                    min={50}
+                    max={100}
+                    value={settings?.min_match_score ?? 75}
+                    onChange={(e) => saveSettings({ min_match_score: Number(e.target.value) })}
+                    style={input}
+                  />
+                  <p style={hint}>Only apply when your fit clears this bar.</p>
+                </div>
+                <div>
+                  <div style={label}>Minimum salary (optional)</div>
+                  <input
+                    type="number"
+                    min={0}
+                    value={settings?.min_salary ?? ''}
+                    onChange={(e) =>
+                      saveSettings({
+                        min_salary: e.target.value ? Number(e.target.value) : null,
+                      })
+                    }
+                    style={input}
+                    placeholder="e.g., 100000"
+                  />
+                  <p style={hint}>Skip obvious lowball roles; leave blank to ignore salary.</p>
+                </div>
+              </div>
+            </article>
+
+            <article style={card}>
+              <div style={{ fontWeight: 600, color: colors.text }}>Safety & alignment</div>
+              <div style={{ display: 'grid', gap: 10 }}>
+                <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={settings?.apply_only_canonical ?? true}
+                    onChange={(e) => saveSettings({ apply_only_canonical: e.target.checked })}
+                    style={{ marginTop: 4, width: 16, height: 16 }}
+                  />
+                  <div style={{ display: 'grid', gap: 4 }}>
+                    <span style={{ fontSize: 13, color: colors.text }}>Prefer official ATS/company sites</span>
+                    <span style={hint}>Improves signal to real recruiters and reduces duplicates.</span>
+                  </div>
+                </label>
+
+                <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={settings?.require_values_alignment ?? true}
+                    onChange={(e) => saveSettings({ require_values_alignment: e.target.checked })}
+                    style={{ marginTop: 4, width: 16, height: 16 }}
+                  />
+                  <div style={{ display: 'grid', gap: 4 }}>
+                    <span style={{ fontSize: 13, color: colors.text }}>Require values alignment</span>
+                    <span style={hint}>Skip companies or industries that do not match your values.</span>
+                  </div>
+                </label>
+              </div>
+              <div
+                style={{
+                  marginTop: 8,
+                  padding: '10px 12px',
+                  borderRadius: 12,
+                  border: `1px dashed ${colors.borderLight}`,
+                  backgroundColor: colors.background,
+                  fontSize: 12,
+                  color: colors.textSecondary,
+                }}
+              >
+                You are always in control. Pause or adjust rules at any time.
+              </div>
+            </article>
+          </section>
+        </FeatureGate>
+      </Container>
+    </div>
+  )
 }

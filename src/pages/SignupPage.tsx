@@ -26,12 +26,12 @@
  * ============================================================================
  */
 
-import { useState, CSSProperties, useMemo, useEffect } from 'react';
+import { useState, CSSProperties, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/useTheme';
 import { copy } from '../config/i18n.config';
 import { PageBackground } from '../components/shared/PageBackground';
+import { useRelevntColors } from '../hooks';
 
 interface SignupFormData {
   firstName: string;
@@ -52,10 +52,10 @@ interface SignupError {
  */
 export function SignupPage(): JSX.Element {
   const navigate = useNavigate();
-  const { mode } = useTheme();
   const { signUpWithEmail } = useAuth();
+  const colors = useRelevntColors();
 
-  const isDark = mode === 'Dark';
+  const isDark = colors.background === '#1A1A1A';
 
   // ============================================================
   // STATE
@@ -82,23 +82,6 @@ export function SignupPage(): JSX.Element {
     const isEdu = formData.email.toLowerCase().endsWith('.edu');
     setIsEduEmail(isEdu);
   }, [formData.email]);
-
-  // ============================================================
-  // THEME COLORS
-  // ============================================================
-
-  const themeColors = useMemo(() => ({
-    bg: isDark ? '#0f0f0f' : '#ffffff',
-    surface: isDark ? '#1a1a1a' : '#f9fafb',
-    text: isDark ? '#f5f5f5' : '#1a1a1a',
-    textSecondary: isDark ? '#b0b0b0' : '#666666',
-    border: isDark ? '#333333' : '#e5e7eb',
-    primary: '#4E808D',
-    accent: '#D4A574',
-    error: '#ef4444',
-    success: '#10b981',
-    warning: '#f59e0b',
-  }), [isDark]);
 
   // ============================================================
   // VALIDATION & SUBMISSION
@@ -212,7 +195,7 @@ export function SignupPage(): JSX.Element {
   };
 
   const cardStyles: CSSProperties = {
-    backgroundColor: themeColors.surface,
+    backgroundColor: colors.surface,
     borderRadius: '12px',
     padding: '48px',
     width: '100%',
@@ -223,14 +206,14 @@ export function SignupPage(): JSX.Element {
   const titleStyles: CSSProperties = {
     fontSize: '28px',
     fontWeight: 700,
-    color: themeColors.text,
+    color: colors.text,
     marginBottom: '8px',
     textAlign: 'center',
   };
 
   const subtitleStyles: CSSProperties = {
     fontSize: '14px',
-    color: themeColors.textSecondary,
+    color: colors.textSecondary,
     marginBottom: '24px',
     textAlign: 'center',
   };
@@ -243,7 +226,7 @@ export function SignupPage(): JSX.Element {
     display: 'block',
     fontSize: '14px',
     fontWeight: 500,
-    color: themeColors.text,
+    color: colors.text,
     marginBottom: '8px',
   };
 
@@ -251,9 +234,9 @@ export function SignupPage(): JSX.Element {
     width: '100%',
     padding: '12px',
     borderRadius: '8px',
-    border: `1px solid ${themeColors.border}`,
+    border: `1px solid ${colors.border}`,
     backgroundColor: isDark ? '#0f0f0f' : '#ffffff',
-    color: themeColors.text,
+    color: colors.text,
     fontSize: '14px',
     fontFamily: 'inherit',
     transition: 'all 0.2s ease',
@@ -262,12 +245,12 @@ export function SignupPage(): JSX.Element {
 
   const inputErrorStyles: CSSProperties = {
     ...inputStyles,
-    borderColor: themeColors.error,
+    borderColor: colors.error,
   };
 
   const errorTextStyles: CSSProperties = {
     fontSize: '13px',
-    color: themeColors.error,
+    color: colors.error,
     marginTop: '6px',
   };
 
@@ -283,19 +266,19 @@ export function SignupPage(): JSX.Element {
     height: '18px',
     marginTop: '2px',
     cursor: 'pointer',
-    accentColor: themeColors.accent,
+    accentColor: colors.accent,
   };
 
   const checkboxLabelStyles: CSSProperties = {
     fontSize: '13px',
-    color: themeColors.textSecondary,
+    color: colors.textSecondary,
     lineHeight: 1.5,
   };
 
   const buttonStyles: CSSProperties = {
     width: '100%',
     padding: '12px',
-    backgroundColor: themeColors.accent,
+    backgroundColor: colors.accent,
     color: '#000000',
     border: 'none',
     borderRadius: '8px',
@@ -312,11 +295,11 @@ export function SignupPage(): JSX.Element {
     textAlign: 'center',
     marginTop: '24px',
     fontSize: '14px',
-    color: themeColors.textSecondary,
+    color: colors.textSecondary,
   };
 
   const loginLinkStyles: CSSProperties = {
-    color: themeColors.primary,
+    color: colors.primary,
     textDecoration: 'none',
     cursor: 'pointer',
     fontWeight: 500,
@@ -328,7 +311,7 @@ export function SignupPage(): JSX.Element {
   // ============================================================
 
   return (
-    <PageBackground version="v1">
+    <PageBackground>
       <div style={containerStyles}>
         <div style={cardStyles}>
           {/* .EDU Promo Banner */}
@@ -336,7 +319,7 @@ export function SignupPage(): JSX.Element {
             <div
               style={{
                 backgroundColor: isDark ? 'rgba(16, 185, 129, 0.1)' : 'rgba(16, 185, 129, 0.1)',
-                borderLeft: `3px solid ${themeColors.success}`,
+                borderLeft: `3px solid ${colors.success}`,
                 padding: '12px',
                 borderRadius: '6px',
                 marginBottom: '20px',
@@ -346,7 +329,7 @@ export function SignupPage(): JSX.Element {
                 style={{
                   margin: 0,
                   fontSize: '13px',
-                  color: themeColors.success,
+                  color: colors.success,
                   fontWeight: 500,
                 }}
               >
@@ -368,7 +351,7 @@ export function SignupPage(): JSX.Element {
             <div
               style={{
                 backgroundColor: isDark ? 'rgba(239, 68, 68, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                borderLeft: `3px solid ${themeColors.error}`,
+                borderLeft: `3px solid ${colors.error}`,
                 padding: '12px',
                 borderRadius: '6px',
                 marginBottom: '20px',
@@ -454,7 +437,7 @@ export function SignupPage(): JSX.Element {
               {error?.field === 'password' && (
                 <p style={errorTextStyles}>{error.message}</p>
               )}
-              <p style={{ fontSize: '12px', color: themeColors.textSecondary, marginTop: '6px' }}>
+              <p style={{ fontSize: '12px', color: colors.textSecondary, marginTop: '6px' }}>
                 At least 8 characters with a letter and number
               </p>
             </div>

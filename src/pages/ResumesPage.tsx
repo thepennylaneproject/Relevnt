@@ -1,641 +1,832 @@
-/**
- * ============================================================================
- * RESUMES PAGE (REFACTORED)
- * ============================================================================
- * 🎯 PURPOSE: Resume management hub with AI analysis tools
- * 
- * This page demonstrates:
- * - Tier system gating (FeatureGate component)
- * - Three integrated hooks (extract, analyze, optimize)
- * - API integration patterns
- * - Empty states with illustrations
- * - Loading and error states
- * 
- * Features:
- * - Resume upload (Starter+)
- * - Extract resume data (Starter+, 1x/month free)
- * - Analyze resume ATS score (Pro+)
- * - Get optimization suggestions (Pro+)
- * - View all resumes
- * 
- * 🎓 LEARNING NOTE: This page shows how tier gating works in practice.
- * Users see upgrade prompts for locked features, creating a natural
- * upgrade funnel.
- * ============================================================================
- */
+import React, { CSSProperties, useMemo, useState } from 'react'
+import { useAuth } from '../contexts/AuthContext'
+import { FeatureGate } from '../components/features/FeatureGate'
+import { Container } from '../components/shared/Container'
+import {
+  ResumeIcon,
+  ApplicationsIcon,
+  KeywordsIcon,
+  MatchScoreIcon,
+} from '../components/icons/RelevntIcons'
+import { useRelevntColors } from '../hooks'
+import { hasFeatureAccess, getRequiredTier } from '../config'
+import { useResumes, useExtractResume, useAnalyzeResume, useOptimizeResume } from '../hooks'
+import type { RelevntColors } from '../hooks/useRelevntColors'
+import type { Resume } from '../hooks/useResumes'
+import type { TierLevel } from '../config/tiers'
+import type {
+  ResumeExtractionResponse,
+  ResumeAnalysisResponse,
+  ResumeOptimizationResponse,
+} from '../types/ai-responses.types'
 
-import { useState, CSSProperties } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/useTheme';
-import { copy, hasFeatureAccess, getRequiredTier } from '../config';
-import { PageBackground } from '../components/shared/PageBackground';
-import { PageHeader } from '../components/shared/PageHeader';
-import { FeatureGate } from '../components/features/FeatureGate';
+type ResumeTab = 'list' | 'upload' | 'extract' | 'analyze' | 'optimize'
 
-/**
- * ResumesPage component
- */
 export function ResumesPage(): JSX.Element {
-  const { user, loading: authLoading } = useAuth();
-  const { mode } = useTheme();
+  const { user, loading: authLoading } = useAuth()
+  const colors = useRelevntColors()
 
-  // Track which tab is active (upload, extract, analyze, optimize)
-  const [activeTab, setActiveTab] = useState<
-    'list' | 'upload' | 'extract' | 'analyze' | 'optimize'
-  >('list');
+  const { resumes, loading: resumesLoading, deleteResume, setDefaultResume, updateResumeTitle } = useResumes(user!)
 
-  // Mock data for demo - in real app, fetch from Supabase
-  const [resumes] = useState([
-    {
-      id: '1',
-      title: 'Senior Frontend Developer',
-      createdAt: '2025-11-10',
-      atsScore: 82,
-    },
-  ]); 
+  const [activeTab, setActiveTab] = useState<ResumeTab>('list')
 
-  const theme = {
-    colors: {
-      primary: mode === 'Dark' ? '#3b82f6' : '#2563eb',      // Blue
-      border: mode === 'Dark' ? '#374151' : '#e5e7eb',       // Gray
-      surface: mode === 'Dark' ? '#1f2937' : '#f9fafb',      // Surface background
-      background: mode === 'Dark' ? '#111827' : '#ffffff',   // Item background
-      textSecondary: mode === 'Dark' ? '#9ca3af' : '#6b7280', // Secondary text
-      text: mode === 'Dark' ? '#f3f4f6' : '#1f2937',          // Primary text
-    }
-  };  // ============================================================
-  // HELPER FUNCTION: Check if user can access feature
-  // ============================================================
+  const userTier: TierLevel =
+    user?.tier && ['starter', 'pro', 'premium'].includes(user.tier)
+      ? (user.tier as TierLevel)
+      : 'starter'
 
-  const canExtract = hasFeatureAccess('resume-extract', user?.tier || 'starter');
-  const canAnalyze = hasFeatureAccess('resume-analyze', user?.tier || 'starter');
-  const canOptimize = hasFeatureAccess(
-    'resume-optimize',
-    user?.tier || 'starter'
-  );
+  const canExtract = hasFeatureAccess('resume-extract', userTier)
+  const canAnalyze = hasFeatureAccess('resume-analyze', userTier)
+  const canOptimize = hasFeatureAccess('resume-optimize', userTier)
 
-  // ============================================================
-  // STYLES
-  // ============================================================
+  const wrapper: CSSProperties = {
+    flex: 1,
+    backgroundColor: colors.background,
+  }
 
-  const mainStyles: CSSProperties = {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    padding: '4rem 2rem',
-  };
-
-  const tabsStyles: CSSProperties = {
+  const pageHeader: CSSProperties = {
     display: 'flex',
-    gap: '1rem',
-    marginTop: '2rem',
-    borderBottom: `2px solid ${theme.colors.border}`,
-    overflow: 'auto',
-  };
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 16,
+    marginBottom: 24,
+    flexWrap: 'wrap',
+  }
 
-  const tabButtonStyles = (isActive: boolean): CSSProperties => ({
-    padding: '1rem 1.5rem',
-    background: 'transparent',
-    border: 'none',
-    borderBottom: isActive ? `3px solid ${theme.colors.primary}` : 'none',
-    color: isActive ? theme.colors.primary : theme.colors.textSecondary,
-    fontSize: '1rem',
-    fontWeight: isActive ? 600 : 400,
+  const titleRow: CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 6,
+  }
+
+  const title: CSSProperties = {
+    fontSize: 22,
+    fontWeight: 600,
+    letterSpacing: '0.02em',
+    color: colors.text,
+  }
+
+  const subtitle: CSSProperties = {
+    fontSize: 13,
+    color: colors.textSecondary,
+    maxWidth: 540,
+    lineHeight: 1.5,
+  }
+
+  const pillRow: CSSProperties = {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 16,
+  }
+
+  const pill = (active: boolean): CSSProperties => ({
+    padding: '8px 14px',
+    borderRadius: 999,
+    border: active ? `1px solid ${colors.primary}` : `1px solid ${colors.borderLight}`,
+    backgroundColor: active ? colors.surfaceHover : colors.surface,
+    fontSize: 12,
+    fontWeight: active ? 600 : 500,
+    color: active ? colors.text : colors.textSecondary,
     cursor: 'pointer',
-    transition: 'all 0.2s ease',
-  });
+  })
 
-  const contentStyles: CSSProperties = {
-    marginTop: '2rem',
-    padding: '2rem',
-    background: theme.colors.surface,
-    borderRadius: '12px',
-    border: `1px solid ${theme.colors.border}`,
-  };
-
+  const contentCard: CSSProperties = {
+    backgroundColor: colors.surface,
+    border: `1px solid ${colors.borderLight}`,
+    borderRadius: 16,
+    padding: '16px 16px 14px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 12,
+  }
 
   if (authLoading) {
     return (
-      <div style={{ textAlign: 'center', padding: '4rem 2rem' }}>
-        Loading...
+      <div style={wrapper}>
+        <Container maxWidth="lg" padding="md">
+          <div style={{ color: colors.textSecondary, padding: '20px 0', fontSize: 14 }}>
+            Checking your account...
+          </div>
+        </Container>
       </div>
-    );
+    )
   }
 
   if (!user) {
     return (
-      <div style={{ textAlign: 'center', padding: '4rem 2rem' }}>
-        Please log in
+      <div style={wrapper}>
+        <Container maxWidth="lg" padding="md">
+          <div style={{ color: colors.textSecondary, padding: '20px 0', fontSize: 14 }}>
+            Please log in to manage resumes.
+          </div>
+        </Container>
       </div>
-    );
+    )
   }
 
-  // ============================================================
-  // RENDER
-  // ============================================================
-
   return (
-    <PageBackground version="v2">
-      <main style={mainStyles}>
-        {/* Page Header */}
-        <PageHeader
-          title={copy.nav.resumes}
-          subtitle="Manage and optimize your professional documents"
-          illustrationVersion="v2"
-        />
+    <div style={wrapper}>
+      <Container maxWidth="lg" padding="md">
+        <header style={pageHeader}>
+          <div style={titleRow}>
+            <h1 style={title}>Resume hub</h1>
+            <p style={subtitle}>
+              Keep your resume versions organized, run quick checks, and line them up against the
+              roles you care about. No fluff—just clean artifacts you can trust.
+            </p>
+          </div>
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '4px 10px',
+              borderRadius: 999,
+              border: `1px solid ${colors.borderLight}`,
+              backgroundColor: colors.surfaceHover,
+              fontSize: 11,
+              letterSpacing: '0.16em',
+              textTransform: 'uppercase',
+              color: colors.textSecondary,
+            }}
+          >
+            <ResumeIcon size={16} strokeWidth={1.6} />
+            <span>Documents</span>
+          </div>
+        </header>
 
-        {/* Navigation Tabs */}
-        <div style={tabsStyles}>
-          <button
-            style={tabButtonStyles(activeTab === 'list')}
-            onClick={() => setActiveTab('list')}
-          >
-            📋 My Resumes
+        <div style={pillRow}>
+          <button type="button" style={pill(activeTab === 'list')} onClick={() => setActiveTab('list')}>
+            Resumes
+          </button>
+          <button type="button" style={pill(activeTab === 'upload')} onClick={() => setActiveTab('upload')}>
+            Upload
           </button>
           <button
-            style={tabButtonStyles(activeTab === 'upload')}
-            onClick={() => setActiveTab('upload')}
-          >
-            📤 Upload
-          </button>
-          <button
-            style={tabButtonStyles(activeTab === 'extract')}
+            type="button"
+            style={pill(activeTab === 'extract')}
             onClick={() => setActiveTab('extract')}
             disabled={!canExtract}
           >
-            🔄 Extract Data {!canExtract && '(Pro)'}
+            Extract {canExtract ? '' : '(Pro)'}
           </button>
           <button
-            style={tabButtonStyles(activeTab === 'analyze')}
+            type="button"
+            style={pill(activeTab === 'analyze')}
             onClick={() => setActiveTab('analyze')}
             disabled={!canAnalyze}
           >
-            📊 Analyze {!canAnalyze && '(Pro)'}
+            Analyze {canAnalyze ? '' : '(Pro)'}
           </button>
           <button
-            style={tabButtonStyles(activeTab === 'optimize')}
+            type="button"
+            style={pill(activeTab === 'optimize')}
             onClick={() => setActiveTab('optimize')}
             disabled={!canOptimize}
           >
-            ✨ Optimize {!canOptimize && '(Pro)'}
+            Optimize {canOptimize ? '' : '(Pro)'}
           </button>
         </div>
 
-        {/* Content Area */}
-        <div style={contentStyles}>
-          {/* Tab: My Resumes List */}
+        <section style={contentCard}>
           {activeTab === 'list' && (
-            <ResumesListTab resumes={resumes} theme={theme} />
+          <ResumesListTab
+            resumes={resumes}
+            colors={colors}
+            loading={resumesLoading}
+            onDelete={async (id) => {
+              try {
+                await deleteResume(id)
+              } catch (err) {
+                console.error('Delete failed', err)
+              }
+            }}
+            onSetDefault={async (id) => {
+              try {
+                await setDefaultResume(id)
+              } catch (err) {
+                console.error('Set default failed', err)
+              }
+            }}
+            onEditTitle={async (id, title) => {
+              try {
+                await updateResumeTitle(id, title)
+              } catch (err) {
+                console.error('Edit title failed', err)
+              }
+            }}
+          />
           )}
 
-          {/* Tab: Upload Resume */}
-          {activeTab === 'upload' && <ResumeUploadTab theme={theme} />}
+          {activeTab === 'upload' && <ResumeUploadTab colors={colors} />}
 
-          {/* Tab: Extract Resume Data (Gated - Pro+) */}
           {activeTab === 'extract' && (
             <FeatureGate
               feature="resume-extract"
               requiredTier={getRequiredTier('resume-extract')}
-              userTier={user.tier || 'starter'}
+              userTier={userTier}
             >
-              <ResumeExtractTab theme={theme} />
+              <ResumeExtractTab colors={colors} />
             </FeatureGate>
           )}
 
-          {/* Tab: Analyze Resume (Gated - Pro+) */}
           {activeTab === 'analyze' && (
             <FeatureGate
               feature="resume-analyze"
               requiredTier={getRequiredTier('resume-analyze')}
-              userTier={user.tier || 'starter'}
+              userTier={userTier}
             >
-              <ResumeAnalyzeTab theme={theme} />
+              <ResumeAnalyzeTab colors={colors} />
             </FeatureGate>
           )}
 
-          {/* Tab: Optimize Resume (Gated - Pro+) */}
           {activeTab === 'optimize' && (
             <FeatureGate
               feature="resume-optimize"
               requiredTier={getRequiredTier('resume-optimize')}
-              userTier={user.tier || 'starter'}
+              userTier={userTier}
             >
-              <ResumeOptimizeTab theme={theme} />
+              <ResumeOptimizeTab colors={colors} />
             </FeatureGate>
           )}
-        </div>
-
-        {/* User Tier Info */}
-        <div
-          style={{
-            marginTop: '2rem',
-            padding: '1.5rem',
-            background: `${theme.colors.primary}20`,
-            borderRadius: '8px',
-            color: theme.colors.text,
-          }}
-        >
-          <p>
-            Current tier: <strong>{user.tier || 'starter'}</strong> |
-            Extract: {canExtract ? '✓' : '✗'} |
-            Analyze: {canAnalyze ? '✓' : '✗'} |
-            Optimize: {canOptimize ? '✓' : '✗'}
-          </p>
-        </div>
-      </main>
-    </PageBackground>
-  );
+        </section>
+      </Container>
+    </div>
+  )
 }
-
-// ============================================================================
-// TAB COMPONENTS
-// ============================================================================
 
 interface TabProps {
-  theme: any;
-  resumes?: any[];
+  colors: RelevntColors;
 }
 
-/**
- * List existing resumes
- */
-function ResumesListTab({ resumes, theme }: TabProps & { resumes: any[] }) {
+function ResumeCard({
+  resume,
+  colors,
+  onDelete,
+  onSetDefault,
+  onEditTitle,
+}: {
+  resume: Resume
+  colors: RelevntColors
+  onDelete: (id: string) => void
+  onSetDefault: (id: string) => void
+  onEditTitle: (id: string, title: string) => void
+}) {
+  const created = useMemo(() => {
+    const date = resume.created_at ? new Date(resume.created_at) : null
+    return date ? date.toLocaleDateString() : 'Just now'
+  }, [resume.created_at])
+
+  const [editing, setEditing] = useState(false)
+  const [title, setTitle] = useState(resume.title || 'Untitled')
+
   return (
-    <div>
-      <h3 style={{ marginBottom: '1.5rem', color: theme.colors.text }}>
-        Your Resumes
-      </h3>
-      {resumes.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '2rem' }}>
-          <p style={{ color: theme.colors.textSecondary }}>
-            {copy.emptyState.noResumes}
-          </p>
-        </div>
-      ) : (
-        <div style={{ display: 'grid', gap: '1rem' }}>
-          {resumes.map((resume) => (
-            <div
-              key={resume.id}
-              style={{
-                padding: '1.5rem',
-                background: theme.colors.background,
-                border: `1px solid ${theme.colors.border}`,
-                borderRadius: '8px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
-            >
-              <div>
-                <h4 style={{ margin: '0 0 0.5rem 0', color: theme.colors.text }}>
-                  {resume.title}
-                </h4>
-                <p style={{ margin: 0, fontSize: '0.9rem', color: theme.colors.textSecondary }}>
-                  Created: {resume.createdAt}
-                </p>
-              </div>
-              {resume.atsScore && (
-                <div
+    <article
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 8,
+        padding: '14px 16px',
+        borderRadius: 16,
+        backgroundColor: colors.background,
+        border: `1px solid ${colors.borderLight}`,
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 10,
+              backgroundColor: colors.surfaceHover,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <ResumeIcon size={18} strokeWidth={1.7} />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {editing ? (
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <input
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
                   style={{
-                    fontSize: '1.5rem',
-                    fontWeight: 700,
-                    color: theme.colors.primary,
+                    padding: '6px 8px',
+                    borderRadius: 10,
+                    border: `1px solid ${colors.borderLight}`,
+                    background: colors.surfaceHover,
+                    fontSize: 13,
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    onEditTitle(resume.id, title)
+                    setEditing(false)
+                  }}
+                  style={{
+                    padding: '6px 10px',
+                    borderRadius: 10,
+                    border: `1px solid ${colors.borderLight}`,
+                    background: colors.surfaceHover,
+                    cursor: 'pointer',
                   }}
                 >
-                  {resume.atsScore}%
-                </div>
-              )}
+                  Save
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: colors.text }}>{resume.title}</div>
+                <button
+                  type="button"
+                  onClick={() => setEditing(true)}
+                  style={{
+                    fontSize: 11,
+                    color: colors.textSecondary,
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Edit
+                </button>
+              </div>
+            )}
+            <div style={{ fontSize: 12, color: colors.textSecondary }}>
+              Created {created} {resume.is_default ? '• Default' : ''}
             </div>
-          ))}
+          </div>
         </div>
-      )}
-    </div>
-  );
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          {resume.ats_score && (
+            <span
+              style={{
+                padding: '4px 8px',
+                borderRadius: 999,
+                backgroundColor: colors.surfaceHover,
+                border: `1px solid ${colors.borderLight}`,
+                fontSize: 12,
+                color: colors.text,
+              }}
+            >
+              ATS {resume.ats_score}%
+            </span>
+          )}
+          {!resume.is_default && (
+            <button
+              type="button"
+              onClick={() => onSetDefault(resume.id)}
+              style={{
+                padding: '6px 10px',
+                borderRadius: 10,
+                border: `1px solid ${colors.borderLight}`,
+                backgroundColor: colors.surfaceHover,
+                color: colors.text, // ensure legible text
+                cursor: 'pointer',
+                fontSize: 12,
+                fontWeight: 600,
+              }}
+            >
+              Make default
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => onDelete(resume.id)}
+            style={{
+              padding: '6px 10px',
+              borderRadius: 10,
+              border: `1px solid ${colors.borderLight}`,
+              backgroundColor: colors.surfaceHover,
+              color: colors.textSecondary,
+              cursor: 'pointer',
+              fontSize: 12,
+            }}
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </article>
+  )
 }
 
-/**
- * Upload new resume
- */
-function ResumeUploadTab({ theme }: TabProps) {
-  const [file, setFile] = useState<File | null>(null);
+function ResumesListTab({
+  resumes,
+  colors,
+  loading,
+  onDelete,
+  onSetDefault,
+  onEditTitle,
+}: {
+  resumes: Resume[]
+  colors: RelevntColors
+  loading: boolean
+  onDelete: (id: string) => void
+  onSetDefault: (id: string) => void
+  onEditTitle: (id: string, title: string) => void
+}) {
+  if (loading) {
+    return <div style={{ fontSize: 13, color: colors.textSecondary }}>Loading resumes...</div>
+  }
 
-  return (
-    <div>
-      <h3 style={{ marginBottom: '1rem', color: theme.colors.text }}>
-        Upload Resume
-      </h3>
+  if (resumes.length === 0) {
+    return (
       <div
         style={{
-          border: `2px dashed ${theme.colors.border}`,
-          borderRadius: '8px',
-          padding: '3rem 2rem',
-          textAlign: 'center',
+          padding: '20px 16px',
+          borderRadius: 14,
+          border: `1px dashed ${colors.borderLight}`,
+          backgroundColor: colors.background,
+          color: colors.textSecondary,
+          fontSize: 13,
+        }}
+      >
+        No resumes yet. Upload one to start tracking ATS readiness and tailoring.
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ display: 'grid', gap: 10 }}>
+      {resumes.map((resume) => (
+        <ResumeCard
+          key={resume.id}
+          resume={resume}
+          colors={colors}
+          onDelete={onDelete}
+          onSetDefault={onSetDefault}
+          onEditTitle={onEditTitle}
+        />
+      ))}
+    </div>
+  )
+}
+
+function ResumeUploadTab({ colors }: TabProps) {
+  const [file, setFile] = useState<File | null>(null)
+
+  return (
+    <div style={{ display: 'grid', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <ResumeIcon size={18} strokeWidth={1.7} />
+        <h2 style={{ fontSize: 15, fontWeight: 600, color: colors.text, margin: 0 }}>Upload a resume</h2>
+      </div>
+      <label
+        htmlFor="resume-input"
+        style={{
+          border: `1px dashed ${colors.border}`,
+          borderRadius: 16,
+          padding: '24px 18px',
+          backgroundColor: colors.background,
           cursor: 'pointer',
-          transition: 'all 0.2s ease',
-        }}
-        onDragOver={(e) => {
-          e.preventDefault();
-          e.currentTarget.style.background = theme.colors.surface;
-        }}
-        onDragLeave={(e) => {
-          e.currentTarget.style.background = 'transparent';
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 6,
+          color: colors.textSecondary,
+          fontSize: 13,
         }}
       >
         <input
-          type="file"
-          accept=".pdf,.docx,.doc"
-          onChange={(e) => setFile(e.target.files?.[0] || null)}
-          style={{ display: 'none' }}
           id="resume-input"
+          type="file"
+          accept=".pdf,.doc,.docx"
+          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          style={{ display: 'none' }}
         />
-        <label htmlFor="resume-input" style={{ cursor: 'pointer' }}>
-          <p style={{ fontSize: '1.2rem', fontWeight: 500, color: theme.colors.text }}>
-            📄 {copy.form.resumeFile}
-          </p>
-          <p style={{ fontSize: '0.9rem', color: theme.colors.textSecondary }}>
-            PDF, DOCX, or DOC (max 10MB)
-          </p>
-          {file && (
-            <p style={{ marginTop: '1rem', color: theme.colors.primary }}>
-              ✓ {file.name}
-            </p>
-          )}
-        </label>
-      </div>
+        <span style={{ color: colors.text, fontWeight: 600 }}>Choose a file</span>
+        <span>PDF, DOCX, or DOC. Max 10MB.</span>
+        {file && <span style={{ color: colors.text }}>Selected: {file.name}</span>}
+      </label>
       <button
+        type="button"
         style={{
-          marginTop: '1.5rem',
-          padding: '1rem 2rem',
-          background: theme.colors.primary,
-          color: theme.colors.accentText,
+          alignSelf: 'flex-start',
+          padding: '10px 16px',
+          borderRadius: 999,
           border: 'none',
-          borderRadius: '8px',
-          cursor: 'pointer',
-          fontSize: '1rem',
+          backgroundColor: colors.primary,
+          color: colors.text,
+          fontSize: 13,
           fontWeight: 600,
+          cursor: 'pointer',
         }}
       >
-        Upload Resume
+        Upload resume
       </button>
     </div>
-  );
+  )
 }
 
-/**
- * Extract resume data (useExtractResume hook example)
- */
-function ResumeExtractTab({ theme }: TabProps) {
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
+function TextArea({
+  value,
+  onChange,
+  placeholder,
+  colors,
+  minRows = 6,
+}: {
+  value: string
+  onChange: (value: string) => void
+  placeholder: string
+  colors: RelevntColors
+  minRows?: number
+}) {
+  return (
+    <textarea
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      rows={minRows}
+      style={{
+        width: '100%',
+        borderRadius: 12,
+        border: `1px solid ${colors.border}`,
+        backgroundColor: colors.background,
+        color: colors.text,
+        padding: '12px 12px',
+        fontSize: 13,
+        resize: 'vertical',
+      }}
+    />
+  )
+}
+
+function ResumeExtractTab({ colors }: TabProps) {
+  const { extract, loading } = useExtractResume()
+  const [resumeText, setResumeText] = useState('')
+  const [result, setResult] = useState<ResumeExtractionResponse['data'] | null>(null)
 
   const handleExtract = async () => {
-    setLoading(true);
-    try {
-      // 🎓 HOOK EXAMPLE: This would call useExtractResume in real app
-      // const { extract } = useExtractResume()
-      // const result = await extract(resumeText)
-
-      // Mock response for now
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setResult({
-        name: 'Jane Doe',
-        email: 'jane@example.com',
-        experience: '8 years',
-        skills: ['React', 'TypeScript', 'Node.js', 'AWS'],
-      });
-    } finally {
-      setLoading(false);
+    if (!resumeText.trim()) return
+    const response = await extract(resumeText)
+    if (response?.success && response.data) {
+      setResult(response.data)
     }
-  };
+  }
 
   return (
-    <div>
-      <h3 style={{ marginBottom: '1rem', color: theme.colors.text }}>
-        Extract Resume Data
-      </h3>
-      <p style={{ color: theme.colors.textSecondary, marginBottom: '1.5rem' }}>
-        Automatically extract structured data from your resume
+    <div style={{ display: 'grid', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <KeywordsIcon size={18} strokeWidth={1.7} />
+        <h2 style={{ fontSize: 15, fontWeight: 600, color: colors.text, margin: 0 }}>Extract resume data</h2>
+      </div>
+      <p style={{ fontSize: 13, color: colors.textSecondary, margin: 0 }}>
+        Paste your resume text to pull out structured details you can reuse elsewhere.
       </p>
+      <TextArea
+        value={resumeText}
+        onChange={setResumeText}
+        placeholder="Paste your resume text..."
+        colors={colors}
+      />
       <button
+        type="button"
         onClick={handleExtract}
         disabled={loading}
         style={{
-          padding: '1rem 2rem',
-          background: theme.colors.primary,
-          color: theme.colors.accentText,
+          alignSelf: 'flex-start',
+          padding: '10px 16px',
+          borderRadius: 999,
           border: 'none',
-          borderRadius: '8px',
-          cursor: loading ? 'not-allowed' : 'pointer',
-          fontSize: '1rem',
+          backgroundColor: colors.primary,
+          color: colors.text,
+          fontSize: 13,
           fontWeight: 600,
-          opacity: loading ? 0.6 : 1,
+          cursor: loading ? 'not-allowed' : 'pointer',
+          opacity: loading ? 0.7 : 1,
         }}
       >
-        {loading ? '⏳ Extracting...' : '🔄 Extract Data'}
+        {loading ? 'Extracting…' : 'Extract data'}
       </button>
-
       {result && (
-        <div style={{ marginTop: '2rem', padding: '1.5rem', background: theme.colors.background, borderRadius: '8px' }}>
-          <h4 style={{ color: theme.colors.text, marginTop: 0 }}>Extracted Data:</h4>
-          <p><strong>Name:</strong> {result.name}</p>
-          <p><strong>Email:</strong> {result.email}</p>
-          <p><strong>Experience:</strong> {result.experience}</p>
-          <p><strong>Skills:</strong> {result.skills.join(', ')}</p>
+        <div
+          style={{
+            marginTop: 4,
+            padding: '12px 12px',
+            borderRadius: 12,
+            border: `1px solid ${colors.borderLight}`,
+            backgroundColor: colors.background,
+            fontSize: 13,
+            color: colors.text,
+            display: 'grid',
+            gap: 6,
+          }}
+        >
+          <div><strong>Name:</strong> {result.fullName}</div>
+          <div><strong>Email:</strong> {result.email}</div>
+          <div><strong>Location:</strong> {result.location}</div>
+          <div><strong>Skills:</strong> {result.skills.join(', ')}</div>
         </div>
       )}
     </div>
-  );
+  )
 }
 
-/**
- * Analyze resume ATS (useAnalyzeResume hook example)
- */
-function ResumeAnalyzeTab({ theme }: TabProps) {
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
+function ResumeAnalyzeTab({ colors }: TabProps) {
+  const { analyze, loading } = useAnalyzeResume()
+  const [resumeText, setResumeText] = useState('')
+  const [result, setResult] = useState<ResumeAnalysisResponse['data'] | null>(null)
 
   const handleAnalyze = async () => {
-    setLoading(true);
-    try {
-      // 🎓 HOOK EXAMPLE: This would call useAnalyzeResume in real app
-      // const { analyze } = useAnalyzeResume()
-      // const result = await analyze(resumeText)
-
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setResult({
-        atsScore: 82,
-        assessment: 'Good',
-        strengths: ['Clear formatting', 'Relevant skills', 'Good use of keywords'],
-        weaknesses: ['Missing quantifiable achievements', 'Could add more metrics'],
-      });
-    } finally {
-      setLoading(false);
+    if (!resumeText.trim()) return
+    const response = await analyze(resumeText)
+    if (response?.success && response.data) {
+      setResult(response.data)
     }
-  };
+  }
 
   return (
-    <div>
-      <h3 style={{ marginBottom: '1rem', color: theme.colors.text }}>
-        Analyze for ATS
-      </h3>
-      <p style={{ color: theme.colors.textSecondary, marginBottom: '1.5rem' }}>
-        Get instant feedback on how Applicant Tracking Systems will read your resume
+    <div style={{ display: 'grid', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <MatchScoreIcon size={18} strokeWidth={1.7} />
+        <h2 style={{ fontSize: 15, fontWeight: 600, color: colors.text, margin: 0 }}>Analyze for ATS</h2>
+      </div>
+      <p style={{ fontSize: 13, color: colors.textSecondary, margin: 0 }}>
+        Quick read on how an ATS will score this version before you send it.
       </p>
+      <TextArea
+        value={resumeText}
+        onChange={setResumeText}
+        placeholder="Paste your resume text..."
+        colors={colors}
+      />
       <button
+        type="button"
         onClick={handleAnalyze}
         disabled={loading}
         style={{
-          padding: '1rem 2rem',
-          background: theme.colors.primary,
-          color: theme.colors.accentText,
+          alignSelf: 'flex-start',
+          padding: '10px 16px',
+          borderRadius: 999,
           border: 'none',
-          borderRadius: '8px',
-          cursor: loading ? 'not-allowed' : 'pointer',
-          fontSize: '1rem',
+          backgroundColor: colors.primary,
+          color: colors.text,
+          fontSize: 13,
           fontWeight: 600,
-          opacity: loading ? 0.6 : 1,
+          cursor: loading ? 'not-allowed' : 'pointer',
+          opacity: loading ? 0.7 : 1,
         }}
       >
-        {loading ? '⏳ Analyzing...' : '📊 Analyze'}
+        {loading ? 'Analyzing…' : 'Analyze'}
       </button>
-
       {result && (
-        <div style={{ marginTop: '2rem', padding: '1.5rem', background: theme.colors.background, borderRadius: '8px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-            <div style={{ fontSize: '3rem', fontWeight: 700, color: theme.colors.primary }}>
-              {result.atsScore}%
-            </div>
-            <div>
-              <p style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: theme.colors.text }}>
-                ATS Score
-              </p>
-              <p style={{ margin: 0, fontSize: '0.9rem', color: theme.colors.textSecondary }}>
-                Overall Assessment: {result.assessment}
-              </p>
+        <div
+          style={{
+            marginTop: 4,
+            padding: '14px 14px',
+            borderRadius: 12,
+            border: `1px solid ${colors.borderLight}`,
+            backgroundColor: colors.background,
+            display: 'grid',
+            gap: 10,
+            color: colors.text,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ fontSize: 26, fontWeight: 700, color: colors.primary }}>{result.atsScore}%</div>
+            <div style={{ fontSize: 13, color: colors.textSecondary }}>
+              ATS score · {result.improvements.length > 0 ? 'Opportunities found' : 'Solid alignment'}
             </div>
           </div>
           <div>
-            <h4 style={{ color: theme.colors.text, marginBottom: '0.5rem' }}>Strengths:</h4>
-            <ul style={{ margin: '0 0 1rem 0', color: theme.colors.textSecondary }}>
-              {result.strengths.map((s: string) => (
-                <li key={s}>✓ {s}</li>
-              ))}
+            <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 4 }}>Strengths</div>
+            <ul style={{ margin: 0, paddingLeft: 18, color: colors.textSecondary }}>
+              {result.keywordMatches.length === 0
+                ? <li>No standout keywords yet.</li>
+                : result.keywordMatches.map((item) => <li key={item}>{item}</li>)}
             </ul>
           </div>
           <div>
-            <h4 style={{ color: theme.colors.text, marginBottom: '0.5rem' }}>Areas to Improve:</h4>
-            <ul style={{ margin: 0, color: theme.colors.textSecondary }}>
-              {result.weaknesses.map((w: string) => (
-                <li key={w}>→ {w}</li>
+            <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 4 }}>Areas to improve</div>
+            <ul style={{ margin: 0, paddingLeft: 18, color: colors.textSecondary }}>
+              {result.improvements.map((item) => (
+                <li key={item}>{item}</li>
               ))}
             </ul>
           </div>
         </div>
       )}
     </div>
-  );
+  )
 }
 
-/**
- * Optimize resume (useOptimizeResume hook example)
- */
-function ResumeOptimizeTab({ theme }: TabProps) {
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
+function ResumeOptimizeTab({ colors }: TabProps) {
+  const { optimize, loading } = useOptimizeResume()
+  const [resumeText, setResumeText] = useState('')
+  const [jobDescription, setJobDescription] = useState('')
+  const [result, setResult] = useState<ResumeOptimizationResponse['data'] | null>(null)
 
   const handleOptimize = async () => {
-    setLoading(true);
-    try {
-      // 🎓 HOOK EXAMPLE: This would call useOptimizeResume in real app
-      // const { optimize } = useOptimizeResume()
-      // const result = await optimize(resumeText)
-
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setResult({
-        suggestions: [
-          {
-            type: 'Keywords',
-            current: 'Worked on frontend development',
-            suggested:
-              'Led React development for 3+ web applications, improving performance by 40%',
-            impact: 'high',
-          },
-          {
-            type: 'Metrics',
-            current: 'Managed projects',
-            suggested: 'Managed 8+ concurrent projects with $2M+ budget',
-            impact: 'high',
-          },
-          {
-            type: 'Format',
-            current: 'Multiple job titles listed',
-            suggested:
-              'Group by responsibility or achievement type for clarity',
-            impact: 'medium',
-          },
-        ],
-      });
-    } finally {
-      setLoading(false);
+    if (!resumeText.trim()) return
+    const response = await optimize(resumeText, jobDescription || undefined)
+    if (response?.success && response.data) {
+      setResult(response.data)
     }
-  };
+  }
 
   return (
-    <div>
-      <h3 style={{ marginBottom: '1rem', color: theme.colors.text }}>
-        Get Optimization Suggestions
-      </h3>
-      <p style={{ color: theme.colors.textSecondary, marginBottom: '1.5rem' }}>
-        AI-powered recommendations to improve your ATS score and impact
+    <div style={{ display: 'grid', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <ApplicationsIcon size={18} strokeWidth={1.7} />
+        <h2 style={{ fontSize: 15, fontWeight: 600, color: colors.text, margin: 0 }}>Optimize for a role</h2>
+      </div>
+      <p style={{ fontSize: 13, color: colors.textSecondary, margin: 0 }}>
+        Get adjustments that keep your voice but align to the role without exaggerating experience.
       </p>
+      <TextArea
+        value={resumeText}
+        onChange={setResumeText}
+        placeholder="Paste your resume text..."
+        colors={colors}
+        minRows={5}
+      />
+      <TextArea
+        value={jobDescription}
+        onChange={setJobDescription}
+        placeholder="Optional: paste a job description to tailor toward"
+        colors={colors}
+        minRows={4}
+      />
       <button
+        type="button"
         onClick={handleOptimize}
         disabled={loading}
         style={{
-          padding: '1rem 2rem',
-          background: theme.colors.primary,
-          color: theme.colors.accentText,
+          alignSelf: 'flex-start',
+          padding: '10px 16px',
+          borderRadius: 999,
           border: 'none',
-          borderRadius: '8px',
-          cursor: loading ? 'not-allowed' : 'pointer',
-          fontSize: '1rem',
+          backgroundColor: colors.primary,
+          color: colors.text,
+          fontSize: 13,
           fontWeight: 600,
-          opacity: loading ? 0.6 : 1,
+          cursor: loading ? 'not-allowed' : 'pointer',
+          opacity: loading ? 0.7 : 1,
         }}
       >
-        {loading ? '✨ Optimizing...' : '✨ Get Suggestions'}
+        {loading ? 'Optimizing…' : 'Get suggestions'}
       </button>
-
       {result && (
-        <div style={{ marginTop: '2rem', display: 'grid', gap: '1rem' }}>
-          {result.suggestions.map((suggestion: any, idx: number) => (
+        <div style={{ display: 'grid', gap: 10 }}>
+          <div
+            style={{
+              padding: '14px 14px',
+              borderRadius: 12,
+              border: `1px solid ${colors.borderLight}`,
+              backgroundColor: colors.background,
+              color: colors.text,
+              display: 'grid',
+              gap: 6,
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+              <div style={{ fontWeight: 600 }}>Optimized resume</div>
+              <div
+                style={{
+                  padding: '4px 8px',
+                  borderRadius: 999,
+                  border: `1px solid ${colors.borderLight}`,
+                  backgroundColor: colors.surfaceHover,
+                  fontSize: 12,
+                  color: colors.textSecondary,
+                }}
+              >
+                ATS {result.atsScore}%
+              </div>
+            </div>
+            <div style={{ fontSize: 13, color: colors.textSecondary }}>
+              {result.optimizedResume}
+            </div>
+          </div>
+          {result.improvements.length > 0 && (
             <div
-              key={idx}
               style={{
-                padding: '1.5rem',
-                background: theme.colors.background,
-                borderRadius: '8px',
-                borderLeft: `4px solid ${suggestion.impact === 'high'
-                    ? theme.colors.primary
-                    : theme.colors.accent
-                  }`,
+                padding: '14px 14px',
+                borderRadius: 12,
+                border: `1px solid ${colors.borderLight}`,
+                backgroundColor: colors.background,
+                color: colors.text,
+                display: 'grid',
+                gap: 6,
               }}
             >
-              <h4 style={{ margin: '0 0 0.5rem 0', color: theme.colors.text }}>
-                {suggestion.type}
-                {suggestion.impact === 'high' && ' ⭐ High Impact'}
-              </h4>
-              <p style={{ margin: '0.5rem 0', color: theme.colors.textSecondary }}>
-                <strong>Current:</strong> {suggestion.current}
-              </p>
-              <p style={{ margin: '0.5rem 0', color: theme.colors.primary }}>
-                <strong>Suggested:</strong> {suggestion.suggested}
-              </p>
+              <div style={{ fontWeight: 600 }}>Recommended tweaks</div>
+              <ul style={{ margin: 0, paddingLeft: 18, color: colors.textSecondary }}>
+                {result.improvements.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
             </div>
-          ))}
+          )}
         </div>
       )}
     </div>
-  );
+  )
 }
 
-export default ResumesPage;
+export default ResumesPage

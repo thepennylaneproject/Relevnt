@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import PageBackground from '../components/shared/PageBackground';
-import { supabase } from '../lib/supabase';
-import { useAuth } from '../contexts/AuthContext';
+import React, { CSSProperties, useEffect, useState } from 'react'
+import { supabase } from '../lib/supabase'
+import { useAuth } from '../contexts/AuthContext'
+import { useRelevntColors } from '../hooks'
+import { Container } from '../components/shared/Container'
 
 type VoicePreset =
   | 'natural'
@@ -9,76 +10,78 @@ type VoicePreset =
   | 'direct'
   | 'creative'
   | 'values_driven'
-  | 'academic';
+  | 'academic'
 
 type ProfileRow = {
-  id: string;
-  voice_preset: VoicePreset | null;
-  voice_custom_sample: string | null;
-  voice_formality: number | null;
-  voice_playfulness: number | null;
-  voice_conciseness: number | null;
-};
+  id: string
+  voice_preset: VoicePreset | null
+  voice_custom_sample: string | null
+  voice_formality: number | null
+  voice_playfulness: number | null
+  voice_conciseness: number | null
+}
 
 export default function VoiceProfilePage(): JSX.Element {
-  const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [profile, setProfile] = useState<ProfileRow | null>(null);
+  const { user } = useAuth()
+  const colors = useRelevntColors()
 
-  const [preset, setPreset] = useState<VoicePreset>('natural');
-  const [sample, setSample] = useState('');
-  const [formality, setFormality] = useState(50);
-  const [playfulness, setPlayfulness] = useState(40);
-  const [conciseness, setConciseness] = useState(60);
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [profile, setProfile] = useState<ProfileRow | null>(null)
+
+  const [preset, setPreset] = useState<VoicePreset>('natural')
+  const [sample, setSample] = useState('')
+  const [formality, setFormality] = useState(50)
+  const [playfulness, setPlayfulness] = useState(40)
+  const [conciseness, setConciseness] = useState(60)
 
   useEffect(() => {
     async function loadProfile() {
       if (!user) {
-        setLoading(false);
-        return;
+        setLoading(false)
+        return
       }
-      setLoading(true);
-      setError(null);
+      setLoading(true)
+      setError(null)
 
-      const { data, error } = await supabase
+      const { data, error: supaError } = await supabase
         .from('profiles')
         .select(
           'id, voice_preset, voice_custom_sample, voice_formality, voice_playfulness, voice_conciseness'
         )
         .eq('id', user.id)
-        .maybeSingle();
+        .maybeSingle()
 
-      if (error) {
-        console.error('Error loading profile voice settings', error);
-        setError('Could not load your voice settings, please try again.');
-        setLoading(false);
-        return;
+      if (supaError) {
+        console.error('Error loading profile voice settings', supaError)
+        setError('Could not load your voice settings, please try again.')
+        setLoading(false)
+        return
       }
 
       if (data) {
-        const p = data as ProfileRow;
-        setProfile(p);
-        setPreset((p.voice_preset as VoicePreset) || 'natural');
-        setSample(p.voice_custom_sample || '');
-        setFormality(p.voice_formality ?? 50);
-        setPlayfulness(p.voice_playfulness ?? 40);
-        setConciseness(p.voice_conciseness ?? 60);
+        const p = data as ProfileRow
+        setProfile(p)
+        setPreset((p.voice_preset as VoicePreset) || 'natural')
+        setSample(p.voice_custom_sample || '')
+        setFormality(p.voice_formality ?? 50)
+        setPlayfulness(p.voice_playfulness ?? 40)
+        setConciseness(p.voice_conciseness ?? 60)
       }
 
-      setLoading(false);
+      setLoading(false)
     }
 
-    loadProfile();
-  }, [user]);
+    loadProfile()
+  }, [user])
 
   async function handleSave(e?: React.FormEvent) {
-    if (e) e.preventDefault();
-    if (!user) return;
+    if (e) e.preventDefault()
+    if (!user) return
 
-    setSaving(true);
-    setError(null);
+    setSaving(true)
+    setError(null)
 
     const payload = {
       voice_preset: preset,
@@ -86,89 +89,170 @@ export default function VoiceProfilePage(): JSX.Element {
       voice_formality: formality,
       voice_playfulness: playfulness,
       voice_conciseness: conciseness,
-    };
+    }
 
-    const { data, error } = await supabase
+    const { data, error: supaError } = await supabase
       .from('profiles')
       .update(payload)
       .eq('id', user.id)
       .select(
         'id, voice_preset, voice_custom_sample, voice_formality, voice_playfulness, voice_conciseness'
       )
-      .maybeSingle();
+      .maybeSingle()
 
-    setSaving(false);
+    setSaving(false)
 
-    if (error) {
-      console.error('Error saving voice settings', error);
-      setError('Something went wrong while saving, please try again.');
-      return;
+    if (supaError) {
+      console.error('Error saving voice settings', supaError)
+      setError('Something went wrong while saving, please try again.')
+      return
     }
 
     if (data) {
-      setProfile(data as ProfileRow);
+      setProfile(data as ProfileRow)
     }
+  }
+
+  const wrapper: CSSProperties = {
+    flex: 1,
+    backgroundColor: colors.background,
+  }
+
+  const pageHeader: CSSProperties = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 16,
+    marginBottom: 24,
+    flexWrap: 'wrap',
+  }
+
+  const titleRow: CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 6,
+  }
+
+  const titleStyles: CSSProperties = {
+    fontSize: 22,
+    fontWeight: 600,
+    letterSpacing: '0.02em',
+    color: colors.text,
+  }
+
+  const subtitleStyles: CSSProperties = {
+    fontSize: 13,
+    color: colors.textSecondary,
+    maxWidth: 620,
+    lineHeight: 1.5,
+  }
+
+  const card: CSSProperties = {
+    display: 'grid',
+    gap: 16,
+    borderRadius: 16,
+    border: `1px solid ${colors.borderLight}`,
+    backgroundColor: colors.surface,
+    padding: '16px 16px 14px',
+  }
+
+  const section: CSSProperties = {
+    display: 'grid',
+    gap: 10,
+  }
+
+  const sectionTitle: CSSProperties = {
+    fontSize: 15,
+    fontWeight: 600,
+    color: colors.text,
+  }
+
+  const sectionDesc: CSSProperties = {
+    fontSize: 12,
+    color: colors.textSecondary,
+  }
+
+  const textareaStyles: CSSProperties = {
+    width: '100%',
+    fontSize: 13,
+    borderRadius: 12,
+    border: `1px solid ${colors.border}`,
+    backgroundColor: colors.background,
+    padding: '10px 12px',
+    color: colors.text,
+    fontFamily: 'inherit',
+    resize: 'vertical' as const,
+  }
+
+  const divider: CSSProperties = {
+    borderTop: `1px solid ${colors.borderLight}`,
+  }
+
+  const buttonStyles: CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 999,
+    backgroundColor: colors.primary,
+    color: colors.text,
+    fontSize: 13,
+    fontWeight: 600,
+    padding: '10px 16px',
+    border: 'none',
+    cursor: saving ? 'not-allowed' : 'pointer',
+    opacity: saving ? 0.7 : 1,
   }
 
   if (!user) {
     return (
-      <PageBackground version="v2" overlayOpacity={0.12}>
-        <div className="min-h-screen flex items-center justify-center px-4">
-          <p className="text-sm text-slate-600 dark:text-slate-300">
-            Sign in to set up your writing voice.
-          </p>
-        </div>
-      </PageBackground>
-    );
+      <div style={wrapper}>
+        <Container maxWidth="lg" padding="md">
+          <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 1rem' }}>
+            <p style={{ fontSize: 13, color: colors.textSecondary }}>
+              Sign in to set up your writing voice.
+            </p>
+          </div>
+        </Container>
+      </div>
+    )
   }
 
   return (
-    <PageBackground version="v2" overlayOpacity={0.12}>
-      <div className="min-h-screen px-4 py-8 flex justify-center">
-        <div className="w-full max-w-3xl space-y-8">
-          {/* Header */}
-          <header className="space-y-2">
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50">
-              Your Voice, Your Agent
-            </h1>
-            <p className="text-sm text-slate-600 dark:text-slate-300 max-w-xl">
-              Before Relevnt writes anything for you, it learns how you sound.
-              This keeps your applications honest, consistent, and authentic.
+    <div style={wrapper}>
+      <Container maxWidth="lg" padding="md">
+        <header style={pageHeader}>
+          <div style={titleRow}>
+            <h1 style={titleStyles}>Your voice, your agent</h1>
+            <p style={subtitleStyles}>
+              Before Relevnt writes anything for you, it learns how you sound. This keeps your applications honest, consistent, and authentic.
             </p>
             {profile && (
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                You can update this anytime. Relevnt will use it for resume
-                bullets, application answers, and cover letters when needed.
+              <p style={{ fontSize: 12, color: colors.textSecondary }}>
+                You can update this anytime. Relevnt will use it for resume bullets, application answers, and cover letters when needed.
               </p>
             )}
-          </header>
+          </div>
+        </header>
 
-          {/* Loading / error */}
-          {loading && (
-            <p className="text-xs text-slate-500">Loading your voice profile…</p>
-          )}
-          {error && (
-            <p className="text-xs text-rose-500">
-              {error}
-            </p>
-          )}
+        {loading && (
+          <p style={{ fontSize: 12, color: colors.textSecondary }}>Loading your voice profile…</p>
+        )}
+        {error && (
+          <p style={{ fontSize: 12, color: colors.error }}>
+            {error}
+          </p>
+        )}
 
-          {!loading && (
-            <form
-              onSubmit={handleSave}
-              className="space-y-8 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 px-4 py-5 shadow-sm"
-            >
-              {/* Presets */}
-              <section className="space-y-3">
-                <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-50">
-                  Choose your base style
-                </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  This is the general tone you are comfortable with in
-                  professional writing. You can still fine tune below.
+        {!loading && (
+          <form onSubmit={handleSave} style={{ display: 'grid', gap: 12 }}>
+            <section style={card}>
+              <div style={section}>
+                <h2 style={sectionTitle}>Choose your base style</h2>
+                <p style={sectionDesc}>
+                  This is the general tone you are comfortable with in professional writing. You can still fine tune below.
                 </p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 10 }}>
                   <PresetCard
                     id="natural"
                     label="Natural you"
@@ -206,55 +290,29 @@ export default function VoiceProfilePage(): JSX.Element {
                   />
                   <PresetCard
                     id="academic"
-                    label="Analytical"
-                    description="Structured, evidence based, and precise. Good for research and academic work."
+                    label="Academic"
+                    description="Measured, well structured, and grounded in evidence."
                     selected={preset === 'academic'}
                     onSelect={() => setPreset('academic')}
                   />
                 </div>
-              </section>
+              </div>
 
-              <hr className="border-slate-200 dark:border-slate-800" />
+              <div style={divider} />
 
-              {/* Custom sample */}
-              <section className="space-y-3">
-                <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-50">
-                  Write in your own voice
-                </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Use three to six sentences that feel like you. You can describe
-                  how you work, what you care about, or how you like to
-                  communicate. Relevnt uses this as your voice fingerprint.
+              <section style={section}>
+                <h2 style={sectionTitle}>Fine tune your tone</h2>
+                <p style={sectionDesc}>
+                  Adjust how playful, formal, and concise you want your writing assistant to be.
                 </p>
-
-                <textarea
-                  rows={6}
-                  value={sample}
-                  onChange={(e) => setSample(e.target.value)}
-                  className="w-full text-sm rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-500/70"
-                  placeholder="Example: I am straightforward but supportive. I do not like fluff, I explain things clearly, and I try to stay human even when work is intense..."
-                />
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Relevnt will not share this text with employers. It is only
-                  used to keep your applications consistent with your real
-                  voice.
-                </p>
-              </section>
-
-              <hr className="border-slate-200 dark:border-slate-800" />
-
-              {/* Sliders */}
-              <section className="space-y-4">
-                <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-50">
-                  Fine tune the vibe
-                </h2>
 
                 <ToneSlider
                   label="Formality"
-                  left="Casual"
-                  right="Formal"
+                  left="More casual"
+                  right="More formal"
                   value={formality}
                   onChange={setFormality}
+                  colors={colors}
                 />
                 <ToneSlider
                   label="Playfulness"
@@ -262,6 +320,7 @@ export default function VoiceProfilePage(): JSX.Element {
                   right="Playful"
                   value={playfulness}
                   onChange={setPlayfulness}
+                  colors={colors}
                 />
                 <ToneSlider
                   label="Conciseness"
@@ -269,94 +328,115 @@ export default function VoiceProfilePage(): JSX.Element {
                   right="More concise"
                   value={conciseness}
                   onChange={setConciseness}
+                  colors={colors}
+                  />
+              </section>
+
+              <div style={divider} />
+
+              <section style={section}>
+                <h2 style={sectionTitle}>Optional sample</h2>
+                <p style={sectionDesc}>
+                  Paste a short paragraph you have written. We will use it as additional context to match your voice.
+                </p>
+                <textarea
+                  style={textareaStyles}
+                  rows={4}
+                  value={sample}
+                  onChange={(e) => setSample(e.target.value)}
+                  placeholder="Paste a short writing sample here…"
                 />
               </section>
 
-              {/* Actions */}
-              <div className="pt-2 flex items-center justify-between gap-3">
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 max-w-xs">
-                  You can change this later in your settings. Your agent will
-                  start using this voice for new applications after you save.
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+                <p style={{ fontSize: 12, color: colors.textSecondary, maxWidth: 360 }}>
+                  You can change this later in your settings. Your agent will start using this voice for new applications after you save.
                 </p>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="inline-flex items-center justify-center rounded-md bg-slate-900 text-white text-sm font-medium px-4 py-2 disabled:opacity-60"
+                  style={buttonStyles}
                 >
                   {saving ? 'Saving…' : 'Save voice profile'}
                 </button>
               </div>
-            </form>
-          )}
-        </div>
-      </div>
-    </PageBackground>
-  );
+            </section>
+          </form>
+        )}
+      </Container>
+    </div>
+  )
 }
 
 type PresetCardProps = {
-  id: string;
-  label: string;
-  description: string;
-  selected: boolean;
-  onSelect: () => void;
-};
+  id: string
+  label: string
+  description: string
+  selected: boolean
+  onSelect: () => void
+}
 
 function PresetCard(props: PresetCardProps) {
-  const { label, description, selected, onSelect } = props;
+  const { label, description, selected, onSelect } = props
+  const colors = useRelevntColors()
+
+  const cardBaseStyles: CSSProperties = {
+    textAlign: 'left',
+    borderRadius: 14,
+    border: selected ? `1px solid ${colors.primary}` : `1px solid ${colors.borderLight}`,
+    padding: '12px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 6,
+    transition: 'all 0.2s ease',
+    backgroundColor: selected ? colors.surfaceHover : colors.surface,
+    color: colors.text,
+    cursor: 'pointer',
+  }
 
   return (
     <button
       type="button"
       onClick={onSelect}
-      className={[
-        'text-left rounded-lg border px-3 py-3 space-y-1 transition shadow-sm',
-        selected
-          ? 'border-slate-900 bg-slate-900 text-slate-50'
-          : 'border-slate-200 bg-white hover:border-slate-400 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-500',
-      ].join(' ')}
+      style={cardBaseStyles}
     >
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-sm font-medium">{label}</span>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+        <span style={{ fontSize: 13, fontWeight: 600 }}>{label}</span>
         {selected && (
-          <span className="text-[11px] uppercase tracking-wide">
+          <span style={{ fontSize: 11, letterSpacing: '0.05em', color: colors.textSecondary }}>
             Selected
           </span>
         )}
       </div>
-      <p
-        className={
-          'text-[11px] ' +
-          (selected ? 'text-slate-200' : 'text-slate-500 dark:text-slate-400')
-        }
-      >
+      <p style={{ fontSize: 12, color: colors.textSecondary, lineHeight: 1.4 }}>
         {description}
       </p>
     </button>
-  );
+  )
 }
 
 type ToneSliderProps = {
-  label: string;
-  left: string;
-  right: string;
-  value: number;
-  onChange: (v: number) => void;
-};
+  label: string
+  left: string
+  right: string
+  value: number
+  onChange: (v: number) => void
+  colors: ReturnType<typeof useRelevntColors>
+}
 
 function ToneSlider(props: ToneSliderProps) {
-  const { label, left, right, value, onChange } = props;
+  const { label, left, right, value, onChange, colors } = props
   return (
-    <div className="space-y-1">
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-slate-700 dark:text-slate-200">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: colors.text }}>
           {label}
         </span>
-        <span className="text-[11px] text-slate-500 dark:text-slate-400">
+        <span style={{ fontSize: 12, color: colors.textSecondary }}>
           {value}
         </span>
       </div>
-      <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 mb-1">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12, color: colors.textSecondary }}>
         <span>{left}</span>
         <span>{right}</span>
       </div>
@@ -366,8 +446,8 @@ function ToneSlider(props: ToneSliderProps) {
         max={100}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full"
+        style={{ width: '100%', accentColor: colors.primary }}
       />
     </div>
-  );
+  )
 }

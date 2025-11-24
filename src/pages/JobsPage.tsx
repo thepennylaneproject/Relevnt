@@ -1,437 +1,1003 @@
-/**
- * ============================================================================
- * DASHBOARD PAGE (FULLY REFACTORED - PHASE 6.1)
- * ============================================================================
- * 🎯 PURPOSE: User's main hub after login - quick access to all features
- * 
- * Layout:
- * - Welcome banner with user name + tier badge
- * - Quick stats card (resumes, jobs, applications)
- * - Feature cards linking to main pages (Resumes, Jobs, Applications)
- * - Getting started guide
- * 
- * Brand Integration:
- * - PageBackground wrapper
- * - PageHeader with illustration (v2)
- * - Tier-aware badge colors
- * - Theme-aware styling
- * 
- * 🎓 LEARNING NOTE: This page demonstrates:
- * - Tier badges (color-coded by tier)
- * - Card grid layout
- * - Link navigation with styling
- * - Interactive hover effects
- * ============================================================================
- */
+// src/pages/JobsPage.tsx
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
+import { supabase } from '../lib/supabase'
+import { RelevntFeedPanel } from '../components/RelevntFeedPanel'
+import { useAuth } from '../contexts/AuthContext'
+import type { JobRow } from '../shared/types'
+import useMatchJobs from '../hooks/useMatchJobs'
+import useCareerTracks from '../hooks/useCareerTracks'
 
-import { CSSProperties, useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/useTheme';
-import { copy } from '../config/i18n.config';
-import { TIERS } from '../config/tiers';
-import { supabase } from '../lib/supabase';
-import { PageBackground } from '../components/shared/PageBackground';
-import { PageHeader } from '../components/shared/PageHeader';
-import { UsageStats } from '../components/shared/UsageStats';
+type JobSourceRow = {
+  id: string
+  name: string
+  source_key: string
+  enabled: boolean
+}
 
-/**
- * DashboardPage Component
- */
-export function DashboardPage(): JSX.Element {
-  const { user } = useAuth();
-  const { mode } = useTheme();
+// cheap structural guard so we never treat an error array as jobs
+function isJobRowArray(data: unknown): data is JobRow[] {
+  if (!Array.isArray(data)) return false
+  return data.every((item) => {
+    if (!item || typeof item !== 'object') return false
+    const obj = item as Record<string, unknown>
+    return typeof obj.id === 'string' && typeof obj.title === 'string'
+  })
+}
 
-  const isDark = mode === 'Dark';
-  const userTier = (user?.user_metadata?.tier as string) || 'starter';
+type SortBy =
+  | 'recent'
+  | 'salary-high'
+  | 'salary-low'
+  | 'match'
+  | 'company'
 
-  // ============================================================
-  // THEME COLORS
-  // ============================================================
+const PAGE_SIZE = 50
 
-  const themeColors = useMemo(() => ({
-    bg: isDark ? '#0f0f0f' : '#ffffff',
-    surface: isDark ? '#1a1a1a' : '#f9fafb',
-    text: isDark ? '#f5f5f5' : '#1a1a1a',
-    textSecondary: isDark ? '#b0b0b0' : '#666666',
-    border: isDark ? '#333333' : '#e5e7eb',
-    primary: '#4E808D',
-    accent: '#D4A574',
-    tierStarter: { bg: isDark ? '#2a2a2a' : '#f5f5f5', text: isDark ? '#e0e0e0' : '#333' },
-    tierPro: { bg: isDark ? '#0d3a3a' : '#e0f2f1', text: isDark ? '#4db8c4' : '#009b9b' },
-    tierPremium: { bg: isDark ? '#3d3d1a' : '#fef9e7', text: isDark ? '#e6d580' : '#b8860b' },
-  }), [isDark]);
+// shared styles
+const pageWrapper: React.CSSProperties = {
+  maxWidth: 1200,
+  margin: '0 auto',
+  padding: '24px 24px 40px',
+}
 
-  // ============================================================
-  // HELPER FUNCTIONS
-  // ============================================================
+const headerTitle: React.CSSProperties = {
+  fontSize: 22,
+  fontWeight: 650,
+  letterSpacing: 0.2,
+  marginBottom: 4,
+}
 
-  const getTierColors = (tier: string) => {
-    switch (tier) {
-      case 'pro':
-        return themeColors.tierPro;
-      case 'premium':
-        return themeColors.tierPremium;
-      default:
-        return themeColors.tierStarter;
+const headerSub: React.CSSProperties = {
+  fontSize: 13,
+  color: 'var(--text-subtle, #666)',
+  maxWidth: 560,
+}
+
+const tabsRow: React.CSSProperties = {
+  display: 'flex',
+  gap: 8,
+  borderBottom: '1px solid var(--border, #e2e2e2)',
+  marginTop: 20,
+  marginBottom: 20,
+}
+
+const tabButtonBase: React.CSSProperties = {
+  border: 'none',
+  background: 'transparent',
+  padding: '8px 14px',
+  fontSize: 13,
+  cursor: 'pointer',
+  borderRadius: 999,
+}
+
+const filtersCard: React.CSSProperties = {
+  borderRadius: 16,
+  padding: 16,
+  border: '1px solid var(--border, #e2e2e2)',
+  background: 'var(--surface, #ffffff)',
+  marginBottom: 16,
+}
+
+const pillInput: React.CSSProperties = {
+  height: 36,
+  borderRadius: 999,
+  border: '1px solid #e2e2e2',
+  padding: '0 12px',
+  fontSize: 13,
+  width: '100%',
+  backgroundColor: '#fff',
+  boxSizing: 'border-box',
+}
+
+const sectionLabel: React.CSSProperties = {
+  fontSize: 12,
+  fontWeight: 500,
+  marginBottom: 4,
+  color: '#555',
+}
+
+const primaryButton: React.CSSProperties = {
+  padding: '8px 14px',
+  borderRadius: 999,
+  border: '1px solid #d6a65c',
+  background: '#f7ecda',
+  fontSize: 12,
+  cursor: 'pointer',
+  color: '#4b3a1d',
+}
+
+const subtleButton: React.CSSProperties = {
+  padding: '6px 12px',
+  borderRadius: 999,
+  border: '1px solid var(--border, #ddd)',
+  background: 'var(--surface, #fff)',
+  fontSize: 12,
+  cursor: 'pointer',
+}
+
+const jobCard: React.CSSProperties = {
+  borderRadius: 14,
+  padding: 16,
+  border: '1px solid var(--border-subtle, #eee)',
+  background: 'var(--surface, #fff)',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 8,
+}
+
+const jobTitle: React.CSSProperties = {
+  fontSize: 15,
+  fontWeight: 600,
+}
+
+const jobMetaRow: React.CSSProperties = {
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: 8,
+  fontSize: 12,
+  color: '#666',
+}
+
+const tagRow: React.CSSProperties = {
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: 6,
+  marginTop: 4,
+}
+
+const tagPill: React.CSSProperties = {
+  padding: '3px 8px',
+  borderRadius: 999,
+  border: '1px solid #eee',
+  fontSize: 11,
+  color: '#555',
+}
+
+const chipRow: React.CSSProperties = {
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: 8,
+  marginTop: 8,
+}
+
+const chip: React.CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 6,
+  padding: '4px 10px',
+  borderRadius: 999,
+  border: '1px solid var(--border-subtle, #eee)',
+  fontSize: 11,
+  color: 'var(--text-subtle, #666)',
+}
+
+// main page
+export default function JobsPage() {
+  const [activeTab, setActiveTab] = useState<'feed' | 'browse'>('feed')
+  const { user } = useAuth()
+
+
+  // browse side (jobs list from Supabase)
+  const [jobs, setJobs] = useState<JobRow[]>([])
+  const [jobsLoading, setJobsLoading] = useState(false)
+  const [jobsError, setJobsError] = useState<string | null>(null)
+
+  const [search, setSearch] = useState('')
+  const [locationFilter, setLocationFilter] = useState('')
+  const [remoteOnlyBrowse, setRemoteOnlyBrowse] = useState(false)
+  const [sourceKey, setSourceKey] = useState<string | ''>('')
+  const [employmentType, setEmploymentType] = useState<string | ''>('')
+  const [postedSince, setPostedSince] = useState<'7d' | '30d' | '90d' | ''>('')
+  const [minSalaryBrowse, setMinSalaryBrowse] = useState(0)
+  const [page, setPage] = useState(0)
+  const [sortBy, setSortBy] = useState<SortBy>('recent')
+
+  const [sources, setSources] = useState<JobSourceRow[]>([])
+  const [savedJobIds, setSavedJobIds] = useState<string[]>([])
+
+  const fetchSources = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('job_sources')
+        .select('id, name, source_key, enabled')
+        .eq('enabled', true)
+        .order('name', { ascending: true })
+
+      if (error) throw error
+      setSources((data || []) as JobSourceRow[])
+    } catch (err) {
+      console.warn('Failed to load job sources', err)
     }
-  };
+  }, [])
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    window.location.href = '/';
-  };
+  const fetchJobs = useCallback(async () => {
+    setJobsLoading(true)
+    setJobsError(null)
 
-  // ============================================================
-  // MOCK DATA (replace with real data from Supabase in Phase 6.2)
-  // ============================================================
+    try {
+      let query = supabase
+        .from('jobs')
+        .select(
+          [
+            'id',
+            'title',
+            'company',
+            'location',
+            'employment_type',
+            'remote_type',
+            'source_slug',
+            'external_url',
+            'posted_date',
+            'created_at',
+            'salary_min',
+            'salary_max',
+            'competitiveness_level',
+            'match_score',
+          ].join(', ')
+        )
+        .eq('is_active', true)
+        .order('posted_date', { ascending: false, nullsFirst: false })
+        .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1)
 
-  const stats = {
-    resumesCount: 1,
-    jobsCount: 0,
-    applicationsCount: 0,
-  };
+      if (search.trim()) {
+        const term = `%${search.trim()}%`
+        query = query.or(
+          `title.ilike.${term},company.ilike.${term},location.ilike.${term}`
+        )
+      }
 
-  // ============================================================
-  // STYLES
-  // ============================================================
+      if (locationFilter.trim()) {
+        const loc = `%${locationFilter.trim()}%`
+        query = query.ilike('location', loc)
+      }
 
-  const containerStyles: CSSProperties = {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    padding: '60px 20px',
-    color: themeColors.text,
-  };
+      if (remoteOnlyBrowse) {
+        query = query.or('remote_type.eq.remote,location.ilike.%Remote%')
+      }
 
-  // ─────────────────────────────────────────────────────────
-  // HEADER WITH TIER BADGE
-  // ─────────────────────────────────────────────────────────
+      if (sourceKey) {
+        query = query.eq('source_slug', sourceKey)
+      }
 
-  const headerStyles: CSSProperties = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: '40px',
-    flexWrap: 'wrap',
-    gap: '20px',
-  };
+      if (employmentType) {
+        switch (employmentType) {
+          case 'full-time':
+            // matches "full time", "full-time", "full_time", "Full Time", etc.
+            query = query.ilike('employment_type', '%full%')
+            break
 
-  const welcomeSectionStyles: CSSProperties = {
-    flex: 1,
-    minWidth: '300px',
-  };
+          case 'part-time':
+            query = query.ilike('employment_type', '%part%')
+            break
 
-  const welcomeTitleStyles: CSSProperties = {
-    fontSize: '32px',
-    fontWeight: 700,
-    marginBottom: '8px',
-    color: themeColors.text,
-  };
+          case 'contract':
+            query = query.ilike('employment_type', '%contract%')
+            break
 
-  const welcomeSubtitleStyles: CSSProperties = {
-    fontSize: '16px',
-    color: themeColors.textSecondary,
-    marginBottom: '16px',
-  };
+          case 'temporary':
+            query = query.ilike('employment_type', '%temp%')
+            break
 
-  const tierBadgeStyles = useMemo(() => {
-    const tierColors = getTierColors(userTier);
-    return {
-      display: 'inline-block',
-      padding: '8px 16px',
-      backgroundColor: tierColors.bg,
-      color: tierColors.text,
-      borderRadius: '20px',
-      fontSize: '14px',
-      fontWeight: 600,
-      border: `1px solid ${tierColors.text}`,
-    } as CSSProperties;
-  }, [userTier, themeColors]);
+          default:
+            // future-proof fallback: no filter
+            break
+        }
+      }
 
-  const signOutButtonStyles: CSSProperties = {
-    padding: '10px 20px',
-    backgroundColor: 'transparent',
-    color: themeColors.accent,
-    border: `2px solid ${themeColors.accent}`,
-    borderRadius: '6px',
-    fontSize: '14px',
-    fontWeight: 600,
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-  };
+      if (postedSince) {
+        const now = new Date()
+        const days =
+          postedSince === '7d' ? 7 : postedSince === '30d' ? 30 : 90
+        const cutoff = new Date(
+          now.getTime() - days * 24 * 60 * 60 * 1000
+        )
+        const isoDate = cutoff.toISOString().slice(0, 10)
+        query = query.gte('posted_date', isoDate)
+      }
 
-  // ─────────────────────────────────────────────────────────
-  // USAGE STATS SECTION
-  // ─────────────────────────────────────────────────────────
+      if (minSalaryBrowse > 0) {
+        query = query.gte('salary_max', minSalaryBrowse)
+      }
 
-  const usageStatsContainerStyles: CSSProperties = {
-    marginBottom: '40px',
-  };
+      const { data, error } = await query
 
-  // ─────────────────────────────────────────────────────────
-  // CARDS GRID
-  // ─────────────────────────────────────────────────────────
+      if (error) {
+        console.error('Jobs fetch failed', error)
+        setJobsError('We could not load jobs right now.')
+        setJobs([])
+        return
+      }
 
-  const cardsGridStyles: CSSProperties = {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-    gap: '24px',
-    marginBottom: '40px',
-  };
+      if (!data || !isJobRowArray(data)) {
+        console.warn('Unexpected jobs payload', data)
+        setJobs([])
+        return
+      }
 
-  const cardStyles: CSSProperties = {
-    padding: '28px',
-    backgroundColor: themeColors.surface,
-    borderRadius: '12px',
-    border: `1px solid ${themeColors.border}`,
-    transition: 'all 0.3s ease',
-    cursor: 'pointer',
-    textDecoration: 'none',
-    color: 'inherit',
-    display: 'block',
-  };
+      setJobs(data)
+    } catch (err) {
+      console.error('Unexpected error loading jobs', err)
+      setJobsError('Something went wrong while loading jobs.')
+      setJobs([])
+    } finally {
+      setJobsLoading(false)
+    }
+  }, [
+    search,
+    locationFilter,
+    remoteOnlyBrowse,
+    sourceKey,
+    employmentType,
+    postedSince,
+    minSalaryBrowse,
+    page,
+  ])
 
-  const cardIconStyles: CSSProperties = {
-    fontSize: '40px',
-    marginBottom: '12px',
-    display: 'block',
-  };
+  // saved jobs for current user
+  const loadSavedJobs = useCallback(async () => {
+    if (!user) {
+      setSavedJobIds([])
+      return
+    }
 
-  const cardTitleStyles: CSSProperties = {
-    fontSize: '18px',
-    fontWeight: 600,
-    marginBottom: '8px',
-    color: themeColors.text,
-  };
+    try {
+      const { data, error } = await supabase
+        .from('saved_jobs')
+        .select('job_id')
+        .eq('user_id', user.id)
 
-  const cardDescriptionStyles: CSSProperties = {
-    fontSize: '14px',
-    color: themeColors.textSecondary,
-    marginBottom: '12px',
-  };
+      if (error) {
+        console.warn('Failed to load saved jobs', error)
+        return
+      }
 
-  const cardCountStyles: CSSProperties = {
-    fontSize: '24px',
-    fontWeight: 700,
-    color: themeColors.accent,
-  };
+      const ids = (data || []).map(
+        (row: { job_id: string }) => row.job_id
+      )
+      setSavedJobIds(ids)
+    } catch (err) {
+      console.warn('Unexpected error loading saved jobs', err)
+    }
+  }, [user])
 
-  // ─────────────────────────────────────────────────────────
-  // GETTING STARTED SECTION
-  // ─────────────────────────────────────────────────────────
+  const toggleSavedJob = useCallback(
+    async (jobId: string) => {
+      if (!user) {
+        // future: open sign in prompt
+        return
+      }
 
-  const gettingStartedStyles: CSSProperties = {
-    padding: '32px',
-    backgroundColor: themeColors.surface,
-    borderRadius: '12px',
-    border: `1px solid ${themeColors.border}`,
-  };
+      const isSaved = savedJobIds.includes(jobId)
 
-  const gettingStartedTitleStyles: CSSProperties = {
-    fontSize: '20px',
-    fontWeight: 600,
-    marginBottom: '16px',
-    color: themeColors.text,
-  };
+      try {
+        if (isSaved) {
+          const { error } = await supabase
+            .from('saved_jobs')
+            .delete()
+            .eq('user_id', user.id)
+            .eq('job_id', jobId)
 
-  const stepsListStyles: CSSProperties = {
-    listStyle: 'none',
-    padding: 0,
-    margin: 0,
-  };
+          if (error) {
+            console.warn('Failed to unsave job', error)
+            return
+          }
 
-  const stepItemStyles: CSSProperties = {
-    padding: '12px 0',
-    display: 'flex',
-    gap: '12px',
-    alignItems: 'flex-start',
-    fontSize: '14px',
-    color: themeColors.textSecondary,
-    borderBottom: `1px solid ${themeColors.border}`,
-  };
+          setSavedJobIds((prev) =>
+            prev.filter((id) => id !== jobId)
+          )
+        } else {
+          const { error } = await supabase
+            .from('saved_jobs')
+            .insert({
+              user_id: user.id,
+              job_id: jobId,
+            })
 
-  const stepNumberStyles: CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '24px',
-    height: '24px',
-    minWidth: '24px',
-    backgroundColor: themeColors.accent,
-    color: '#000',
-    borderRadius: '50%',
-    fontSize: '12px',
-    fontWeight: 700,
-  };
+          if (error) {
+            console.warn('Failed to save job', error)
+            return
+          }
 
-  // ============================================================
-  // RENDER
-  // ============================================================
+          setSavedJobIds((prev) =>
+            prev.includes(jobId) ? prev : [...prev, jobId]
+          )
+        }
+      } catch (err) {
+        console.warn('Unexpected error toggling saved job', err)
+      }
+    },
+    [user, savedJobIds]
+  )
 
-  if (!user) {
+  // sorted view of jobs for rendering
+  const sortedJobs = useMemo(() => {
+    if (jobs.length === 0) return jobs
+
+    if (sortBy === 'recent') {
+      // already ordered by posted_date desc from DB
+      return jobs
+    }
+
+    const copy = [...jobs]
+
+    if (sortBy === 'company') {
+      copy.sort((a, b) =>
+        (a.company || '').localeCompare(b.company || '')
+      )
+      return copy
+    }
+
+    if (sortBy === 'match') {
+      copy.sort(
+        (a, b) =>
+          (b.match_score ?? 0) - (a.match_score ?? 0)
+      )
+      return copy
+    }
+
+    if (sortBy === 'salary-high' || sortBy === 'salary-low') {
+      const sign = sortBy === 'salary-high' ? -1 : 1
+      copy.sort((a, b) => {
+        const aVal =
+          (a.salary_max ?? a.salary_min ?? 0) as number
+        const bVal =
+          (b.salary_max ?? b.salary_min ?? 0) as number
+        if (aVal === bVal) return 0
+        return aVal < bVal ? sign : -sign
+      })
+      return copy
+    }
+
+    return jobs
+  }, [jobs, sortBy])
+
+  useEffect(() => {
+    fetchSources()
+  }, [fetchSources])
+
+  useEffect(() => {
+    if (activeTab === 'browse') {
+      fetchJobs()
+    }
+  }, [activeTab, fetchJobs])
+
+  useEffect(() => {
+    loadSavedJobs()
+  }, [loadSavedJobs])
+
+  // helpers
+  const renderFeedTab = () => {
     return (
-      <PageBackground>
-        <div style={containerStyles}>
-          <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-            <h2 style={{ fontSize: '24px', color: themeColors.text }}>Loading...</h2>
+      <div style={{ marginTop: 16 }}>
+        <RelevntFeedPanel />
+      </div>
+    )
+  }
+
+  const renderBrowseTab = () => {
+    return (
+      <>
+        <div style={filtersCard}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns:
+                'minmax(0, 2fr) minmax(0, 2fr) minmax(0, 1.5fr)',
+              gap: 12,
+              marginBottom: 12,
+            }}
+          >
+            {/* search */}
+            <div>
+              <label style={sectionLabel}>
+                Search title or company
+              </label>
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value)
+                  setPage(0)
+                }}
+                placeholder="Product designer, marketing, security…"
+                style={pillInput}
+              />
+            </div>
+
+            {/* location */}
+            <div>
+              <label style={sectionLabel}>
+                Location
+              </label>
+              <input
+                type="text"
+                value={locationFilter}
+                onChange={(e) => {
+                  setLocationFilter(
+                    e.target.value
+                  )
+                  setPage(0)
+                }}
+                placeholder="Remote, New York, Europe…"
+                style={pillInput}
+              />
+            </div>
+
+            {/* source */}
+            <div>
+              <label style={sectionLabel}>
+                Source
+              </label>
+              <select
+                value={sourceKey}
+                onChange={(e) => {
+                  setSourceKey(e.target.value)
+                  setPage(0)
+                }}
+                style={pillInput}
+              >
+                <option value="">
+                  All sources
+                </option>
+                {sources.map((s) => (
+                  <option
+                    key={s.id}
+                    value={s.source_key}
+                  >
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* second row */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns:
+                'minmax(0, 1.2fr) minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr)',
+              gap: 12,
+              alignItems: 'center',
+            }}
+          >
+            {/* employment type */}
+            <div>
+              <label style={sectionLabel}>
+                Employment type
+              </label>
+              <select
+                value={employmentType}
+                onChange={(e) => {
+                  setEmploymentType(
+                    e.target.value
+                  )
+                  setPage(0)
+                }}
+                style={pillInput}
+              >
+                <option value="">
+                  Any
+                </option>
+                <option value="full-time">
+                  Full time
+                </option>
+                <option value="part-time">
+                  Part time
+                </option>
+                <option value="contract">
+                  Contract
+                </option>
+                <option value="temporary">
+                  Temporary
+                </option>
+              </select>
+            </div>
+
+            {/* posted since */}
+            <div>
+              <label style={sectionLabel}>
+                Posted within
+              </label>
+              <select
+                value={postedSince}
+                onChange={(e) => {
+                  setPostedSince(
+                    e.target.value as
+                    | '7d'
+                    | '30d'
+                    | '90d'
+                    | ''
+                  )
+                  setPage(0)
+                }}
+                style={pillInput}
+              >
+                <option value="">
+                  Anytime
+                </option>
+                <option value="7d">
+                  Last 7 days
+                </option>
+                <option value="30d">
+                  Last 30 days
+                </option>
+                <option value="90d">
+                  Last 90 days
+                </option>
+              </select>
+            </div>
+
+            {/* min salary browse */}
+            <div>
+              <label style={sectionLabel}>
+                Min salary (USD)
+              </label>
+              <input
+                type="number"
+                min={0}
+                step={5000}
+                value={minSalaryBrowse}
+                onChange={(e) => {
+                  const raw = e.target.value
+                  const numeric =
+                    raw.replace(/[^\d]/g, '')
+                  const num =
+                    numeric === ''
+                      ? 0
+                      : Number(numeric)
+                  const next =
+                    num <= 0 ? 0 : num
+                  setMinSalaryBrowse(next)
+                  setPage(0)
+                }}
+                style={{
+                  ...pillInput,
+                  textAlign: 'right',
+                }}
+              />
+            </div>
+
+            {/* remote */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                fontSize: 13,
+                marginTop: 18,
+              }}
+            >
+              <input
+                id="browse-remote-only"
+                type="checkbox"
+                checked={remoteOnlyBrowse}
+                onChange={(e) => {
+                  setRemoteOnlyBrowse(
+                    e.target.checked
+                  )
+                  setPage(0)
+                }}
+              />
+              <label htmlFor="browse-remote-only">
+                Remote friendly only
+              </label>
+            </div>
+          </div>
+
+          {/* third row: sort */}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginTop: 14,
+              gap: 12,
+              flexWrap: 'wrap',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                minWidth: 220,
+              }}
+            >
+              <label style={sectionLabel}>
+                Sort by
+              </label>
+              <select
+                value={sortBy}
+                onChange={(e) =>
+                  setSortBy(
+                    e.target.value as SortBy
+                  )
+                }
+                style={pillInput}
+              >
+                <option value="recent">
+                  Most recent
+                </option>
+                <option value="salary-high">
+                  Salary, high to low
+                </option>
+                <option value="salary-low">
+                  Salary, low to high
+                </option>
+                <option value="match">
+                  Best match
+                </option>
+                <option value="company">
+                  Company name
+                </option>
+              </select>
+            </div>
+
+            {/* actions */}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: 8,
+                flex: 1,
+              }}
+            >
+              <button
+                type="button"
+                style={subtleButton}
+                onClick={() => {
+                  setSearch('')
+                  setLocationFilter('')
+                  setSourceKey('')
+                  setEmploymentType('')
+                  setPostedSince('')
+                  setMinSalaryBrowse(0)
+                  setRemoteOnlyBrowse(false)
+                  setSortBy('recent')
+                  setPage(0)
+                }}
+              >
+                Clear filters
+              </button>
+              <button
+                type="button"
+                style={primaryButton}
+                onClick={() => fetchJobs()}
+                disabled={jobsLoading}
+              >
+                {jobsLoading
+                  ? 'Refreshing…'
+                  : 'Refresh jobs'}
+              </button>
+            </div>
           </div>
         </div>
-      </PageBackground>
-    );
+
+        {/* list */}
+        <div
+          style={{
+            display: 'grid',
+            gap: 12,
+          }}
+        >
+          {jobsLoading && (
+            <div
+              style={{ fontSize: 13, color: '#666' }}
+            >
+              Loading jobs…
+            </div>
+          )}
+          {!jobsLoading && jobsError && (
+            <div
+              style={{ fontSize: 13, color: '#b3261e' }}
+            >
+              {jobsError}
+            </div>
+          )}
+          {!jobsLoading &&
+            !jobsError &&
+            sortedJobs.length === 0 && (
+              <div
+                style={{ fontSize: 13, color: '#666' }}
+              >
+                No jobs match your filters yet.
+                Try broadening your search and
+                refresh.
+              </div>
+            )}
+
+          {sortedJobs.map((job) => {
+            const salaryMin =
+              job.salary_min || null
+            const salaryMax =
+              job.salary_max || null
+            let salaryLabel = ''
+            if (
+              salaryMin &&
+              salaryMax &&
+              salaryMin !== salaryMax
+            ) {
+              salaryLabel = `$${salaryMin.toLocaleString()} – $${salaryMax.toLocaleString()}`
+            } else if (salaryMin || salaryMax) {
+              const n = salaryMin || salaryMax
+              salaryLabel = `$${Number(
+                n
+              ).toLocaleString()}`
+            }
+
+            const isRemote =
+              job.remote_type === 'remote' ||
+              (job.location || '')
+                .toLowerCase()
+                .includes('remote')
+
+            const isSaved = savedJobIds.includes(
+              job.id
+            )
+
+            return (
+              <article
+                key={job.id}
+                style={jobCard}
+              >
+                <div style={jobTitle}>
+                  {job.title}
+                </div>
+                <div style={jobMetaRow}>
+                  {job.company && (
+                    <span>{job.company}</span>
+                  )}
+                  {job.location && (
+                    <span>
+                      • {job.location}
+                    </span>
+                  )}
+                  {salaryLabel && (
+                    <span>
+                      • {salaryLabel}
+                    </span>
+                  )}
+                </div>
+                <div style={tagRow}>
+                  {isRemote && (
+                    <span style={tagPill}>
+                      Remote friendly
+                    </span>
+                  )}
+                  {job.employment_type && (
+                    <span style={tagPill}>
+                      Employment: {job.employment_type}
+                    </span>
+                  )}
+                  {job.competitiveness_level && (
+                    <span style={tagPill}>
+                      Market:{' '}
+                      {
+                        job
+                          .competitiveness_level
+                      }
+                    </span>
+                  )}
+                  {typeof job.match_score ===
+                    'number' && (
+                      <span
+                        style={{
+                          ...tagPill,
+                          borderColor:
+                            '#f0e1c4',
+                        }}
+                      >
+                        Match{' '}
+                        {Math.round(
+                          job.match_score
+                        )}
+                      </span>
+                    )}
+                  {job.source_slug && (
+                    <span style={tagPill}>
+                      {job.source_slug}
+                    </span>
+                  )}
+                </div>
+                <div
+                  style={{
+                    marginTop: 10,
+                    display: 'flex',
+                    gap: 8,
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() =>
+                      toggleSavedJob(job.id)
+                    }
+                    style={{
+                      ...subtleButton,
+                      backgroundColor: isSaved
+                        ? '#f7ecda'
+                        : 'var(--surface, #fff)',
+                    }}
+                  >
+                    {isSaved ? 'Saved' : 'Save'}
+                  </button>
+                  {job.external_url && (
+                    <a
+                      href={job.external_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{
+                        ...primaryButton,
+                        textDecoration:
+                          'none',
+                      }}
+                    >
+                      View job posting
+                    </a>
+                  )}
+                </div>
+              </article>
+            )
+          })}
+        </div>
+      </>
+    )
   }
 
   return (
-    <PageBackground version="v2" overlayOpacity={0.15}>
-      <div style={containerStyles}>
-        {/* PAGE HEADER */}
-        <PageHeader
-          title="Your Career Dashboard"
-          subtitle="All your job search tools in one place"
-          illustrationVersion="v2"
-          illustrationPosition="left"
-        />
+    <div style={pageWrapper}>
+      <div style={headerTitle}>Jobs</div>
+      <p style={headerSub}>
+        Let Relevnt bring matches to you, or browse the full
+        stream and hunt manually when you are in that mood.
+      </p>
 
-        {/* ═══════════════════════════════════════════════════════════ */
-        /* HEADER WITH TIER */
-        /* ═══════════════════════════════════════════════════════════ */}
-
-        <div style={headerStyles}>
-          <div style={welcomeSectionStyles}>
-            <h1 style={welcomeTitleStyles}>
-              Welcome back, {user.email?.split('@')[0]}! 👋
-            </h1>
-            <p style={welcomeSubtitleStyles}>
-              {copy.onboarding.tagline}
-            </p>
-            <div style={tierBadgeStyles}>
-              ✨ {TIERS[userTier as 'starter' | 'pro' | 'premium'].name} Plan
-            </div>
-          </div>
-
-          <button
-            style={signOutButtonStyles}
-            onClick={handleSignOut}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = themeColors.accent;
-              e.currentTarget.style.color = '#000';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-              e.currentTarget.style.color = themeColors.accent;
-            }}
-          >
-            Sign Out
-          </button>
-        </div>
-
-        {/* ═══════════════════════════════════════════════════════════ */
-        /* USAGE STATS */
-        /* ═══════════════════════════════════════════════════════════ */}
-
-        <div style={usageStatsContainerStyles}>
-          <UsageStats variant="expanded" />
-        </div>
-
-        {/* ═══════════════════════════════════════════════════════════ */
-        /* FEATURE CARDS GRID */
-        /* ═══════════════════════════════════════════════════════════ */}
-
-        <div style={cardsGridStyles}>
-          {/* RESUMES CARD */}
-          <Link to="/resumes" style={{ textDecoration: 'none', color: 'inherit' }}>
-            <div
-              style={cardStyles}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-8px)';
-                e.currentTarget.style.boxShadow = `0 12px 24px ${isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)'}`;
-                e.currentTarget.style.borderColor = themeColors.accent;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.borderColor = themeColors.border;
-              }}
-            >
-              <span style={cardIconStyles}>📄</span>
-              <h2 style={cardTitleStyles}>Resumes</h2>
-              <p style={cardDescriptionStyles}>Create and manage your resumes</p>
-              <div style={cardCountStyles}>{stats.resumesCount}</div>
-            </div>
-          </Link>
-
-          {/* JOBS CARD */}
-          <Link to="/jobs" style={{ textDecoration: 'none', color: 'inherit' }}>
-            <div
-              style={cardStyles}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-8px)';
-                e.currentTarget.style.boxShadow = `0 12px 24px ${isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)'}`;
-                e.currentTarget.style.borderColor = themeColors.accent;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.borderColor = themeColors.border;
-              }}
-            >
-              <span style={cardIconStyles}>💼</span>
-              <h2 style={cardTitleStyles}>Jobs</h2>
-              <p style={cardDescriptionStyles}>Track job opportunities</p>
-              <div style={cardCountStyles}>{stats.jobsCount}</div>
-            </div>
-          </Link>
-
-          {/* APPLICATIONS CARD */}
-          <Link to="/applications" style={{ textDecoration: 'none', color: 'inherit' }}>
-            <div
-              style={cardStyles}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-8px)';
-                e.currentTarget.style.boxShadow = `0 12px 24px ${isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)'}`;
-                e.currentTarget.style.borderColor = themeColors.accent;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.borderColor = themeColors.border;
-              }}
-            >
-              <span style={cardIconStyles}>📊</span>
-              <h2 style={cardTitleStyles}>Applications</h2>
-              <p style={cardDescriptionStyles}>Monitor your application status</p>
-              <div style={cardCountStyles}>{stats.applicationsCount}</div>
-            </div>
-          </Link>
-        </div>
-
-        {/* ═══════════════════════════════════════════════════════════ */
-        /* GETTING STARTED GUIDE */
-        /* ═══════════════════════════════════════════════════════════ */}
-
-        <div style={gettingStartedStyles}>
-          <h2 style={gettingStartedTitleStyles}>🚀 Getting Started</h2>
-          <ol style={stepsListStyles}>
-            <li style={{ ...stepItemStyles, borderBottom: `1px solid ${themeColors.border}` }}>
-              <span style={stepNumberStyles}>1</span>
-              <span>Create or upload your first resume</span>
-            </li>
-            <li style={{ ...stepItemStyles, borderBottom: `1px solid ${themeColors.border}` }}>
-              <span style={stepNumberStyles}>2</span>
-              <span>Analyze your resume for ATS compatibility</span>
-            </li>
-            <li style={{ ...stepItemStyles, borderBottom: `1px solid ${themeColors.border}` }}>
-              <span style={stepNumberStyles}>3</span>
-              <span>Search for jobs that match your skills</span>
-            </li>
-            <li style={{ ...stepItemStyles, borderBottom: 'none' }}>
-              <span style={stepNumberStyles}>4</span>
-              <span>Track your applications and build momentum</span>
-            </li>
-          </ol>
-        </div>
+      <div style={tabsRow}>
+        <button
+          type="button"
+          style={{
+            ...tabButtonBase,
+            backgroundColor:
+              activeTab === 'feed'
+                ? '#f7ecda'
+                : 'transparent',
+            color:
+              activeTab === 'feed'
+                ? '#4b3a1d'
+                : '#555',
+          }}
+          onClick={() => setActiveTab('feed')}
+        >
+          Relevnt Feed
+        </button>
+        <button
+          type="button"
+          style={{
+            ...tabButtonBase,
+            backgroundColor:
+              activeTab === 'browse'
+                ? '#f7ecda'
+                : 'transparent',
+            color:
+              activeTab === 'browse'
+                ? '#4b3a1d'
+                : '#555',
+          }}
+          onClick={() => setActiveTab('browse')}
+        >
+          All jobs
+        </button>
       </div>
-    </PageBackground>
-  );
-}
 
-export default DashboardPage;
+      {activeTab === 'feed'
+        ? renderFeedTab()
+        : renderBrowseTab()}
+    </div>
+  )
+}

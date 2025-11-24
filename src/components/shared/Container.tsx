@@ -1,10 +1,11 @@
-import React from 'react';
+// src/components/shared/Container.tsx
+import React from 'react'
 
 export interface ContainerProps {
-  children: React.ReactNode;
-  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
-  padding?: 'none' | 'sm' | 'md' | 'lg';
-  className?: string;
+  children: React.ReactNode
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | 'full'
+  padding?: 'none' | 'sm' | 'md' | 'lg'
+  className?: string
 }
 
 export const Container: React.FC<ContainerProps> = ({
@@ -13,20 +14,20 @@ export const Container: React.FC<ContainerProps> = ({
   padding = 'lg',
   className = '',
 }) => {
-  const maxWidths = {
+  const maxWidths: Record<NonNullable<ContainerProps['maxWidth']>, string> = {
     sm: '640px',
     md: '768px',
     lg: '1024px',
     xl: '1280px',
     full: '100%',
-  };
+  }
 
-  const paddings = {
+  const paddings: Record<NonNullable<ContainerProps['padding']>, string> = {
     none: '0',
-    sm: '16px',
-    md: '24px',
-    lg: '32px',
-  };
+    sm: '0.75rem',
+    md: '1.25rem',
+    lg: '2rem',
+  }
 
   return (
     <div
@@ -41,7 +42,7 @@ export const Container: React.FC<ContainerProps> = ({
     >
       {children}
     </div>
-  );
-};
+  )
+}
 
-Container.displayName = 'Container';
+Container.displayName = 'Container'
