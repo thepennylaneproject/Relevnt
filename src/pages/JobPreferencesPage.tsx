@@ -17,6 +17,8 @@ type ChipField =
   | 'exclude_titles'
   | 'exclude_companies'
   | 'exclude_contract_types'
+  | 'include_keywords'
+  | 'avoid_keywords'
 
 const seniorityOptions = ['Junior', 'Mid level', 'Senior', 'Lead', 'Director']
 const locationOptions = ['Remote', 'Hybrid', 'On site', 'Flexible']
@@ -58,6 +60,8 @@ export default function JobPreferencesPage(): JSX.Element {
     exclude_titles: '',
     exclude_companies: '',
     exclude_contract_types: '',
+    include_keywords: '',
+    avoid_keywords: '',
   })
 
   const updateField = <K extends keyof JobPreferences>(
@@ -528,6 +532,112 @@ export default function JobPreferencesPage(): JSX.Element {
                     </select>
                   </div>
                 </label>
+              </div>
+            </div>
+          </article>
+
+          {/* Keywords & filters */}
+          <article style={cardStyle(colors)}>
+            <div className="rl-field-grid">
+              {sectionHeader(
+                <PreferencesIcon size={18} strokeWidth={1.7} />,
+                'Keywords & filters',
+                'Tell Relevnt what language feels like a green flag or a red flag so we can gently up-rank or down-rank roles in your feed.'
+              )}
+              <div style={{ display: 'grid', gap: 12 }}>
+                <div>
+                  <label className="rl-label">
+                    Keywords to lean toward
+                    <input
+                      className="rl-input"
+                      type="text"
+                      value={chipDrafts.include_keywords}
+                      onChange={(e) =>
+                        setChipDrafts({
+                          ...chipDrafts,
+                          include_keywords: e.target.value,
+                        })
+                      }
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault()
+                          addChip('include_keywords')
+                        }
+                      }}
+                      placeholder="e.g., ethical AI, non-profit, public health, climate, women-led"
+                    />
+                  </label>
+                  <div style={chipList}>
+                    {prefs.include_keywords?.map((item) => (
+                      <span key={item} style={chip(item)}>
+                        {item}
+                        <button
+                          type="button"
+                          onClick={() => removeChip('include_keywords', item)}
+                          style={{
+                            border: 'none',
+                            background: 'transparent',
+                            cursor: 'pointer',
+                            color: colors.textSecondary,
+                          }}
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                  <div className="rl-help">
+                    Think of these as “this looks like my lane” signals. We use them to gently boost
+                    jobs that sound like your people.
+                  </div>
+                </div>
+
+                <div>
+                  <label className="rl-label">
+                    Words or phrases to avoid
+                    <input
+                      className="rl-input"
+                      type="text"
+                      value={chipDrafts.avoid_keywords}
+                      onChange={(e) =>
+                        setChipDrafts({
+                          ...chipDrafts,
+                          avoid_keywords: e.target.value,
+                        })
+                      }
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault()
+                          addChip('avoid_keywords')
+                        }
+                      }}
+                      placeholder="e.g., crypto, MLM, unpaid, commission only, hustle, rockstar"
+                    />
+                  </label>
+                  <div style={chipList}>
+                    {prefs.avoid_keywords?.map((item) => (
+                      <span key={item} style={chip(item)}>
+                        {item}
+                        <button
+                          type="button"
+                          onClick={() => removeChip('avoid_keywords', item)}
+                          style={{
+                            border: 'none',
+                            background: 'transparent',
+                            cursor: 'pointer',
+                            color: colors.textSecondary,
+                          }}
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                  <div className="rl-help">
+                    We use these as soft filters and down-rank signals, not hard blocks, so you never
+                    miss something genuinely aligned that uses messy language.
+                  </div>
+                </div>
               </div>
             </div>
           </article>

@@ -1,4 +1,4 @@
-import React, { CSSProperties, useMemo, useState } from 'react'
+import  { CSSProperties, useMemo, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { FeatureGate } from '../components/features/FeatureGate'
 import { Container } from '../components/shared/Container'
@@ -19,6 +19,7 @@ import type {
   ResumeAnalysisResponse,
   ResumeOptimizationResponse,
 } from '../types/ai-responses.types'
+import { supabase } from '../lib/supabase'
 
 type ResumeTab = 'list' | 'upload' | 'extract' | 'analyze' | 'optimize'
 
@@ -469,14 +470,69 @@ function ResumesListTab({
 }
 
 function ResumeUploadTab({ colors }: TabProps) {
+  const { user } = useAuth()
   const [file, setFile] = useState<File | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const [status, setStatus] = useState<string | null>(null)
+
+  const handleUpload = async () => {
+    if (!user) {
+      setStatus('You need to be logged in to upload a resume.')
+      return
+    }
+
+    if (!file) {
+      setStatus('Choose a file first.')
+      return
+    }
+
+    try {
+      setUploading(true)
+      setStatus(null)
+
+      // Basic text extraction. For PDFs and DOCX this will not be perfect
+      // but it gives us something to work with until we drop in a real parser.
+      const text = await file.text()
+
+      const title =
+        file.name.replace(/\.[^/.]+$/, '') || 'Untitled resume'
+
+      const { error } = await supabase.from('resumes').insert({
+        user_id: user.id,
+        title,
+        original_filename: file.name,
+        mime_type: file.type || null,
+        parsed_text: text,
+        is_default: false,
+      })
+
+      if (error) {
+        console.error('Resume upload insert error:', error)
+        setStatus('We could not save your resume. Check console for details.')
+        return
+      }
+
+      setStatus('Resume uploaded. Refresh the page to see it in your list.')
+      setFile(null)
+    } catch (err) {
+      console.error('Resume upload failed:', err)
+      setStatus('Something went wrong while reading your file.')
+    } finally {
+      setUploading(false)
+    }
+  }
 
   return (
     <div style={{ display: 'grid', gap: 12 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <ResumeIcon size={18} strokeWidth={1.7} />
-        <h2 style={{ fontSize: 15, fontWeight: 600, color: colors.text, margin: 0 }}>Upload a resume</h2>
+        <h2 style={{ fontSize: 15, fontWeight: 600, color: colors.text, margin: 0 }}>
+          Upload a resume
+        </h2>
       </div>
+      <p style={{ fontSize: 13, color: colors.textSecondary, margin: 0 }}>
+        Upload a file so Relevnt can use it for matching and future automations.
+      </p>
       <label
         htmlFor="resume-input"
         style={{
@@ -495,16 +551,21 @@ function ResumeUploadTab({ colors }: TabProps) {
         <input
           id="resume-input"
           type="file"
-          accept=".pdf,.doc,.docx"
-          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          accept=".pdf,.doc,.docx,.txt"
+          onChange={(e) => {
+            setStatus(null)
+            setFile(e.target.files?.[0] ?? null)
+          }}
           style={{ display: 'none' }}
         />
         <span style={{ color: colors.text, fontWeight: 600 }}>Choose a file</span>
-        <span>PDF, DOCX, or DOC. Max 10MB.</span>
+        <span>PDF, DOCX, DOC, or TXT. Max 10MB.</span>
         {file && <span style={{ color: colors.text }}>Selected: {file.name}</span>}
       </label>
       <button
         type="button"
+        onClick={handleUpload}
+        disabled={uploading || !file}
         style={{
           alignSelf: 'flex-start',
           padding: '10px 16px',
@@ -514,11 +575,22 @@ function ResumeUploadTab({ colors }: TabProps) {
           color: colors.text,
           fontSize: 13,
           fontWeight: 600,
-          cursor: 'pointer',
+          cursor: uploading || !file ? 'not-allowed' : 'pointer',
+          opacity: uploading || !file ? 0.7 : 1,
         }}
       >
-        Upload resume
+        {uploading ? 'Uploading…' : 'Upload resume'}
       </button>
+      {status && (
+        <div
+          style={{
+            fontSize: 12,
+            color: status.toLowerCase().includes('upload') ? colors.textSecondary : colors.error,
+          }}
+        >
+          {status}
+        </div>
+      )}
     </div>
   )
 }

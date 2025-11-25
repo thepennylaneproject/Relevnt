@@ -17,6 +17,8 @@ export type JobPreferences = {
   exclude_titles: string[]
   exclude_companies: string[]
   exclude_contract_types: string[]
+  include_keywords: string[]
+  avoid_keywords: string[]
 
   enable_auto_apply: boolean
   auto_apply_min_match_score: number | null
@@ -52,6 +54,8 @@ export function useJobPreferences(): UseJobPreferencesReturn {
     exclude_titles: [],
     exclude_companies: [],
     exclude_contract_types: [],
+    include_keywords: [],
+    avoid_keywords: [],
 
     enable_auto_apply: false,
     auto_apply_min_match_score: null,
@@ -107,6 +111,8 @@ export function useJobPreferences(): UseJobPreferencesReturn {
         exclude_titles: row.exclude_titles ?? [],
         exclude_companies: row.exclude_companies ?? [],
         exclude_contract_types: row.exclude_contract_types ?? [],
+        include_keywords: row.include_keywords ?? [],
+        avoid_keywords: row.avoid_keywords ?? [],
 
         enable_auto_apply: !!row.enable_auto_apply,
         auto_apply_min_match_score:

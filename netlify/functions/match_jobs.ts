@@ -558,6 +558,23 @@ if (profileErr) {
       if (mergedExcludes.length > 0) {
         ;(enrichedProfile as any).keywords_exclude = mergedExcludes
       }
+
+      // Positive keywords: phrases you want us to lean toward
+      const includeFromPrefs = Array.isArray(jobPrefs.include_keywords)
+        ? jobPrefs.include_keywords
+        : []
+
+      const existingIncludes = normalizeListField(
+        (enrichedProfile as any).keywords_include ??
+          (enrichedProfile as any).target_keywords ??
+          (enrichedProfile as any).skills_primary
+      )
+
+      const mergedIncludes = [...existingIncludes, ...includeFromPrefs]
+
+      if (mergedIncludes.length > 0) {
+        ;(enrichedProfile as any).keywords_include = mergedIncludes
+      }
     }
 
     // 2) Load active jobs
@@ -607,9 +624,11 @@ if (profileErr) {
     // 3) Compute scores
     const results: MatchResult[] = jobs
       .map((job) => scoreJobAgainstProfile(job, enrichedProfile))
-      .filter((m) => m.score > 0)
 
-    if (results.length === 0) {
+    // optional: if you want a floor, use something gentle like:
+    const filtered = results.filter((m) => m.score >= 5)
+
+    if (filtered.length === 0) {
       return {
         statusCode: 200,
         body: JSON.stringify({
@@ -619,8 +638,8 @@ if (profileErr) {
       }
     }
 
-    const sorted = results.sort((a, b) => b.score - a.score)
-
+    const sorted = filtered.sort((a, b) => b.score - a.score)
+    
     return {
       statusCode: 200,
       body: JSON.stringify({

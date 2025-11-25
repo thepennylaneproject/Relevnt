@@ -195,3 +195,8 @@ cron = "0 * * * *"
 # - Give you a .netlify.app domain
 # 
 # =====================================================
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
