@@ -1,6 +1,6 @@
 /**
- * ============================================================================
- * useExtractResume Hook
+// ============================================================================
+ * //useExtractResume Hook
  * ============================================================================
  *
  * Extracts structured data from raw resume text:
@@ -15,13 +15,9 @@
  * ============================================================================
  */
 
-import { useCallback } from 'react'
-import { useAITask } from './useAITask'
-import type {
-  ResumeExtractionResponse,
-  UsageStats,
-  AIError,
-} from '../types/ai-responses.types'
+import { useCallback, useState } from 'react'
+import type { ResumeExtractionResponse } from '../types/ai-responses.types'
+import type { AIError, UsageStats } from '../types/ai-responses.types'
 
 // ============================================================================
 // Return type
@@ -59,29 +55,50 @@ export interface UseExtractResumeReturn {
 // ============================================================================
 
 export function useExtractResume(): UseExtractResumeReturn {
-  const { execute, loading, error, usageStats, retry } = useAITask()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<AIError | null>(null)
+  const [usageStats, setUsageStats] = useState<UsageStats | null>(null)
 
-  const extract = useCallback(
-    async (resumeText: string): Promise<ResumeExtractionResponse | null> => {
-      try {
-        const response = (await execute('extract-resume', {
-          resumeText,
-        })) as ResumeExtractionResponse
+  const extract = useCallback(async (resumeText: string) => {
+    setLoading(true)
+    setError(null)
 
-        return response
-      } catch {
-        // useAITask already logs and stores the error
+    try {
+      const res = await fetch('/.netlify/functions/parse_resume', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resumeText })
+      })
+
+      const data = await res.json()
+
+      if (!res.ok || !data.success) {
+        setError({
+          code: data?.code ?? 'parse_resume_error',
+          message: data?.error || 'Failed to parse resume',
+          retryable: false,
+        })
         return null
       }
-    },
-    [execute]
-  )
+
+      return data as ResumeExtractionResponse
+    } catch (err: any) {
+      setError({
+        code: 'NETWORK_ERROR',
+        message: err?.message || 'Unknown error',
+        retryable: true,
+      })
+      return null
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   return {
     extract,
     loading,
-    error: error as AIError | null,
-    usageStats: usageStats as UsageStats | null,
-    retry: () => retry() as Promise<ResumeExtractionResponse | null>,
+    error,
+    usageStats,
+    retry: () => extract(''), 
   }
 }

@@ -31,6 +31,10 @@ export interface Resume {
   ats_score: number | null
   created_at: string
   updated_at: string
+  mime_type?: string | null
+  file_name?: string | null
+  file_size_bytes?: number | null
+  parsed_text?: string | null
 }
 
 export interface UseResumesReturn {
@@ -42,6 +46,7 @@ export interface UseResumesReturn {
   // Actions
   fetchResumes: () => Promise<void>
   createResume: (title: string) => Promise<Resume | null>
+  uploadResumeFile: (file: File) => Promise<Resume | null>
   deleteResume: (id: string) => Promise<void>
   setDefaultResume: (id: string) => Promise<void>
   updateResumeTitle: (id: string, title: string) => Promise<void>
@@ -64,6 +69,33 @@ export function useResumes(user: User): UseResumesReturn {
   const [isDeleting, setIsDeleting] = useState(false)
 
   // =========================================================================
+  // Helper function to convert file to base64 string (without prefix)
+  // =========================================================================
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => {
+        const result = reader.result
+        if (typeof result === 'string') {
+          // Strip the data:*/*;base64, prefix
+          const base64Index = result.indexOf('base64,')
+          if (base64Index === -1) {
+            reject(new Error('Invalid base64 data'))
+          } else {
+            resolve(result.substring(base64Index + 7))
+          }
+        } else {
+          reject(new Error('Failed to read file as base64'))
+        }
+      }
+      reader.onerror = () => {
+        reject(new Error('Error reading file'))
+      }
+      reader.readAsDataURL(file)
+    })
+  }
+
+  // =========================================================================
   // FETCH RESUMES
   // =========================================================================
 
@@ -74,18 +106,7 @@ export function useResumes(user: User): UseResumesReturn {
     try {
       const { data, error: supabaseError } = await supabase
         .from('resumes')
-        .select(
-          `
-          id,
-          user_id,
-          title,
-          is_default,
-          version_number,
-          ats_score,
-          created_at,
-          updated_at
-        `
-        )
+        .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
 
@@ -156,6 +177,97 @@ export function useResumes(user: User): UseResumesReturn {
           err instanceof Error ? err.message : 'Failed to create resume'
         setError(message)
         console.error('Error creating resume:', err)
+        return null
+      } finally {
+        setIsCreating(false)
+      }
+    },
+    [user.id, resumes]
+  )
+
+  // =========================================================================
+  // UPLOAD RESUME FILE (via Netlify function, no direct storage upload)
+  // =========================================================================
+
+  const uploadResumeFile = useCallback(
+    async (file: File): Promise<Resume | null> => {
+      setIsCreating(true)
+      setError(null)
+
+      try {
+        if (!file) {
+          throw new Error('No file selected')
+        }
+
+        const maxSizeBytes = 10 * 1024 * 1024 // 10MB
+        if (file.size > maxSizeBytes) {
+          throw new Error('File must be 10MB or smaller')
+        }
+
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+        if (sessionError) {
+          throw sessionError
+        }
+        const access_token = sessionData?.session?.access_token
+        if (!access_token) {
+          throw new Error('No access token found')
+        }
+
+        const fileBase64 = await fileToBase64(file)
+
+        const response = await fetch('/.netlify/functions/upload_resume', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + access_token,
+          },
+          body: JSON.stringify({
+            fileBase64,
+            fileName: file.name,
+            mimeType: file.type || 'application/octet-stream',
+            size: file.size,
+          }),
+        })
+
+        if (!response.ok) {
+          let errorMessage = response.statusText || 'Upload failed'
+          try {
+            const errorJson = await response.json()
+            if (errorJson?.error) {
+              errorMessage = errorJson.error
+            } else if (errorJson?.message) {
+              errorMessage = errorJson.message
+            }
+          } catch {
+            // ignore JSON parse errors
+          }
+          throw new Error(errorMessage)
+        }
+
+        const json = await response.json()
+
+        let resumeRow: Resume | null = null
+        if (json) {
+          if (json.resume && typeof json.resume === 'object') {
+            resumeRow = json.resume as Resume
+          } else if (json.data && typeof json.data === 'object') {
+            resumeRow = json.data as Resume
+          } else if (json.id && json.user_id) {
+            resumeRow = json as Resume
+          }
+        }
+
+        if (!resumeRow) {
+          throw new Error('Upload succeeded but no resume returned')
+        }
+
+        setResumes((prev) => [resumeRow as Resume, ...prev])
+        return resumeRow as Resume
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : 'Failed to upload resume'
+        setError(message)
+        console.error('Error uploading resume:', err)
         return null
       } finally {
         setIsCreating(false)
@@ -297,6 +409,8 @@ export function useResumes(user: User): UseResumesReturn {
     await fetchResumes()
   }, [fetchResumes])
 
+
+  
   // =========================================================================
   // LIFECYCLE
   // =========================================================================
@@ -311,6 +425,7 @@ export function useResumes(user: User): UseResumesReturn {
     error,
     fetchResumes,
     createResume,
+    uploadResumeFile,
     deleteResume,
     setDefaultResume,
     updateResumeTitle,

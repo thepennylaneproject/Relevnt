@@ -1,4 +1,4 @@
-import  { CSSProperties, useMemo, useState } from 'react'
+import React, { CSSProperties, useMemo, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { FeatureGate } from '../components/features/FeatureGate'
 import { Container } from '../components/shared/Container'
@@ -10,7 +10,12 @@ import {
 } from '../components/icons/RelevntIcons'
 import { useRelevntColors } from '../hooks'
 import { hasFeatureAccess, getRequiredTier } from '../config'
-import { useResumes, useExtractResume, useAnalyzeResume, useOptimizeResume } from '../hooks'
+import {
+  useResumes,
+  useExtractResume,
+  useAnalyzeResume,
+  useOptimizeResume,
+} from '../hooks'
 import type { RelevntColors } from '../hooks/useRelevntColors'
 import type { Resume } from '../hooks/useResumes'
 import type { TierLevel } from '../config/tiers'
@@ -27,7 +32,13 @@ export function ResumesPage(): JSX.Element {
   const { user, loading: authLoading } = useAuth()
   const colors = useRelevntColors()
 
-  const { resumes, loading: resumesLoading, deleteResume, setDefaultResume, updateResumeTitle } = useResumes(user!)
+  const {
+    resumes,
+    loading: resumesLoading,
+    deleteResume,
+    setDefaultResume,
+    updateResumeTitle,
+  } = useResumes(user!)
 
   const [activeTab, setActiveTab] = useState<ResumeTab>('list')
 
@@ -134,7 +145,7 @@ export function ResumesPage(): JSX.Element {
             <h1 style={title}>Resume hub</h1>
             <p style={subtitle}>
               Keep your resume versions organized, run quick checks, and line them up against the
-              roles you care about. No fluff—just clean artifacts you can trust.
+              roles you care about. No fluff, just clean artifacts you can trust.
             </p>
           </div>
           <div
@@ -192,36 +203,40 @@ export function ResumesPage(): JSX.Element {
 
         <section style={contentCard}>
           {activeTab === 'list' && (
-          <ResumesListTab
-            resumes={resumes}
-            colors={colors}
-            loading={resumesLoading}
-            onDelete={async (id) => {
-              try {
-                await deleteResume(id)
-              } catch (err) {
-                console.error('Delete failed', err)
-              }
-            }}
-            onSetDefault={async (id) => {
-              try {
-                await setDefaultResume(id)
-              } catch (err) {
-                console.error('Set default failed', err)
-              }
-            }}
-            onEditTitle={async (id, title) => {
-              try {
-                await updateResumeTitle(id, title)
-              } catch (err) {
-                console.error('Edit title failed', err)
-              }
-            }}
-          />
+            <ResumesListTab
+              resumes={resumes}
+              colors={colors}
+              loading={resumesLoading}
+              onDelete={async (id) => {
+                try {
+                  await deleteResume(id)
+                } catch (err) {
+                  console.error('Delete failed', err)
+                }
+              }}
+              onSetDefault={async (id) => {
+                try {
+                  await setDefaultResume(id)
+                } catch (err) {
+                  console.error('Set default failed', err)
+                }
+              }}
+              onEditTitle={async (id, title) => {
+                try {
+                  await updateResumeTitle(id, title)
+                } catch (err) {
+                  console.error('Edit title failed', err)
+                }
+              }}
+            />
           )}
 
-          {activeTab === 'upload' && <ResumeUploadTab colors={colors} />}
-
+          {activeTab === 'upload' && (
+            <ResumeUploadTab
+              colors={colors}
+              user={user}
+            />
+          )}
           {activeTab === 'extract' && (
             <FeatureGate
               feature="resume-extract"
@@ -387,7 +402,7 @@ function ResumeCard({
                 borderRadius: 10,
                 border: `1px solid ${colors.borderLight}`,
                 backgroundColor: colors.surfaceHover,
-                color: colors.text, // ensure legible text
+                color: colors.text,
                 cursor: 'pointer',
                 fontSize: 12,
                 fontWeight: 600,
@@ -469,54 +484,64 @@ function ResumesListTab({
   )
 }
 
-function ResumeUploadTab({ colors }: TabProps) {
-  const { user } = useAuth()
+function ResumeUploadTab({
+  colors,
+  user,
+}: TabProps & { user: any }) {
   const [file, setFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
-  const [status, setStatus] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
 
   const handleUpload = async () => {
     if (!user) {
-      setStatus('You need to be logged in to upload a resume.')
+      setError('You need to be logged in to upload a resume.')
+      return
+    }
+    if (!file) {
+      setError('Choose a file first.')
       return
     }
 
-    if (!file) {
-      setStatus('Choose a file first.')
-      return
-    }
+    setUploading(true)
+    setError(null)
+    setSuccess(false)
 
     try {
-      setUploading(true)
-      setStatus(null)
+      // Basic client side parsing: get text from the file blob.
+      // This is not perfect for every format but gives us something usable
+      // without extra dependencies or server side PDF work.
+      let parsedText = ''
+      try {
+        parsedText = await file.text()
+      } catch (e) {
+        console.error('Failed to read file as text', e)
+        parsedText = ''
+      }
 
-      // Basic text extraction. For PDFs and DOCX this will not be perfect
-      // but it gives us something to work with until we drop in a real parser.
-      const text = await file.text()
+      const baseTitle = file.name.replace(/\.[^.]+$/, '') || 'Untitled resume'
 
-      const title =
-        file.name.replace(/\.[^/.]+$/, '') || 'Untitled resume'
-
-      const { error } = await supabase.from('resumes').insert({
+      const { error: insertError } = await supabase.from('resumes').insert({
         user_id: user.id,
-        title,
-        original_filename: file.name,
+        title: baseTitle,
+        parsed_text: parsedText || null,
         mime_type: file.type || null,
-        parsed_text: text,
-        is_default: false,
+        file_name: file.name,
+        file_size_bytes: file.size,
       })
 
-      if (error) {
-        console.error('Resume upload insert error:', error)
-        setStatus('We could not save your resume. Check console for details.')
+      if (insertError) {
+        console.error('Resume upload insert error:', insertError)
+        setError('Resume upload failed. Check the console for details.')
         return
       }
 
-      setStatus('Resume uploaded. Refresh the page to see it in your list.')
+      setSuccess(true)
       setFile(null)
+      
     } catch (err) {
-      console.error('Resume upload failed:', err)
-      setStatus('Something went wrong while reading your file.')
+      console.error('Resume upload error:', err)
+      setError('Resume upload failed unexpectedly.')
     } finally {
       setUploading(false)
     }
@@ -526,12 +551,10 @@ function ResumeUploadTab({ colors }: TabProps) {
     <div style={{ display: 'grid', gap: 12 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <ResumeIcon size={18} strokeWidth={1.7} />
-        <h2 style={{ fontSize: 15, fontWeight: 600, color: colors.text, margin: 0 }}>
-          Upload a resume
-        </h2>
+        <h2 style={{ fontSize: 15, fontWeight: 600, color: colors.text, margin: 0 }}>Upload a resume</h2>
       </div>
       <p style={{ fontSize: 13, color: colors.textSecondary, margin: 0 }}>
-        Upload a file so Relevnt can use it for matching and future automations.
+        Upload a resume file and Relevnt will store it along with a text version for matching and analysis.
       </p>
       <label
         htmlFor="resume-input"
@@ -553,8 +576,9 @@ function ResumeUploadTab({ colors }: TabProps) {
           type="file"
           accept=".pdf,.doc,.docx,.txt"
           onChange={(e) => {
-            setStatus(null)
             setFile(e.target.files?.[0] ?? null)
+            setError(null)
+            setSuccess(false)
           }}
           style={{ display: 'none' }}
         />
@@ -565,7 +589,7 @@ function ResumeUploadTab({ colors }: TabProps) {
       <button
         type="button"
         onClick={handleUpload}
-        disabled={uploading || !file}
+        disabled={uploading}
         style={{
           alignSelf: 'flex-start',
           padding: '10px 16px',
@@ -575,20 +599,20 @@ function ResumeUploadTab({ colors }: TabProps) {
           color: colors.text,
           fontSize: 13,
           fontWeight: 600,
-          cursor: uploading || !file ? 'not-allowed' : 'pointer',
-          opacity: uploading || !file ? 0.7 : 1,
+          cursor: uploading ? 'not-allowed' : 'pointer',
+          opacity: uploading ? 0.7 : 1,
         }}
       >
         {uploading ? 'Uploading…' : 'Upload resume'}
       </button>
-      {status && (
-        <div
-          style={{
-            fontSize: 12,
-            color: status.toLowerCase().includes('upload') ? colors.textSecondary : colors.error,
-          }}
-        >
-          {status}
+      {(error || success) && (
+        <div style={{ fontSize: 12, marginTop: 4 }}>
+          {error && <span style={{ color: colors.error }}>{error}</span>}
+          {success && !error && (
+            <span style={{ color: colors.textSecondary }}>
+              Resume uploaded. Your matches and ATS tools can now use it.
+            </span>
+          )}
         </div>
       )}
     </div>
