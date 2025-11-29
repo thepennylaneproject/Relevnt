@@ -1,4 +1,4 @@
-import React, { CSSProperties, useMemo, useState } from 'react'
+import React, { CSSProperties, useMemo, useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { FeatureGate } from '../components/features/FeatureGate'
 import { Container } from '../components/shared/Container'
@@ -12,9 +12,9 @@ import { useRelevntColors } from '../hooks'
 import { hasFeatureAccess, getRequiredTier } from '../config'
 import {
   useResumes,
-  useExtractResume,
   useAnalyzeResume,
   useOptimizeResume,
+  useExtractResume,
 } from '../hooks'
 import type { RelevntColors } from '../hooks/useRelevntColors'
 import type { Resume } from '../hooks/useResumes'
@@ -25,6 +25,8 @@ import type {
   ResumeOptimizationResponse,
 } from '../types/ai-responses.types'
 import { supabase } from '../lib/supabase'
+import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist'
+
 
 type ResumeTab = 'list' | 'upload' | 'extract' | 'analyze' | 'optimize'
 
@@ -40,12 +42,43 @@ export function ResumesPage(): JSX.Element {
     updateResumeTitle,
   } = useResumes(user!)
 
+  // Figure out which resume to use as the "default" source of text for tools
+  const defaultResume = useMemo(() => {
+    if (!resumes || resumes.length === 0) return null
+
+    // Prefer the one explicitly marked as default, otherwise fall back to the most recent
+    const explicitlyDefault = resumes.find((r) => r.is_default)
+    if (explicitlyDefault) return explicitlyDefault
+
+    return resumes[0]
+  }, [resumes])
+
+  // Safely pull text content from the default resume, with sensible fallbacks
+  const defaultResumeText =
+    (defaultResume as any)?.parsed_text ||
+    (defaultResume as any)?.raw_text ||
+    (defaultResume as any)?.summary ||
+    ''
+
+  const defaultResumeId = (defaultResume as any)?.id || undefined
+
+  // New: hydrate parsed fields from the DB so the right-hand panel starts filled in
+  const defaultParsedFields =
+    ((defaultResume as any)?.parsed_fields as ResumeExtractionResponse['data']) || null
+
   const [activeTab, setActiveTab] = useState<ResumeTab>('list')
 
+  const isAdmin =
+    user?.user_metadata?.role === 'admin' ||
+    user?.user_metadata?.tier === 'admin' || // in case you store it this way
+    user?.email === 'sarah@thepennylaneproject.org'  // or whatever email you log in with
+
   const userTier: TierLevel =
-    user?.tier && ['starter', 'pro', 'premium'].includes(user.tier)
-      ? (user.tier as TierLevel)
-      : 'starter'
+    isAdmin
+      ? 'premium'
+      : user?.tier && ['starter', 'pro', 'premium'].includes(user.tier)
+        ? (user.tier as TierLevel)
+        : 'starter'
 
   const canExtract = hasFeatureAccess('resume-extract', userTier)
   const canAnalyze = hasFeatureAccess('resume-analyze', userTier)
@@ -243,7 +276,12 @@ export function ResumesPage(): JSX.Element {
               requiredTier={getRequiredTier('resume-extract')}
               userTier={userTier}
             >
-              <ResumeExtractTab colors={colors} />
+              <ResumeExtractTab
+                colors={colors}
+                defaultResumeText={defaultResumeText}
+                defaultResumeId={defaultResumeId}
+                defaultParsedFields={defaultParsedFields}
+              />
             </FeatureGate>
           )}
 
@@ -253,7 +291,10 @@ export function ResumesPage(): JSX.Element {
               requiredTier={getRequiredTier('resume-analyze')}
               userTier={userTier}
             >
-              <ResumeAnalyzeTab colors={colors} />
+              <ResumeAnalyzeTab
+                colors={colors}
+                defaultResumeText={defaultResumeText}
+              />
             </FeatureGate>
           )}
 
@@ -263,7 +304,10 @@ export function ResumesPage(): JSX.Element {
               requiredTier={getRequiredTier('resume-optimize')}
               userTier={userTier}
             >
-              <ResumeOptimizeTab colors={colors} />
+              <ResumeOptimizeTab
+                colors={colors}
+                defaultResumeText={defaultResumeText}
+              />
             </FeatureGate>
           )}
         </section>
@@ -274,6 +318,157 @@ export function ResumesPage(): JSX.Element {
 
 interface TabProps {
   colors: RelevntColors;
+  defaultResumeText?: string;
+  defaultResumeId?: string;
+  defaultParsedFields?: ResumeExtractionResponse['data'] | null;
+}
+
+interface ParsedResumeContent {
+  name: string
+  email: string
+  phone: string
+  location: string
+  summary: string
+  skills: string[]
+}
+
+function parseResumeContent(raw: string): ResumeExtractionResponse['data'] {
+  // Normalize text
+  const text = raw
+    .replace(/\r\n/g, '\n')
+    .replace(/\u00A0/g, ' ')
+    .replace(/&amp;/gi, '&')
+    .trim()
+
+  const lines = text
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0)
+
+  // --------------------------
+  // CONTACT INFO
+  // --------------------------
+
+  const emailMatch = text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)
+  const phoneMatch = text.match(/(\+?\d[\d\s().-]{7,}\d)/)
+  const locationMatch =
+    text.match(/\b[A-Z][a-z]+,\s*[A-Z]{2}\s*\d{5}\b/) ||
+    text.match(/\b[A-Z][a-z]+,\s*[A-Z]{2}\b/)
+
+  // Name from first "Firstname Lastname" at top
+  let fullName = ''
+  const nameLine = lines.find((l, idx) =>
+    idx < 5 && /^[A-Z][a-z]+ [A-Z][a-z]+/.test(l)
+  )
+  if (nameLine) {
+    const leftPart = nameLine.split('|')[0].trim()
+    const nameTokens = leftPart.split(/\s+/)
+    fullName = nameTokens.slice(0, 2).join(' ')
+  }
+
+
+
+  // --------------------------
+  // SUMMARY EXTRACTION (ROBUST FOR SINGLE-LINE RESUMES)
+  // --------------------------
+
+  let summary = ''
+
+  // Identify the contact header end (email or phone)
+  const headerIndex = text.search(emailMatch?.[0] || phoneMatch?.[0] || '')
+  let searchStart = headerIndex >= 0 ? headerIndex : 0
+
+  // Define where major sections begin
+  const sectionRegex = /(Professional Experience|Experience|Work Experience|Employment History|Education\b|Technical Skills\b)/i
+  const sectionMatch = text.match(sectionRegex)
+  const sectionIndex = sectionMatch ? sectionMatch.index! : -1
+
+  // Extract the chunk between header and the first section
+  if (sectionIndex > searchStart) {
+    let summaryChunk = text.slice(searchStart, sectionIndex).trim()
+
+    // Remove email/phone/location/name repetition
+    summaryChunk = summaryChunk
+      .replace(fullName, '')
+      .replace(emailMatch?.[0] || '', '')
+      .replace(phoneMatch?.[0] || '', '')
+      .replace(locationMatch?.[0] || '', '')
+      .replace(/\|/g, ' ')
+      .trim()
+
+    // Take first 1–2 sentences only
+    const sentences = summaryChunk
+      .split(/(?<=[.?!])\s+/)
+      .map(s => s.trim())
+      .filter(s => s.length > 0)
+
+    const firstSentences = sentences.slice(0, 2).join(' ')
+
+    // Reject nonsense / too short summaries
+    if (firstSentences.split(/\s+/).length >= 6) {
+      summary = firstSentences
+    }
+  }
+
+  // Final sanity check
+  if (summary.length < 20) {
+    summary = ''
+  }
+
+  // --------------------------
+  // SKILLS EXTRACTION (FROM TECHNICAL SKILLS BLOCK)
+  // --------------------------
+
+  let skills: string[] = []
+
+  const techBlockMatch = text.match(/Technical Skills([\s\S]+)/i)
+  if (techBlockMatch) {
+    let skillsBlock = techBlockMatch[1]
+
+    // Cut off at next big section
+    skillsBlock = skillsBlock.split(/Professional Experience|Experience\b|Work Experience|Education &/i)[0]
+
+    // Normalize parentheses to commas to split better
+    skillsBlock = skillsBlock.replace(/[()]/g, ',')
+
+    const rawTokens = skillsBlock
+      .split(/[,;•|]/)
+      .map((t) => t.trim())
+      .filter((t) => t.length > 1)
+
+    const seen = new Set<string>()
+    skills = rawTokens.filter((token) => {
+      // Drop obvious sentence fragments
+      if (token.includes('.')) return false
+      if (token.split(/\s+/).length > 6) return false
+
+      const lower = token.toLowerCase()
+      if (
+        lower.includes('technical skills') ||
+        lower.includes('education &') ||
+        lower.includes('professional experience') ||
+        lower.includes('resume page')
+      ) {
+        return false
+      }
+
+      const key = lower
+      if (seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
+  }
+
+  return {
+    fullName,
+    email: emailMatch?.[0] ?? '',
+    phone: phoneMatch?.[0]?.trim() ?? '',
+    location: locationMatch?.[0] ?? '',
+    summary,
+    skills,
+    experience: [],
+    education: [],
+  }
 }
 
 function ResumeCard({
@@ -508,26 +703,82 @@ function ResumeUploadTab({
     setSuccess(false)
 
     try {
-      // Basic client side parsing: get text from the file blob.
-      // This is not perfect for every format but gives us something usable
-      // without extra dependencies or server side PDF work.
-      let parsedText = ''
-      try {
-        parsedText = await file.text()
-      } catch (e) {
-        console.error('Failed to read file as text', e)
-        parsedText = ''
+      // Helper to normalize and sanitize text before inserting into Postgres
+      const cleanText = (input: string) =>
+        input
+          .replace(/\u0000/g, '') // strip null bytes that Postgres text hates
+          .replace(/<[^>]+>/g, ' ') // strip any HTML tags if present
+          .replace(/\s+/g, ' ') // collapse whitespace
+          .trim()
+
+      const fileName = file.name
+      const mimeType = file.type || 'application/octet-stream'
+      const size = file.size
+      const lowerName = fileName.toLowerCase()
+
+      const isPdf = mimeType === 'application/pdf' || lowerName.endsWith('.pdf')
+      const isDocx =
+        mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+        lowerName.endsWith('.docx')
+      const isPlainText = mimeType.startsWith('text/') || lowerName.endsWith('.txt')
+
+      let parsedText: string | null = null
+
+      if (isPlainText) {
+        try {
+          const raw = await file.text()
+          parsedText = cleanText(raw)
+        } catch (e) {
+          console.error('Failed to read text file', e)
+          parsedText = null
+        }
+      } else if (isPdf) {
+        try {
+          const rawText = await extractTextFromPdf(file)
+          parsedText = cleanText(rawText)
+        } catch (e) {
+          console.error('PDF text extraction failed, storing metadata only:', e)
+          parsedText = null
+        }
+      } else if (isDocx) {
+        // DOCX parsing via mammoth (browser build), dynamic import to keep bundle happy
+        try {
+          const arrayBuffer = await file.arrayBuffer()
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const mammothModule: any = await import('mammoth/mammoth.browser')
+          const result = await mammothModule.convertToHtml({ arrayBuffer })
+          const html = typeof result.value === 'string' ? result.value : ''
+          parsedText = cleanText(html)
+        } catch (e) {
+          console.error('DOCX parse failed, storing metadata only:', e)
+          parsedText = null
+        }
+      } else {
+        // Fallback: try reading as text; if it blows up, we still keep metadata
+        try {
+          const raw = await file.text()
+          parsedText = cleanText(raw)
+        } catch (e) {
+          console.error('Fallback text read failed, storing metadata only:', e)
+          parsedText = null
+        }
       }
 
-      const baseTitle = file.name.replace(/\.[^.]+$/, '') || 'Untitled resume'
+      // Guardrail: avoid inserting absurdly large blobs into parsed_text
+      const MAX_CHARS = 500_000
+      if (parsedText && parsedText.length > MAX_CHARS) {
+        parsedText = parsedText.slice(0, MAX_CHARS)
+      }
+
+      const baseTitle = fileName.replace(/\.[^.]+$/, '') || 'Untitled resume'
 
       const { error: insertError } = await supabase.from('resumes').insert({
         user_id: user.id,
         title: baseTitle,
-        parsed_text: parsedText || null,
-        mime_type: file.type || null,
-        file_name: file.name,
-        file_size_bytes: file.size,
+        parsed_text: parsedText,
+        mime_type: mimeType,
+        file_name: fileName,
+        file_size_bytes: size,
       })
 
       if (insertError) {
@@ -538,7 +789,6 @@ function ResumeUploadTab({
 
       setSuccess(true)
       setFile(null)
-      
     } catch (err) {
       console.error('Resume upload error:', err)
       setError('Resume upload failed unexpectedly.')
@@ -555,6 +805,7 @@ function ResumeUploadTab({
       </div>
       <p style={{ fontSize: 13, color: colors.textSecondary, margin: 0 }}>
         Upload a resume file and Relevnt will store it along with a text version for matching and analysis.
+        TXT, PDF, and DOCX are supported.
       </p>
       <label
         htmlFor="resume-input"
@@ -619,6 +870,36 @@ function ResumeUploadTab({
   )
 }
 
+// Simple PDF text extraction using pdfjs-dist
+// We configure the worker once via GlobalWorkerOptions, then use getDocument.
+GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.mjs',
+  import.meta.url
+).toString()
+
+async function extractTextFromPdf(file: File): Promise<string> {
+  const arrayBuffer = await file.arrayBuffer()
+
+  // pdfjs-dist handles parsing in the browser; we feed it the raw bytes
+  const pdf = await getDocument({ data: arrayBuffer }).promise
+
+  let fullText = ''
+
+  for (let pageNum = 1; pageNum <= pdf.numPages; pageNum += 1) {
+    const page = await pdf.getPage(pageNum)
+    const content: any = await page.getTextContent()
+
+    const pageText = (content.items || [])
+      .map((item: any) => (item && item.str ? item.str : ''))
+      .join(' ')
+
+    fullText += pageText + '\n'
+  }
+
+  // Strip any null bytes just in case, Postgres text does not like them
+  return fullText.replace(/\u0000/g, '')
+}
+
 function TextArea({
   value,
   onChange,
@@ -652,87 +933,661 @@ function TextArea({
   )
 }
 
-function ResumeExtractTab({ colors }: TabProps) {
-  const { extract, loading } = useExtractResume()
-  const [resumeText, setResumeText] = useState('')
-  const [result, setResult] = useState<ResumeExtractionResponse['data'] | null>(null)
+// ---------------------------------------------------------------------------
+// Heuristic resume parsing (fast, offline, no tokens)
+// ---------------------------------------------------------------------------
 
-  const handleExtract = async () => {
-    if (!resumeText.trim()) return
-    const response = await extract(resumeText)
-    if (response?.success && response.data) {
-      setResult(response.data)
+type ParsedResumeData = ResumeExtractionResponse['data']
+
+function normalizeResumeText(raw: string): string {
+  // Strip common unicode icons and normalize whitespace
+  return raw
+    .replace(/[•\t]/g, ' ')
+    .replace(/[📍📞✉🔗]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function splitLines(raw: string): string[] {
+  return raw
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0)
+}
+
+function inferEmail(text: string): string {
+  const match = text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)
+  return match ? match[0] : ''
+}
+
+function inferPhone(text: string): string {
+  const match = text.match(/(\+?1[ .-]?)?(\(?\d{3}\)?[ .-]?\d{3}[ .-]?\d{4})/)
+  return match ? match[0].trim() : ''
+}
+
+function inferLocation(lines: string[]): string {
+  const locLine = lines.find((l) => /,\s*[A-Z]{2}\b/.test(l))
+  if (!locLine) return ''
+
+  // Grab the part up through `City, ST` and optional country
+  const match = locLine.match(/([^·|]+?,\s*[A-Z]{2}(?:[^·|]*)?)/)
+  return match ? match[1].trim() : locLine.trim()
+}
+
+function inferName(lines: string[], email: string): string {
+  const emailUser = email ? email.split('@')[0] : ''
+
+  for (const line of lines.slice(0, 5)) {
+    const hasAt = line.includes('@')
+    const hasUrl =
+      line.toLowerCase().includes('http') ||
+      line.toLowerCase().includes('linkedin')
+    if (hasAt || hasUrl) continue
+
+    const lettersOnly = line.replace(/[^A-Za-z ]/g, '').trim()
+    if (!lettersOnly) continue
+
+    if (emailUser) {
+      const parts = emailUser.split(/[._-]+/).filter(Boolean)
+      const hit = parts.some((p) =>
+        lettersOnly.toLowerCase().includes(p.toLowerCase())
+      )
+      if (!hit) continue
+    }
+
+    return lettersOnly
+  }
+
+  return ''
+}
+
+function findSectionRange(
+  lines: string[],
+  headerPatterns: RegExp[],
+  stopPatterns: RegExp[]
+): { start: number; end: number } | null {
+  const headerIdx = lines.findIndex((l) =>
+    headerPatterns.some((re) => re.test(l.toUpperCase()))
+  )
+  if (headerIdx === -1) return null
+
+  let end = lines.length
+  for (let i = headerIdx + 1; i < lines.length; i++) {
+    const upper = lines[i].toUpperCase()
+    if (stopPatterns.some((re) => re.test(upper))) {
+      end = i
+      break
     }
   }
 
+  return { start: headerIdx + 1, end }
+}
+
+function extractSummary(lines: string[]): string {
+  const range = findSectionRange(
+    lines,
+    [/SUMMARY/, /PROFESSIONAL SUMMARY/],
+    [/CORE COMPETENCIES/, /SKILLS/, /EXPERIENCE/, /TECHNOLOGY/, /EDUCATION/]
+  )
+  if (!range) return ''
+
+  const slice = lines.slice(range.start, range.end)
+  return slice.join(' ').slice(0, 800).trim()
+}
+
+function extractSkills(lines: string[]): string[] {
+  const range = findSectionRange(
+    lines,
+    [/CORE COMPETENCIES/, /SKILLS/, /TECHNOLOGY & DIGITAL/, /TECHNOLOGY/],
+    [/PROFESSIONAL EXPERIENCE/, /EXPERIENCE/, /WORK HISTORY/, /EDUCATION/]
+  )
+  if (!range) return []
+
+  const slice = lines.slice(range.start, range.end)
+
+  const rawPieces = slice.flatMap((line) => {
+    const cleaned = line.replace(/^[-•]+\s*/, '')
+
+    if (cleaned.includes(',')) {
+      return cleaned.split(',')
+    }
+
+    return [cleaned]
+  })
+
+  const skills = rawPieces
+    .map((s) => s.replace(/\([^)]*\)/g, '').trim())
+    .filter((s) => s.length > 1)
+
+  const seen = new Set<string>()
+  const unique: string[] = []
+  for (const s of skills) {
+    const key = s.toLowerCase()
+    if (!seen.has(key)) {
+      seen.add(key)
+      unique.push(s)
+    }
+  }
+
+  return unique
+}
+
+function mergeSkills(a: string[], b: string[] = []): string[] {
+  const seen = new Set<string>()
+  const merged: string[] = []
+
+  for (const s of [...a, ...b]) {
+    const key = s.trim().toLowerCase()
+    if (!key) continue
+    if (!seen.has(key)) {
+      seen.add(key)
+      merged.push(s.trim())
+    }
+  }
+
+  return merged
+}
+
+function parseResumeHeuristic(raw: string): ParsedResumeData {
+  const normalized = normalizeResumeText(raw)
+  const lines = splitLines(raw)
+
+  const email = inferEmail(normalized)
+  const phone = inferPhone(normalized)
+  const location = inferLocation(lines)
+  const fullName = inferName(lines, email)
+  const summary = extractSummary(lines)
+  const skills = extractSkills(lines)
+
+  return {
+    fullName,
+    email,
+    phone,
+    location,
+    summary,
+    skills,
+    experience: [],
+    education: [],
+  }
+}
+
+function ResumeExtractTab({
+  colors,
+  defaultResumeText,
+  defaultResumeId,
+  defaultParsedFields,
+}: TabProps) {
+  const { extract, loading, error } = useExtractResume()
+  const [resumeText, setResumeText] = useState('')
+  const [parsed, setParsed] = useState<ResumeExtractionResponse['data'] | null>(
+    defaultParsedFields || null
+  )
+  const [skillsInput, setSkillsInput] = useState(
+    defaultParsedFields?.skills?.join(', ') || ''
+  )
+  const [saveMessage, setSaveMessage] = useState<string | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
+
+  // Hydrate from DB when defaultParsedFields changes
+  useEffect(() => {
+    if (defaultParsedFields) {
+      setParsed(defaultParsedFields)
+      setSkillsInput((defaultParsedFields.skills || []).join(', '))
+      setSaveMessage('Loaded saved fields from your default resume.')
+    }
+  }, [defaultParsedFields])
+
+  const handleExtract = async () => {
+    if (!resumeText.trim()) return
+
+    // First pass: heuristic parser
+    const heuristic = parseResumeHeuristic(resumeText)
+
+    let combined = heuristic
+    let usedAI = false
+
+    // Only call AI if we need help
+    const needsAI =
+      !heuristic.summary ||
+      heuristic.summary.length < 80 ||
+      heuristic.skills.length < 5
+
+    if (needsAI) {
+      try {
+        const response = await extract(resumeText)
+
+        if (response?.success && response.data) {
+          usedAI = true
+          const ai = response.data
+
+          combined = {
+            fullName: ai.fullName || heuristic.fullName,
+            email: ai.email || heuristic.email,
+            phone: ai.phone || heuristic.phone,
+            location: ai.location || heuristic.location,
+            summary: ai.summary || heuristic.summary,
+            skills: mergeSkills(heuristic.skills, ai.skills || []),
+            experience:
+              ai.experience && ai.experience.length > 0
+                ? ai.experience
+                : heuristic.experience,
+            education:
+              ai.education && ai.education.length > 0
+                ? ai.education
+                : heuristic.education,
+          }
+        }
+      } catch (e) {
+        console.warn('extract-resume AI failed, using heuristic result only', e)
+      }
+    }
+
+    setParsed(combined)
+    setSkillsInput((combined.skills || []).join(', '))
+    setSaveMessage('Fields updated. Saving…')
+
+    if (usedAI) {
+      console.info('Resume extract: heuristic + AI hybrid parsing used')
+    } else {
+      console.info('Resume extract: heuristic-only parsing used')
+    }
+  }
+
+  const handleFieldChange =
+    (field: 'fullName' | 'email' | 'phone' | 'location' | 'summary') =>
+      (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        if (!parsed) return
+        const next = { ...parsed, [field]: e.target.value }
+        setParsed(next)
+        setSaveMessage('Changes detected. Saving…')
+      }
+
+  const handleSkillsBlur = () => {
+    if (!parsed) return
+    const raw = skillsInput
+      .split(/[,;\n]/)
+      .map((s: string) => s.trim())
+      .filter(Boolean)
+
+    setParsed({ ...parsed, skills: raw })
+    setSaveMessage('Changes detected. Saving…')
+  }
+
+  // Autosave to Supabase when parsed fields or defaultResumeId change
+  useEffect(() => {
+    if (!defaultResumeId || !parsed) return
+
+    let cancelled = false
+    setIsSaving(true)
+
+    const timeout = setTimeout(async () => {
+      try {
+        const { error: updateError } = await supabase
+          .from('resumes')
+          .update({
+            parsed_fields: {
+              fullName: parsed.fullName,
+              email: parsed.email,
+              phone: parsed.phone,
+              location: parsed.location,
+              summary: parsed.summary,
+              skills: parsed.skills || [],
+            },
+          })
+          .eq('id', defaultResumeId)
+
+        if (cancelled) return
+
+        if (updateError) {
+          console.error('Failed to save parsed resume fields:', updateError)
+          setSaveMessage(
+            'Parsed fields updated locally. Saving to your resume record failed, check console for details.'
+          )
+        } else {
+          setSaveMessage('Parsed fields autosaved to your default resume.')
+        }
+      } catch (dbErr) {
+        if (cancelled) return
+        console.error('Unexpected error saving parsed resume fields:', dbErr)
+        setSaveMessage(
+          'Parsed fields updated locally. Saving to your resume record failed, check console for details.'
+        )
+      } finally {
+        if (!cancelled) setIsSaving(false)
+      }
+    }, 800)
+
+    return () => {
+      cancelled = true
+      clearTimeout(timeout)
+    }
+  }, [parsed, defaultResumeId])
+
+  const labelStyle: React.CSSProperties = {
+    fontSize: 12,
+    fontWeight: 600,
+    marginBottom: 4,
+    letterSpacing: '0.06em',
+    textTransform: 'uppercase',
+    color: '#555',
+  }
+
+  const helperStyle: React.CSSProperties = {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 4,
+  }
+
+  const buttonBase: React.CSSProperties = {
+    borderRadius: 999,
+    padding: '8px 14px',
+    fontSize: 13,
+    fontWeight: 500,
+    border: '1px solid #222',
+    cursor: 'pointer',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    whiteSpace: 'nowrap',
+  }
+
+  const primaryButton: React.CSSProperties = {
+    ...buttonBase,
+    backgroundColor: '#111',
+    color: '#fdfdfd',
+    borderColor: '#111',
+  }
+
+  const secondaryButton: React.CSSProperties = {
+    ...buttonBase,
+    backgroundColor: '#f7f7f7',
+    color: '#111',
+    borderColor: colors.borderLight,
+  }
+
   return (
-    <div style={{ display: 'grid', gap: 12 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <KeywordsIcon size={18} strokeWidth={1.7} />
-        <h2 style={{ fontSize: 15, fontWeight: 600, color: colors.text, margin: 0 }}>Extract resume data</h2>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 16,
+      }}
+    >
+      <div style={{ marginBottom: 4 }}>
+        <div style={{ fontSize: 14, color: '#333', marginBottom: 4 }}>
+          Step 1: Drop your resume text in. Step 2: Let the AI squint at it. Step 3: Fix anything it got weird about.
+        </div>
+        <div style={helperStyle}>
+          This tab is just for extracting clean contact info, summary, and skills from whatever resume you already have.
+        </div>
       </div>
-      <p style={{ fontSize: 13, color: colors.textSecondary, margin: 0 }}>
-        Paste your resume text to pull out structured details you can reuse elsewhere.
-      </p>
-      <TextArea
-        value={resumeText}
-        onChange={setResumeText}
-        placeholder="Paste your resume text..."
-        colors={colors}
-      />
-      <button
-        type="button"
-        onClick={handleExtract}
-        disabled={loading}
+
+      <div
         style={{
-          alignSelf: 'flex-start',
-          padding: '10px 16px',
-          borderRadius: 999,
-          border: 'none',
-          backgroundColor: colors.primary,
-          color: colors.text,
-          fontSize: 13,
-          fontWeight: 600,
-          cursor: loading ? 'not-allowed' : 'pointer',
-          opacity: loading ? 0.7 : 1,
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0, 1.3fr) minmax(0, 1fr)',
+          gap: 16,
+          alignItems: 'flex-start',
         }}
       >
-        {loading ? 'Extracting…' : 'Extract data'}
-      </button>
-      {result && (
+        {/* LEFT: RAW RESUME TEXT */}
         <div
           style={{
-            marginTop: 4,
-            padding: '12px 12px',
-            borderRadius: 12,
-            border: `1px solid ${colors.borderLight}`,
-            backgroundColor: colors.background,
-            fontSize: 13,
-            color: colors.text,
-            display: 'grid',
-            gap: 6,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
           }}
         >
-          <div><strong>Name:</strong> {result.fullName}</div>
-          <div><strong>Email:</strong> {result.email}</div>
-          <div><strong>Location:</strong> {result.location}</div>
-          <div><strong>Skills:</strong> {result.skills.join(', ')}</div>
+          <div style={labelStyle}>1. Paste your resume text</div>
+          <textarea
+            value={resumeText}
+            onChange={(e) => setResumeText(e.target.value)}
+            placeholder="Paste your full resume here. You can copy from a PDF, DOCX, or wherever it lives right now."
+            style={{
+              minHeight: 220,
+              padding: 12,
+              borderRadius: 12,
+              border: `1px solid ${colors.borderLight}`,
+              fontSize: 13,
+              lineHeight: 1.5,
+              resize: 'vertical',
+            }}
+          />
+          <div
+            style={{
+              display: 'flex',
+              gap: 8,
+              alignItems: 'center',
+              flexWrap: 'wrap',
+            }}
+          >
+            <button
+              type="button"
+              style={secondaryButton}
+              onClick={() => {
+                if (defaultResumeText && defaultResumeText.trim()) {
+                  setResumeText(defaultResumeText)
+                  setSaveMessage(null)
+                } else {
+                  alert('No default resume text found yet. Try uploading a resume first.')
+                }
+              }}
+            >
+              Use default resume
+            </button>
+            <button
+              type="button"
+              style={primaryButton}
+              onClick={handleExtract}
+              disabled={loading || !resumeText.trim()}
+            >
+              {loading ? 'Extracting…' : 'Extract fields'}
+            </button>
+          </div>
+          {error && (
+            <div
+              style={{
+                marginTop: 4,
+                padding: '10px 12px',
+                borderRadius: 10,
+                border: `1px solid ${colors.borderLight}`,
+                backgroundColor: '#fff6f6',
+                fontSize: 12,
+                color: '#b3261e',
+              }}
+            >
+              {error.message}
+            </div>
+          )}
+          <div style={helperStyle}>
+            Heads up: nothing on this tab overwrites your resume file. It just helps you get clean, structured text you
+            can reuse elsewhere.
+          </div>
         </div>
-      )}
+
+        {/* RIGHT: PARSED / EDITABLE FIELDS */}
+        <div
+          style={{
+            borderRadius: 16,
+            border: `1px solid ${colors.borderLight}`,
+            padding: 14,
+            backgroundColor: '#fafafa',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 10,
+          }}
+        >
+          <div style={labelStyle}>2. Review & edit detected fields</div>
+          {!parsed && (
+            <div style={{ fontSize: 13, color: '#666' }}>
+              Run an extraction to see your contact info, summary, and skills here in a more copy-paste friendly format.
+            </div>
+          )}
+
+          {parsed && (
+            <>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr',
+                  gap: 8,
+                }}
+              >
+                <div>
+                  <div style={labelStyle}>Name</div>
+                  <input
+                    type="text"
+                    value={parsed.fullName}
+                    onChange={handleFieldChange('fullName')}
+                    style={{
+                      width: '100%',
+                      padding: '8px 10px',
+                      borderRadius: 10,
+                      border: '1px solid #ddd',
+                      fontSize: 13,
+                    }}
+                  />
+                </div>
+                <div>
+                  <div style={labelStyle}>Email</div>
+                  <input
+                    type="email"
+                    value={parsed.email}
+                    onChange={handleFieldChange('email')}
+                    style={{
+                      width: '100%',
+                      padding: '8px 10px',
+                      borderRadius: 10,
+                      border: '1px solid #ddd',
+                      fontSize: 13,
+                    }}
+                  />
+                </div>
+                <div>
+                  <div style={labelStyle}>Phone</div>
+                  <input
+                    type="text"
+                    value={parsed.phone}
+                    onChange={handleFieldChange('phone')}
+                    style={{
+                      width: '100%',
+                      padding: '8px 10px',
+                      borderRadius: 10,
+                      border: '1px solid #ddd',
+                      fontSize: 13,
+                    }}
+                  />
+                </div>
+                <div>
+                  <div style={labelStyle}>Location</div>
+                  <input
+                    type="text"
+                    value={parsed.location}
+                    onChange={handleFieldChange('location')}
+                    style={{
+                      width: '100%',
+                      padding: '8px 10px',
+                      borderRadius: 10,
+                      border: '1px solid #ddd',
+                      fontSize: 13,
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div style={labelStyle}>Summary (optional)</div>
+                <textarea
+                  value={parsed.summary}
+                  onChange={handleFieldChange('summary')}
+                  placeholder="If your resume has a summary or headline, you can paste or tweak it here."
+                  style={{
+                    width: '100%',
+                    minHeight: 80,
+                    padding: '8px 10px',
+                    borderRadius: 10,
+                    border: '1px solid #ddd',
+                    fontSize: 13,
+                    resize: 'vertical',
+                  }}
+                />
+              </div>
+
+              <div>
+                <div style={labelStyle}>Skills (comma-separated)</div>
+                <textarea
+                  value={skillsInput}
+                  onChange={(e) => setSkillsInput(e.target.value)}
+                  onBlur={handleSkillsBlur}
+                  placeholder="Example: Social media strategy, GA4, Google Ads, Monday.com, Canva, HubSpot"
+                  style={{
+                    width: '100%',
+                    minHeight: 70,
+                    padding: '8px 10px',
+                    borderRadius: 10,
+                    border: '1px solid #ddd',
+                    fontSize: 13,
+                    resize: 'vertical',
+                  }}
+                />
+                <div style={helperStyle}>
+                  We split this into individual skills in the background, so you can be as casual or as extra as you like
+                  here.
+                </div>
+              </div>
+
+              <div style={helperStyle}>
+                {isSaving
+                  ? 'Saving your changes to your default resume…'
+                  : saveMessage || 'Your cleaned fields will autosave to your default resume when you make changes.'}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
 
-function ResumeAnalyzeTab({ colors }: TabProps) {
-  const { analyze, loading } = useAnalyzeResume()
+function ResumeAnalyzeTab({ colors, defaultResumeText }: TabProps) {
+  const { user } = useAuth()
+  const { analyze, loading, error } = useAnalyzeResume()
   const [resumeText, setResumeText] = useState('')
   const [result, setResult] = useState<ResumeAnalysisResponse['data'] | null>(null)
+
+  const handleLoadDefault = () => {
+    if (defaultResumeText && defaultResumeText.trim()) {
+      setResumeText(defaultResumeText)
+    } else {
+      console.warn(
+        'No default resume text available for analyze tab. Try uploading a resume first.'
+      )
+    }
+  }
 
   const handleAnalyze = async () => {
     if (!resumeText.trim()) return
     const response = await analyze(resumeText)
+
     if (response?.success && response.data) {
       setResult(response.data)
+
+      if (user) {
+        try {
+          const { error: updateError } = await supabase
+            .from('resumes')
+            .update({ ats_score: response.data.atsScore })
+            .eq('user_id', user.id)
+            .eq('is_default', true)
+
+          if (updateError) {
+            console.error('Failed to save ATS score to default resume:', updateError)
+          }
+        } catch (err) {
+          console.error('Unexpected error saving ATS score:', err)
+        }
+      }
     }
   }
 
@@ -740,17 +1595,41 @@ function ResumeAnalyzeTab({ colors }: TabProps) {
     <div style={{ display: 'grid', gap: 12 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <MatchScoreIcon size={18} strokeWidth={1.7} />
-        <h2 style={{ fontSize: 15, fontWeight: 600, color: colors.text, margin: 0 }}>Analyze for ATS</h2>
+        <h2 style={{ fontSize: 15, fontWeight: 600, color: colors.text, margin: 0 }}>
+          Analyze for ATS
+        </h2>
       </div>
+
       <p style={{ fontSize: 13, color: colors.textSecondary, margin: 0 }}>
-        Quick read on how an ATS will score this version before you send it.
+        Quick read on how an ATS will score this version before you send it. You can paste text or load your default resume.
       </p>
+
+      {user && (
+        <button
+          type="button"
+          onClick={handleLoadDefault}
+          style={{
+            alignSelf: 'flex-start',
+            padding: '6px 12px',
+            borderRadius: 999,
+            border: `1px solid ${colors.borderLight}`,
+            backgroundColor: colors.surfaceHover,
+            color: colors.text,
+            fontSize: 12,
+            cursor: 'pointer',
+          }}
+        >
+          Use default resume
+        </button>
+      )}
+
       <TextArea
         value={resumeText}
         onChange={setResumeText}
         placeholder="Paste your resume text..."
         colors={colors}
       />
+
       <button
         type="button"
         onClick={handleAnalyze}
@@ -770,6 +1649,23 @@ function ResumeAnalyzeTab({ colors }: TabProps) {
       >
         {loading ? 'Analyzing…' : 'Analyze'}
       </button>
+
+      {error && (
+        <div
+          style={{
+            marginTop: 4,
+            padding: '10px 12px',
+            borderRadius: 10,
+            border: `1px solid ${colors.borderLight}`,
+            backgroundColor: colors.background,
+            fontSize: 12,
+            color: colors.error || '#b3261e',
+          }}
+        >
+          {error.message}
+        </div>
+      )}
+
       {result && (
         <div
           style={{
@@ -784,21 +1680,34 @@ function ResumeAnalyzeTab({ colors }: TabProps) {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ fontSize: 26, fontWeight: 700, color: colors.primary }}>{result.atsScore}%</div>
+            <div style={{ fontSize: 26, fontWeight: 700, color: colors.primary }}>
+              {result.atsScore}%
+            </div>
             <div style={{ fontSize: 13, color: colors.textSecondary }}>
-              ATS score · {result.improvements.length > 0 ? 'Opportunities found' : 'Solid alignment'}
+              ATS score ·{' '}
+              {result.improvements.length > 0
+                ? 'Opportunities found'
+                : 'Solid alignment'}
             </div>
           </div>
+
           <div>
-            <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 4 }}>Strengths</div>
+            <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 4 }}>
+              Strengths
+            </div>
             <ul style={{ margin: 0, paddingLeft: 18, color: colors.textSecondary }}>
-              {result.keywordMatches.length === 0
-                ? <li>No standout keywords yet.</li>
-                : result.keywordMatches.map((item) => <li key={item}>{item}</li>)}
+              {result.keywordMatches.length === 0 ? (
+                <li>No standout keywords yet.</li>
+              ) : (
+                result.keywordMatches.map((item) => <li key={item}>{item}</li>)
+              )}
             </ul>
           </div>
+
           <div>
-            <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 4 }}>Areas to improve</div>
+            <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 4 }}>
+              Areas to improve
+            </div>
             <ul style={{ margin: 0, paddingLeft: 18, color: colors.textSecondary }}>
               {result.improvements.map((item) => (
                 <li key={item}>{item}</li>
@@ -811,11 +1720,22 @@ function ResumeAnalyzeTab({ colors }: TabProps) {
   )
 }
 
-function ResumeOptimizeTab({ colors }: TabProps) {
-  const { optimize, loading } = useOptimizeResume()
+function ResumeOptimizeTab({ colors, defaultResumeText }: TabProps) {
+  const { user } = useAuth()
+  const { optimize, loading, error } = useOptimizeResume()
   const [resumeText, setResumeText] = useState('')
   const [jobDescription, setJobDescription] = useState('')
   const [result, setResult] = useState<ResumeOptimizationResponse['data'] | null>(null)
+
+  const handleLoadDefault = () => {
+    if (defaultResumeText && defaultResumeText.trim()) {
+      setResumeText(defaultResumeText)
+    } else {
+      console.warn(
+        'No default resume text available for optimize tab. Try uploading a resume first.'
+      )
+    }
+  }
 
   const handleOptimize = async () => {
     if (!resumeText.trim()) return
@@ -829,11 +1749,34 @@ function ResumeOptimizeTab({ colors }: TabProps) {
     <div style={{ display: 'grid', gap: 12 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <ApplicationsIcon size={18} strokeWidth={1.7} />
-        <h2 style={{ fontSize: 15, fontWeight: 600, color: colors.text, margin: 0 }}>Optimize for a role</h2>
+        <h2 style={{ fontSize: 15, fontWeight: 600, color: colors.text, margin: 0 }}>
+          Optimize for a role
+        </h2>
       </div>
+
       <p style={{ fontSize: 13, color: colors.textSecondary, margin: 0 }}>
         Get adjustments that keep your voice but align to the role without exaggerating experience.
       </p>
+
+      {user && (
+        <button
+          type="button"
+          onClick={handleLoadDefault}
+          style={{
+            alignSelf: 'flex-start',
+            padding: '6px 12px',
+            borderRadius: 999,
+            border: `1px solid ${colors.borderLight}`,
+            backgroundColor: colors.surfaceHover,
+            color: colors.text,
+            fontSize: 12,
+            cursor: 'pointer',
+          }}
+        >
+          Use default resume
+        </button>
+      )}
+
       <TextArea
         value={resumeText}
         onChange={setResumeText}
@@ -841,6 +1784,7 @@ function ResumeOptimizeTab({ colors }: TabProps) {
         colors={colors}
         minRows={5}
       />
+
       <TextArea
         value={jobDescription}
         onChange={setJobDescription}
@@ -848,6 +1792,7 @@ function ResumeOptimizeTab({ colors }: TabProps) {
         colors={colors}
         minRows={4}
       />
+
       <button
         type="button"
         onClick={handleOptimize}
@@ -867,6 +1812,23 @@ function ResumeOptimizeTab({ colors }: TabProps) {
       >
         {loading ? 'Optimizing…' : 'Get suggestions'}
       </button>
+
+      {error && (
+        <div
+          style={{
+            marginTop: 4,
+            padding: '10px 12px',
+            borderRadius: 10,
+            border: `1px solid ${colors.borderLight}`,
+            backgroundColor: colors.background,
+            fontSize: 12,
+            color: colors.error || '#b3261e',
+          }}
+        >
+          {error.message}
+        </div>
+      )}
+
       {result && (
         <div style={{ display: 'grid', gap: 10 }}>
           <div
@@ -899,6 +1861,7 @@ function ResumeOptimizeTab({ colors }: TabProps) {
               {result.optimizedResume}
             </div>
           </div>
+
           {result.improvements.length > 0 && (
             <div
               style={{

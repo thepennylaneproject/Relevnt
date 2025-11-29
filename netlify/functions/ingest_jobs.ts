@@ -307,3 +307,7 @@ export const handler: Handler = async (event) => {
     }
   }
 }
+export const config = {
+  // run once an hour
+  schedule: '@hourly',
+}

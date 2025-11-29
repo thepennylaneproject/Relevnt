@@ -27,14 +27,34 @@ export interface Resume {
   user_id: string
   title: string
   is_default: boolean
-  version_number: number
+  version_number: number | null
   ats_score: number | null
   created_at: string
   updated_at: string
+
+  // File metadata
   mime_type?: string | null
   file_name?: string | null
   file_size_bytes?: number | null
+
+  // Parsed and structured content
   parsed_text?: string | null
+  summary?: string | null
+  personal_info?: any
+  work_experience?: any
+  education?: any
+  skills?: any
+  certifications?: any
+  projects?: any
+  languages?: any
+
+  // ATS-related fields
+  ats_suggestions?: any
+  keywords?: any
+
+  // Optimization tracking
+  last_optimization_date?: string | null
+  optimization_history?: any
 }
 
 export interface UseResumesReturn {
@@ -106,7 +126,23 @@ export function useResumes(user: User): UseResumesReturn {
     try {
       const { data, error: supabaseError } = await supabase
         .from('resumes')
-        .select('*')
+        .select(
+          `
+          id,
+          user_id,
+          title,
+          is_default,
+          version_number,
+          ats_score,
+          parsed_text,
+          summary,
+          mime_type,
+          file_name,
+          file_size_bytes,
+          created_at,
+          updated_at
+        `
+        )
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
 
@@ -159,6 +195,11 @@ export function useResumes(user: User): UseResumesReturn {
             is_default,
             version_number,
             ats_score,
+            parsed_text,
+            summary,
+            mime_type,
+            file_name,
+            file_size_bytes,
             created_at,
             updated_at
           `

@@ -162,31 +162,55 @@ export function useAITask(): UseAITaskReturn {
   // =========================================================================
   // QUOTA CHECKING
   // =========================================================================
+  // Normalize any raw tier string into a known AI tier
+  // Normalize any raw tier string into a known AI tier
+  const normalizeUserTierForAI = (rawTier: string | undefined | null): UserTierForAI => {
+    const tier = (rawTier || '').toLowerCase();
 
+    // Treat admin as premium for AI access
+    if (tier === 'admin') {
+      return 'premium' as UserTierForAI;
+    }
+
+    if (tier === 'premium') {
+      return 'premium' as UserTierForAI;
+    }
+
+    if (tier === 'pro') {
+      return 'pro' as UserTierForAI;
+    }
+
+    if (tier === 'starter') {
+      return 'starter' as UserTierForAI;
+    }
+
+    // Fallback for anything weird
+    return 'starter' as UserTierForAI;
+  };
   /**
    * Check if user has quota remaining for this task
    */
   const checkQuota = useCallback(
     (taskName: TaskName): { canUse: boolean; reason?: string } => {
-      // Get user tier from auth context
-      const userTier = (user?.user_metadata?.tier || 'starter') as UserTierForAI;
+      // Raw tier from auth metadata
+      const rawTier = user?.user_metadata?.tier as string | undefined;
 
-      // Get monthly limit for this task/tier
-      const limit = getTaskLimit(userTier, taskName);
+      // Normalize to something the quota system understands
+      const normalizedTier = normalizeUserTierForAI(rawTier);
+
+      // Get monthly limit for this task / tier
+      const limit = getTaskLimit(normalizedTier, taskName);
 
       // Premium tier has unlimited usage
       if (limit === Infinity) {
         return { canUse: true };
       }
 
-      // For now, we'll check against a simple count
-      // In production, this would query Supabase for actual usage
-      // This is a placeholder - your backend will return real usage
-      return { canUse: true }; // Backend enforces limits
+      // Placeholder: backend will enforce actual usage limits
+      return { canUse: true };
     },
     [user]
   );
-
   // =========================================================================
   // RETRY LOGIC WITH EXPONENTIAL BACKOFF
   // =========================================================================

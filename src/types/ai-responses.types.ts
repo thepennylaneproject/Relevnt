@@ -381,12 +381,36 @@ export const TIER_LIMITS = {
 
 /**
  * Map user tier to usage limits
+ *
+ * Note: we support internal tiers like "starter" and "admin" as well,
+ * even if they do not have explicit entries in TIER_LIMITS. Missing
+ * tiers or tasks are treated as effectively "unlimited" at this layer,
+ * and the backend is responsible for any hard enforcement.
  */
-export type UserTierForAI = 'free' | 'pro' | 'premium';
+export type UserTierForAI = 'starter' | 'free' | 'pro' | 'premium' | 'admin';
 
 /**
- * Get limit for a specific task and tier
+ * Get limit for a specific task and tier in a safe way.
+ *
+ * - If the tier has no entry in TIER_LIMITS, treat as unlimited.
+ * - If the tier exists but the specific task is missing, treat as unlimited.
+ * - Otherwise return the configured numeric limit.
  */
 export function getTaskLimit(tier: UserTierForAI, task: TaskName): number {
-  return TIER_LIMITS[tier][task] ?? 0;
+  const tierLimits =
+    (TIER_LIMITS as Partial<Record<UserTierForAI, Record<TaskName, number>>>)[tier];
+
+  // Unknown / unset tier: no limit enforced at this layer
+  if (!tierLimits) {
+    return Infinity;
+  }
+
+  const limit = tierLimits[task];
+
+  // Missing task config: also treat as unlimited
+  if (typeof limit !== 'number') {
+    return Infinity;
+  }
+
+  return limit;
 }
