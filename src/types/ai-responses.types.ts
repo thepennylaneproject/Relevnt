@@ -39,32 +39,52 @@ export interface NumberResponse {
 // RESUME ANALYSIS RESPONSES
 // ============================================================================
 
-/**
- * Resume extraction - parse resume text into structured data
- */
+export interface ResumeExtractionBrainstorm {
+  suggestedSkills?: string[]
+  alternateTitles?: string[]
+  relatedKeywords?: string[]
+  positioningNotes?: string
+}
+
+export interface ResumeExtractionData {
+  fullName: string
+  email: string
+  phone: string
+  location: string
+  summary: string
+  skills: string[]
+
+  experience: {
+    title: string
+    company: string
+    location?: string
+    startDate?: string
+    endDate?: string
+    current?: boolean
+    bullets?: string[]
+  }[]
+
+  education: {
+    institution: string
+    degree?: string
+    fieldOfStudy?: string
+    startDate?: string
+    endDate?: string
+  }[]
+
+  certifications?: {
+    name: string
+    issuer?: string
+    year?: string
+  }[]
+
+  brainstorming?: ResumeExtractionBrainstorm | null
+}
+
 export interface ResumeExtractionResponse {
-  success: boolean;
-  data: {
-    fullName: string;
-    email: string;
-    phone: string;
-    location: string;
-    summary: string;
-    skills: string[];
-    experience: Array<{
-      title: string;
-      company: string;
-      duration: string;
-      description: string;
-    }>;
-    education: Array<{
-      school: string;
-      degree: string;
-      field: string;
-      year: string;
-    }>;
-  };
-  error?: string;
+  success: boolean
+  data: ResumeExtractionData
+  error?: string
 }
 
 /**
@@ -282,6 +302,34 @@ export interface APIResponse<T> {
 }
 
 // ============================================================================
+// NEW AI ASSIST RESPONSES
+// ============================================================================
+
+export interface GenerateBulletsResponse {
+  success: boolean
+  data: {
+    bullets: string[]
+  }
+  error?: string
+}
+
+export interface RewriteTextResponse {
+  success: boolean
+  data: {
+    rewritten: string
+  }
+  error?: string
+}
+
+export interface SuggestSkillsResponse {
+  success: boolean
+  data: {
+    skills: string[]
+  }
+  error?: string
+}
+
+// ============================================================================
 // UNION TYPE FOR ALL RESPONSES
 // ============================================================================
 
@@ -303,7 +351,10 @@ export type AITaskResponse =
   | JobRankingResponse
   | SkillsGapResponse
   | CoverLetterResponse
-  | InterviewPrepResponse;
+  | InterviewPrepResponse
+  | GenerateBulletsResponse
+  | RewriteTextResponse
+  | SuggestSkillsResponse
 
 /**
  * Task name to response type mapping
@@ -323,7 +374,10 @@ export const TASK_RESPONSE_TYPES = {
   'analyze-skills-gap': {} as SkillsGapResponse,
   'generate-cover-letter': {} as CoverLetterResponse,
   'prepare-interview': {} as InterviewPrepResponse,
-} as const;
+  'generate-bullets': {} as GenerateBulletsResponse,
+  'rewrite-text': {} as RewriteTextResponse,
+  'suggest-skills': {} as SuggestSkillsResponse,
+} as const
 
 /**
  * All valid task names
@@ -350,6 +404,9 @@ export const TIER_LIMITS = {
     'analyze-skills-gap': 3,
     'generate-cover-letter': 2,
     'prepare-interview': 2,
+    'generate-bullets': 5,
+    'rewrite-text': 5,
+    'suggest-skills': 5,
   },
   pro: {
     'extract-resume': 50,
@@ -363,6 +420,9 @@ export const TIER_LIMITS = {
     'analyze-skills-gap': 30,
     'generate-cover-letter': 20,
     'prepare-interview': 20,
+    'generate-bullets': 50,
+    'rewrite-text': 50,
+    'suggest-skills': 50,
   },
   premium: {
     'extract-resume': Infinity,
@@ -376,6 +436,9 @@ export const TIER_LIMITS = {
     'analyze-skills-gap': Infinity,
     'generate-cover-letter': Infinity,
     'prepare-interview': Infinity,
+    'generate-bullets': Infinity,
+    'rewrite-text': Infinity,
+    'suggest-skills': Infinity,
   },
 } as const;
 

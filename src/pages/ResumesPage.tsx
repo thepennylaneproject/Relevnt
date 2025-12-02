@@ -1,11 +1,10 @@
-import React, { CSSProperties, useMemo, useState, useEffect, useCallback } from 'react'
+import React, { CSSProperties, useMemo, useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { FeatureGate } from '../components/features/FeatureGate'
 import { Container } from '../components/shared/Container'
 import {
   ResumeIcon,
   ApplicationsIcon,
-  KeywordsIcon,
   MatchScoreIcon,
 } from '../components/icons/RelevntIcons'
 import { useRelevntColors } from '../hooks'
@@ -27,6 +26,29 @@ import type {
 import { supabase } from '../lib/supabase'
 import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist'
 
+type ParsedResumeData = Omit<
+  ResumeExtractionResponse['data'],
+  'brainstorming' | 'certifications'
+> & {
+  certifications?: string[]          // just names for now
+  brainstorming?: {
+    suggestedSkills?: string[]
+    alternateTitles?: string[]
+    relatedKeywords?: string[]
+    positioningNotes?: string
+  } | null
+}
+// Shared helper for formatting date ranges for experience/education previews
+function formatDateRange(start?: string, end?: string, current?: boolean): string {
+  const cleanStart = start?.trim()
+  const cleanEnd = current ? 'Present' : end?.trim()
+
+  if (!cleanStart && !cleanEnd) return ''
+  if (cleanStart && !cleanEnd) return cleanStart
+  if (!cleanStart && cleanEnd) return cleanEnd
+
+  return `${cleanStart} - ${cleanEnd}`
+}
 
 type ResumeTab = 'list' | 'upload' | 'extract' | 'analyze' | 'optimize'
 
@@ -64,7 +86,7 @@ export function ResumesPage(): JSX.Element {
 
   // New: hydrate parsed fields from the DB so the right-hand panel starts filled in
   const defaultParsedFields =
-    ((defaultResume as any)?.parsed_fields as ResumeExtractionResponse['data']) || null
+    ((defaultResume as any)?.parsed_fields as ParsedResumeData) || null
 
   const [activeTab, setActiveTab] = useState<ResumeTab>('list')
 
@@ -83,6 +105,7 @@ export function ResumesPage(): JSX.Element {
   const canExtract = hasFeatureAccess('resume-extract', userTier)
   const canAnalyze = hasFeatureAccess('resume-analyze', userTier)
   const canOptimize = hasFeatureAccess('resume-optimize', userTier)
+
 
   const wrapper: CSSProperties = {
     flex: 1,
@@ -320,156 +343,9 @@ interface TabProps {
   colors: RelevntColors;
   defaultResumeText?: string;
   defaultResumeId?: string;
-  defaultParsedFields?: ResumeExtractionResponse['data'] | null;
+  defaultParsedFields?: ParsedResumeData | null;
 }
 
-interface ParsedResumeContent {
-  name: string
-  email: string
-  phone: string
-  location: string
-  summary: string
-  skills: string[]
-}
-
-function parseResumeContent(raw: string): ResumeExtractionResponse['data'] {
-  // Normalize text
-  const text = raw
-    .replace(/\r\n/g, '\n')
-    .replace(/\u00A0/g, ' ')
-    .replace(/&amp;/gi, '&')
-    .trim()
-
-  const lines = text
-    .split('\n')
-    .map((l) => l.trim())
-    .filter((l) => l.length > 0)
-
-  // --------------------------
-  // CONTACT INFO
-  // --------------------------
-
-  const emailMatch = text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)
-  const phoneMatch = text.match(/(\+?\d[\d\s().-]{7,}\d)/)
-  const locationMatch =
-    text.match(/\b[A-Z][a-z]+,\s*[A-Z]{2}\s*\d{5}\b/) ||
-    text.match(/\b[A-Z][a-z]+,\s*[A-Z]{2}\b/)
-
-  // Name from first "Firstname Lastname" at top
-  let fullName = ''
-  const nameLine = lines.find((l, idx) =>
-    idx < 5 && /^[A-Z][a-z]+ [A-Z][a-z]+/.test(l)
-  )
-  if (nameLine) {
-    const leftPart = nameLine.split('|')[0].trim()
-    const nameTokens = leftPart.split(/\s+/)
-    fullName = nameTokens.slice(0, 2).join(' ')
-  }
-
-
-
-  // --------------------------
-  // SUMMARY EXTRACTION (ROBUST FOR SINGLE-LINE RESUMES)
-  // --------------------------
-
-  let summary = ''
-
-  // Identify the contact header end (email or phone)
-  const headerIndex = text.search(emailMatch?.[0] || phoneMatch?.[0] || '')
-  let searchStart = headerIndex >= 0 ? headerIndex : 0
-
-  // Define where major sections begin
-  const sectionRegex = /(Professional Experience|Experience|Work Experience|Employment History|Education\b|Technical Skills\b)/i
-  const sectionMatch = text.match(sectionRegex)
-  const sectionIndex = sectionMatch ? sectionMatch.index! : -1
-
-  // Extract the chunk between header and the first section
-  if (sectionIndex > searchStart) {
-    let summaryChunk = text.slice(searchStart, sectionIndex).trim()
-
-    // Remove email/phone/location/name repetition
-    summaryChunk = summaryChunk
-      .replace(fullName, '')
-      .replace(emailMatch?.[0] || '', '')
-      .replace(phoneMatch?.[0] || '', '')
-      .replace(locationMatch?.[0] || '', '')
-      .replace(/\|/g, ' ')
-      .trim()
-
-    // Take first 1–2 sentences only
-    const sentences = summaryChunk
-      .split(/(?<=[.?!])\s+/)
-      .map(s => s.trim())
-      .filter(s => s.length > 0)
-
-    const firstSentences = sentences.slice(0, 2).join(' ')
-
-    // Reject nonsense / too short summaries
-    if (firstSentences.split(/\s+/).length >= 6) {
-      summary = firstSentences
-    }
-  }
-
-  // Final sanity check
-  if (summary.length < 20) {
-    summary = ''
-  }
-
-  // --------------------------
-  // SKILLS EXTRACTION (FROM TECHNICAL SKILLS BLOCK)
-  // --------------------------
-
-  let skills: string[] = []
-
-  const techBlockMatch = text.match(/Technical Skills([\s\S]+)/i)
-  if (techBlockMatch) {
-    let skillsBlock = techBlockMatch[1]
-
-    // Cut off at next big section
-    skillsBlock = skillsBlock.split(/Professional Experience|Experience\b|Work Experience|Education &/i)[0]
-
-    // Normalize parentheses to commas to split better
-    skillsBlock = skillsBlock.replace(/[()]/g, ',')
-
-    const rawTokens = skillsBlock
-      .split(/[,;•|]/)
-      .map((t) => t.trim())
-      .filter((t) => t.length > 1)
-
-    const seen = new Set<string>()
-    skills = rawTokens.filter((token) => {
-      // Drop obvious sentence fragments
-      if (token.includes('.')) return false
-      if (token.split(/\s+/).length > 6) return false
-
-      const lower = token.toLowerCase()
-      if (
-        lower.includes('technical skills') ||
-        lower.includes('education &') ||
-        lower.includes('professional experience') ||
-        lower.includes('resume page')
-      ) {
-        return false
-      }
-
-      const key = lower
-      if (seen.has(key)) return false
-      seen.add(key)
-      return true
-    })
-  }
-
-  return {
-    fullName,
-    email: emailMatch?.[0] ?? '',
-    phone: phoneMatch?.[0]?.trim() ?? '',
-    location: locationMatch?.[0] ?? '',
-    summary,
-    skills,
-    experience: [],
-    education: [],
-  }
-}
 
 function ResumeCard({
   resume,
@@ -933,12 +809,6 @@ function TextArea({
   )
 }
 
-// ---------------------------------------------------------------------------
-// Heuristic resume parsing (fast, offline, no tokens)
-// ---------------------------------------------------------------------------
-
-type ParsedResumeData = ResumeExtractionResponse['data']
-
 function normalizeResumeText(raw: string): string {
   // Strip common unicode icons and normalize whitespace
   return raw
@@ -1090,7 +960,7 @@ function mergeSkills(a: string[], b: string[] = []): string[] {
 
 function parseResumeHeuristic(raw: string): ParsedResumeData {
   const normalized = normalizeResumeText(raw)
-  const lines = splitLines(raw)
+  const lines = splitLines(normalized)
 
   const email = inferEmail(normalized)
   const phone = inferPhone(normalized)
@@ -1108,6 +978,8 @@ function parseResumeHeuristic(raw: string): ParsedResumeData {
     skills,
     experience: [],
     education: [],
+    certifications: [],
+    brainstorming: null,
   }
 }
 
@@ -1118,78 +990,142 @@ function ResumeExtractTab({
   defaultParsedFields,
 }: TabProps) {
   const { extract, loading, error } = useExtractResume()
-  const [resumeText, setResumeText] = useState('')
-  const [parsed, setParsed] = useState<ResumeExtractionResponse['data'] | null>(
-    defaultParsedFields || null
-  )
-  const [skillsInput, setSkillsInput] = useState(
-    defaultParsedFields?.skills?.join(', ') || ''
-  )
-  const [saveMessage, setSaveMessage] = useState<string | null>(null)
-  const [isSaving, setIsSaving] = useState(false)
 
-  // Hydrate from DB when defaultParsedFields changes
+  const [resumeText, setResumeText] = useState('')
+  const [parsed, setParsed] = useState<ParsedResumeData | null>(null)
+  const [skillsInput, setSkillsInput] = useState('')
+  const [saveMessage, setSaveMessage] = useState<string | null>(null)
+
+  // Simple toggles so sections can collapse
+  const [activeSections, setActiveSections] = useState({
+    summary: true,
+    skills: true,
+    experience: true,
+    education: true,
+    brainstorm: true,
+  })
+
+  const experience = parsed?.experience || []
+  const education = parsed?.education || []
+  const brainstorming = parsed?.brainstorming || null
+
+  // Hydrate from DB when defaultParsedFields is present
   useEffect(() => {
     if (defaultParsedFields) {
       setParsed(defaultParsedFields)
       setSkillsInput((defaultParsedFields.skills || []).join(', '))
-      setSaveMessage('Loaded saved fields from your default resume.')
+      setSaveMessage('Loaded saved structured fields from your default resume.')
     }
   }, [defaultParsedFields])
+
+  const toggleSection = (key: keyof typeof activeSections) => {
+    setActiveSections((prev) => ({ ...prev, [key]: !prev[key] }))
+  }
+
+  const persistParsed = async (data: ParsedResumeData) => {
+    // Helpful log while we are wiring this up
+    console.log('persistParsed: defaultResumeId =', defaultResumeId, 'data:', data)
+
+    if (!defaultResumeId) {
+      setSaveMessage(
+        'Structured fields updated locally. No default resume record was found to save into.'
+      )
+      return
+    }
+
+    try {
+      const { error: updateError } = await supabase
+        .from('resumes')
+        .update({
+          parsed_fields: {
+            fullName: data.fullName,
+            email: data.email,
+            phone: data.phone,
+            location: data.location,
+            summary: data.summary,
+            skills: data.skills,
+            experience: data.experience,
+            education: data.education,
+            certifications: data.certifications,
+            brainstorming: data.brainstorming,
+          },
+        })
+        .eq('id', defaultResumeId)
+
+      if (updateError) {
+        console.error('Failed to save parsed resume fields:', updateError)
+        setSaveMessage(
+          'Structured fields updated locally. Saving to your resume record failed.'
+        )
+      } else {
+        setSaveMessage('Structured fields saved to your default resume.')
+      }
+    } catch (dbErr) {
+      console.error('Unexpected error saving parsed resume fields:', dbErr)
+      setSaveMessage(
+        'Structured fields updated locally. Saving to your resume record failed.'
+      )
+    }
+  }
 
   const handleExtract = async () => {
     if (!resumeText.trim()) return
 
-    // First pass: heuristic parser
+    // First pass: heuristic for a safety net
     const heuristic = parseResumeHeuristic(resumeText)
 
-    let combined = heuristic
+    let combined: ParsedResumeData = {
+      fullName: heuristic.fullName,
+      email: heuristic.email,
+      phone: heuristic.phone,
+      location: heuristic.location,
+      summary: heuristic.summary,
+      skills: heuristic.skills,
+      experience: [],
+      education: [],
+      certifications: [],
+      brainstorming: null,
+    }
+
     let usedAI = false
 
-    // Only call AI if we need help
-    const needsAI =
-      !heuristic.summary ||
-      heuristic.summary.length < 80 ||
-      heuristic.skills.length < 5
+    try {
+      const response = await extract(resumeText)
 
-    if (needsAI) {
-      try {
-        const response = await extract(resumeText)
+      if (response?.success && response.data) {
+        usedAI = true
+        const ai = response.data
 
-        if (response?.success && response.data) {
-          usedAI = true
-          const ai = response.data
-
-          combined = {
-            fullName: ai.fullName || heuristic.fullName,
-            email: ai.email || heuristic.email,
-            phone: ai.phone || heuristic.phone,
-            location: ai.location || heuristic.location,
-            summary: ai.summary || heuristic.summary,
-            skills: mergeSkills(heuristic.skills, ai.skills || []),
-            experience:
-              ai.experience && ai.experience.length > 0
-                ? ai.experience
-                : heuristic.experience,
-            education:
-              ai.education && ai.education.length > 0
-                ? ai.education
-                : heuristic.education,
-          }
+        combined = {
+          fullName: ai.fullName || heuristic.fullName,
+          email: ai.email || heuristic.email,
+          phone: ai.phone || heuristic.phone,
+          location: ai.location || heuristic.location,
+          summary: ai.summary || heuristic.summary,
+          skills: mergeSkills(heuristic.skills, ai.skills || []),
+          experience: ai.experience || [],
+          education: ai.education || [],
+          certifications: (ai.certifications || [])
+            .map((c: { name?: string }) => c.name || '')
+            .filter((name) => Boolean(name)),
+          brainstorming: ai.brainstorming || null,
         }
-      } catch (e) {
-        console.warn('extract-resume AI failed, using heuristic result only', e)
       }
+    } catch (e) {
+      console.warn('extract-resume AI failed, using heuristic only', e)
     }
 
     setParsed(combined)
     setSkillsInput((combined.skills || []).join(', '))
-    setSaveMessage('Fields updated. Saving…')
+    setSaveMessage(null)
+
+    // Auto-save once after extraction so the rest of the app has something to work with
+    await persistParsed(combined)
 
     if (usedAI) {
       console.info('Resume extract: heuristic + AI hybrid parsing used')
     } else {
-      console.info('Resume extract: heuristic-only parsing used')
+      console.info('Resume extract: heuristic only parsing used')
     }
   }
 
@@ -1197,9 +1133,8 @@ function ResumeExtractTab({
     (field: 'fullName' | 'email' | 'phone' | 'location' | 'summary') =>
       (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         if (!parsed) return
-        const next = { ...parsed, [field]: e.target.value }
-        setParsed(next)
-        setSaveMessage('Changes detected. Saving…')
+        setParsed({ ...parsed, [field]: e.target.value })
+        setSaveMessage(null)
       }
 
   const handleSkillsBlur = () => {
@@ -1210,58 +1145,22 @@ function ResumeExtractTab({
       .filter(Boolean)
 
     setParsed({ ...parsed, skills: raw })
-    setSaveMessage('Changes detected. Saving…')
+    setSaveMessage(null)
   }
 
-  // Autosave to Supabase when parsed fields or defaultResumeId change
-  useEffect(() => {
-    if (!defaultResumeId || !parsed) return
+  const addSuggestedSkill = (skill: string) => {
+    if (!parsed) return
+    const existing = new Set(
+      (parsed.skills || []).map((s) => s.trim().toLowerCase())
+    )
+    const key = skill.trim().toLowerCase()
+    if (!key || existing.has(key)) return
 
-    let cancelled = false
-    setIsSaving(true)
-
-    const timeout = setTimeout(async () => {
-      try {
-        const { error: updateError } = await supabase
-          .from('resumes')
-          .update({
-            parsed_fields: {
-              fullName: parsed.fullName,
-              email: parsed.email,
-              phone: parsed.phone,
-              location: parsed.location,
-              summary: parsed.summary,
-              skills: parsed.skills || [],
-            },
-          })
-          .eq('id', defaultResumeId)
-
-        if (cancelled) return
-
-        if (updateError) {
-          console.error('Failed to save parsed resume fields:', updateError)
-          setSaveMessage(
-            'Parsed fields updated locally. Saving to your resume record failed, check console for details.'
-          )
-        } else {
-          setSaveMessage('Parsed fields autosaved to your default resume.')
-        }
-      } catch (dbErr) {
-        if (cancelled) return
-        console.error('Unexpected error saving parsed resume fields:', dbErr)
-        setSaveMessage(
-          'Parsed fields updated locally. Saving to your resume record failed, check console for details.'
-        )
-      } finally {
-        if (!cancelled) setIsSaving(false)
-      }
-    }, 800)
-
-    return () => {
-      cancelled = true
-      clearTimeout(timeout)
-    }
-  }, [parsed, defaultResumeId])
+    const updated = [...(parsed.skills || []), skill]
+    setParsed({ ...parsed, skills: updated })
+    setSkillsInput(updated.join(', '))
+    setSaveMessage(null)
+  }
 
   const labelStyle: React.CSSProperties = {
     fontSize: 12,
@@ -1306,6 +1205,15 @@ function ResumeExtractTab({
     borderColor: colors.borderLight,
   }
 
+  const chipStyle: React.CSSProperties = {
+    padding: '4px 8px',
+    borderRadius: 999,
+    border: `1px solid ${colors.borderLight}`,
+    backgroundColor: '#fff',
+    fontSize: 11,
+    cursor: 'pointer',
+  }
+
   return (
     <div
       style={{
@@ -1316,10 +1224,12 @@ function ResumeExtractTab({
     >
       <div style={{ marginBottom: 4 }}>
         <div style={{ fontSize: 14, color: '#333', marginBottom: 4 }}>
-          Step 1: Drop your resume text in. Step 2: Let the AI squint at it. Step 3: Fix anything it got weird about.
+          Step 1: Drop your resume text in. Step 2: Let the AI squint at it. Step 3:
+          Fix anything it got weird about.
         </div>
         <div style={helperStyle}>
-          This tab is just for extracting clean contact info, summary, and skills from whatever resume you already have.
+          This tab is for turning messy resume text into clean, structured fields
+          Relevnt can reuse everywhere else.
         </div>
       </div>
 
@@ -1401,8 +1311,8 @@ function ResumeExtractTab({
             </div>
           )}
           <div style={helperStyle}>
-            Heads up: nothing on this tab overwrites your resume file. It just helps you get clean, structured text you
-            can reuse elsewhere.
+            Nothing here overwrites your actual resume file. It just feeds a clean,
+            structured version into the rest of Relevnt.
           </div>
         </div>
 
@@ -1416,17 +1326,21 @@ function ResumeExtractTab({
             display: 'flex',
             flexDirection: 'column',
             gap: 10,
+            maxHeight: 520,
+            overflowY: 'auto', // independent scroll so you are not yo-yoing the whole page
           }}
         >
           <div style={labelStyle}>2. Review & edit detected fields</div>
           {!parsed && (
             <div style={{ fontSize: 13, color: '#666' }}>
-              Run an extraction to see your contact info, summary, and skills here in a more copy-paste friendly format.
+              Run an extraction or load existing structured data to see your contact
+              info, summary, skills, and previews of experience and education here.
             </div>
           )}
 
           {parsed && (
             <>
+              {/* Contact block (always visible) */}
               <div
                 style={{
                   display: 'grid',
@@ -1496,51 +1410,453 @@ function ResumeExtractTab({
                 </div>
               </div>
 
+              {/* Summary (collapsible) */}
               <div>
-                <div style={labelStyle}>Summary (optional)</div>
-                <textarea
-                  value={parsed.summary}
-                  onChange={handleFieldChange('summary')}
-                  placeholder="If your resume has a summary or headline, you can paste or tweak it here."
+                <div
                   style={{
-                    width: '100%',
-                    minHeight: 80,
-                    padding: '8px 10px',
-                    borderRadius: 10,
-                    border: '1px solid #ddd',
-                    fontSize: 13,
-                    resize: 'vertical',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
                   }}
-                />
+                >
+                  <div style={labelStyle}>Summary</div>
+                  <button
+                    type="button"
+                    onClick={() => toggleSection('summary')}
+                    style={{
+                      border: 'none',
+                      background: 'transparent',
+                      fontSize: 11,
+                      color: '#666',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {activeSections.summary ? 'Hide' : 'Show'}
+                  </button>
+                </div>
+                {activeSections.summary && (
+                  <textarea
+                    value={parsed.summary}
+                    onChange={handleFieldChange('summary')}
+                    placeholder="If your resume has a summary or headline, you can paste or tweak it here."
+                    style={{
+                      width: '100%',
+                      minHeight: 80,
+                      padding: '8px 10px',
+                      borderRadius: 10,
+                      border: '1px solid #ddd',
+                      fontSize: 13,
+                      resize: 'vertical',
+                    }}
+                  />
+                )}
               </div>
 
+              {/* Skills (collapsible) */}
               <div>
-                <div style={labelStyle}>Skills (comma-separated)</div>
-                <textarea
-                  value={skillsInput}
-                  onChange={(e) => setSkillsInput(e.target.value)}
-                  onBlur={handleSkillsBlur}
-                  placeholder="Example: Social media strategy, GA4, Google Ads, Monday.com, Canva, HubSpot"
+                <div
                   style={{
-                    width: '100%',
-                    minHeight: 70,
-                    padding: '8px 10px',
-                    borderRadius: 10,
-                    border: '1px solid #ddd',
-                    fontSize: 13,
-                    resize: 'vertical',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
                   }}
-                />
-                <div style={helperStyle}>
-                  We split this into individual skills in the background, so you can be as casual or as extra as you like
-                  here.
+                >
+                  <div style={labelStyle}>Skills (comma-separated)</div>
+                  <button
+                    type="button"
+                    onClick={() => toggleSection('skills')}
+                    style={{
+                      border: 'none',
+                      background: 'transparent',
+                      fontSize: 11,
+                      color: '#666',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {activeSections.skills ? 'Hide' : 'Show'}
+                  </button>
                 </div>
+                {activeSections.skills && (
+                  <>
+                    <textarea
+                      value={skillsInput}
+                      onChange={(e) => {
+                        setSkillsInput(e.target.value)
+                        setSaveMessage(null)
+                      }}
+                      onBlur={handleSkillsBlur}
+                      placeholder="Example: Social media strategy, GA4, Google Ads, Monday.com, Canva, HubSpot"
+                      style={{
+                        width: '100%',
+                        minHeight: 70,
+                        padding: '8px 10px',
+                        borderRadius: 10,
+                        border: '1px solid #ddd',
+                        fontSize: 13,
+                        resize: 'vertical',
+                      }}
+                    />
+                    <div style={helperStyle}>
+                      We split this into individual skills behind the scenes so you can
+                      be as casual or as extra as you want here.
+                    </div>
+                    {brainstorming?.suggestedSkills &&
+                      brainstorming.suggestedSkills.length > 0 && (
+                        <div style={{ marginTop: 6 }}>
+                          <div
+                            style={{
+                              fontSize: 11,
+                              color: '#555',
+                              marginBottom: 4,
+                            }}
+                          >
+                            Suggested skills to add:
+                          </div>
+                          <div
+                            style={{
+                              display: 'flex',
+                              flexWrap: 'wrap',
+                              gap: 6,
+                            }}
+                          >
+                            {brainstorming.suggestedSkills.map((skill) => (
+                              <button
+                                key={skill}
+                                type="button"
+                                style={chipStyle}
+                                onClick={() => addSuggestedSkill(skill)}
+                              >
+                                + {skill}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                  </>
+                )}
+              </div>
+
+              {/* Experience preview (collapsible) */}
+              <div>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <div style={labelStyle}>Experience (preview)</div>
+                  <button
+                    type="button"
+                    onClick={() => toggleSection('experience')}
+                    style={{
+                      border: 'none',
+                      background: 'transparent',
+                      fontSize: 11,
+                      color: '#666',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {activeSections.experience ? 'Hide' : 'Show'}
+                  </button>
+                </div>
+                {activeSections.experience && (
+                  <>
+                    {experience.length === 0 ? (
+                      <div style={{ fontSize: 12, color: '#777' }}>
+                        No structured experience detected yet. That is okay, you can
+                        still use this tab for contact, summary, and skills.
+                      </div>
+                    ) : (
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 6,
+                        }}
+                      >
+                        {experience.map((role, idx) => {
+                          const duration = formatDateRange(
+                            role.startDate,
+                            role.endDate,
+                            role.current
+                          )
+                          return (
+                            <div
+                              key={idx}
+                              style={{
+                                padding: '6px 8px',
+                                borderRadius: 8,
+                                border: '1px solid #e2e2e2',
+                                backgroundColor: '#fff',
+                              }}
+                            >
+                              <div
+                                style={{
+                                  fontSize: 13,
+                                  fontWeight: 600,
+                                }}
+                              >
+                                {role.title || 'Role title'}
+                              </div>
+                              <div
+                                style={{ fontSize: 12, color: '#555' }}
+                              >
+                                {role.company}
+                                {role.location ? ` • ${role.location}` : ''}
+                              </div>
+                              {duration && (
+                                <div
+                                  style={{
+                                    fontSize: 11,
+                                    color: '#777',
+                                    marginTop: 2,
+                                  }}
+                                >
+                                  {duration}
+                                </div>
+                              )}
+                              {role.bullets && role.bullets.length > 0 && (
+                                <ul
+                                  style={{
+                                    marginTop: 4,
+                                    paddingLeft: 16,
+                                    fontSize: 11,
+                                    color: '#555',
+                                  }}
+                                >
+                                  {role.bullets.slice(0, 3).map((b, i) => (
+                                    <li key={i}>{b}</li>
+                                  ))}
+                                </ul>
+                              )}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+
+              {/* Education preview (collapsible) */}
+              <div>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <div style={labelStyle}>Education (preview)</div>
+                  <button
+                    type="button"
+                    onClick={() => toggleSection('education')}
+                    style={{
+                      border: 'none',
+                      background: 'transparent',
+                      fontSize: 11,
+                      color: '#666',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {activeSections.education ? 'Hide' : 'Show'}
+                  </button>
+                </div>
+                {activeSections.education && (
+                  <>
+                    {education.length === 0 ? (
+                      <div style={{ fontSize: 12, color: '#777' }}>
+                        No education section detected yet. Once we can see your schools
+                        and credentials, they will show up here.
+                      </div>
+                    ) : (
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 6,
+                        }}
+                      >
+                        {education.map((edu, idx) => {
+                          const duration = formatDateRange(
+                            edu.startDate,
+                            edu.endDate,
+                            false
+                          )
+                          return (
+                            <div
+                              key={idx}
+                              style={{
+                                padding: '6px 8px',
+                                borderRadius: 8,
+                                border: '1px solid #e2e2e2',
+                                backgroundColor: '#fff',
+                              }}
+                            >
+                              <div
+                                style={{
+                                  fontSize: 13,
+                                  fontWeight: 600,
+                                }}
+                              >
+                                {edu.institution || 'Institution'}
+                              </div>
+                              <div
+                                style={{ fontSize: 12, color: '#555' }}
+                              >
+                                {[edu.degree, edu.fieldOfStudy]
+                                  .filter(Boolean)
+                                  .join(' • ')}
+                              </div>
+                              {duration && (
+                                <div
+                                  style={{
+                                    fontSize: 11,
+                                    color: '#777',
+                                    marginTop: 2,
+                                  }}
+                                >
+                                  {duration}
+                                </div>
+                              )}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+
+              {/* Brainstorm panel (optional, collapsible) */}
+              {brainstorming && (
+                <div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <div style={labelStyle}>Brainstorming assist</div>
+                    <button
+                      type="button"
+                      onClick={() => toggleSection('brainstorm')}
+                      style={{
+                        border: 'none',
+                        background: 'transparent',
+                        fontSize: 11,
+                        color: '#666',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {activeSections.brainstorm ? 'Hide' : 'Show'}
+                    </button>
+                  </div>
+                  {activeSections.brainstorm && (
+                    <div style={{ fontSize: 12, color: '#555' }}>
+                      {brainstorming.alternateTitles &&
+                        brainstorming.alternateTitles.length > 0 && (
+                          <div style={{ marginBottom: 6 }}>
+                            <div
+                              style={{
+                                fontSize: 11,
+                                fontWeight: 600,
+                                marginBottom: 2,
+                              }}
+                            >
+                              Alternate titles to consider:
+                            </div>
+                            <div
+                              style={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                gap: 6,
+                              }}
+                            >
+                              {brainstorming.alternateTitles.map((t) => (
+                                <span key={t} style={chipStyle}>
+                                  {t}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      {brainstorming.relatedKeywords &&
+                        brainstorming.relatedKeywords.length > 0 && (
+                          <div style={{ marginBottom: 6 }}>
+                            <div
+                              style={{
+                                fontSize: 11,
+                                fontWeight: 600,
+                                marginBottom: 2,
+                              }}
+                            >
+                              Related keywords:
+                            </div>
+                            <div
+                              style={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                gap: 6,
+                              }}
+                            >
+                              {brainstorming.relatedKeywords.map((k) => (
+                                <span key={k} style={chipStyle}>
+                                  {k}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      {brainstorming.positioningNotes && (
+                        <div>
+                          <div
+                            style={{
+                              fontSize: 11,
+                              fontWeight: 600,
+                              marginBottom: 2,
+                            }}
+                          >
+                            Positioning notes:
+                          </div>
+                          <div>{brainstorming.positioningNotes}</div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Save row */}
+              <div
+                style={{
+                  marginTop: 4,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 6,
+                }}
+              >
+                <button
+                  type="button"
+                  style={primaryButton}
+                  onClick={() => {
+                    if (parsed) {
+                      void persistParsed(parsed)
+                    }
+                  }}
+                >
+                  Save structured fields
+                </button>
+                {saveMessage && (
+                  <div style={{ ...helperStyle, color: '#222' }}>{saveMessage}</div>
+                )}
               </div>
 
               <div style={helperStyle}>
-                {isSaving
-                  ? 'Saving your changes to your default resume…'
-                  : saveMessage || 'Your cleaned fields will autosave to your default resume when you make changes.'}
+                Once this looks right, these fields become the source of truth for the
+                rest of Relevnt. Analyze, optimize, matching, all of it.
               </div>
             </>
           )}

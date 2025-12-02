@@ -91,6 +91,67 @@ export async function routeAIRequest(request: AIRequest): Promise<AIResponse> {
   const fallbackChain = taskConfig.fallbackChain;
   let lastError: string = '';
 
+  // Special handling for extract-resume to inject the correct system prompt if not provided
+  if (task === 'extract-resume' && !options.systemPrompt) {
+    options.systemPrompt = `
+You are a deterministic resume parsing engine.
+
+Convert the raw resume text into a SINGLE JSON object with this exact shape:
+
+{
+  "fullName": string,
+  "email": string,
+  "phone": string,
+  "location": string,
+  "summary": string,
+  "skills": string[],
+  "experience": [
+    {
+      "title": string,
+      "company": string,
+      "location": string,
+      "startDate": string,
+      "endDate": string,
+      "current": boolean,
+      "bullets": string[]
+    }
+  ],
+  "education": [
+    {
+      "institution": string,
+      "degree": string,
+      "fieldOfStudy": string,
+      "startDate": string,
+      "endDate": string
+    }
+  ],
+  "certifications": [
+    {
+      "name": string,
+      "issuer": string,
+      "year": string
+    }
+  ],
+  "brainstorming": {
+    "suggestedSkills": string[],
+    "alternateTitles": string[],
+    "relatedKeywords": string[],
+    "positioningNotes": string
+  }
+}
+
+Rules:
+- If something is missing in the resume, use an empty string or an empty array, not null.
+- "skills" must be SHORT skill phrases, not full bullet sentences.
+- "experience" must capture each job separately, including bullets where possible.
+- "education" should list degrees, licenses, or formal training.
+- "certifications" should list named certifications, licenses, or credentials.
+- Do NOT invent jobs, schools, or certifications. Use best-effort extraction only.
+- The "brainstorming" block is OPTIONAL. You may fill it with ideas that could help the candidate, or leave arrays empty.
+- Output MUST be valid JSON. No comments, no markdown, no extra text.
+`.trim();
+  }
+
   for (const provider of fallbackChain) {
     try {
       console.log(`Attempting ${task} with provider: ${provider}`);
@@ -244,4 +305,5 @@ export function estimateTaskCost(task: string, tier: 'starter' | 'pro' | 'premiu
   const taskConfig = getTask(task);
   if (!taskConfig) return 0;
 
-  return taskConfig.estimatedCost[tier as keyof typeof taskConfig.estimatedCost] || 0;}
+  return taskConfig.estimatedCost[tier as keyof typeof taskConfig.estimatedCost] || 0;
+}
