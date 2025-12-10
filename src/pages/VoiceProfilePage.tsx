@@ -1,8 +1,8 @@
-import React, { CSSProperties, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
-import { useRelevntColors } from '../hooks'
 import { Container } from '../components/shared/Container'
+import { Icon } from '../components/ui/Icon'
 
 type VoicePreset =
   | 'natural'
@@ -23,7 +23,6 @@ type ProfileRow = {
 
 export default function VoiceProfilePage(): JSX.Element {
   const { user } = useAuth()
-  const colors = useRelevntColors()
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -113,102 +112,12 @@ export default function VoiceProfilePage(): JSX.Element {
     }
   }
 
-  const wrapper: CSSProperties = {
-    flex: 1,
-    backgroundColor: colors.background,
-  }
-
-  const pageHeader: CSSProperties = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    gap: 16,
-    marginBottom: 24,
-    flexWrap: 'wrap',
-  }
-
-  const titleRow: CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 6,
-  }
-
-  const titleStyles: CSSProperties = {
-    fontSize: 22,
-    fontWeight: 600,
-    letterSpacing: '0.02em',
-    color: colors.text,
-  }
-
-  const subtitleStyles: CSSProperties = {
-    fontSize: 13,
-    color: colors.textSecondary,
-    maxWidth: 620,
-    lineHeight: 1.5,
-  }
-
-  const card: CSSProperties = {
-    display: 'grid',
-    gap: 16,
-    borderRadius: 16,
-    border: `1px solid ${colors.borderLight}`,
-    backgroundColor: colors.surface,
-    padding: '16px 16px 14px',
-  }
-
-  const section: CSSProperties = {
-    display: 'grid',
-    gap: 10,
-  }
-
-  const sectionTitle: CSSProperties = {
-    fontSize: 15,
-    fontWeight: 600,
-    color: colors.text,
-  }
-
-  const sectionDesc: CSSProperties = {
-    fontSize: 12,
-    color: colors.textSecondary,
-  }
-
-  const textareaStyles: CSSProperties = {
-    width: '100%',
-    fontSize: 13,
-    borderRadius: 12,
-    border: `1px solid ${colors.border}`,
-    backgroundColor: colors.background,
-    padding: '10px 12px',
-    color: colors.text,
-    fontFamily: 'inherit',
-    resize: 'vertical' as const,
-  }
-
-  const divider: CSSProperties = {
-    borderTop: `1px solid ${colors.borderLight}`,
-  }
-
-  const buttonStyles: CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 999,
-    backgroundColor: colors.primary,
-    color: colors.text,
-    fontSize: 13,
-    fontWeight: 600,
-    padding: '10px 16px',
-    border: 'none',
-    cursor: saving ? 'not-allowed' : 'pointer',
-    opacity: saving ? 0.7 : 1,
-  }
-
   if (!user) {
     return (
-      <div style={wrapper}>
+      <div className="page-wrapper">
         <Container maxWidth="lg" padding="md">
           <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 1rem' }}>
-            <p style={{ fontSize: 13, color: colors.textSecondary }}>
+            <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
               Sign in to set up your writing voice.
             </p>
           </div>
@@ -218,147 +127,154 @@ export default function VoiceProfilePage(): JSX.Element {
   }
 
   return (
-    <div style={wrapper}>
+    <div className="page-wrapper">
       <Container maxWidth="lg" padding="md">
-        <header style={pageHeader}>
-          <div style={titleRow}>
-            <h1 style={titleStyles}>Your voice, your agent</h1>
-            <p style={subtitleStyles}>
-              Before Relevnt writes anything for you, it learns how you sound. This keeps your applications honest, consistent, and authentic.
-            </p>
-            {profile && (
-              <p style={{ fontSize: 12, color: colors.textSecondary }}>
-                You can update this anytime. Relevnt will use it for resume bullets, application answers, and cover letters when needed.
+        <header className="hero-shell">
+          <div className="hero-header">
+            <div className="hero-header-main">
+              <div className="hero__badge">
+                <Icon name="microphone" size="sm" hideAccent />
+                <span>Voice Profile</span>
+              </div>
+              <h1>Your voice, your agent</h1>
+              <p className="hero-subtitle">
+                Before Relevnt writes anything for you, it learns how you sound. This keeps your applications honest, consistent, and authentic.
               </p>
-            )}
+              {profile && (
+                <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 8 }}>
+                  Relevnt uses this for resume bullets, application answers, and cover letters.
+                </p>
+              )}
+            </div>
           </div>
         </header>
 
         {loading && (
-          <p style={{ fontSize: 12, color: colors.textSecondary }}>Loading your voice profile…</p>
+          <p style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Loading your voice profile…</p>
         )}
         {error && (
-          <p style={{ fontSize: 12, color: colors.error }}>
+          <p style={{ fontSize: 12, color: 'var(--color-error)' }}>
             {error}
           </p>
         )}
 
         {!loading && (
-          <form onSubmit={handleSave} style={{ display: 'grid', gap: 12 }}>
-            <section style={card}>
-              <div style={section}>
-                <h2 style={sectionTitle}>Choose your base style</h2>
-                <p style={sectionDesc}>
-                  This is the general tone you are comfortable with in professional writing. You can still fine tune below.
-                </p>
+          <form onSubmit={handleSave} className="page-stack">
+            <section className="surface-card">
+              <div style={{ padding: 24, display: 'grid', gap: 24 }}>
+                <div style={{ display: 'grid', gap: 10 }}>
+                  <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text)' }}>Choose your base style</h2>
+                  <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+                    This is the general tone you are comfortable with in professional writing. You can still fine tune below.
+                  </p>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 10 }}>
-                  <PresetCard
-                    id="natural"
-                    label="Natural you"
-                    description="Balanced, human, clear. Sounds like your best self on a good day."
-                    selected={preset === 'natural'}
-                    onSelect={() => setPreset('natural')}
-                  />
-                  <PresetCard
-                    id="professional_warm"
-                    label="Professional but warm"
-                    description="Friendly, polished, and approachable. Great for most roles."
-                    selected={preset === 'professional_warm'}
-                    onSelect={() => setPreset('professional_warm')}
-                  />
-                  <PresetCard
-                    id="direct"
-                    label="Direct and concise"
-                    description="Short, efficient, and to the point. Ideal for senior or technical roles."
-                    selected={preset === 'direct'}
-                    onSelect={() => setPreset('direct')}
-                  />
-                  <PresetCard
-                    id="creative"
-                    label="Creative storyteller"
-                    description="A bit more narrative and expressive. Good for creative careers."
-                    selected={preset === 'creative'}
-                    onSelect={() => setPreset('creative')}
-                  />
-                  <PresetCard
-                    id="values_driven"
-                    label="Values driven"
-                    description="Emphasizes impact, ethics, and alignment. Ideal for mission driven orgs."
-                    selected={preset === 'values_driven'}
-                    onSelect={() => setPreset('values_driven')}
-                  />
-                  <PresetCard
-                    id="academic"
-                    label="Academic"
-                    description="Measured, well structured, and grounded in evidence."
-                    selected={preset === 'academic'}
-                    onSelect={() => setPreset('academic')}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
+                    <PresetCard
+                      id="natural"
+                      label="Natural you"
+                      description="Balanced, human, clear. Sounds like your best self on a good day."
+                      selected={preset === 'natural'}
+                      onSelect={() => setPreset('natural')}
+                    />
+                    <PresetCard
+                      id="professional_warm"
+                      label="Professional but warm"
+                      description="Friendly, polished, and approachable. Great for most roles."
+                      selected={preset === 'professional_warm'}
+                      onSelect={() => setPreset('professional_warm')}
+                    />
+                    <PresetCard
+                      id="direct"
+                      label="Direct and concise"
+                      description="Short, efficient, and to the point. Ideal for senior or technical roles."
+                      selected={preset === 'direct'}
+                      onSelect={() => setPreset('direct')}
+                    />
+                    <PresetCard
+                      id="creative"
+                      label="Creative storyteller"
+                      description="A bit more narrative and expressive. Good for creative careers."
+                      selected={preset === 'creative'}
+                      onSelect={() => setPreset('creative')}
+                    />
+                    <PresetCard
+                      id="values_driven"
+                      label="Values driven"
+                      description="Emphasizes impact, ethics, and alignment. Ideal for mission driven orgs."
+                      selected={preset === 'values_driven'}
+                      onSelect={() => setPreset('values_driven')}
+                    />
+                    <PresetCard
+                      id="academic"
+                      label="Academic"
+                      description="Measured, well structured, and grounded in evidence."
+                      selected={preset === 'academic'}
+                      onSelect={() => setPreset('academic')}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ height: 1, backgroundColor: 'var(--border-subtle)' }} />
+
+                <div style={{ display: 'grid', gap: 16 }}>
+                  <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text)' }}>Fine tune your tone</h2>
+                  <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+                    Adjust how playful, formal, and concise you want your writing assistant to be.
+                  </p>
+
+                  <div style={{ display: 'grid', gap: 24, maxWidth: 600 }}>
+                    <ToneSlider
+                      label="Formality"
+                      left="More casual"
+                      right="More formal"
+                      value={formality}
+                      onChange={setFormality}
+                    />
+                    <ToneSlider
+                      label="Playfulness"
+                      left="Serious"
+                      right="Playful"
+                      value={playfulness}
+                      onChange={setPlayfulness}
+                    />
+                    <ToneSlider
+                      label="Conciseness"
+                      left="More detail"
+                      right="More concise"
+                      value={conciseness}
+                      onChange={setConciseness}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ height: 1, backgroundColor: 'var(--border-subtle)' }} />
+
+                <div style={{ display: 'grid', gap: 10 }}>
+                  <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text)' }}>Optional sample</h2>
+                  <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+                    Paste a short paragraph you have written. We will use it as additional context to match your voice.
+                  </p>
+                  <textarea
+                    className="rl-textarea"
+                    rows={4}
+                    value={sample}
+                    onChange={(e) => setSample(e.target.value)}
+                    placeholder="Paste a short writing sample here…"
                   />
                 </div>
-              </div>
 
-              <div style={divider} />
-
-              <section style={section}>
-                <h2 style={sectionTitle}>Fine tune your tone</h2>
-                <p style={sectionDesc}>
-                  Adjust how playful, formal, and concise you want your writing assistant to be.
-                </p>
-
-                <ToneSlider
-                  label="Formality"
-                  left="More casual"
-                  right="More formal"
-                  value={formality}
-                  onChange={setFormality}
-                  colors={colors}
-                />
-                <ToneSlider
-                  label="Playfulness"
-                  left="Serious"
-                  right="Playful"
-                  value={playfulness}
-                  onChange={setPlayfulness}
-                  colors={colors}
-                />
-                <ToneSlider
-                  label="Conciseness"
-                  left="More detail"
-                  right="More concise"
-                  value={conciseness}
-                  onChange={setConciseness}
-                  colors={colors}
-                  />
-              </section>
-
-              <div style={divider} />
-
-              <section style={section}>
-                <h2 style={sectionTitle}>Optional sample</h2>
-                <p style={sectionDesc}>
-                  Paste a short paragraph you have written. We will use it as additional context to match your voice.
-                </p>
-                <textarea
-                  style={textareaStyles}
-                  rows={4}
-                  value={sample}
-                  onChange={(e) => setSample(e.target.value)}
-                  placeholder="Paste a short writing sample here…"
-                />
-              </section>
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-                <p style={{ fontSize: 12, color: colors.textSecondary, maxWidth: 360 }}>
-                  You can change this later in your settings. Your agent will start using this voice for new applications after you save.
-                </p>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  style={buttonStyles}
-                >
-                  {saving ? 'Saving…' : 'Save voice profile'}
-                </button>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', alignItems: 'center', paddingTop: 8 }}>
+                  <p style={{ fontSize: 12, color: 'var(--text-secondary)', maxWidth: 360 }}>
+                    You can change this later in your settings. Your agent will start using this voice for new applications after you save.
+                  </p>
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="primary-button"
+                  >
+                    {saving ? 'Saving…' : 'Save voice profile'}
+                  </button>
+                </div>
               </div>
             </section>
           </form>
@@ -378,37 +294,32 @@ type PresetCardProps = {
 
 function PresetCard(props: PresetCardProps) {
   const { label, description, selected, onSelect } = props
-  const colors = useRelevntColors()
-
-  const cardBaseStyles: CSSProperties = {
-    textAlign: 'left',
-    borderRadius: 14,
-    border: selected ? `1px solid ${colors.primary}` : `1px solid ${colors.borderLight}`,
-    padding: '12px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 6,
-    transition: 'all 0.2s ease',
-    backgroundColor: selected ? colors.surfaceHover : colors.surface,
-    color: colors.text,
-    cursor: 'pointer',
-  }
 
   return (
     <button
       type="button"
       onClick={onSelect}
-      style={cardBaseStyles}
+      className={`option-button ${selected ? 'is-active' : ''}`}
+      style={{
+        textAlign: 'left',
+        justifyContent: 'flex-start',
+        alignItems: 'flex-start',
+        padding: '16px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 8,
+        height: '100%',
+        width: '100%',
+        borderRadius: 'var(--radius-lg)'
+      }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-        <span style={{ fontSize: 13, fontWeight: 600 }}>{label}</span>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 8 }}>
+        <span style={{ fontSize: 14, fontWeight: 700 }}>{label}</span>
         {selected && (
-          <span style={{ fontSize: 11, letterSpacing: '0.05em', color: colors.textSecondary }}>
-            Selected
-          </span>
+          <Icon name="check" size="sm" />
         )}
       </div>
-      <p style={{ fontSize: 12, color: colors.textSecondary, lineHeight: 1.4 }}>
+      <p style={{ fontSize: 13, color: selected ? 'var(--text)' : 'var(--text-secondary)', lineHeight: 1.4, fontWeight: 400 }}>
         {description}
       </p>
     </button>
@@ -421,24 +332,19 @@ type ToneSliderProps = {
   right: string
   value: number
   onChange: (v: number) => void
-  colors: ReturnType<typeof useRelevntColors>
 }
 
 function ToneSlider(props: ToneSliderProps) {
-  const { label, left, right, value, onChange, colors } = props
+  const { label, left, right, value, onChange } = props
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 13, fontWeight: 600, color: colors.text }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
           {label}
         </span>
-        <span style={{ fontSize: 12, color: colors.textSecondary }}>
-          {value}
+        <span style={{ fontSize: 13, color: 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums' }}>
+          {value}%
         </span>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12, color: colors.textSecondary }}>
-        <span>{left}</span>
-        <span>{right}</span>
       </div>
       <input
         type="range"
@@ -446,8 +352,16 @@ function ToneSlider(props: ToneSliderProps) {
         max={100}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        style={{ width: '100%', accentColor: colors.primary }}
+        style={{
+          width: '100%',
+          accentColor: 'var(--color-accent)',
+          cursor: 'pointer'
+        }}
       />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        <span>{left}</span>
+        <span>{right}</span>
+      </div>
     </div>
   )
 }

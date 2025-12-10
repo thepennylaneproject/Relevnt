@@ -3,6 +3,8 @@ import React, { ChangeEvent } from 'react'
 import { SectionCard } from './SectionCard'
 import { ResumeCertificationItem } from '../../types/resume-builder.types'
 import { RelevntColors } from '../../hooks/useRelevntColors'
+import { addButtonClass, inputClass, itemCardClass, labelClass, removeButtonClass } from './sectionStyles'
+import { Award } from "lucide-react"
 
 interface CertificationsSectionProps {
   id: string
@@ -48,39 +50,31 @@ export const CertificationsSection: React.FC<CertificationsSectionProps> = ({
 
   return (
     <SectionCard
-      id={id}
       title="Certifications"
-      icon="📜"
       description="License, certs, and credentials that move the needle."
+      icon={<Award className="w-4 h-4 text-[#1F2933]" />}
       colors={colors}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div className="space-y-4">
         {items.map((item, index) => (
           <div
             key={item.id || index}
-            style={{
-              borderRadius: 12,
-              border: '1px solid rgba(148, 163, 184, 0.6)',
-              padding: 12,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 8,
-            }}
+            className={itemCardClass}
           >
-            <div style={{ display: 'flex', gap: 8 }}>
-              <div style={{ flex: 1 }}>
-                <label style={labelStyle}>Name</label>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className={labelClass}>Name</label>
                 <input
-                  style={inputStyle}
+                  className={inputClass}
                   value={(item.name as string) || ''}
                   onChange={handleFieldChange(index, 'name')}
                   placeholder="Hydrafacial Certified Provider"
                 />
               </div>
-              <div style={{ flex: 1 }}>
-                <label style={labelStyle}>Issuer</label>
+              <div>
+                <label className={labelClass}>Issuer</label>
                 <input
-                  style={inputStyle}
+                  className={inputClass}
                   value={(item.issuer as string) || ''}
                   onChange={handleFieldChange(index, 'issuer')}
                   placeholder="Hydrafacial / Manufacturer"
@@ -88,20 +82,20 @@ export const CertificationsSection: React.FC<CertificationsSectionProps> = ({
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: 8 }}>
-              <div style={{ flex: 1 }}>
-                <label style={labelStyle}>Issued</label>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className={labelClass}>Issued</label>
                 <input
-                  style={inputStyle}
+                  className={inputClass}
                   value={(item.year as string) || ''}
                   onChange={handleFieldChange(index, 'year')}
                   placeholder="2022-04"
                 />
               </div>
-              <div style={{ flex: 1 }}>
-                <label style={labelStyle}>Expires (optional)</label>
+              <div>
+                <label className={labelClass}>Expires (optional)</label>
                 <input
-                  style={inputStyle}
+                  className={inputClass}
                   value={(item.year as string) || ''}
                   onChange={handleFieldChange(index, 'year')}
                   placeholder="2025-04"
@@ -110,9 +104,9 @@ export const CertificationsSection: React.FC<CertificationsSectionProps> = ({
             </div>
 
             <div>
-              <label style={labelStyle}>URL (optional)</label>
+              <label className={labelClass}>URL (optional)</label>
               <input
-                style={inputStyle}
+                className={inputClass}
                 value={(item.link as string) || ''}
                 onChange={handleFieldChange(index, 'link')}
                 placeholder="Link to license or credential"
@@ -122,7 +116,7 @@ export const CertificationsSection: React.FC<CertificationsSectionProps> = ({
             <button
               type="button"
               onClick={() => removeItem(index)}
-              style={removeButtonStyle}
+              className={removeButtonClass}
             >
               ✕ Remove certification
             </button>
@@ -132,52 +126,11 @@ export const CertificationsSection: React.FC<CertificationsSectionProps> = ({
         <button
           type="button"
           onClick={addItem}
-          style={addButtonStyle}
+          className={addButtonClass}
         >
           + Add certification
         </button>
       </div>
     </SectionCard>
   )
-}
-
-const labelStyle: React.CSSProperties = {
-  display: 'block',
-  fontSize: 12,
-  color: '#9ca3af',
-  marginBottom: 4,
-}
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '8px 10px',
-  borderRadius: 8,
-  border: '1px solid rgba(148, 163, 184, 0.7)',
-  background: 'rgba(15, 23, 42, 0.9)',
-  color: '#e5e7eb',
-  fontSize: 13,
-}
-
-const addButtonStyle: React.CSSProperties = {
-  marginTop: 4,
-  padding: '6px 10px',
-  borderRadius: 999,
-  border: '1px dashed rgba(148, 163, 184, 0.7)',
-  background: 'transparent',
-  color: '#e5e7eb',
-  fontSize: 13,
-  cursor: 'pointer',
-  alignSelf: 'flex-start',
-}
-
-const removeButtonStyle: React.CSSProperties = {
-  alignSelf: 'flex-start',
-  marginTop: 6,
-  padding: '4px 10px',
-  borderRadius: 999,
-  border: '1px solid rgba(248, 113, 113, 0.7)',
-  background: 'rgba(127, 29, 29, 0.5)',
-  color: '#fecaca',
-  cursor: 'pointer',
-  fontSize: 12,
 }

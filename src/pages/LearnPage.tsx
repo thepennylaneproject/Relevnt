@@ -3,6 +3,11 @@ import React from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { useSkillGaps, type SkillGap } from '../hooks/useSkillGaps'
 import { useLearningCourses } from '../hooks/useLearningCourses'
+import PageBackground from '../components/shared/PageBackground'
+import { Container } from '../components/shared/Container'
+import { Icon } from '../components/ui/Icon'
+import { EmptyState } from '../components/ui/EmptyState'
+import { copy } from '../lib/copy'
 
 export default function LearnPage() {
   const { user } = useAuth()
@@ -10,82 +15,103 @@ export default function LearnPage() {
   const { courses, isLoading: coursesLoading, error: coursesError } = useLearningCourses()
 
   const loading = gapsLoading || coursesLoading
+  const hasContent = (skillGaps && skillGaps.length > 0) || (courses && courses.length > 0)
 
   return (
-    <div className="page-root">
-      <header className="page-header">
-        <h1 className="page-title">Learn</h1>
-        <p className="page-subtitle text-sm text-muted-foreground">
-          Close the gaps the market cares about most, without signing your life away to another bootcamp.
-        </p>
-      </header>
+    <PageBackground>
+      <Container maxWidth="xl" padding="md">
+        <div className="page-stack">
+          {/* HERO */}
+          <section className="hero-shell">
+            <div className="hero-header">
+              <div className="hero-icon">
+                <Icon name="book" size="md" />
+              </div>
+              <div className="hero-header-main">
+                <p className="text-xs muted">{copy.learn.pageTitle}</p>
+                <h1 className="font-display">{copy.learn.pageSubtitle}</h1>
+              </div>
+            </div>
+          </section>
 
-      {loading && (
-        <p className="text-sm text-muted-foreground mt-4">
-          Loading your skill gaps and learning suggestions…
-        </p>
-      )}
+          {loading && (
+            <section className="surface-card">
+              <div className="flex flex-col items-center gap-4 py-12">
+                <Icon name="candle" size="lg" className="text-graphite-light animate-pulse-soft" />
+                <p className="muted">{copy.transparency.loading}</p>
+              </div>
+            </section>
+          )}
 
-      {!loading && (gapsError || coursesError) && (
-        <p className="text-sm text-red-600 mt-4">
-          {gapsError || coursesError}
-        </p>
-      )}
+          {!loading && (gapsError || coursesError) && (
+            <section className="surface-card">
+              <div className="alert alert--error">
+                <Icon name="compass-cracked" size="sm" hideAccent />
+                <span>{gapsError || coursesError}</span>
+              </div>
+            </section>
+          )}
 
-      {!loading && !gapsError && skillGaps && skillGaps.length > 0 && (
-        <section className="mt-6">
-          <h2 className="text-sm font-semibold mb-2">Your top skill gaps</h2>
-          <ul className="space-y-2">
-            {skillGaps.map((gap: SkillGap) => (
-              <li
-                key={gap.skill_key}
-                className="flex items-start justify-between rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2"
-              >
-                <div>
-                  <div className="text-sm font-medium">{gap.skill_key}</div>
-                  {gap.explanation && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {gap.explanation}
-                    </p>
-                  )}
-                </div>
-                <div className="text-right text-[11px] text-muted-foreground">
-                  <div>{gap.job_count} jobs</div>
-                  {gap.priority != null && <div>Priority {gap.priority}</div>}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+          {!loading && !hasContent && (
+            <EmptyState type="learn" />
+          )}
 
-      {!loading && !coursesError && courses && courses.length > 0 && (
-        <section className="mt-8">
-          <h2 className="text-sm font-semibold mb-2">Suggested courses</h2>
-          <ul className="space-y-2">
-            {courses.slice(0, 8).map((course) => (
-              <li
-                key={course.id}
-                className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2"
-              >
-                <div className="text-sm font-medium">{course.title}</div>
-                {course.providerName && (
-                  <div className="text-xs text-muted-foreground mt-0.5">
-                    {course.providerName}
-                  </div>
-                )}
-                <div className="mt-1 text-[11px] text-muted-foreground flex gap-3">
-                  {course.level && <span>{course.level}</span>}
-                  {course.estimatedHours != null && (
-                    <span>{course.estimatedHours} hours</span>
-                  )}
-                  {course.isFree && <span>Free</span>}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-    </div>
+          {!loading && !gapsError && skillGaps && skillGaps.length > 0 && (
+            <section className="surface-card">
+              <h2 className="text-sm font-semibold mb-4">Your top skill gaps</h2>
+              <ul className="space-y-2">
+                {skillGaps.map((gap: SkillGap) => (
+                  <li
+                    key={gap.skill_key}
+                    className="card flex items-start justify-between"
+                  >
+                    <div>
+                      <div className="text-sm font-medium">{gap.skill_key}</div>
+                      {gap.explanation && (
+                        <p className="muted text-xs mt-1">
+                          {gap.explanation}
+                        </p>
+                      )}
+                    </div>
+                    <div className="text-right text-xs muted">
+                      <div>{gap.job_count} jobs</div>
+                      {gap.priority != null && <div>Priority {gap.priority}</div>}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {!loading && !coursesError && courses && courses.length > 0 && (
+            <section className="surface-card">
+              <h2 className="text-sm font-semibold mb-4">Suggested courses</h2>
+              <ul className="space-y-2">
+                {courses.slice(0, 8).map((course) => (
+                  <li
+                    key={course.id}
+                    className="card"
+                  >
+                    <div className="text-sm font-medium">{course.title}</div>
+                    {course.providerName && (
+                      <div className="muted text-xs mt-0.5">
+                        {course.providerName}
+                      </div>
+                    )}
+                    <div className="mt-1 text-xs muted flex gap-3">
+                      {course.level && <span>{course.level}</span>}
+                      {course.estimatedHours != null && (
+                        <span>{course.estimatedHours} hours</span>
+                      )}
+                      {course.isFree && <span className="badge badge--accent">Free</span>}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </div>
+      </Container>
+    </PageBackground>
   )
 }

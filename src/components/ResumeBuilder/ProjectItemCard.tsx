@@ -1,6 +1,7 @@
 // src/pages/ResumeBuilder/components/ProjectItemCard.tsx
 import React, { ChangeEvent } from 'react'
 import { ResumeProjectItem } from '../../types/resume-builder.types'
+import { inputClass, itemCardClass, labelClass, removeButtonClass, textareaClass } from './sectionStyles'
 
 interface ProjectItemCardProps {
   item: ResumeProjectItem
@@ -31,35 +32,28 @@ export const ProjectItemCard: React.FC<ProjectItemCardProps> = ({
 
       onChange({
         ...item,
-        technologies: list,
+        techStack: list,
       } as ResumeProjectItem)
     }
 
   return (
     <div
-      style={{
-        borderRadius: 12,
-        border: '1px solid rgba(148, 163, 184, 0.6)',
-        padding: 12,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 8,
-      }}
+      className={itemCardClass}
     >
-      <div style={{ display: 'flex', gap: 8 }}>
-        <div style={{ flex: 1 }}>
-          <label style={labelStyle}>Project name</label>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div>
+          <label className={labelClass}>Project name</label>
           <input
-            style={inputStyle}
+            className={inputClass}
             value={(item.name as string) || ''}
             onChange={handleFieldChange('name')}
             placeholder="Relevnt, AI career platform"
           />
         </div>
-        <div style={{ flex: 1 }}>
-          <label style={labelStyle}>Role</label>
+        <div>
+          <label className={labelClass}>Role</label>
           <input
-            style={inputStyle}
+            className={inputClass}
             value={(item.role as string) || ''}
             onChange={handleFieldChange('role')}
             placeholder="Founder, Product and Marketing"
@@ -68,9 +62,9 @@ export const ProjectItemCard: React.FC<ProjectItemCardProps> = ({
       </div>
 
       <div>
-        <label style={labelStyle}>Project link (optional)</label>
+        <label className={labelClass}>Project link (optional)</label>
         <input
-          style={inputStyle}
+          className={inputClass}
           value={(item.link as string) || ''}
           onChange={handleFieldChange('link')}
           placeholder="https://relevnt.work"
@@ -78,9 +72,9 @@ export const ProjectItemCard: React.FC<ProjectItemCardProps> = ({
       </div>
 
       <div>
-        <label style={labelStyle}>Highlights/Impact</label>
+        <label className={labelClass}>Highlights/Impact</label>
         <textarea
-          style={textareaStyle}
+          className={textareaClass}
           rows={4}
           value={(item.description as string) || ''}
           onChange={handleFieldChange('description')}
@@ -89,9 +83,9 @@ export const ProjectItemCard: React.FC<ProjectItemCardProps> = ({
       </div>
 
       <div>
-        <label style={labelStyle}>Technologies (comma separated)</label>
+        <label className={labelClass}>Technologies (comma separated)</label>
         <input
-          style={inputStyle}
+          className={inputClass}
           value={Array.isArray(item.techStack) ? item.techStack.join(', ') : ''}
           onChange={handleTechChange}
           placeholder="React, Supabase, Netlify, Tailwind, OpenAI"
@@ -101,49 +95,10 @@ export const ProjectItemCard: React.FC<ProjectItemCardProps> = ({
       <button
         type="button"
         onClick={onRemove}
-        style={removeButtonStyle}
+        className={removeButtonClass}
       >
         ✕ Remove project
       </button>
     </div>
   )
-}
-
-const labelStyle: React.CSSProperties = {
-  display: 'block',
-  fontSize: 12,
-  fontWeight: 500,
-  color: '#64748b',
-  marginBottom: 6,
-}
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '10px 12px',
-  borderRadius: 8,
-  border: '1px solid #e2e8f0',
-  background: '#f8fafc',
-  color: '#1e293b',
-  fontSize: 14,
-  transition: 'all 0.2s',
-}
-
-const textareaStyle: React.CSSProperties = {
-  ...inputStyle,
-  resize: 'vertical',
-  lineHeight: 1.5,
-}
-
-const removeButtonStyle: React.CSSProperties = {
-  alignSelf: 'flex-start',
-  marginTop: 8,
-  padding: '6px 12px',
-  borderRadius: 6,
-  border: '1px solid #fee2e2',
-  background: '#fff1f2',
-  color: '#ef4444',
-  cursor: 'pointer',
-  fontSize: 12,
-  fontWeight: 500,
-  transition: 'all 0.2s',
 }

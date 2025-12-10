@@ -4,6 +4,8 @@ import { SectionCard } from './SectionCard'
 import { ProjectItemCard } from './ProjectItemCard'
 import { ResumeProjectItem } from '../../types/resume-builder.types'
 import { RelevntColors } from '../../hooks/useRelevntColors'
+import { addButtonClass } from './sectionStyles'
+import { FolderOpen } from "lucide-react"
 
 interface ProjectsSectionProps {
   id: string
@@ -47,13 +49,12 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
 
   return (
     <SectionCard
-      id={id}
       title="Projects"
-      icon="🚀"
       description="Founder builds, side projects, and proof of concept work."
+      icon={<FolderOpen className="w-4 h-4 text-[#1F2933]" />}
       colors={colors}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div className="space-y-4">
         {items.map((item, index) => (
           <ProjectItemCard
             key={item.id || index}
@@ -66,23 +67,11 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
         <button
           type="button"
           onClick={addItem}
-          style={addButtonStyle}
+          className={addButtonClass}
         >
           + Add project
         </button>
       </div>
     </SectionCard>
   )
-}
-
-const addButtonStyle: React.CSSProperties = {
-  marginTop: 4,
-  padding: '6px 10px',
-  borderRadius: 999,
-  border: '1px dashed rgba(148, 163, 184, 0.7)',
-  background: 'transparent',
-  color: '#e5e7eb',
-  fontSize: 13,
-  cursor: 'pointer',
-  alignSelf: 'flex-start',
 }

@@ -5,6 +5,8 @@ import { ResumeSkillGroup } from '../../types/resume-builder.types'
 import { RelevntColors } from '../../hooks/useRelevntColors'
 import { AIButton } from './AIButton'
 import { useAITask } from '../../hooks/useAITask'
+import { addButtonClass, inputClass, itemCardClass, labelClass, removeButtonClass } from './sectionStyles'
+import { FileText } from "lucide-react"
 
 interface SkillsSectionProps {
   id: string
@@ -78,36 +80,22 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ id, skillGroups, o
 
   return (
     <SectionCard
-      id={id}
       title="Skills"
-      icon="🧠"
       description="Group skills into themes: Core, Technical, Leadership, Tools, etc."
+      icon={<FileText className="w-4 h-4 text-[#1F2933]" />}
       colors={colors}
     >
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 12,
-        }}
-      >
+      <div className="space-y-4">
         {skillGroups.map((group, index) => (
           <div
             key={group.label || index}
-            style={{
-              borderRadius: 12,
-              border: '1px solid rgba(148, 163, 184, 0.6)',
-              padding: 12,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 8,
-            }}
+            className={itemCardClass}
           >
-            <div style={{ display: 'flex', gap: 8 }}>
-              <div style={{ flex: 1 }}>
-                <label style={labelStyle}>Group title</label>
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <label className={labelClass}>Group title</label>
                 <input
-                  style={inputStyle}
+                  className={inputClass}
                   value={group.label || ''}
                   onChange={handleGroupTitleChange(index)}
                   placeholder="Core Skills"
@@ -116,15 +104,15 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ id, skillGroups, o
               <button
                 type="button"
                 onClick={() => removeGroup(index)}
-                style={removeButtonStyle}
+                className={removeButtonClass}
               >
                 ✕
               </button>
             </div>
 
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                <label style={{ ...labelStyle, marginBottom: 0 }}>Skills (comma separated)</label>
+              <div className="mb-1 flex items-center justify-between gap-3">
+                <label className={labelClass}>Skills (comma separated)</label>
                 <AIButton
                   label="Suggest Skills"
                   onClick={handleSuggestSkills(index)}
@@ -133,13 +121,13 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ id, skillGroups, o
                 />
               </div>
               <input
-                style={inputStyle}
+                className={inputClass}
                 value={(group.skills || []).join(', ')}
                 onChange={handleGroupSkillsChange(index)}
                 placeholder="Demand generation, Campaign strategy, CRM architecture"
               />
               {error && lastActionIndex === index && (
-                <div style={{ fontSize: 12, color: '#ef4444', marginTop: 4 }}>{error.message}</div>
+                <div className="text-xs text-rose-600">{error.message}</div>
               )}
             </div>
           </div>
@@ -148,52 +136,11 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ id, skillGroups, o
         <button
           type="button"
           onClick={addGroup}
-          style={addButtonStyle}
+          className={addButtonClass}
         >
           + Add skill group
         </button>
       </div>
     </SectionCard>
   )
-}
-
-const labelStyle: React.CSSProperties = {
-  display: 'block',
-  fontSize: 12,
-  color: '#9ca3af',
-  marginBottom: 4,
-}
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '8px 10px',
-  borderRadius: 8,
-  border: '1px solid rgba(148, 163, 184, 0.7)',
-  background: 'rgba(15, 23, 42, 0.9)',
-  color: '#e5e7eb',
-  fontSize: 13,
-}
-
-const addButtonStyle: React.CSSProperties = {
-  marginTop: 4,
-  padding: '6px 10px',
-  borderRadius: 999,
-  border: '1px dashed rgba(148, 163, 184, 0.7)',
-  background: 'transparent',
-  color: '#e5e7eb',
-  fontSize: 13,
-  cursor: 'pointer',
-  alignSelf: 'flex-start',
-}
-
-const removeButtonStyle: React.CSSProperties = {
-  alignSelf: 'flex-end',
-  marginTop: 20,
-  padding: '4px 8px',
-  borderRadius: 999,
-  border: '1px solid rgba(248, 113, 113, 0.7)',
-  background: 'rgba(127, 29, 29, 0.5)',
-  color: '#fecaca',
-  cursor: 'pointer',
-  fontSize: 12,
 }

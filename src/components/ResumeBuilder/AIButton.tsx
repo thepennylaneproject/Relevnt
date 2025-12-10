@@ -1,45 +1,23 @@
-import React from 'react'
-import { AiAssistIcon } from '../icons/RelevntIcons'
+import * as React from 'react'
 
-interface Props {
-  onClick: () => void
-  loading?: boolean
-  disabled?: boolean
+type AIButtonProps = {
   label: string
+  onClick?: () => void | Promise<void>
+  disabled?: boolean
+  loading?: boolean
 }
 
-export const AIButton: React.FC<Props> = ({ onClick, loading, disabled, label }) => {
+export function AIButton({ label, onClick, disabled, loading }: AIButtonProps) {
+  const isDisabled = disabled || loading
+
   return (
     <button
       type="button"
       onClick={onClick}
-      disabled={disabled || loading}
-      style={{
-        padding: '6px 12px',
-        borderRadius: 999,
-        border: '1px solid rgba(129, 140, 248, 0.7)',
-        background: 'rgba(30, 64, 175, 0.1)',
-        color: '#4f46e5', // Indigo 600
-        fontSize: 12,
-        fontWeight: 600,
-        cursor: disabled || loading ? 'not-allowed' : 'pointer',
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 6,
-        opacity: disabled ? 0.6 : 1,
-        transition: 'all 0.2s',
-      }}
-      onMouseEnter={(e) => {
-        if (!disabled && !loading) {
-          e.currentTarget.style.background = 'rgba(30, 64, 175, 0.15)'
-        }
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.background = 'rgba(30, 64, 175, 0.1)'
-      }}
+      disabled={isDisabled}
+      className="inline-flex items-center justify-center rounded-lg border border-border bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
     >
-      <AiAssistIcon size={14} />
-      <span>{loading ? 'Thinking...' : label}</span>
+      {loading ? 'Thinking…' : label}
     </button>
   )
 }

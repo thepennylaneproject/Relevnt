@@ -1,11 +1,9 @@
 import { useState } from 'react';
 import { useAnalyzeSkillsGap } from '../hooks/useAnalyzeSkillsGap';
-import { useTheme } from '../contexts/useTheme';
+import { Container } from '../components/shared/Container';
+import { Icon } from '../components/ui/Icon';
 
 export default function LearningPathsPage() {
-  const { mode } = useTheme();
-  const isDark = mode === 'Dark';
-
   const { analyze, loading } = useAnalyzeSkillsGap();
 
   const [resumeText, setResumeText] = useState('');
@@ -49,55 +47,76 @@ export default function LearningPathsPage() {
   }
 
   return (
-    <div
-      className="min-h-screen px-4 py-8 flex justify-center"
-      style={{
-        backgroundColor: isDark ? '#020617' : '#f3f4f6',
-      }}
-    >
-      <div className="w-full max-w-5xl space-y-8">
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50">
-          Recommended Learning Paths
-        </h1>
-
-        <p className="text-sm text-slate-600 dark:text-slate-300 max-w-2xl">
-          Paste your resume and a job description. Relevnt identifies skill gaps and recommends free or accessible courses to help you level up.
-        </p>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <textarea
-            className="w-full h-48 p-3 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm"
-            placeholder="Paste your resume here..."
-            value={resumeText}
-            onChange={(e) => setResumeText(e.target.value)}
-          />
-          <textarea
-            className="w-full h-48 p-3 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm"
-            placeholder="Paste the job description here..."
-            value={jobDescription}
-            onChange={(e) => setJobDescription(e.target.value)}
-          />
-        </div>
-
-        <button
-          onClick={handleRecommend}
-          disabled={loading}
-          className="px-4 py-2 rounded bg-sky-600 text-white hover:bg-sky-700"
-        >
-          {loading ? 'Analyzing…' : 'Get Learning Path Recommendations'}
-        </button>
-
-        {recommendedCourses.length > 0 && (
-          <div className="space-y-3 mt-6">
-            <h2 className="text-xl font-semibold">Recommended Courses</h2>
-            <ul className="list-disc list-inside space-y-2 text-sm text-slate-800 dark:text-slate-200">
-              {recommendedCourses.map((course, i) => (
-                <li key={i}>{course}</li>
-              ))}
-            </ul>
+    <div className="page-wrapper">
+      <Container maxWidth="lg" padding="md">
+        <header className="hero-shell">
+          <div className="hero-header">
+            <div className="hero-header-main">
+              <div className="hero__badge">
+                <Icon name="book" size="sm" hideAccent />
+                <span>Learning Center</span>
+              </div>
+              <h1>Recommended Learning Paths</h1>
+              <p className="hero-subtitle">
+                Paste your resume and a job description. Relevnt identifies skill gaps and recommends free or accessible courses to help you level up.
+              </p>
+            </div>
           </div>
-        )}
-      </div>
+        </header>
+
+        <div className="page-stack">
+          <article className="surface-card">
+            <div className="rl-field-grid">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                <label className="rl-label">
+                  Your Resume
+                  <textarea
+                    className="rl-textarea"
+                    rows={8}
+                    placeholder="Paste your resume here..."
+                    value={resumeText}
+                    onChange={(e) => setResumeText(e.target.value)}
+                  />
+                </label>
+                <label className="rl-label">
+                  Job Description
+                  <textarea
+                    className="rl-textarea"
+                    rows={8}
+                    placeholder="Paste the job description here..."
+                    value={jobDescription}
+                    onChange={(e) => setJobDescription(e.target.value)}
+                  />
+                </label>
+              </div>
+
+              <div style={{ marginTop: 16 }}>
+                <button
+                  onClick={handleRecommend}
+                  disabled={loading}
+                  className="primary-button"
+                >
+                  {loading ? 'Analyzing…' : 'Get Learning Path Recommendations'}
+                </button>
+              </div>
+            </div>
+          </article>
+
+          {recommendedCourses.length > 0 && (
+            <article className="surface-card">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                <Icon name="lighthouse" size="sm" hideAccent />
+                <h2 style={{ fontSize: 16, fontWeight: 600, color: 'var(--text)' }}>Recommended Courses</h2>
+              </div>
+              <ul style={{ paddingLeft: '1.25rem', margin: 0, color: 'var(--text)', fontSize: '14px', lineHeight: '1.6' }}>
+                {recommendedCourses.map((course, i) => (
+                  <li key={i} style={{ marginBottom: '0.5rem' }}>{course}</li>
+                ))}
+              </ul>
+            </article>
+          )}
+        </div>
+      </Container>
     </div>
   );
 }

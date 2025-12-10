@@ -23,12 +23,11 @@
  * ============================================================================
  */
 
-import { useState, CSSProperties } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { copy } from '../config/i18n.config';
 import { PageBackground } from '../components/shared/PageBackground';
-import { useRelevntColors } from '../hooks';
 
 interface LoginFormData {
   email: string;
@@ -46,9 +45,6 @@ interface LoginError {
 export function LoginPage(): JSX.Element {
   const navigate = useNavigate();
   const { signInWithEmail } = useAuth();
-  const colors = useRelevntColors();
-
-  const isDark = colors.background === '#1A1A1A';
 
   // ============================================================
   // STATE
@@ -122,147 +118,29 @@ export function LoginPage(): JSX.Element {
   };
 
   // ============================================================
-  // STYLES
-  // ============================================================
-
-  const containerStyles: CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: '100vh',
-    padding: '20px',
-  };
-
-  const cardStyles: CSSProperties = {
-    backgroundColor: colors.surface,
-    borderRadius: '12px',
-    padding: '48px',
-    width: '100%',
-    maxWidth: '400px',
-    boxShadow: isDark ? '0 4px 16px rgba(0,0,0,0.3)' : '0 4px 16px rgba(0,0,0,0.08)',
-  };
-
-  const titleStyles: CSSProperties = {
-    fontSize: '28px',
-    fontWeight: 700,
-    color: colors.text,
-    marginBottom: '8px',
-    textAlign: 'center',
-  };
-
-  const subtitleStyles: CSSProperties = {
-    fontSize: '14px',
-    color: colors.textSecondary,
-    marginBottom: '32px',
-    textAlign: 'center',
-  };
-
-  const formGroupStyles: CSSProperties = {
-    marginBottom: '20px',
-  };
-
-  const labelStyles: CSSProperties = {
-    display: 'block',
-    fontSize: '14px',
-    fontWeight: 500,
-    color: colors.text,
-    marginBottom: '8px',
-  };
-
-  const inputStyles: CSSProperties = {
-    width: '100%',
-    padding: '12px',
-    borderRadius: '8px',
-    border: `1px solid ${colors.border}`,
-    backgroundColor: isDark ? '#0f0f0f' : '#ffffff',
-    color: colors.text,
-    fontSize: '14px',
-    fontFamily: 'inherit',
-    transition: 'all 0.2s ease',
-    boxSizing: 'border-box',
-  };
-
-  const inputErrorStyles: CSSProperties = {
-    ...inputStyles,
-    borderColor: colors.error,
-    backgroundColor: isDark ? 'rgba(239, 68, 68, 0.05)' : 'rgba(239, 68, 68, 0.05)',
-  };
-
-  const errorTextStyles: CSSProperties = {
-    fontSize: '13px',
-    color: colors.error,
-    marginTop: '6px',
-  };
-
-  const buttonStyles: CSSProperties = {
-    width: '100%',
-    padding: '12px',
-    backgroundColor: colors.accent,
-    color: '#000000',
-    border: 'none',
-    borderRadius: '8px',
-    fontSize: '16px',
-    fontWeight: 600,
-    cursor: loading ? 'not-allowed' : 'pointer',
-    transition: 'all 0.3s ease',
-    opacity: loading ? 0.7 : 1,
-    boxShadow: '0 4px 12px rgba(212, 165, 116, 0.25)',
-    marginTop: '24px',
-  };
-
-  const linkStyles: CSSProperties = {
-    color: colors.primary,
-    textDecoration: 'none',
-    fontSize: '14px',
-    fontWeight: 500,
-    cursor: 'pointer',
-    transition: 'opacity 0.2s',
-  };
-
-  const footerStyles: CSSProperties = {
-    textAlign: 'center',
-    marginTop: '24px',
-    fontSize: '14px',
-    color: colors.textSecondary,
-  };
-
-  const signupLinkStyles: CSSProperties = {
-    ...linkStyles,
-    marginLeft: '4px',
-  };
-
-  // ============================================================
   // RENDER
   // ============================================================
 
   return (
     <PageBackground>
-      <div style={containerStyles}>
-        <div style={cardStyles}>
+      <div className="auth-wrapper">
+        <div className="auth-card">
           {/* Header */}
-          <h1 style={titleStyles}>{copy.nav.login}</h1>
-          <p style={subtitleStyles}>Welcome back to Relevnt</p>
+          <h1 className="auth-title">{copy.nav.login}</h1>
+          <p className="auth-subtitle">Welcome back to Relevnt</p>
 
           {/* Generic error message */}
           {error && !error.field && (
-            <div
-              style={{
-                backgroundColor: isDark ? 'rgba(239, 68, 68, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                borderLeft: `3px solid ${colors.error}`,
-                padding: '12px',
-                borderRadius: '6px',
-                marginBottom: '20px',
-              }}
-            >
-              <p style={{ ...errorTextStyles, margin: 0 }}>{error.message}</p>
+            <div className="form-error" style={{ marginBottom: '20px' }}>
+              {error.message}
             </div>
           )}
 
           {/* Login Form */}
           <form onSubmit={handleSubmit}>
             {/* Email Field */}
-            <div style={formGroupStyles}>
-              <label htmlFor="email" style={labelStyles}>
+            <div className="form-group">
+              <label htmlFor="email" className="form-label">
                 {copy.form.email}
               </label>
               <input
@@ -271,23 +149,17 @@ export function LoginPage(): JSX.Element {
                 placeholder="you@example.com"
                 value={formData.email}
                 onChange={(e) => handleChange('email', e.target.value)}
-                style={error?.field === 'email' ? inputErrorStyles : inputStyles}
-                onFocus={(e) =>
-                  (e.currentTarget.style.borderColor = colors.primary)
-                }
-                onBlur={(e) =>
-                  (e.currentTarget.style.borderColor = error?.field === 'email' ? colors.error : colors.border)
-                }
+                className="input"
                 disabled={loading}
               />
               {error?.field === 'email' && (
-                <p style={errorTextStyles}>{error.message}</p>
+                <p className="form-error">{error.message}</p>
               )}
             </div>
 
             {/* Password Field */}
-            <div style={formGroupStyles}>
-              <label htmlFor="password" style={labelStyles}>
+            <div className="form-group">
+              <label htmlFor="password" className="form-label">
                 {copy.form.password}
               </label>
               <input
@@ -296,17 +168,11 @@ export function LoginPage(): JSX.Element {
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={(e) => handleChange('password', e.target.value)}
-                style={error?.field === 'password' ? inputErrorStyles : inputStyles}
-                onFocus={(e) =>
-                  (e.currentTarget.style.borderColor = colors.primary)
-                }
-                onBlur={(e) =>
-                  (e.currentTarget.style.borderColor = error?.field === 'password' ? colors.error : colors.border)
-                }
+                className="input"
                 disabled={loading}
               />
               {error?.field === 'password' && (
-                <p style={errorTextStyles}>{error.message}</p>
+                <p className="form-error">{error.message}</p>
               )}
             </div>
 
@@ -318,9 +184,7 @@ export function LoginPage(): JSX.Element {
                   e.preventDefault();
                   navigate('/password-reset');
                 }}
-                style={linkStyles}
-                onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.7')}
-                onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+                className="link"
               >
                 Forgot password?
               </a>
@@ -329,28 +193,18 @@ export function LoginPage(): JSX.Element {
             {/* Submit Button */}
             <button
               type="submit"
-              style={buttonStyles}
+              className="btn btn--lg"
               disabled={loading}
-              onMouseEnter={(e) =>
-                !loading && (e.currentTarget.style.transform = 'translateY(-2px)')
-              }
-              onMouseLeave={(e) =>
-                !loading && (e.currentTarget.style.transform = 'translateY(0)')
-              }
+              style={{ width: '100%' }}
             >
               {loading ? 'Signing in...' : copy.nav.login}
             </button>
           </form>
 
           {/* Signup Link */}
-          <div style={footerStyles}>
+          <div className="auth-footer">
             Don't have an account?
-            <a
-              onClick={() => navigate('/signup')}
-              style={signupLinkStyles}
-              onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.7')}
-              onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
-            >
+            <a onClick={() => navigate('/signup')} className="link">
               {copy.nav.signup}
             </a>
           </div>

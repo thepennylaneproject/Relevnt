@@ -1,6 +1,7 @@
 // src/pages/ResumeBuilder/components/EducationItemCard.tsx
 import React, { ChangeEvent } from 'react'
 import { ResumeEducationItem } from '../../types/resume-builder.types' // adjust if needed
+import { inputClass, itemCardClass, labelClass, removeButtonClass } from './sectionStyles'
 
 interface EducationItemCardProps {
   item: ResumeEducationItem
@@ -24,29 +25,22 @@ export const EducationItemCard: React.FC<EducationItemCardProps> = ({
 
   return (
     <div
-      style={{
-        borderRadius: 12,
-        border: '1px solid rgba(148, 163, 184, 0.6)',
-        padding: 12,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 8,
-      }}
+      className={itemCardClass}
     >
-      <div style={{ display: 'flex', gap: 8 }}>
-        <div style={{ flex: 1 }}>
-          <label style={labelStyle}>School</label>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div>
+          <label className={labelClass}>School</label>
           <input
-            style={inputStyle}
+            className={inputClass}
             value={(item.institution as string) || ''}
             onChange={handleFieldChange('institution')}
             placeholder="Iowa State University"
           />
         </div>
-        <div style={{ flex: 1 }}>
-          <label style={labelStyle}>Degree</label>
+        <div>
+          <label className={labelClass}>Degree</label>
           <input
-            style={inputStyle}
+            className={inputClass}
             value={(item.degree as string) || ''}
             onChange={handleFieldChange('degree')}
             placeholder="BA, Marketing"
@@ -54,20 +48,20 @@ export const EducationItemCard: React.FC<EducationItemCardProps> = ({
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 8 }}>
-        <div style={{ flex: 1 }}>
-          <label style={labelStyle}>Field of study</label>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div>
+          <label className={labelClass}>Field of study</label>
           <input
-            style={inputStyle}
+            className={inputClass}
             value={(item.fieldOfStudy as string) || ''}
             onChange={handleFieldChange('fieldOfStudy')}
             placeholder="Digital Media and Communications"
           />
         </div>
-        <div style={{ flex: 1 }}>
-          <label style={labelStyle}>Location</label>
+        <div>
+          <label className={labelClass}>Location</label>
           <input
-            style={inputStyle}
+            className={inputClass}
             value={(item.location as string) || ''}
             onChange={handleFieldChange('location')}
             placeholder="Ames, IA"
@@ -75,20 +69,20 @@ export const EducationItemCard: React.FC<EducationItemCardProps> = ({
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 8 }}>
-        <div style={{ flex: 1 }}>
-          <label style={labelStyle}>Start</label>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div>
+          <label className={labelClass}>Start</label>
           <input
-            style={inputStyle}
+            className={inputClass}
             value={(item.startDate as string) || ''}
             onChange={handleFieldChange('startDate')}
             placeholder="2014-08"
           />
         </div>
-        <div style={{ flex: 1 }}>
-          <label style={labelStyle}>End</label>
+        <div>
+          <label className={labelClass}>End</label>
           <input
-            style={inputStyle}
+            className={inputClass}
             value={(item.endDate as string) || ''}
             onChange={handleFieldChange('endDate')}
             placeholder="2018-05"
@@ -99,49 +93,10 @@ export const EducationItemCard: React.FC<EducationItemCardProps> = ({
       <button
         type="button"
         onClick={onRemove}
-        style={removeButtonStyle}
+        className={removeButtonClass}
       >
         ✕ Remove education
       </button>
     </div>
   )
-}
-
-const labelStyle: React.CSSProperties = {
-  display: 'block',
-  fontSize: 12,
-  fontWeight: 500,
-  color: '#64748b',
-  marginBottom: 6,
-}
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '10px 12px',
-  borderRadius: 8,
-  border: '1px solid #e2e8f0',
-  background: '#f8fafc',
-  color: '#1e293b',
-  fontSize: 14,
-  transition: 'all 0.2s',
-}
-
-const textareaStyle: React.CSSProperties = {
-  ...inputStyle,
-  resize: 'vertical',
-  lineHeight: 1.5,
-}
-
-const removeButtonStyle: React.CSSProperties = {
-  alignSelf: 'flex-start',
-  marginTop: 8,
-  padding: '6px 12px',
-  borderRadius: 6,
-  border: '1px solid #fee2e2',
-  background: '#fff1f2',
-  color: '#ef4444',
-  cursor: 'pointer',
-  fontSize: 12,
-  fontWeight: 500,
-  transition: 'all 0.2s',
 }

@@ -1,43 +1,53 @@
-// src/components/ResumeBuilder/SectionCard.tsx
-import React from 'react'
-import type { RelevntColors } from '../../hooks/useRelevntColors' // adjust import if needed
+import * as React from 'react'
+import type { RelevntColors } from '../../hooks/useRelevntColors'
 
-export interface Props {
-  id?: string
-  title: string
+type Props = {
+  children: React.ReactNode
+  title?: string
   description?: string
-  icon?: string
-  colors: RelevntColors
-  showAIButton?: boolean
-  children?: React.ReactNode
+  icon?: React.ReactNode
+  colors?: RelevntColors | any
+  className?: string
 }
 
-export function SectionCard({ colors, title, description, children }: Props) {
+export const SectionCard: React.FC<Props> = ({
+  title,
+  description,
+  icon,
+  className = '',
+  children,
+}) => {
+  const base = 'card space-y-5' // uses global .card
+
   return (
-    <section
-      style={{
-        background: colors.surface,
-        borderRadius: 16,
-        border: `1px solid ${colors.border}`,
-        padding: 24,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 20,
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-        transition: 'all 0.2s ease',
-      }}
-    >
-      <div style={{ borderBottom: `1px solid ${colors.border}`, paddingBottom: 16 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 700, color: colors.text, margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-          {title}
-        </h2>
-        {description && (
-          <p style={{ fontSize: 13, color: colors.textSecondary, marginTop: 4, lineHeight: 1.5 }}>
-            {description}
-          </p>
-        )}
+    <section className={[base, className].filter(Boolean).join(' ')}>
+      {(title || description || icon) && (
+        <header className="flex items-start gap-3">
+          {icon && (
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#F3F4F6] text-[#1F2933]">
+              {icon}
+            </span>
+          )}
+          <div className="space-y-1">
+            {title && (
+              <h2 className="text-sm font-semibold text-neutral-900">
+                {title}
+              </h2>
+            )}
+            {description && (
+              <p className="text-xs leading-relaxed text-neutral-600">
+                {description}
+              </p>
+            )}
+          </div>
+        </header>
+      )}
+
+      <div className="space-y-4">
+        {children}
       </div>
-      <div>{children}</div>
     </section>
   )
 }
+
+export default SectionCard

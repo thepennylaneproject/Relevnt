@@ -4,6 +4,7 @@ import { ResumeExperienceItem } from '../../types/resume-builder.types'
 import { AIButton } from './AIButton'
 import { useAITask } from '../../hooks/useAITask'
 import { useState } from 'react'
+import { inputClass, itemCardClass, labelClass, removeButtonClass, textareaClass } from './sectionStyles'
 
 interface ExperienceItemCardProps {
   item: ResumeExperienceItem
@@ -69,29 +70,22 @@ export const ExperienceItemCard: React.FC<ExperienceItemCardProps> = ({
 
   return (
     <div
-      style={{
-        borderRadius: 12,
-        border: '1px solid rgba(148, 163, 184, 0.6)',
-        padding: 12,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 8,
-      }}
+      className={itemCardClass}
     >
-      <div style={{ display: 'flex', gap: 8 }}>
-        <div style={{ flex: 1 }}>
-          <label style={labelStyle}>Title</label>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div>
+          <label className={labelClass}>Title</label>
           <input
-            style={inputStyle}
+            className={inputClass}
             value={item.title || ''}
             onChange={handleFieldChange('title')}
             placeholder="Digital Marketing Strategist"
           />
         </div>
-        <div style={{ flex: 1 }}>
-          <label style={labelStyle}>Company</label>
+        <div>
+          <label className={labelClass}>Company</label>
           <input
-            style={inputStyle}
+            className={inputClass}
             value={item.company || ''}
             onChange={handleFieldChange('company')}
             placeholder="HealthTech Associates"
@@ -99,30 +93,30 @@ export const ExperienceItemCard: React.FC<ExperienceItemCardProps> = ({
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 8 }}>
-        <div style={{ flex: 1 }}>
-          <label style={labelStyle}>Location</label>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div>
+          <label className={labelClass}>Location</label>
           <input
-            style={inputStyle}
+            className={inputClass}
             value={item.location || ''}
             onChange={handleFieldChange('location')}
             placeholder="West Des Moines, IA · Remote"
           />
         </div>
-        <div style={{ flex: 1, display: 'flex', gap: 8 }}>
-          <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Start</label>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div>
+            <label className={labelClass}>Start</label>
             <input
-              style={inputStyle}
+              className={inputClass}
               value={item.startDate || ''}
               onChange={handleFieldChange('startDate')}
               placeholder="2023-09"
             />
           </div>
-          <div style={{ flex: 1 }}>
-            <label style={labelStyle}>End</label>
+          <div>
+            <label className={labelClass}>End</label>
             <input
-              style={inputStyle}
+              className={inputClass}
               value={item.endDate || ''}
               onChange={handleFieldChange('endDate')}
               placeholder="Present"
@@ -132,9 +126,9 @@ export const ExperienceItemCard: React.FC<ExperienceItemCardProps> = ({
       </div>
 
       <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-          <label style={{ ...labelStyle, marginBottom: 0 }}>Highlights / Impact</label>
-          <div style={{ display: 'flex', gap: 8 }}>
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
+          <label className={labelClass}>Highlights / Impact</label>
+          <div className="flex items-center gap-2">
             <AIButton
               label="Generate Bullets"
               onClick={handleGenerateBullets}
@@ -150,61 +144,22 @@ export const ExperienceItemCard: React.FC<ExperienceItemCardProps> = ({
           </div>
         </div>
         <textarea
-          style={textareaStyle}
+          className={textareaClass}
           rows={4}
           value={item.bullets || ''}
           onChange={handleFieldChange('bullets')}
           placeholder="Use bullet-style lines, quantified impact, systems you built…"
         />
-        {error && <div style={{ fontSize: 12, color: '#ef4444', marginTop: 4 }}>{error.message}</div>}
+        {error && <div className="text-xs text-rose-600">{error.message}</div>}
       </div>
 
       <button
         type="button"
         onClick={onRemove}
-        style={removeButtonStyle}
+        className={removeButtonClass}
       >
         ✕ Remove experience
       </button>
     </div>
   )
-}
-
-const labelStyle: React.CSSProperties = {
-  display: 'block',
-  fontSize: 12,
-  fontWeight: 500,
-  color: '#64748b',
-  marginBottom: 6,
-}
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '10px 12px',
-  borderRadius: 8,
-  border: '1px solid #e2e8f0',
-  background: '#f8fafc',
-  color: '#1e293b',
-  fontSize: 14,
-  transition: 'all 0.2s',
-}
-
-const textareaStyle: React.CSSProperties = {
-  ...inputStyle,
-  resize: 'vertical',
-  lineHeight: 1.5,
-}
-
-const removeButtonStyle: React.CSSProperties = {
-  alignSelf: 'flex-start',
-  marginTop: 8,
-  padding: '6px 12px',
-  borderRadius: 6,
-  border: '1px solid #fee2e2',
-  background: '#fff1f2',
-  color: '#ef4444',
-  cursor: 'pointer',
-  fontSize: 12,
-  fontWeight: 500,
-  transition: 'all 0.2s',
 }

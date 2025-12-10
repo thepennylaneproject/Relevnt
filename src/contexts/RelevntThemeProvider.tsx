@@ -9,7 +9,7 @@
  * the useRelevntTheme() hook.
  */
 
-import { createContext, useContext, useState, useMemo, useCallback, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useMemo, useCallback, useEffect, useState, ReactNode } from 'react'
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -22,28 +22,28 @@ interface ThemeColors {
   background: string
   surface: string
   surfaceHover: string
-  
+
   // Text
   text: string
   textSecondary: string
   mutedText: string
-  
+
   // Borders & Dividers
   border: string
   borderLight: string
-  
+
   // Interactive
   primary: string
   primaryHover: string
   secondary: string
   secondaryHover: string
-  
+
   // Feedback
   success: string
   warning: string
   error: string
   info: string
-  
+
   // Special
   overlay: string
   focus: string
@@ -54,10 +54,10 @@ interface RelevntThemeContextValue {
   mode: ThemeMode
   setMode: (mode: ThemeMode) => void
   toggleMode: () => void
-  
+
   // Colors
   colors: ThemeColors
-  
+
   // Utilities
   isDark: boolean
 }
@@ -92,65 +92,35 @@ const LIGHT_COLORS: ThemeColors = {
   background: '#FFFFFF',
   surface: '#F8F7F5',
   surfaceHover: '#F0EEEA',
-  
+
   // Text
   text: BRAND_COLORS.deepBlack,
   textSecondary: '#4A4A4A',
   mutedText: '#999999',
-  
+
   // Borders
   border: '#D9D6D1',
   borderLight: '#E9E6E1',
-  
+
   // Interactive
   primary: BRAND_COLORS.accentGold,
   primaryHover: '#B89558',
   secondary: BRAND_COLORS.supportTeal,
   secondaryHover: '#007B7B',
-  
+
   // Feedback
   success: '#10B981',
   warning: '#F59E0B',
   error: '#EF4444',
   info: BRAND_COLORS.supportTeal,
-  
+
   // Special
   overlay: 'rgba(11, 11, 11, 0.5)',
   focus: 'rgba(205, 170, 112, 0.2)',
 }
 
 // Dark Mode Palette
-const DARK_COLORS: ThemeColors = {
-  // Backgrounds
-  background: '#1A1A1A',
-  surface: '#242424',
-  surfaceHover: '#2E2E2E',
-  
-  // Text
-  text: '#F5F5F5',
-  textSecondary: '#D0D0D0',
-  mutedText: '#888888',
-  
-  // Borders
-  border: '#404040',
-  borderLight: '#333333',
-  
-  // Interactive
-  primary: BRAND_COLORS.accentGold,
-  primaryHover: '#E8C582',
-  secondary: BRAND_COLORS.supportTeal,
-  secondaryHover: '#00BFBF',
-  
-  // Feedback
-  success: '#34D399',
-  warning: '#FBBF24',
-  error: '#F87171',
-  info: BRAND_COLORS.supportTeal,
-  
-  // Special
-  overlay: 'rgba(0, 0, 0, 0.7)',
-  focus: 'rgba(205, 170, 112, 0.3)',
-}
+// Dark mode removed (light mode only)
 
 // ============================================================================
 // CONTEXT CREATION
@@ -170,67 +140,53 @@ export function RelevntThemeProvider({
   children,
   initialMode = 'Light',
 }: RelevntThemeProviderProps) {
-  
-  // Get initial mode from localStorage or use default
+  // Initialize from localStorage or prop
   const [mode, setModeState] = useState<ThemeMode>(() => {
-    try {
-      const saved = localStorage.getItem('relevnt-theme-mode')
-      return (saved as ThemeMode) || initialMode
-    } catch {
-      return initialMode
-    }
-  })
-  
-  // ========================================================================
-  // PERSIST MODE TO LOCALSTORAGE
-  // ========================================================================
-  
-  /**
-   * 📚 LEARNING NOTE: useEffect runs side effects (like saving to localStorage)
-   * after rendering. The dependency array [mode] means it runs whenever mode changes.
-   */
+    if (typeof window === 'undefined') return initialMode;
+    const stored = localStorage.getItem('relevnt-theme-mode');
+    if (stored === 'Light' || stored === 'Dark') return stored;
+    // Check system preference if no stored value
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) return 'Dark';
+    return initialMode;
+  });
+
+  // Apply theme class to document when mode changes
   useEffect(() => {
-    try {
-      localStorage.setItem('relevnt-theme-mode', mode)
-      // Set data-theme attribute for CSS token switching
-      if (mode === 'Dark') {
-        document.documentElement.setAttribute('data-theme', 'dark')
-      } else {
-        document.documentElement.removeAttribute('data-theme')
-      }
-    } catch (error) {
-      console.error('Failed to save theme mode:', error)
+    const root = document.documentElement;
+
+    if (mode === 'Dark') {
+      root.classList.add('dark');
+      root.classList.remove('light');
+      root.setAttribute('data-theme', 'dark');
+    } else {
+      root.classList.remove('dark');
+      root.classList.add('light');
+      root.setAttribute('data-theme', 'light');
     }
-  }, [mode])
-  
-  // ========================================================================
-  // SET MODE HANDLERS
-  // ========================================================================
-  
+
+    // Persist to localStorage
+    try {
+      localStorage.setItem('relevnt-theme-mode', mode);
+    } catch (error) {
+      console.error('Failed to save theme mode:', error);
+    }
+  }, [mode]);
+
   const setMode = useCallback((newMode: ThemeMode) => {
-    setModeState(newMode)
-  }, [])
-  
+    setModeState(newMode);
+  }, []);
+
   const toggleMode = useCallback(() => {
-    setModeState((prev) => (prev === 'Light' ? 'Dark' : 'Light'))
-  }, [])
-  
-  // ========================================================================
-  // SELECT COLORS BASED ON MODE
-  // ========================================================================
-  
-  /**
-   * 📚 LEARNING NOTE: useMemo caches the computed colors so they don't change
-   * on every render. This prevents unnecessary re-renders of components using these colors.
-   */
-  const colors = useMemo(() => {
-    return mode === 'Light' ? LIGHT_COLORS : DARK_COLORS
-  }, [mode])
-  
+    setModeState((prev: ThemeMode) => prev === 'Light' ? 'Dark' : 'Light');
+  }, []);
+
+  // Colors come from CSS variables now, so we provide computed defaults
+  const colors = useMemo(() => LIGHT_COLORS, []);
+
   // ========================================================================
   // CREATE CONTEXT VALUE
   // ========================================================================
-  
+
   const value: RelevntThemeContextValue = useMemo(
     () => ({
       mode,
@@ -240,17 +196,17 @@ export function RelevntThemeProvider({
       isDark: mode === 'Dark',
     }),
     [mode, setMode, toggleMode, colors]
-  )
-  
+  );
+
   // ========================================================================
   // RENDER PROVIDER
   // ========================================================================
-  
+
   return (
     <RelevntThemeContext.Provider value={value}>
       {children}
     </RelevntThemeContext.Provider>
-  )
+  );
 }
 
 // ============================================================================
@@ -268,14 +224,14 @@ export function RelevntThemeProvider({
  */
 export function useRelevntTheme(): RelevntThemeContextValue {
   const context = useContext(RelevntThemeContext)
-  
+
   if (!context) {
     throw new Error(
       '❌ useRelevntTheme() must be used inside <RelevntThemeProvider>. ' +
       'Make sure RelevntThemeProvider wraps your app in main.tsx or App.tsx'
     )
   }
-  
+
   return context
 }
 
@@ -326,4 +282,3 @@ export function useToggleTheme(): () => void {
 // ============================================================================
 
 export type { ThemeMode, ThemeColors, RelevntThemeContextValue, RelevntThemeProviderProps }
-

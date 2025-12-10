@@ -1,6 +1,8 @@
 import React, { ChangeEvent } from 'react'
 import { SectionCard } from './SectionCard'
 import { ResumeContact } from '../../types/resume-builder.types'
+import { addButtonClass, helperClass, inputClass, labelClass, removeButtonClass } from './sectionStyles'
+import { User } from "lucide-react"
 
 interface Props {
   contact: ResumeContact
@@ -48,25 +50,24 @@ export const ContactSection: React.FC<Props> = ({ contact, onChange, colors }) =
     <SectionCard
       title="Contact"
       description="Who you are and how people should reach you."
-      icon="👋"
+      icon={<User className="w-4 h-4 text-[#1F2933]" />}
       colors={colors}
-      showAIButton={false}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <div style={{ flex: 2 }}>
-            <label style={labelStyle}>Full name</label>
+      <div className="space-y-4">
+        <div className="grid gap-3 sm:grid-cols-[1.1fr_1.4fr]">
+          <div>
+            <label className={labelClass}>Full name</label>
             <input
-              style={inputStyle}
+              className={inputClass}
               value={contact.fullName}
               onChange={handleFieldChange('fullName')}
               placeholder="Sarah Sahl"
             />
           </div>
-          <div style={{ flex: 3 }}>
-            <label style={labelStyle}>Headline (optional)</label>
+          <div>
+            <label className={labelClass}>Headline (optional)</label>
             <input
-              style={inputStyle}
+              className={inputClass}
               value={contact.headline ?? ''}
               onChange={handleFieldChange('headline')}
               placeholder="Digital marketing strategist & AI product builder"
@@ -74,29 +75,29 @@ export const ContactSection: React.FC<Props> = ({ contact, onChange, colors }) =
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: 8 }}>
-          <div style={{ flex: 2 }}>
-            <label style={labelStyle}>Email</label>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div>
+            <label className={labelClass}>Email</label>
             <input
-              style={inputStyle}
+              className={inputClass}
               value={contact.email}
               onChange={handleFieldChange('email')}
               placeholder="you@example.com"
             />
           </div>
-          <div style={{ flex: 2 }}>
-            <label style={labelStyle}>Phone</label>
+          <div>
+            <label className={labelClass}>Phone</label>
             <input
-              style={inputStyle}
+              className={inputClass}
               value={contact.phone}
               onChange={handleFieldChange('phone')}
               placeholder="(555) 123-4567"
             />
           </div>
-          <div style={{ flex: 2 }}>
-            <label style={labelStyle}>Location</label>
+          <div>
+            <label className={labelClass}>Location</label>
             <input
-              style={inputStyle}
+              className={inputClass}
               value={contact.location}
               onChange={handleFieldChange('location')}
               placeholder="Des Moines, IA · Remote"
@@ -104,44 +105,37 @@ export const ContactSection: React.FC<Props> = ({ contact, onChange, colors }) =
           </div>
         </div>
 
-        <div>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: 6,
-            }}
-          >
-            <label style={labelStyle}>Links (optional)</label>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className={labelClass}>Links (optional)</label>
             <button
               type="button"
               onClick={addLink}
-              style={smallGhostButton}
+              className={addButtonClass}
             >
               + Add link
             </button>
           </div>
 
           {(contact.links ?? []).length === 0 ? (
-            <p style={{ fontSize: 12, color: '#6b7280' }}>
+            <p className={helperClass}>
               Add LinkedIn, portfolio, GitHub, or other high value links.
             </p>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div className="space-y-2">
               {(contact.links ?? []).map((link, index) => (
                 <div
                   key={index}
-                  style={{ display: 'flex', gap: 8, alignItems: 'center' }}
+                  className="flex flex-col gap-2 sm:flex-row sm:items-center"
                 >
                   <input
-                    style={{ ...inputStyle, flex: 1 }}
+                    className={`${inputClass} sm:flex-1`}
                     value={link.label}
                     onChange={handleLinkLabelChange(index)}
                     placeholder="LinkedIn"
                   />
                   <input
-                    style={{ ...inputStyle, flex: 3 }}
+                    className={`${inputClass} sm:flex-[2]`}
                     value={link.url}
                     onChange={handleLinkUrlChange(index)}
                     placeholder="https://linkedin.com/in/you"
@@ -149,10 +143,10 @@ export const ContactSection: React.FC<Props> = ({ contact, onChange, colors }) =
                   <button
                     type="button"
                     onClick={() => removeLink(index)}
-                    style={iconButtonStyle}
+                    className={removeButtonClass}
                     aria-label="Remove link"
                   >
-                    ✕
+                    ✕ Remove
                   </button>
                 </div>
               ))}
@@ -162,41 +156,4 @@ export const ContactSection: React.FC<Props> = ({ contact, onChange, colors }) =
       </div>
     </SectionCard>
   )
-}
-
-const labelStyle: React.CSSProperties = {
-  display: 'block',
-  fontSize: 12,
-  color: '#9ca3af',
-  marginBottom: 4,
-}
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '8px 10px',
-  borderRadius: 8,
-  border: '1px solid rgba(148, 163, 184, 0.7)',
-  background: 'rgba(15, 23, 42, 0.9)',
-  color: '#e5e7eb',
-  fontSize: 13,
-}
-
-const smallGhostButton: React.CSSProperties = {
-  fontSize: 12,
-  padding: '4px 8px',
-  borderRadius: 999,
-  border: '1px dashed rgba(148, 163, 184, 0.8)',
-  background: 'transparent',
-  color: '#e5e7eb',
-  cursor: 'pointer',
-}
-
-const iconButtonStyle: React.CSSProperties = {
-  padding: '4px 8px',
-  borderRadius: 999,
-  border: '1px solid rgba(148, 163, 184, 0.7)',
-  background: 'rgba(15, 23, 42, 0.9)',
-  color: '#e5e7eb',
-  cursor: 'pointer',
-  fontSize: 12,
 }

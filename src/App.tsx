@@ -9,7 +9,6 @@ import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
 import DashboardPage from './pages/DashboardPage'
-import ResumesPage from './pages/ResumesPage'
 import JobsPage from './pages/JobsPage'
 import ApplicationsPage from './pages/ApplicationsPage'
 import AdminDashboard from './pages/AdminDashboard'
@@ -20,9 +19,8 @@ import JobPreferencesPage from './pages/JobPreferencesPage'
 import LearnPage from './pages/LearnPage'
 import ProfilePersonalPage from './pages/ProfilePersonalPage'
 import ProfileProfessionalPage from './pages/ProfileProfessionalPage'
-import { ResumeBuilderPage } from './pages/ResumeBuilderPage'
+import ResumeBuilderPage  from './pages/ResumeBuilderPage'
 import SidebarMarginNav from './components/chrome/SidebarMarginNav'
-import AdminJobSourcesPage from './legacy/AdminJobSourcesPage'
 import './styles/margin-nav.css'
 
 import './App.css'
@@ -78,10 +76,6 @@ function AppInner() {
               element={isAuthed ? <ResumeBuilderPage /> : <Navigate to="/login" replace />}
             />
             <Route
-              path="/resumes/legacy"
-              element={isAuthed ? <ResumesPage /> : <Navigate to="/login" replace />}
-            />
-            <Route
               path="/jobs"
               element={isAuthed ? <JobsPage /> : <Navigate to="/login" replace />}
             />
@@ -125,10 +119,6 @@ function AppInner() {
             <Route
               path="/admin"
               element={isAuthed ? <AdminDashboard /> : <Navigate to="/login" replace />}
-            />
-            <Route
-              path="/admin/sources"
-              element={isAuthed ? <AdminJobSourcesPage /> : <Navigate to="/login" replace />}
             />
           </Routes>
         </AppLayout>

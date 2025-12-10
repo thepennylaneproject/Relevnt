@@ -4,6 +4,8 @@ import { SectionCard } from './SectionCard'
 import { ExperienceItemCard } from './ExperienceItemCard'
 import { ResumeExperienceItem } from '../../types/resume-builder.types'
 import { RelevntColors } from '../../hooks/useRelevntColors'
+import { addButtonClass } from './sectionStyles'
+import { Briefcase } from "lucide-react"
 
 interface ExperienceSectionProps {
   id: string
@@ -44,13 +46,12 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
 
   return (
     <SectionCard
-      id={id}
       title="Experience"
-      icon="💼"
       description="Roles where you did the most damage, quantified and structured."
+      icon={<Briefcase className="w-4 h-4 text-[#1F2933]" />}
       colors={colors}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div className="space-y-4">
         {items.map((item, index) => (
           <ExperienceItemCard
             key={item.id || index}
@@ -63,23 +64,11 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
         <button
           type="button"
           onClick={addItem}
-          style={addButtonStyle}
+          className={addButtonClass}
         >
           + Add experience
         </button>
       </div>
     </SectionCard>
   )
-}
-
-const addButtonStyle: React.CSSProperties = {
-  marginTop: 4,
-  padding: '6px 10px',
-  borderRadius: 999,
-  border: '1px dashed rgba(148, 163, 184, 0.7)',
-  background: 'transparent',
-  color: '#e5e7eb',
-  fontSize: 13,
-  cursor: 'pointer',
-  alignSelf: 'flex-start',
 }

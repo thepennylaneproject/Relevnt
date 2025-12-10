@@ -1,6 +1,5 @@
 import React from 'react'
 import { useSkillInsights } from '../../hooks/useSkillInsights'
-import { useRelevntColors } from '../../hooks'
 
 interface SkillMapCardProps {
   onSkillSelected?: (slug: string) => void
@@ -8,7 +7,6 @@ interface SkillMapCardProps {
 
 export function SkillMapCard({ onSkillSelected }: SkillMapCardProps) {
   const { insights, isLoading, error } = useSkillInsights()
-  const colors = useRelevntColors()
 
   const topInsights = insights
     .slice(0, 8)
@@ -16,16 +14,9 @@ export function SkillMapCard({ onSkillSelected }: SkillMapCardProps) {
 
   if (isLoading) {
     return (
-      <div
-        style={{
-          padding: '16px 16px 14px',
-          borderRadius: 16,
-          backgroundColor: colors.surface,
-          border: `1px solid ${colors.borderLight}`,
-        }}
-      >
-        <div style={{ height: 14, width: 180, background: colors.surfaceHover, borderRadius: 8, marginBottom: 8 }} />
-        <div style={{ height: 12, width: 220, background: colors.surfaceHover, borderRadius: 8 }} />
+      <div className="surface-card">
+        <div style={{ height: 14, width: 180, background: 'var(--surface-hover)', borderRadius: 8, marginBottom: 8 }} />
+        <div style={{ height: 12, width: 220, background: 'var(--surface-hover)', borderRadius: 8 }} />
       </div>
     )
   }
@@ -35,26 +26,17 @@ export function SkillMapCard({ onSkillSelected }: SkillMapCardProps) {
   }
 
   const badgeColor = (status: string) => {
-    if (status === 'solid') return colors.surfaceHover
-    if (status === 'gap') return colors.error + '20'
-    return colors.surface
+    if (status === 'solid') return 'var(--surface-hover)'
+    if (status === 'gap') return 'var(--color-bg-error)'
+    return 'var(--surface)'
   }
 
   return (
-    <div
-      style={{
-        padding: '16px 16px 14px',
-        borderRadius: 16,
-        backgroundColor: colors.surface,
-        border: `1px solid ${colors.borderLight}`,
-        display: 'grid',
-        gap: 10,
-      }}
-    >
+    <div className="surface-card" style={{ display: 'grid', gap: 10 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'space-between' }}>
         <div>
-          <div style={{ fontSize: 15, fontWeight: 600, color: colors.text }}>Your skill story</div>
-          <p style={{ fontSize: 12, color: colors.textSecondary, marginTop: 2 }}>
+          <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>Your skill story</div>
+          <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>
             Click a skill to explore matching roles.
           </p>
         </div>
@@ -66,21 +48,18 @@ export function SkillMapCard({ onSkillSelected }: SkillMapCardProps) {
             key={skill.slug}
             type="button"
             onClick={() => onSkillSelected?.(skill.slug)}
+            className="chip"
             style={{
-              padding: '8px 10px',
-              borderRadius: 999,
-              border: `1px solid ${colors.borderLight}`,
+              borderRadius: 'var(--radius-full)',
               backgroundColor: badgeColor(skill.status),
-              color: colors.text,
-              fontSize: 12,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
-              cursor: 'pointer',
+              color: 'var(--text)',
+              borderColor: 'var(--border-subtle)',
+              borderWidth: 1,
+              borderStyle: 'solid',
             }}
           >
             <span>{skill.displayName}</span>
-            <span style={{ color: colors.textSecondary, fontSize: 11 }}>
+            <span style={{ color: 'var(--text-secondary)', fontSize: 11 }}>
               {skill.status}
             </span>
           </button>

@@ -58,104 +58,74 @@ export default function JobsFiltersBar(props: JobsFiltersBarProps) {
     onClearFilters,
   } = props
 
+  const labelStyle: React.CSSProperties = {
+    display: 'block',
+    fontSize: 13,
+    fontWeight: 600,
+    marginBottom: 6,
+    color: 'var(--text)',
+  }
+
+  const inputStyle: React.CSSProperties = {
+    height: 40,
+    padding: '0 12px',
+    borderRadius: 'var(--radius-md)',
+    border: '1px solid var(--border)',
+    fontSize: 13,
+    width: '100%',
+    backgroundColor: 'var(--surface)',
+    color: 'var(--text)',
+  }
+
   return (
     <div
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: 8,
-        marginBottom: 16,
+        gap: 12,
+        marginBottom: 24,
       }}
     >
-      {/* Top row of filter pills */}
+      {/* Top row of filter inputs */}
       <div
         style={{
           display: 'flex',
           flexWrap: 'wrap',
-          gap: 12,
+          gap: 16,
           alignItems: 'flex-end',
         }}
       >
         {/* Search */}
         <div style={{ flex: '2 1 220px', minWidth: 220 }}>
-          <label
-            style={{
-              display: 'block',
-              fontSize: 13,
-              fontWeight: 500,
-              marginBottom: 4,
-            }}
-          >
-            Search
-          </label>
+          <label style={labelStyle}>Search</label>
           <input
             type="text"
             placeholder="Title, company, keywords"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{
-              height: 40,
-              padding: '0 12px',
-              borderRadius: 999,
-              border: '1px solid #e2e2e2',
-              fontSize: 13,
-              width: '100%',
-            }}
+            style={inputStyle}
           />
         </div>
 
         {/* Location */}
         <div style={{ flex: '1.5 1 200px', minWidth: 200 }}>
-          <label
-            style={{
-              display: 'block',
-              fontSize: 13,
-              fontWeight: 500,
-              marginBottom: 4,
-            }}
-          >
-            Location
-          </label>
+          <label style={labelStyle}>Location</label>
           <input
             type="text"
             placeholder="City, country, region"
             value={locationFilter}
             onChange={(e) => setLocationFilter(e.target.value)}
-            style={{
-              height: 40,
-              padding: '0 12px',
-              borderRadius: 999,
-              border: '1px solid #e2e2e2',
-              fontSize: 13,
-              width: '100%',
-            }}
+            style={inputStyle}
           />
         </div>
 
         {/* Source */}
         <div style={{ flex: '1 1 160px', minWidth: 160 }}>
-          <label
-            style={{
-              display: 'block',
-              fontSize: 13,
-              fontWeight: 500,
-              marginBottom: 4,
-            }}
-          >
-            Source
-          </label>
+          <label style={labelStyle}>Source</label>
           <select
             value={sourceSlug}
             onChange={(e) => setSourceSlug(e.target.value)}
-            style={{
-              height: 40,
-              padding: '0 12px',
-              borderRadius: 999,
-              border: '1px solid #e2e2e2',
-              fontSize: 13,
-              width: '100%',
-              backgroundColor: '#fff',
-            }}
+            style={inputStyle}
           >
             <option value="">All sources</option>
             {sources.map((s) => (
@@ -168,28 +138,11 @@ export default function JobsFiltersBar(props: JobsFiltersBarProps) {
 
         {/* Employment type */}
         <div style={{ flex: '1 1 140px', minWidth: 140 }}>
-          <label
-            style={{
-              display: 'block',
-              fontSize: 13,
-              fontWeight: 500,
-              marginBottom: 4,
-            }}
-          >
-            Employment type
-          </label>
+          <label style={labelStyle}>Employment type</label>
           <select
             value={employmentType}
             onChange={(e) => setEmploymentType(e.target.value)}
-            style={{
-              height: 40,
-              padding: '0 12px',
-              borderRadius: 999,
-              border: '1px solid #e2e2e2',
-              fontSize: 13,
-              width: '100%',
-              backgroundColor: '#fff',
-            }}
+            style={inputStyle}
           >
             <option value="">All</option>
             <option value="full_time">Full time</option>
@@ -201,59 +154,26 @@ export default function JobsFiltersBar(props: JobsFiltersBarProps) {
 
         {/* Minimum salary */}
         <div style={{ flex: '1 1 140px', minWidth: 140 }}>
-          <label
-            style={{
-              display: 'block',
-              fontSize: 13,
-              fontWeight: 500,
-              marginBottom: 4,
-            }}
-          >
-            Minimum salary
-          </label>
+          <label style={labelStyle}>Minimum salary</label>
           <input
             type="number"
             min={0}
             placeholder="e.g. 60000"
             value={salaryMin}
             onChange={(e) => setSalaryMin(e.target.value)}
-            style={{
-              height: 40,
-              padding: '0 12px',
-              borderRadius: 999,
-              border: '1px solid #e2e2e2',
-              fontSize: 13,
-              width: '100%',
-            }}
+            style={inputStyle}
           />
         </div>
 
         {/* Posted since */}
         <div style={{ flex: '1 1 140px', minWidth: 140 }}>
-          <label
-            style={{
-              display: 'block',
-              fontSize: 13,
-              fontWeight: 500,
-              marginBottom: 4,
-            }}
-          >
-            Posted in
-          </label>
+          <label style={labelStyle}>Posted in</label>
           <select
             value={postedSince}
             onChange={(e) =>
               setPostedSince(e.target.value as PostedSince)
             }
-            style={{
-              height: 40,
-              padding: '0 12px',
-              borderRadius: 999,
-              border: '1px solid #e2e2e2',
-              fontSize: 13,
-              width: '100%',
-              backgroundColor: '#fff',
-            }}
+            style={inputStyle}
           >
             <option value="">Any time</option>
             <option value="7d">Last 7 days</option>
@@ -268,8 +188,9 @@ export default function JobsFiltersBar(props: JobsFiltersBarProps) {
             flex: '0 0 auto',
             display: 'flex',
             alignItems: 'center',
-            gap: 6,
-            paddingTop: 22,
+            gap: 8,
+            paddingTop: 28, // Visually confirm alignment with inputs
+            height: 66, // Align with input height + label
           }}
         >
           <input
@@ -277,10 +198,11 @@ export default function JobsFiltersBar(props: JobsFiltersBarProps) {
             type="checkbox"
             checked={remoteOnly}
             onChange={(e) => setRemoteOnly(e.target.checked)}
+            style={{ width: 18, height: 18, accentColor: 'var(--color-accent)' }}
           />
           <label
             htmlFor="remote-only"
-            style={{ fontSize: 13, cursor: 'pointer' }}
+            style={{ fontSize: 13, cursor: 'pointer', color: 'var(--text)' }}
           >
             Remote only
           </label>
@@ -299,14 +221,7 @@ export default function JobsFiltersBar(props: JobsFiltersBarProps) {
         <button
           type="button"
           onClick={onClearFilters}
-          style={{
-            padding: '6px 14px',
-            borderRadius: 999,
-            border: '1px solid #e2e2e2',
-            backgroundColor: '#f5f5f5',
-            fontSize: 13,
-            cursor: 'pointer',
-          }}
+          className="ghost-button button-sm"
         >
           Clear filters
         </button>
@@ -315,7 +230,7 @@ export default function JobsFiltersBar(props: JobsFiltersBarProps) {
           <span
             style={{
               fontSize: 12,
-              color: '#c0392b',
+              color: 'var(--color-error)',
               textAlign: 'right',
             }}
           >

@@ -13,17 +13,17 @@ export const AutosaveIndicator: React.FC<Props> = ({
   lastSavedAt,
 }) => {
   let label = ''
-  let color = '#9ca3af'
+  let tone: 'neutral' | 'warning' | 'error' | 'success' = 'neutral'
 
   if (status === 'saving') {
     label = 'Saving…'
-    color = '#eab308'
+    tone = 'warning'
   } else if (status === 'error') {
     label = 'Save failed'
-    color = '#f97373'
+    tone = 'error'
   } else if (isDirty) {
     label = 'Unsaved changes'
-    color = '#eab308'
+    tone = 'warning'
   } else if (lastSavedAt) {
     const date = new Date(lastSavedAt)
     const timeString = date.toLocaleTimeString(undefined, {
@@ -31,30 +31,34 @@ export const AutosaveIndicator: React.FC<Props> = ({
       minute: '2-digit',
     })
     label = `Saved at ${timeString}`
-    color = '#22c55e'
+    tone = 'success'
   } else {
     label = 'Ready'
   }
 
+  const toneStyles: Record<typeof tone, { container: string; dot: string }> = {
+    neutral: {
+      container: 'border-[#D6C8AA] bg-white/80 text-[#1F2933]',
+      dot: 'bg-[#9CA3AF]',
+    },
+    warning: {
+      container: 'border-amber-200 bg-amber-50 text-amber-700',
+      dot: 'bg-amber-500',
+    },
+    error: {
+      container: 'border-rose-200 bg-rose-50 text-rose-700',
+      dot: 'bg-rose-500',
+    },
+    success: {
+      container: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+      dot: 'bg-emerald-500',
+    },
+  }
+
   return (
-    <div
-      style={{
-        fontSize: 12,
-        color,
-        display: 'flex',
-        alignItems: 'center',
-        gap: 6,
-      }}
-    >
-      <span
-        style={{
-          width: 8,
-          height: 8,
-          borderRadius: '50%',
-          backgroundColor: color,
-        }}
-      />
-      <span>{label}</span>
+    <div className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold shadow-sm ${toneStyles[tone].container}`}>
+      <span className={`h-2 w-2 rounded-full ${toneStyles[tone].dot}`} />
+      <span className="whitespace-nowrap">{label}</span>
     </div>
   )
 }

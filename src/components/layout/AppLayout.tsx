@@ -1,6 +1,5 @@
 // src/components/layout/AppLayout.tsx
 import React, { ReactNode } from 'react'
-import { useRelevntTheme } from '../../contexts/RelevntThemeProvider'
 import { Header } from './Header'
 import { Footer } from './Footer'
 
@@ -10,33 +9,29 @@ export interface AppLayoutProps {
 }
 
 export function AppLayout({ children, showFooter = true }: AppLayoutProps) {
-  const { colors } = useRelevntTheme()
-
   const container: React.CSSProperties = {
     minHeight: '100vh',
     display: 'flex',
     flexDirection: 'column',
-    backgroundColor: colors.background,
-    color: colors.text,
-    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+    backgroundColor: 'var(--bg)',
+    color: 'var(--text)',
   }
 
   const headerStyle: React.CSSProperties = {
     flexShrink: 0,
-    borderBottom: `1px solid ${colors.border}`,
-    backgroundColor: colors.background,
+    borderBottom: '1px solid var(--border-subtle)',
+    backgroundColor: 'var(--bg)',
+    position: 'sticky',
+    top: 0,
+    zIndex: 50,
   }
 
   const mainStyle: React.CSSProperties = {
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
-  }
-
-  const footerStyle: React.CSSProperties = {
-    flexShrink: 0,
-    borderTop: `1px solid ${colors.border}`,
-    backgroundColor: colors.surface,
+    backgroundColor: 'var(--bg)',
+    position: 'relative',
   }
 
   return (
@@ -47,11 +42,7 @@ export function AppLayout({ children, showFooter = true }: AppLayoutProps) {
 
       <main style={mainStyle}>{children}</main>
 
-      {showFooter && (
-        <footer style={footerStyle}>
-          <Footer />
-        </footer>
-      )}
+      {showFooter && <Footer />}
     </div>
   )
 }

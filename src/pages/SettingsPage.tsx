@@ -1,15 +1,10 @@
-import React, { CSSProperties, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Container } from '../components/shared/Container'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
+import { Icon } from '../components/ui/Icon'
 import {
-  ProfileIcon,
-  PreferencesIcon,
-  NotificationsIcon,
-} from '../components/icons/RelevntIcons'
-import {
-  useRelevntColors,
   useProfileSettings,
   type ProfileSettings,
   type ThemePreference,
@@ -33,48 +28,18 @@ const SectionCard: React.FC<{
   subtitle: string
   children: React.ReactNode
 }> = ({ icon, title, subtitle, children }) => {
-  const colors = useRelevntColors()
-  const card: CSSProperties = {
-    display: 'grid',
-    gridTemplateColumns: 'minmax(220px, 1fr) 2fr',
-    gap: 16,
-    padding: '16px 16px 14px',
-    borderRadius: 16,
-    backgroundColor: colors.surface,
-    border: `1px solid ${colors.borderLight}`,
-  }
-
-  const header: CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 6,
-  }
-
-  const titleStyles: CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-    fontSize: 15,
-    fontWeight: 600,
-    color: colors.text,
-  }
-
-  const subtitleStyles: CSSProperties = {
-    fontSize: 12,
-    color: colors.textSecondary,
-    lineHeight: 1.5,
-  }
-
   return (
-    <article style={card}>
-      <div style={header}>
-        <div style={titleStyles}>
-          {icon}
-          <span>{title}</span>
+    <article className="surface-card">
+      <div className="rl-field-grid">
+        <div style={{ display: 'grid', gap: 6 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>
+            {icon}
+            <span>{title}</span>
+          </div>
+          <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>{subtitle}</p>
         </div>
-        <p style={subtitleStyles}>{subtitle}</p>
+        <div style={{ display: 'grid', gap: 12 }}>{children}</div>
       </div>
-      <div style={{ display: 'grid', gap: 12 }}>{children}</div>
     </article>
   )
 }
@@ -84,12 +49,11 @@ const Field: React.FC<{
   children: React.ReactNode
   helper?: string
 }> = ({ label, children, helper }) => {
-  const colors = useRelevntColors()
   return (
     <label style={{ display: 'grid', gap: 6 }}>
-      <span style={{ fontSize: 13, fontWeight: 600, color: colors.text }}>{label}</span>
+      <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{label}</span>
       {children}
-      {helper && <span style={{ fontSize: 12, color: colors.textSecondary }}>{helper}</span>}
+      {helper && <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{helper}</span>}
     </label>
   )
 }
@@ -100,65 +64,32 @@ const ToggleRow: React.FC<{
   checked: boolean
   onChange: (value: boolean) => void
 }> = ({ label, helper, checked, onChange }) => {
-  const colors = useRelevntColors()
   return (
     <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer' }}>
       <input
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        style={{ width: 16, height: 16, marginTop: 3 }}
+        className="jobprefs-checkbox"
+        style={{ width: 16, height: 16, marginTop: 3, accentColor: 'var(--color-accent)' }}
       />
       <div style={{ display: 'grid', gap: 4 }}>
-        <span style={{ fontSize: 13, color: colors.text, fontWeight: 600 }}>{label}</span>
-        {helper && <span style={{ fontSize: 12, color: colors.textSecondary }}>{helper}</span>}
+        <span style={{ fontSize: 13, color: 'var(--text)', fontWeight: 600 }}>{label}</span>
+        {helper && <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{helper}</span>}
       </div>
     </label>
   )
 }
 
 export default function SettingsPage(): JSX.Element {
-  const colors = useRelevntColors()
   const { user } = useAuth()
   const { settings, isLoading, saving, error, saveError, saveSettings } = useProfileSettings()
   const [form, setForm] = useState<ProfileSettings | null>(null)
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
-  const [skillStatus, setSkillStatus] = useState<'idle' | 'saved' | 'error' | 'saving'>('idle')
-  const [skillPrefs, setSkillPrefs] = useState<{
-    focusSkills: string[]
-    avoidSkills: string[]
-    learningStyle: 'quick_hits' | 'video' | 'reading' | 'projects' | ''
-  }>({ focusSkills: [], avoidSkills: [], learningStyle: '' })
-  const [skillDrafts, setSkillDrafts] = useState<{ focus: string; avoid: string }>({ focus: '', avoid: '' })
 
   useEffect(() => {
     if (settings) setForm(settings)
   }, [settings])
-
-  useEffect(() => {
-    const loadSkillPrefs = async () => {
-      if (!user) return
-      const { data, error: prefError } = await supabase
-        .from('user_skill_preferences')
-        .select('focus_skills, avoid_skills, learning_style')
-        .eq('user_id', user.id)
-        .maybeSingle()
-
-      if (prefError) {
-        console.error(prefError)
-        return
-      }
-      const focus = (data?.focus_skills as string[] | null) ?? []
-      const avoid = (data?.avoid_skills as string[] | null) ?? []
-      const style = (data?.learning_style as string | null) ?? ''
-      setSkillPrefs({
-        focusSkills: focus,
-        avoidSkills: avoid,
-        learningStyle: style as any,
-      })
-    }
-    loadSkillPrefs()
-  }, [user])
 
   const handleChange: FieldChange = (key, value) => {
     if (!form) return
@@ -173,107 +104,12 @@ export default function SettingsPage(): JSX.Element {
     setStatus(ok ? 'saved' : 'error')
   }
 
-  const addChip = (type: 'focusSkills' | 'avoidSkills') => {
-    const draft = type === 'focusSkills' ? skillDrafts.focus : skillDrafts.avoid
-    const trimmed = draft.trim()
-    if (!trimmed) return
-    setSkillPrefs((prev) => ({
-      ...prev,
-      [type]: [...prev[type], trimmed],
-    }))
-    setSkillDrafts((d) => ({ ...d, [type === 'focusSkills' ? 'focus' : 'avoid']: '' }))
-    setSkillStatus('idle')
-  }
-
-  const removeChip = (type: 'focusSkills' | 'avoidSkills', value: string) => {
-    setSkillPrefs((prev) => ({
-      ...prev,
-      [type]: prev[type].filter((item) => item !== value),
-    }))
-    setSkillStatus('idle')
-  }
-
-  const handleSkillSave = async () => {
-    if (!user) return
-    setSkillStatus('saving')
-    const { error: saveErr } = await supabase
-      .from('user_skill_preferences')
-      .upsert({
-        user_id: user.id,
-        focus_skills: skillPrefs.focusSkills,
-        avoid_skills: skillPrefs.avoidSkills,
-        learning_style: skillPrefs.learningStyle || null,
-      })
-
-    if (saveErr) {
-      console.error(saveErr)
-      setSkillStatus('error')
-      return
-    }
-    setSkillStatus('saved')
-  }
-
-  const wrapper: CSSProperties = {
-    flex: 1,
-    backgroundColor: colors.background,
-  }
-
-  const pageHeader: CSSProperties = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    gap: 16,
-    marginBottom: 24,
-    flexWrap: 'wrap',
-  }
-
-  const titleRow: CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 6,
-  }
-
-  const title: CSSProperties = {
-    fontSize: 22,
-    fontWeight: 600,
-    letterSpacing: '0.02em',
-    color: colors.text,
-  }
-
-  const subtitle: CSSProperties = {
-    fontSize: 13,
-    color: colors.textSecondary,
-    maxWidth: 540,
-  }
-
-  const badge: CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: 8,
-    padding: '4px 10px',
-    borderRadius: 999,
-    border: `1px solid ${colors.borderLight}`,
-    backgroundColor: colors.surfaceHover,
-    fontSize: 11,
-    letterSpacing: '0.16em',
-    textTransform: 'uppercase',
-    color: colors.textSecondary,
-  }
-
   if (isLoading || !form) {
     return (
-      <div style={wrapper}>
+      <div className="page-wrapper">
         <Container maxWidth="lg" padding="md">
-          <div style={{ ...pageHeader }}>
-            <div style={titleRow}>
-              <div style={{ width: 180, height: 20, backgroundColor: colors.surfaceHover, borderRadius: 8 }} />
-              <div style={{ width: 260, height: 14, backgroundColor: colors.surfaceHover, borderRadius: 8 }} />
-            </div>
-          </div>
-          <div style={{ display: 'grid', gap: 12 }}>
-            <div style={{ height: 140, borderRadius: 16, backgroundColor: colors.surfaceHover }} />
-            <div style={{ height: 140, borderRadius: 16, backgroundColor: colors.surfaceHover }} />
-            <div style={{ height: 140, borderRadius: 16, backgroundColor: colors.surfaceHover }} />
+          <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ color: 'var(--text-secondary)' }}>Loading settings...</span>
           </div>
         </Container>
       </div>
@@ -281,106 +117,47 @@ export default function SettingsPage(): JSX.Element {
   }
 
   return (
-    <div style={wrapper}>
+    <div className="page-wrapper">
       <Container maxWidth="lg" padding="md">
-        <header style={pageHeader}>
-          <div style={titleRow}>
-            <h1 style={title}>Settings</h1>
-            <p style={subtitle}>
-              Tune how Relevnt works for you. We keep things simple, honest, and in your control.
-            </p>
+        <header className="hero-shell">
+          <div className="hero-header">
+            <div className="hero-header-main">
+              <div className="hero__badge">
+                <Icon name="pocket-watch" size="sm" hideAccent />
+                <span>Preferences</span>
+              </div>
+              <h1>Settings</h1>
+              <p className="hero-subtitle">
+                Tune how Relevnt works for you. We keep things simple, honest, and in your control.
+              </p>
+            </div>
 
-            {/* Quick links to other preference pages */}
-            <div
-              style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: 8,
-                marginTop: 8,
-              }}
-            >
-              <Link
-                to="/job-preferences"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  padding: '6px 12px',
-                  borderRadius: 999,
-                  border: `1px solid ${colors.borderLight}`,
-                  backgroundColor: colors.surface,
-                  color: colors.text,
-                  fontSize: 11,
-                  textDecoration: 'none',
-                }}
-              >
-                <PreferencesIcon size={14} strokeWidth={1.6} />
+            <div className="hero-actions" style={{ justifyContent: 'flex-start', paddingTop: 0 }}>
+              <Link to="/job-preferences" className="link-pill">
+                <Icon name="pocket-watch" size="sm" hideAccent />
                 <span>Job preferences</span>
               </Link>
-
-              <Link
-                to="/profile/professional"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  padding: '6px 12px',
-                  borderRadius: 999,
-                  border: `1px solid ${colors.borderLight}`,
-                  backgroundColor: colors.surface,
-                  color: colors.text,
-                  fontSize: 11,
-                  textDecoration: 'none',
-                }}
-              >
-                <ProfileIcon size={14} strokeWidth={1.6} />
+              <Link to="/profile/professional" className="link-pill">
+                <Icon name="compass" size="sm" hideAccent />
                 <span>Professional profile</span>
               </Link>
-
-              <Link
-                to="/voice"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  padding: '6px 12px',
-                  borderRadius: 999,
-                  border: `1px solid ${colors.borderLight}`,
-                  backgroundColor: colors.surface,
-                  color: colors.text,
-                  fontSize: 11,
-                  textDecoration: 'none',
-                }}
-              >
-                <NotificationsIcon size={14} strokeWidth={1.6} />
+              <Link to="/voice" className="link-pill">
+                <Icon name="microphone" size="sm" hideAccent />
                 <span>Voice profile</span>
               </Link>
             </div>
           </div>
-
-          <div style={badge}>
-            <PreferencesIcon size={16} strokeWidth={1.6} />
-            <span>Preferences</span>
-          </div>
         </header>
 
-        <div style={{ display: 'grid', gap: 12 }}>
-          <article
-            style={{
-              display: 'grid',
-              padding: '16px 16px 14px',
-              borderRadius: 16,
-              backgroundColor: colors.surface,
-              border: `1px solid ${colors.borderLight}`,
-            }}
-          >
+        <div className="page-stack">
+          <article className="surface-card">
             <div className="rl-field-grid">
               <div style={{ display: 'grid', gap: 6 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 15, fontWeight: 600, color: colors.text }}>
-                  <ProfileIcon size={18} strokeWidth={1.7} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>
+                  <Icon name="compass" size="sm" hideAccent />
                   <span>Profile & account</span>
                 </div>
-                <p style={{ fontSize: 12, color: colors.textSecondary, lineHeight: 1.5 }}>
+                <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
                   Basic details to personalize recommendations and copy.
                 </p>
               </div>
@@ -453,7 +230,7 @@ export default function SettingsPage(): JSX.Element {
           </article>
 
           <SectionCard
-            icon={<PreferencesIcon size={18} strokeWidth={1.7} />}
+            icon={<Icon name="pocket-watch" size="sm" hideAccent />}
             title="How Relevnt behaves"
             subtitle="Set your theme and how tightly we pack information on screen."
           >
@@ -465,19 +242,7 @@ export default function SettingsPage(): JSX.Element {
                       key={option}
                       type="button"
                       onClick={() => handleChange('themePreference', option)}
-                      style={{
-                        padding: '8px 12px',
-                        borderRadius: 999,
-                        border:
-                          form.themePreference === option
-                            ? `1px solid ${colors.primary}`
-                            : `1px solid ${colors.borderLight}`,
-                        backgroundColor:
-                          form.themePreference === option ? colors.surfaceHover : colors.surface,
-                        color: colors.text,
-                        fontSize: 12,
-                        cursor: 'pointer',
-                      }}
+                      className={`option-button ${form.themePreference === option ? 'is-active' : ''}`}
                     >
                       {option.charAt(0).toUpperCase() + option.slice(1)}
                     </button>
@@ -492,19 +257,7 @@ export default function SettingsPage(): JSX.Element {
                       key={option}
                       type="button"
                       onClick={() => handleChange('layoutDensity', option)}
-                      style={{
-                        padding: '8px 12px',
-                        borderRadius: 999,
-                        border:
-                          form.layoutDensity === option
-                            ? `1px solid ${colors.primary}`
-                            : `1px solid ${colors.borderLight}`,
-                        backgroundColor:
-                          form.layoutDensity === option ? colors.surfaceHover : colors.surface,
-                        color: colors.text,
-                        fontSize: 12,
-                        cursor: 'pointer',
-                      }}
+                      className={`option-button ${form.layoutDensity === option ? 'is-active' : ''}`}
                     >
                       {option === 'cozy' ? 'Cozy' : 'Compact'}
                     </button>
@@ -515,7 +268,7 @@ export default function SettingsPage(): JSX.Element {
           </SectionCard>
 
           <SectionCard
-            icon={<NotificationsIcon size={18} strokeWidth={1.7} />}
+            icon={<Icon name="stars" size="sm" hideAccent />}
             title="Notifications & privacy"
             subtitle="Control what reaches your inbox and how your data is used."
           >
@@ -541,7 +294,7 @@ export default function SettingsPage(): JSX.Element {
                 />
               </div>
 
-              <div style={{ height: 1, backgroundColor: colors.borderLight }} />
+              <div style={{ height: 1, backgroundColor: 'var(--border-subtle)' }} />
 
               <div style={{ display: 'grid', gap: 10 }}>
                 <ToggleRow
@@ -558,19 +311,11 @@ export default function SettingsPage(): JSX.Element {
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
                 <button
                   type="button"
                   onClick={() => console.log('TODO: export data')}
-                  style={{
-                    padding: '8px 12px',
-                    borderRadius: 999,
-                    border: `1px solid ${colors.borderLight}`,
-                    backgroundColor: colors.surface,
-                    color: colors.text,
-                    fontSize: 12,
-                    cursor: 'pointer',
-                  }}
+                  className="option-button"
                 >
                   Export my data
                 </button>
@@ -581,15 +326,8 @@ export default function SettingsPage(): JSX.Element {
                       console.log('TODO: delete account')
                     }
                   }}
-                  style={{
-                    padding: '8px 12px',
-                    borderRadius: 999,
-                    border: `1px solid ${colors.error}`,
-                    backgroundColor: 'transparent',
-                    color: colors.error,
-                    fontSize: 12,
-                    cursor: 'pointer',
-                  }}
+                  className="option-button"
+                  style={{ color: 'var(--color-error)', borderColor: 'var(--color-error)' }}
                 >
                   Delete my account
                 </button>
@@ -598,45 +336,35 @@ export default function SettingsPage(): JSX.Element {
           </SectionCard>
         </div>
 
-        <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ marginTop: 24, display: 'flex', alignItems: 'center', gap: 12 }}>
           <button
             type="button"
             onClick={handleSave}
             disabled={saving}
-            style={{
-              padding: '10px 18px',
-              borderRadius: 999,
-              border: 'none',
-              backgroundColor: colors.primary,
-              color: colors.text,
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: saving ? 'not-allowed' : 'pointer',
-              opacity: saving ? 0.7 : 1,
-            }}
+            className="primary-button"
           >
             {saving ? 'Saving…' : 'Save changes'}
           </button>
           {status === 'saved' && (
-            <span style={{ fontSize: 12, color: colors.textSecondary }}>Saved</span>
+            <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Saved</span>
           )}
           {status === 'error' && (
-            <span style={{ fontSize: 12, color: colors.error }}>
+            <span style={{ fontSize: 13, color: 'var(--color-error)' }}>
               We couldn't save your settings. Try again.
             </span>
           )}
           {error && (
-            <span style={{ fontSize: 12, color: colors.error }}>
+            <span style={{ fontSize: 13, color: 'var(--color-error)' }}>
               {error}
             </span>
           )}
           {saveError && (
-            <span style={{ fontSize: 12, color: colors.error }}>
+            <span style={{ fontSize: 13, color: 'var(--color-error)' }}>
               {saveError}
             </span>
           )}
         </div>
-      </Container>
-    </div>
+      </Container >
+    </div >
   )
 }

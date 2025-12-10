@@ -16,131 +16,6 @@ type JobLike = {
   competitiveness_level?: string | null
 }
 
-// shared styles local to the feed
-
-const card: React.CSSProperties = {
-  borderRadius: 16,
-  padding: 16,
-  border: '1px solid var(--border, #e2e2e2)',
-  backgroundColor: 'var(--surface, #ffffff)',
-}
-
-const sectionLabel: React.CSSProperties = {
-  fontSize: 12,
-  fontWeight: 500,
-  marginBottom: 4,
-  color: '#555',
-}
-
-const overlay: React.CSSProperties = {
-  position: 'fixed',
-  inset: 0,
-  backgroundColor: 'rgba(0, 0, 0, 0.4)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  zIndex: 1000,
-  padding: 16,
-}
-
-const modal: React.CSSProperties = {
-  borderRadius: 16,
-  padding: 20,
-  border: '1px solid var(--border, #ddd)',
-  backgroundColor: 'var(--surface, #ffffff)',
-  maxWidth: 520,
-  width: '100%',
-  maxHeight: '80vh',
-  overflowY: 'auto',
-  boxShadow: '0 18px 45px rgba(15, 18, 20, 0.35)',
-}
-
-const modalHeaderRow: React.CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'flex-start',
-  gap: 8,
-}
-
-const modalCloseButton: React.CSSProperties = {
-  border: 'none',
-  background: 'transparent',
-  fontSize: 18,
-  lineHeight: 1,
-  cursor: 'pointer',
-  padding: 4,
-}
-
-const modalSectionLabel: React.CSSProperties = {
-  ...sectionLabel,
-  marginBottom: 2,
-}
-
-const pillInput: React.CSSProperties = {
-  height: 36,
-  borderRadius: 999,
-  border: '1px solid #e2e2e2',
-  padding: '0 12px',
-  fontSize: 13,
-  width: '100%',
-  backgroundColor: '#fff',
-  boxSizing: 'border-box',
-}
-
-const subtleButton: React.CSSProperties = {
-  padding: '6px 12px',
-  borderRadius: 999,
-  border: '1px solid var(--border, #ddd)',
-  background: 'var(--surface, #fff)',
-  fontSize: 12,
-  cursor: 'pointer',
-}
-
-const jobCard: React.CSSProperties = {
-  borderRadius: 14,
-  padding: 16,
-  border: '1px solid var(--border-subtle, #eee)',
-  background: 'var(--surface, #fff)',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 8,
-}
-
-const jobTitle: React.CSSProperties = {
-  fontSize: 15,
-  fontWeight: 600,
-}
-
-const jobMetaRow: React.CSSProperties = {
-  display: 'flex',
-  flexWrap: 'wrap',
-  gap: 8,
-  fontSize: 12,
-  color: '#666',
-}
-
-const tagRow: React.CSSProperties = {
-  display: 'flex',
-  flexWrap: 'wrap',
-  gap: 6,
-  marginTop: 4,
-}
-
-const tagPill: React.CSSProperties = {
-  padding: '3px 8px',
-  borderRadius: 999,
-  border: '1px solid #eee',
-  fontSize: 11,
-  color: '#555',
-}
-
-const reasonList: React.CSSProperties = {
-  fontSize: 11,
-  color: '#666',
-  marginTop: 6,
-  paddingLeft: 16,
-}
-
 export function RelevntFeedPanel() {
   const { tracks, loading: tracksLoading } = useCareerTracks()
   const { matches, loading: feedLoading, error: feedError, runMatchJobs } =
@@ -207,26 +82,17 @@ export function RelevntFeedPanel() {
 
   return (
     <>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div className="feed-stack">
         {/* top controls: track selector + explainer */}
-        <div
-          style={{
-            ...card,
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            gap: 16,
-            flexWrap: 'wrap',
-          }}
-        >
-          <div style={{ minWidth: 220 }}>
-            <label style={sectionLabel}>Career focus</label>
+        <div className="surface-card feed-controls">
+          <div className="feed-track-selector">
+            <label className="section-label">Career focus</label>
             {tracksLoading ? (
-              <div style={{ fontSize: 13, color: '#666' }}>
+              <div className="muted text-sm">
                 Loading tracks…
               </div>
             ) : tracks.length === 0 ? (
-              <div style={{ fontSize: 13, color: '#666' }}>
+              <div className="muted text-sm">
                 You have not created tracks yet. This feed is using your general
                 profile and resume.
               </div>
@@ -236,7 +102,7 @@ export function RelevntFeedPanel() {
                 onChange={(e) =>
                   setActiveTrackId(e.target.value || null)
                 }
-                style={pillInput}
+                className="input-pill"
               >
                 {tracks.map((t) => (
                   <option key={t.id} value={t.id}>
@@ -247,24 +113,16 @@ export function RelevntFeedPanel() {
             )}
           </div>
 
-          <div style={{ fontSize: 12, color: '#666', maxWidth: 420 }}>
+          <div className="feed-explainer muted text-xs">
             Relevnt uses this focus area, your resume, and current market data to
             score and explain which roles are worth your energy first.
           </div>
         </div>
 
         {/* feed filters */}
-        <div
-          style={{
-            ...card,
-            display: 'grid',
-            gridTemplateColumns:
-              'minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr)',
-            gap: 12,
-          }}
-        >
-          <div>
-            <label style={sectionLabel}>
+        <div className="surface-card feed-filters">
+          <div className="field">
+            <label className="section-label">
               Minimum match score
             </label>
             <input
@@ -276,15 +134,12 @@ export function RelevntFeedPanel() {
                 const val = Number(e.target.value || 0)
                 setMinScore(val < 0 ? 0 : val > 100 ? 100 : val)
               }}
-              style={{
-                ...pillInput,
-                textAlign: 'right',
-              }}
+              className="input-pill text-right"
             />
           </div>
 
-          <div>
-            <label style={sectionLabel}>
+          <div className="field">
+            <label className="section-label">
               Minimum salary (USD)
             </label>
             <input
@@ -299,21 +154,11 @@ export function RelevntFeedPanel() {
                 const next = num <= 0 ? 0 : num
                 setMinSalary(next)
               }}
-              style={{
-                ...pillInput,
-                textAlign: 'right',
-              }}
+              className="input-pill text-right"
             />
           </div>
 
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              marginTop: 22,
-            }}
-          >
+          <div className="feed-remote-filter">
             <input
               id="feed-remote-only"
               type="checkbox"
@@ -324,7 +169,7 @@ export function RelevntFeedPanel() {
             />
             <label
               htmlFor="feed-remote-only"
-              style={{ fontSize: 13 }}
+              className="text-sm"
             >
               Remote friendly only
             </label>
@@ -332,10 +177,10 @@ export function RelevntFeedPanel() {
         </div>
 
         {/* status bar */}
-        <div style={{ fontSize: 12, color: '#666' }}>
+        <div className="feed-status-bar text-xs muted">
           {feedLoading && 'Scanning the market for matches…'}
           {!feedLoading && feedError && (
-            <span style={{ color: '#b3261e' }}>
+            <span className="feed-error">
               {feedError.message}
             </span>
           )}
@@ -348,16 +193,11 @@ export function RelevntFeedPanel() {
         </div>
 
         {/* list of matches */}
-        <div
-          style={{
-            display: 'grid',
-            gap: 12,
-          }}
-        >
+        <div className="feed-job-list">
           {!feedLoading &&
             !feedError &&
             filteredMatches.length === 0 && (
-              <div style={{ fontSize: 13, color: '#666' }}>
+              <div className="muted text-sm">
                 No matches cleared your current filters yet. Try lowering the
                 minimum score or salary to see more of the landscape.
               </div>
@@ -389,32 +229,18 @@ export function RelevntFeedPanel() {
             return (
               <article
                 key={m.job_id}
-                style={jobCard}
+                className="feed-job-card"
               >
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    gap: 8,
-                    alignItems: 'baseline',
-                    flexWrap: 'wrap',
-                  }}
-                >
-                  <div style={jobTitle}>
+                <div className="feed-job-title-row">
+                  <div className="feed-job-title">
                     {job.title}
                   </div>
-                  <div
-                    style={{
-                      ...tagPill,
-                      borderColor: '#f0e1c4',
-                      backgroundColor: '#f7ecda',
-                    }}
-                  >
+                  <div className="feed-match-pill">
                     Match {Math.round(m.score)}
                   </div>
                 </div>
 
-                <div style={jobMetaRow}>
+                <div className="feed-job-meta muted text-xs">
                   {job.company && <span>{job.company}</span>}
                   {job.location && (
                     <span>• {job.location}</span>
@@ -424,54 +250,41 @@ export function RelevntFeedPanel() {
                   )}
                 </div>
 
-                <div style={tagRow}>
+                <div className="feed-tag-row">
                   {isRemote && (
-                    <span style={tagPill}>
+                    <span className="feed-tag">
                       Remote friendly
                     </span>
                   )}
                   {job.competitiveness_level && (
-                    <span style={tagPill}>
+                    <span className="feed-tag">
                       Market: {job.competitiveness_level}
                     </span>
                   )}
                 </div>
 
                 {mainReasons.length > 0 && (
-                  <ul style={reasonList}>
+                  <ul className="feed-reason-list muted text-xs">
                     {mainReasons.map((reason, idx) => (
                       <li key={idx}>{reason}</li>
                     ))}
                   </ul>
                 )}
 
-                <div
-                  style={{
-                    marginTop: 8,
-                    display: 'flex',
-                    gap: 8,
-                    flexWrap: 'wrap',
-                  }}
-                >
+                <div className="feed-job-actions">
                   {job.external_url && (
                     <a
                       href={job.external_url}
                       target="_blank"
                       rel="noreferrer"
-                      style={{
-                        ...subtleButton,
-                        textDecoration: 'none',
-                        borderColor: '#d6a65c',
-                        backgroundColor: '#f7ecda',
-                        color: '#4b3a1d',
-                      }}
+                      className="ghost-button button-sm feed-accent-link"
                     >
                       View posting
                     </a>
                   )}
                   <button
                     type="button"
-                    style={subtleButton}
+                    className="ghost-button button-sm"
                     onClick={() => {
                       setSelectedMatch(m)
                       setShowWhyModal(true)
@@ -487,19 +300,19 @@ export function RelevntFeedPanel() {
       </div>
 
       {showWhyModal && selectedMatch && (
-        <div style={overlay} onClick={() => setShowWhyModal(false)}>
+        <div className="feed-modal-overlay" onClick={() => setShowWhyModal(false)}>
           <div
-            style={modal}
+            className="feed-modal"
             onClick={(e) => {
               e.stopPropagation()
             }}
           >
-            <div style={modalHeaderRow}>
+            <div className="feed-modal-header">
               <div>
-                <div style={jobTitle}>
+                <div className="feed-job-title">
                   {(selectedMatch.job as JobLike)?.title}
                 </div>
-                <div style={jobMetaRow}>
+                <div className="feed-job-meta muted text-xs">
                   {(selectedMatch.job as JobLike)?.company && (
                     <span>{(selectedMatch.job as JobLike)?.company}</span>
                   )}
@@ -510,43 +323,37 @@ export function RelevntFeedPanel() {
               </div>
               <button
                 type="button"
-                style={modalCloseButton}
+                className="feed-modal-close"
                 onClick={() => setShowWhyModal(false)}
               >
                 ×
               </button>
             </div>
 
-            <div style={{ marginTop: 8, marginBottom: 12 }}>
-              <span
-                style={{
-                  ...tagPill,
-                  borderColor: '#f0e1c4',
-                  backgroundColor: '#f7ecda',
-                }}
-              >
+            <div className="feed-modal-score">
+              <span className="feed-match-pill">
                 Match {Math.round(selectedMatch.score)}
               </span>
             </div>
 
-            <div style={{ marginTop: 8 }}>
-              <div style={modalSectionLabel}>Why this is in your feed</div>
+            <div className="feed-modal-section">
+              <div className="section-label">Why this is in your feed</div>
               {Array.isArray(selectedMatch.reasons) && selectedMatch.reasons.length > 0 ? (
-                <ul style={reasonList}>
+                <ul className="feed-reason-list muted text-xs">
                   {selectedMatch.reasons.map((reason, idx) => (
                     <li key={idx}>{reason}</li>
                   ))}
                 </ul>
               ) : (
-                <div style={{ fontSize: 12, color: '#666' }}>
+                <div className="muted text-xs">
                   This match passed your filters based on your profile, resume, and current settings.
                 </div>
               )}
             </div>
 
-            <div style={{ marginTop: 12 }}>
-              <div style={modalSectionLabel}>Job snapshot</div>
-              <div style={{ fontSize: 12, color: '#555' }}>
+            <div className="feed-modal-section">
+              <div className="section-label">Job snapshot</div>
+              <div className="text-xs">
                 {(() => {
                   const job = (selectedMatch.job as JobLike) || {}
                   const salaryMin = job.salary_min || null
@@ -564,7 +371,7 @@ export function RelevntFeedPanel() {
                     (job.location || '').toLowerCase().includes('remote')
 
                   return (
-                    <ul style={{ paddingLeft: 16, marginTop: 4 }}>
+                    <ul className="feed-modal-snapshot-list">
                       {salaryLabel && <li>Salary signal: {salaryLabel}</li>}
                       {isRemote && <li>Remote-friendly or flexible location</li>}
                       {job.competitiveness_level && (
@@ -577,18 +384,12 @@ export function RelevntFeedPanel() {
             </div>
 
             {(selectedMatch.job as JobLike)?.external_url && (
-              <div style={{ marginTop: 16 }}>
+              <div className="feed-modal-actions">
                 <a
                   href={(selectedMatch.job as JobLike).external_url as string}
                   target="_blank"
                   rel="noreferrer"
-                  style={{
-                    ...subtleButton,
-                    textDecoration: 'none',
-                    borderColor: '#d6a65c',
-                    backgroundColor: '#f7ecda',
-                    color: '#4b3a1d',
-                  }}
+                  className="ghost-button button-sm feed-accent-link"
                 >
                   Open full posting on employer site
                 </a>

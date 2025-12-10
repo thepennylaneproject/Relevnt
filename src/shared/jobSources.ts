@@ -30,6 +30,8 @@ export interface JobSource {
   slug: string
   displayName: string
   fetchUrl: string
+  type?: 'board' | 'aggregator' | string
+  region?: string
   // allow normalization to return either a sync array or a promise
   normalize: (raw: unknown) => NormalizedJob[] | Promise<NormalizedJob[]>
 }
@@ -188,6 +190,8 @@ export const HimalayasSource: JobSource = {
   slug: 'himalayas',
   displayName: 'Himalayas',
   fetchUrl: 'https://himalayas.app/jobs/api',
+  type: 'board',
+  region: 'global',
 
   normalize: (raw) => {
     const jobs = (raw as any)?.jobs
@@ -230,6 +234,70 @@ export const HimalayasSource: JobSource = {
         data_raw: row,
       }
     })
+  },
+}
+
+// ---------------------------------------------------------------------------
+// Findwork
+// ---------------------------------------------------------------------------
+
+export const FindworkSource: JobSource = {
+  slug: 'findwork',
+  displayName: 'Findwork',
+  fetchUrl: 'https://findwork.dev/api/jobs/',
+  type: 'aggregator',
+  region: 'global',
+
+  normalize: (raw) => {
+    const rows = asArray<any>((raw as any)?.results)
+    if (!rows.length) return []
+
+    const nowIso = new Date().toISOString()
+
+    return rows
+      .map((row): NormalizedJob | null => {
+        if (!row || !row.id) return null
+
+        const title = row.role ?? row.title ?? ''
+        if (!title) return null
+
+        const location = (row.location as string | undefined) ?? null
+        const remoteField = (row as any)?.remote
+        let remote_type: RemoteType = inferRemoteTypeFromLocation(location)
+        if (typeof remoteField === 'boolean') {
+          remote_type = remoteField ? 'remote' : 'onsite'
+        }
+
+        const employmentType =
+          typeof row.employment_type === 'string' ? row.employment_type : null
+
+        const description = row.description ?? row.text ?? null
+        const externalUrl = row.url ?? null
+        const posted = safeDate(row.date_posted)
+
+        return {
+          source_slug: 'findwork',
+          external_id: String(row.id),
+
+          title,
+          company: row.company_name ?? null,
+          location,
+          employment_type: employmentType,
+          remote_type,
+
+          posted_date: posted,
+          created_at: nowIso,
+          external_url: externalUrl,
+
+          salary_min: null,
+          salary_max: null,
+          competitiveness_level: null,
+
+          description,
+          data_raw: row,
+        }
+      })
+      .filter((job): job is NormalizedJob => Boolean(job))
   },
 }
 
@@ -513,6 +581,307 @@ export const ArbeitnowSource: JobSource = {
 }
 
 // ---------------------------------------------------------------------------
+// USAJOBS (US federal roles)
+// ---------------------------------------------------------------------------
+
+export const USAJobsSource: JobSource = {
+  slug: 'usajobs',
+  displayName: 'USAJOBS',
+  fetchUrl: 'https://data.usajobs.gov/api/Search',
+  type: 'aggregator',
+  region: 'us',
+
+  normalize: (raw) => {
+    const searchResult = (raw as any)?.SearchResult
+    const items = asArray<any>(searchResult?.SearchResultItems)
+    if (!items.length) return []
+
+    const nowIso = new Date().toISOString()
+    const jobs: NormalizedJob[] = []
+
+    for (const item of items) {
+      try {
+        if (!item || !item.MatchedObjectId) continue
+
+        const descriptor = item.MatchedObjectDescriptor || {}
+        const title = descriptor.PositionTitle ?? ''
+        const company = descriptor.OrganizationName ?? null
+
+        const firstLocation = asArray<any>(descriptor.PositionLocation)[0]
+        const location =
+          (firstLocation &&
+            [
+              firstLocation.LocationName,
+              firstLocation.CityName,
+              firstLocation.CountrySubDivisionCode,
+              firstLocation.CountryCode,
+            ]
+              .filter((part) => typeof part === 'string' && part.trim().length)
+              .map((part) => String(part).trim())
+              .join(', ')) ||
+          (typeof descriptor.PositionLocationDisplay === 'string'
+            ? descriptor.PositionLocationDisplay
+            : null)
+
+        const schedule = asArray<any>(descriptor.PositionSchedule)[0]
+        const employment_type =
+          (typeof schedule?.Name === 'string' && schedule.Name) ??
+          (typeof schedule?.Code === 'string' && schedule.Code) ??
+          null
+
+        const remuneration = asArray<any>(descriptor.PositionRemuneration)[0]
+        const salary_min = parseNumber(remuneration?.MinimumRange)
+        const salary_max = parseNumber(remuneration?.MaximumRange)
+
+        const description =
+          (descriptor as any)?.UserArea?.Details?.JobSummary ??
+          descriptor.QualificationSummary ??
+          null
+
+        const job: NormalizedJob = {
+          source_slug: 'usajobs',
+          external_id: String(item.MatchedObjectId),
+
+          title,
+          company,
+          location,
+          employment_type,
+          remote_type: inferRemoteTypeFromLocation(location),
+
+          posted_date: safeDate(descriptor.PublicationStartDate),
+          created_at: nowIso,
+          external_url: descriptor.PositionURI ?? null,
+
+          salary_min,
+          salary_max,
+          competitiveness_level: null,
+
+          description,
+          data_raw: item,
+        }
+
+        jobs.push(job)
+      } catch (err) {
+        console.warn('USAJobsSource: skipping malformed item', err)
+        continue
+      }
+    }
+
+    return jobs
+  },
+}
+
+// ---------------------------------------------------------------------------
+// Jooble (POST-based API, global aggregator)
+// ---------------------------------------------------------------------------
+
+export const JoobleSource: JobSource = {
+  slug: 'jooble',
+  displayName: 'Jooble',
+  // Note: Jooble uses POST requests; the URL is built dynamically with API key
+  fetchUrl: 'https://jooble.org/api/',
+  type: 'aggregator',
+  region: 'global',
+
+  normalize: (raw) => {
+    const anyRaw = raw as any
+    const rows = asArray<any>(anyRaw?.jobs ?? anyRaw)
+    if (!rows.length) {
+      console.log(
+        'Jooble: no rows in response, top-level keys:',
+        anyRaw && typeof anyRaw === 'object' ? Object.keys(anyRaw) : 'non-object'
+      )
+      return []
+    }
+
+    const nowIso = new Date().toISOString()
+
+    return rows.map((row: any): NormalizedJob => {
+      const id = row.id != null ? String(row.id) : ''
+      const title = row.title ?? ''
+      const company = row.company ?? null
+      const location = row.location ?? null
+      const url = row.link ?? null
+
+      // Jooble returns salary as string like "$50,000 - $70,000"
+      let salaryMin: number | null = null
+      let salaryMax: number | null = null
+      if (typeof row.salary === 'string' && row.salary.length > 0) {
+        const nums = row.salary.match(/[\d,]+/g)
+        if (nums && nums.length >= 1) {
+          salaryMin = parseNumber(nums[0].replace(/,/g, ''))
+          if (nums.length >= 2) {
+            salaryMax = parseNumber(nums[1].replace(/,/g, ''))
+          }
+        }
+      }
+
+      const posted = safeDate(row.updated)
+
+      return {
+        source_slug: 'jooble',
+        external_id: `jooble:${id || url || title}`,
+
+        title,
+        company,
+        location,
+        employment_type: row.type ?? null,
+        remote_type: inferRemoteTypeFromLocation(location),
+
+        posted_date: posted,
+        created_at: nowIso,
+        external_url: url,
+
+        salary_min: salaryMin,
+        salary_max: salaryMax,
+        competitiveness_level: null,
+
+        description: row.snippet ?? null,
+        data_raw: row,
+      }
+    })
+  },
+}
+
+// ---------------------------------------------------------------------------
+// The Muse (free tier with API key, US-focused)
+// ---------------------------------------------------------------------------
+
+export const TheMuseSource: JobSource = {
+  slug: 'themuse',
+  displayName: 'The Muse',
+  fetchUrl: 'https://www.themuse.com/api/public/jobs',
+  type: 'aggregator',
+  region: 'us',
+
+  normalize: (raw) => {
+    const anyRaw = raw as any
+    const rows = asArray<any>(anyRaw?.results ?? anyRaw)
+    if (!rows.length) {
+      console.log(
+        'The Muse: no rows in response, top-level keys:',
+        anyRaw && typeof anyRaw === 'object' ? Object.keys(anyRaw) : 'non-object'
+      )
+      return []
+    }
+
+    const nowIso = new Date().toISOString()
+
+    return rows.map((row: any): NormalizedJob => {
+      const id = row.id != null ? String(row.id) : ''
+      const title = row.name ?? row.title ?? ''
+      const company = row.company?.name ?? null
+
+      // The Muse has locations as array of objects
+      const locations = asArray<any>(row.locations)
+      const location = locations.length > 0
+        ? locations.map((loc: any) => loc.name).filter(Boolean).join(', ')
+        : null
+
+      // The Muse has categories/levels for employment type
+      const levels = asArray<any>(row.levels)
+      const employmentType = levels.length > 0
+        ? levels.map((lvl: any) => lvl.name).join(', ')
+        : null
+
+      const url = row.refs?.landing_page ?? null
+      const posted = safeDate(row.publication_date)
+
+      return {
+        source_slug: 'themuse',
+        external_id: `themuse:${id}`,
+
+        title,
+        company,
+        location,
+        employment_type: employmentType,
+        remote_type: inferRemoteTypeFromLocation(location),
+
+        posted_date: posted,
+        created_at: nowIso,
+        external_url: url,
+
+        salary_min: null, // The Muse doesn't provide salary in API
+        salary_max: null,
+        competitiveness_level: null,
+
+        description: row.contents ?? null,
+        data_raw: row,
+      }
+    })
+  },
+}
+
+// ---------------------------------------------------------------------------
+// Reed UK (free tier with API key, UK-focused)
+// ---------------------------------------------------------------------------
+
+export const ReedUKSource: JobSource = {
+  slug: 'reed_uk',
+  displayName: 'Reed UK',
+  fetchUrl: 'https://www.reed.co.uk/api/1.0/search',
+  type: 'aggregator',
+  region: 'uk',
+
+  normalize: (raw) => {
+    const anyRaw = raw as any
+    const rows = asArray<any>(anyRaw?.results ?? anyRaw)
+    if (!rows.length) {
+      console.log(
+        'Reed UK: no rows in response, top-level keys:',
+        anyRaw && typeof anyRaw === 'object' ? Object.keys(anyRaw) : 'non-object'
+      )
+      return []
+    }
+
+    const nowIso = new Date().toISOString()
+
+    return rows.map((row: any): NormalizedJob => {
+      const id = row.jobId != null ? String(row.jobId) : ''
+      const title = row.jobTitle ?? ''
+      const company = row.employerName ?? null
+      const location = row.locationName ?? null
+      const url = row.jobUrl ?? null
+
+      const salaryMin = parseNumber(row.minimumSalary)
+      const salaryMax = parseNumber(row.maximumSalary)
+
+      const posted = safeDate(row.date ?? row.datePosted)
+
+      // Reed has explicit contract/permanent fields
+      let employmentType: string | null = null
+      if (row.contractType) {
+        employmentType = row.contractType
+      } else if (row.isPermanent !== undefined) {
+        employmentType = row.isPermanent ? 'permanent' : 'contract'
+      }
+
+      return {
+        source_slug: 'reed_uk',
+        external_id: `reed_uk:${id}`,
+
+        title,
+        company,
+        location,
+        employment_type: employmentType,
+        remote_type: inferRemoteTypeFromLocation(location),
+
+        posted_date: posted,
+        created_at: nowIso,
+        external_url: url,
+
+        salary_min: salaryMin,
+        salary_max: salaryMax,
+        competitiveness_level: null,
+
+        description: row.jobDescription ?? null,
+        data_raw: row,
+      }
+    })
+  },
+}
+
+// ---------------------------------------------------------------------------
 // Combined export for ingest_jobs
 // ---------------------------------------------------------------------------
 
@@ -520,8 +889,13 @@ export const ALL_SOURCES: JobSource[] = [
   RemoteOKSource,
   RemotiveSource,
   HimalayasSource,
+  FindworkSource,
   AdzunaUSSource,
+  USAJobsSource,
   // CareerOneStopSource, // temporarily disabled while auth is blocked
   JobicySource,
   ArbeitnowSource,
+  JoobleSource,
+  TheMuseSource,
+  ReedUKSource,
 ]

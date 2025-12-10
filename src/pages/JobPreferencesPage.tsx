@@ -1,14 +1,9 @@
-import React, { CSSProperties, useState } from 'react'
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useRelevntColors, useJobPreferences } from '../hooks'
-import type { JobPreferences } from '../hooks/useJobPreferences' // ⬅️ add this
+import { useJobPreferences } from '../hooks'
+import type { JobPreferences } from '../hooks/useJobPreferences'
 import { Container } from '../components/shared/Container'
-import {
-  PreferencesIcon,
-  JobsIcon,
-  AutoApplyIcon,
-  MatchScoreIcon,
-} from '../components/icons/RelevntIcons'
+import { Icon } from '../components/ui/Icon'
 
 type ChipField =
   | 'related_titles'
@@ -25,24 +20,7 @@ const locationOptions = ['Remote', 'Hybrid', 'On site', 'Flexible']
 const currencyOptions = ['USD', 'CAD', 'EUR', 'GBP']
 const salaryUnitOptions = ['yearly', 'hourly']
 
-const cardStyle = (colors: ReturnType<typeof useRelevntColors>): CSSProperties => ({
-  display: 'grid',
-  gap: 12,
-  padding: '24px',
-  borderRadius: 16,
-  backgroundColor: colors.surface,
-  border: `1px solid ${colors.borderLight}`,
-})
-
-const headerSkeletonRow = (colors: ReturnType<typeof useRelevntColors>) => ({
-  width: 200,
-  height: 18,
-  backgroundColor: colors.surfaceHover,
-  borderRadius: 10,
-})
-
 export default function JobPreferencesPage(): JSX.Element {
-  const colors = useRelevntColors()
   const {
     prefs,
     loading,
@@ -94,70 +72,13 @@ export default function JobPreferencesPage(): JSX.Element {
     await save()
   }
 
-  const header: CSSProperties = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    gap: 16,
-    marginBottom: 24,
-    flexWrap: 'wrap',
-  }
-
-  const titleRow: CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 6,
-  }
-
-  const title: CSSProperties = {
-    fontSize: 22,
-    fontWeight: 600,
-    letterSpacing: '0.02em',
-    color: colors.text,
-  }
-
-  const subtitle: CSSProperties = {
-    fontSize: 13,
-    color: colors.textSecondary,
-    maxWidth: 620,
-    lineHeight: 1.5,
-  }
-
-  const chipList: CSSProperties = {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginTop: 8,
-  }
-
-  const chip = (text: string): CSSProperties => ({
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: 6,
-    padding: '6px 10px',
-    borderRadius: 999,
-    backgroundColor: colors.surfaceHover,
-    border: `1px solid ${colors.borderLight}`,
-    fontSize: 12,
-    color: colors.text,
-  })
-
   const sectionHeader = (icon: React.ReactNode, label: string, desc: string) => (
     <div style={{ display: 'grid', gap: 6 }}>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          fontSize: 15,
-          fontWeight: 600,
-          color: colors.text,
-        }}
-      >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>
         {icon}
         <span>{label}</span>
       </div>
-      <p style={{ fontSize: 12, color: colors.textSecondary, lineHeight: 1.5 }}>
+      <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
         {desc}
       </p>
     </div>
@@ -165,43 +86,10 @@ export default function JobPreferencesPage(): JSX.Element {
 
   if (loading || !prefs) {
     return (
-      <div style={{ flex: 1, backgroundColor: colors.background }}>
+      <div className="page-wrapper">
         <Container maxWidth="lg" padding="md">
-          <div style={header}>
-            <div style={titleRow}>
-              <div style={headerSkeletonRow(colors)} />
-              <div
-                style={{
-                  width: 320,
-                  height: 14,
-                  backgroundColor: colors.surfaceHover,
-                  borderRadius: 10,
-                }}
-              />
-            </div>
-          </div>
-          <div style={{ display: 'grid', gap: 12 }}>
-            <div
-              style={{
-                height: 180,
-                borderRadius: 16,
-                backgroundColor: colors.surfaceHover,
-              }}
-            />
-            <div
-              style={{
-                height: 180,
-                borderRadius: 16,
-                backgroundColor: colors.surfaceHover,
-              }}
-            />
-            <div
-              style={{
-                height: 180,
-                borderRadius: 16,
-                backgroundColor: colors.surfaceHover,
-              }}
-            />
+          <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ color: 'var(--text-secondary)' }}>Loading preferences...</span>
           </div>
         </Container>
       </div>
@@ -209,43 +97,38 @@ export default function JobPreferencesPage(): JSX.Element {
   }
 
   return (
-    <div style={{ flex: 1, backgroundColor: colors.background }}>
+    <div className="page-wrapper">
       <Container maxWidth="lg" padding="md">
-        <header style={header}>
-          <div style={titleRow}>
-            <h1 style={title}>Job preferences</h1>
-            <p style={subtitle}>
-              Tell Relevnt what is worth your energy. We use this to score your matches,
-              tune your Relevnt Feed, and set guardrails for auto apply, always on your
-              terms and never shared with employers.
-            </p>
+        <header className="hero-shell">
+          <div className="hero-header">
+            <div className="hero-header-main">
+              <div className="hero__badge">
+                <Icon name="pocket-watch" size="sm" hideAccent />
+                <span>Job Preferences</span>
+              </div>
+              <h1>Job preferences</h1>
+              <p className="hero-subtitle">
+                Tell Relevnt what is worth your energy. We use this to score your matches,
+                tune your Relevnt Feed, and set guardrails for auto apply, always on your
+                terms and never shared with employers.
+              </p>
+            </div>
+
+            <div className="hero-actions" style={{ justifyContent: 'flex-start', paddingTop: 0 }}>
+              <Link to="/settings" className="ghost-button button-sm">
+                <Icon name="pocket-watch" size="sm" hideAccent />
+                <span>Settings</span>
+              </Link>
+            </div>
           </div>
-          <Link
-            to="/settings"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '8px 12px',
-              borderRadius: 999,
-              border: `1px solid ${colors.borderLight}`,
-              backgroundColor: colors.surface,
-              color: colors.text,
-              fontSize: 12,
-              textDecoration: 'none',
-            }}
-          >
-            <PreferencesIcon size={16} strokeWidth={1.6} />
-            <span>Settings</span>
-          </Link>
         </header>
 
-        <div style={{ display: 'grid', gap: 12 }}>
+        <div className="page-stack">
           {/* Target roles */}
-          <article style={cardStyle(colors)}>
+          <article className="surface-card">
             <div className="rl-field-grid">
               {sectionHeader(
-                <JobsIcon size={18} strokeWidth={1.7} />,
+                <Icon name="briefcase" size="sm" hideAccent />,
                 'Target roles',
                 'We start from the titles that feel most like you, then branch into nearby options using live job market data.'
               )}
@@ -283,21 +166,15 @@ export default function JobPreferencesPage(): JSX.Element {
                       placeholder="Add related titles one by one"
                     />
                   </label>
-                  <div style={chipList}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
                     {prefs.related_titles.map((item) => (
-                      <span key={item} style={chip(item)}>
+                      <span key={item} className="chip">
                         {item}
                         <button
                           type="button"
                           onClick={() => removeChip('related_titles', item)}
-                          style={{
-                            border: 'none',
-                            background: 'transparent',
-                            cursor: 'pointer',
-                            color: colors.textSecondary,
-                          }}
                         >
-                          ×
+                          <Icon name="compass-cracked" size="sm" hideAccent />
                         </button>
                       </span>
                     ))}
@@ -319,19 +196,7 @@ export default function JobPreferencesPage(): JSX.Element {
                               : [...prefs.seniority_levels, option]
                             updateField('seniority_levels', next)
                           }}
-                          style={{
-                            padding: '8px 12px',
-                            borderRadius: 999,
-                            border: active
-                              ? `1px solid ${colors.primary}`
-                              : `1px solid ${colors.borderLight}`,
-                            backgroundColor: active
-                              ? colors.surfaceHover
-                              : colors.surface,
-                            color: colors.text,
-                            fontSize: 12,
-                            cursor: 'pointer',
-                          }}
+                          className={`option-button ${active ? 'is-active' : ''}`}
                         >
                           {option}
                         </button>
@@ -341,16 +206,16 @@ export default function JobPreferencesPage(): JSX.Element {
                 </div>
               </div>
             </div>
-            <div className="rl-help">
+            <div className="rl-help" style={{ marginTop: 12 }}>
               We also use your saved jobs and resume to suggest nearby titles.
             </div>
           </article>
 
           {/* Work style */}
-          <article style={cardStyle(colors)}>
+          <article className="surface-card">
             <div className="rl-field-grid">
               {sectionHeader(
-                <PreferencesIcon size={18} strokeWidth={1.7} />,
+                <Icon name="compass" size="sm" hideAccent />,
                 'Work style',
                 'Tell us how you actually work best so we can filter out roles that ignore your remote, hybrid, onsite, and timezone reality.'
               )}
@@ -365,19 +230,7 @@ export default function JobPreferencesPage(): JSX.Element {
                         key={option}
                         type="button"
                         onClick={() => updateField('remote_preference', value)}
-                        style={{
-                          padding: '8px 12px',
-                          borderRadius: 999,
-                          border: active
-                            ? `1px solid ${colors.primary}`
-                            : `1px solid ${colors.borderLight}`,
-                          backgroundColor: active
-                            ? colors.surfaceHover
-                            : colors.surface,
-                          color: colors.text,
-                          fontSize: 12,
-                          cursor: 'pointer',
-                        }}
+                        className={`option-button ${active ? 'is-active' : ''}`}
                       >
                         {option}
                       </button>
@@ -407,21 +260,15 @@ export default function JobPreferencesPage(): JSX.Element {
                       placeholder="Cities or regions you are open to"
                     />
                   </label>
-                  <div style={chipList}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
                     {prefs.preferred_locations.map((item) => (
-                      <span key={item} style={chip(item)}>
+                      <span key={item} className="chip">
                         {item}
                         <button
                           type="button"
                           onClick={() => removeChip('preferred_locations', item)}
-                          style={{
-                            border: 'none',
-                            background: 'transparent',
-                            cursor: 'pointer',
-                            color: colors.textSecondary,
-                          }}
                         >
-                          ×
+                          <Icon name="compass-cracked" size="sm" hideAccent />
                         </button>
                       </span>
                     ))}
@@ -450,21 +297,15 @@ export default function JobPreferencesPage(): JSX.Element {
                       placeholder="Optional: add timezones you align with"
                     />
                   </label>
-                  <div style={chipList}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
                     {prefs.allowed_timezones.map((item) => (
-                      <span key={item} style={chip(item)}>
+                      <span key={item} className="chip">
                         {item}
                         <button
                           type="button"
                           onClick={() => removeChip('allowed_timezones', item)}
-                          style={{
-                            border: 'none',
-                            background: 'transparent',
-                            cursor: 'pointer',
-                            color: colors.textSecondary,
-                          }}
                         >
-                          ×
+                          <Icon name="compass-cracked" size="sm" hideAccent />
                         </button>
                       </span>
                     ))}
@@ -475,17 +316,17 @@ export default function JobPreferencesPage(): JSX.Element {
           </article>
 
           {/* Compensation */}
-          <article style={cardStyle(colors)}>
+          <article className="surface-card">
             <div className="rl-field-grid">
               {sectionHeader(
-                <PreferencesIcon size={18} strokeWidth={1.7} />,
+                <Icon name="scroll" size="sm" hideAccent />,
                 'Compensation',
                 'This never gets shared with employers. It helps us compare your floor to current ranges and hide roles that are not financially respectful.'
               )}
               <div style={{ display: 'grid', gap: 12 }}>
                 <label className="rl-label">
                   Minimum base salary
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
                     <input
                       className="rl-input"
                       type="number"
@@ -497,7 +338,7 @@ export default function JobPreferencesPage(): JSX.Element {
                         )
                       }
                       placeholder="e.g., 95000"
-                      style={{ minWidth: 140, flex: '1 1 140px' }}
+                      style={{ flex: 2 }}
                     />
                     <select
                       className="rl-select"
@@ -505,7 +346,7 @@ export default function JobPreferencesPage(): JSX.Element {
                       onChange={(e) =>
                         updateField('salary_currency', e.target.value)
                       }
-                      style={{ minWidth: 110 }}
+                      style={{ flex: 1 }}
                     >
                       {currencyOptions.map((opt) => (
                         <option key={opt} value={opt}>
@@ -522,7 +363,7 @@ export default function JobPreferencesPage(): JSX.Element {
                           e.target.value as JobPreferences['salary_unit']
                         )
                       }
-                      style={{ minWidth: 110 }}
+                      style={{ flex: 1 }}
                     >
                       {salaryUnitOptions.map((opt) => (
                         <option key={opt} value={opt}>
@@ -537,10 +378,10 @@ export default function JobPreferencesPage(): JSX.Element {
           </article>
 
           {/* Keywords & filters */}
-          <article style={cardStyle(colors)}>
+          <article className="surface-card">
             <div className="rl-field-grid">
               {sectionHeader(
-                <PreferencesIcon size={18} strokeWidth={1.7} />,
+                <Icon name="seeds" size="sm" hideAccent />,
                 'Keywords & filters',
                 'Tell Relevnt what language feels like a green flag or a red flag so we can gently up-rank or down-rank roles in your feed.'
               )}
@@ -567,27 +408,21 @@ export default function JobPreferencesPage(): JSX.Element {
                       placeholder="e.g., ethical AI, non-profit, public health, climate, women-led"
                     />
                   </label>
-                  <div style={chipList}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
                     {prefs.include_keywords?.map((item) => (
-                      <span key={item} style={chip(item)}>
+                      <span key={item} className="chip">
                         {item}
                         <button
                           type="button"
                           onClick={() => removeChip('include_keywords', item)}
-                          style={{
-                            border: 'none',
-                            background: 'transparent',
-                            cursor: 'pointer',
-                            color: colors.textSecondary,
-                          }}
                         >
-                          ×
+                          <Icon name="compass-cracked" size="sm" hideAccent />
                         </button>
                       </span>
                     ))}
                   </div>
                   <div className="rl-help">
-                    Think of these as “this looks like my lane” signals. We use them to gently boost
+                    Think of these as "this looks like my lane" signals. We use them to gently boost
                     jobs that sound like your people.
                   </div>
                 </div>
@@ -614,21 +449,15 @@ export default function JobPreferencesPage(): JSX.Element {
                       placeholder="e.g., crypto, MLM, unpaid, commission only, hustle, rockstar"
                     />
                   </label>
-                  <div style={chipList}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
                     {prefs.avoid_keywords?.map((item) => (
-                      <span key={item} style={chip(item)}>
+                      <span key={item} className="chip">
                         {item}
                         <button
                           type="button"
                           onClick={() => removeChip('avoid_keywords', item)}
-                          style={{
-                            border: 'none',
-                            background: 'transparent',
-                            cursor: 'pointer',
-                            color: colors.textSecondary,
-                          }}
                         >
-                          ×
+                          <Icon name="compass-cracked" size="sm" hideAccent />
                         </button>
                       </span>
                     ))}
@@ -643,10 +472,10 @@ export default function JobPreferencesPage(): JSX.Element {
           </article>
 
           {/* Safeties */}
-          <article style={cardStyle(colors)}>
+          <article className="surface-card">
             <div className="rl-field-grid">
               {sectionHeader(
-                <PreferencesIcon size={18} strokeWidth={1.7} />,
+                <Icon name="compass-cracked" size="sm" hideAccent />,
                 'Safeties',
                 'Hard boundaries so you do not waste time or emotional energy.'
               )}
@@ -673,21 +502,15 @@ export default function JobPreferencesPage(): JSX.Element {
                       placeholder="Add titles you will not consider"
                     />
                   </label>
-                  <div style={chipList}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
                     {prefs.exclude_titles.map((item) => (
-                      <span key={item} style={chip(item)}>
+                      <span key={item} className="chip">
                         {item}
                         <button
                           type="button"
                           onClick={() => removeChip('exclude_titles', item)}
-                          style={{
-                            border: 'none',
-                            background: 'transparent',
-                            cursor: 'pointer',
-                            color: colors.textSecondary,
-                          }}
                         >
-                          ×
+                          <Icon name="compass-cracked" size="sm" hideAccent />
                         </button>
                       </span>
                     ))}
@@ -716,21 +539,15 @@ export default function JobPreferencesPage(): JSX.Element {
                       placeholder="Add companies to skip"
                     />
                   </label>
-                  <div style={chipList}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
                     {prefs.exclude_companies.map((item) => (
-                      <span key={item} style={chip(item)}>
+                      <span key={item} className="chip">
                         {item}
                         <button
                           type="button"
                           onClick={() => removeChip('exclude_companies', item)}
-                          style={{
-                            border: 'none',
-                            background: 'transparent',
-                            cursor: 'pointer',
-                            color: colors.textSecondary,
-                          }}
                         >
-                          ×
+                          <Icon name="compass-cracked" size="sm" hideAccent />
                         </button>
                       </span>
                     ))}
@@ -762,23 +579,17 @@ export default function JobPreferencesPage(): JSX.Element {
                   <div className="rl-help">
                     Examples: unpaid internship, 1099 only, commission only.
                   </div>
-                  <div style={chipList}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
                     {prefs.exclude_contract_types.map((item) => (
-                      <span key={item} style={chip(item)}>
+                      <span key={item} className="chip">
                         {item}
                         <button
                           type="button"
                           onClick={() =>
                             removeChip('exclude_contract_types', item)
                           }
-                          style={{
-                            border: 'none',
-                            background: 'transparent',
-                            cursor: 'pointer',
-                            color: colors.textSecondary,
-                          }}
                         >
-                          ×
+                          <Icon name="compass-cracked" size="sm" hideAccent />
                         </button>
                       </span>
                     ))}
@@ -789,39 +600,31 @@ export default function JobPreferencesPage(): JSX.Element {
           </article>
 
           {/* Auto apply */}
-          <article style={cardStyle(colors)}>
+          <article className="surface-card">
             <div className="rl-field-grid">
               {sectionHeader(
-                <AutoApplyIcon size={18} strokeWidth={1.7} />,
+                <Icon name="paper-airplane" size="sm" hideAccent />,
                 'Auto apply guardrails',
                 'If you turn on auto apply, these are the rules we follow, including preferring the employer site when available so your applications look intentional, not spray and pray.'
               )}
               <div style={{ display: 'grid', gap: 12 }}>
-                <label
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    cursor: 'pointer',
-                    fontSize: 13,
-                    color: colors.text,
-                  }}
-                >
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, userSelect: 'none', cursor: 'pointer' }}>
                   <input
                     type="checkbox"
                     checked={prefs.enable_auto_apply}
                     onChange={(e) =>
                       updateField('enable_auto_apply', e.target.checked)
                     }
-                    style={{ width: 16, height: 16 }}
+                    className="jobprefs-checkbox"
+                    style={{ width: 16, height: 16, accentColor: 'var(--color-accent)' }}
                   />
-                  <span>Allow Relevnt to auto-apply on my behalf</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>Allow Relevnt to auto-apply on my behalf</span>
                 </label>
 
                 <label className="rl-label">
                   Minimum match score
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <MatchScoreIcon size={16} strokeWidth={1.6} />
+                    <Icon name="stars" size="sm" hideAccent />
                     <input
                       className="rl-input"
                       type="number"
@@ -835,7 +638,6 @@ export default function JobPreferencesPage(): JSX.Element {
                         )
                       }
                       placeholder="e.g., 85"
-                      style={{ flex: '1 1 140px' }}
                     />
                   </div>
                 </label>
@@ -861,45 +663,28 @@ export default function JobPreferencesPage(): JSX.Element {
           </article>
         </div>
 
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-            marginTop: 18,
-            flexWrap: 'wrap',
-          }}
-        >
+        <div style={{ marginTop: 24, paddingBottom: 64, display: 'flex', alignItems: 'center', gap: 16 }}>
           <button
             type="button"
             onClick={handleSave}
             disabled={saving}
-            style={{
-              padding: '10px 18px',
-              borderRadius: 999,
-              border: 'none',
-              backgroundColor: colors.primary,
-              color: colors.text,
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: saving ? 'not-allowed' : 'pointer',
-              opacity: saving ? 0.7 : 1,
-            }}
+            className="primary-button"
+            style={{ opacity: saving ? 0.7 : 1, cursor: saving ? 'not-allowed' : 'pointer' }}
           >
             {saving ? 'Saving…' : 'Save preferences'}
           </button>
           {saveStatus === 'saved' && (
-            <span style={{ fontSize: 12, color: colors.textSecondary }}>
+            <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
               Saved
             </span>
           )}
           {saveStatus === 'error' && (
-            <span style={{ fontSize: 12, color: colors.error }}>
+            <span style={{ fontSize: 13, color: 'var(--color-error)' }}>
               We could not save your preferences. Try again.
             </span>
           )}
           {error && (
-            <span style={{ fontSize: 12, color: colors.error }}>{error}</span>
+            <span style={{ fontSize: 13, color: 'var(--color-error)' }}>{error}</span>
           )}
         </div>
       </Container>

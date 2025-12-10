@@ -7,12 +7,9 @@ import useMatchJobs, { MatchJobsResult } from '../hooks/useMatchJobs'
 import { useJobStats } from '../hooks/useJobStats'
 import { supabase } from '../lib/supabase'
 import type { Database } from '../lib/database.types'
-import heroImage from '../assets/hero/dashboard/relevnt-dashboard-hero-21x9.png'
-import resumeOptimizerIcon from '../assets/icons/feature/icon-feature-resume-optimizer.png'
-import jobAlertsIcon from '../assets/icons/feature/icon-feature-job-alerts.png'
-import interviewPrepIcon from '../assets/icons/feature/icon-feature-interview-prep.png'
-import portfolioBuilderIcon from '../assets/icons/feature/icon-feature-portfolio-builder.png'
-import emptyJobsIllustration from '../assets/illustrations/empty/illustration-empty-jobs.png'
+import { Icon } from '../components/ui/Icon'
+import { EmptyState } from '../components/ui/EmptyState'
+import { copy } from '../lib/copy'
 
 type ResumeRow = Database['public']['Tables']['resumes']['Row']
 
@@ -65,8 +62,12 @@ const sectionOrder: ResumeSection[] = [
 
 export default function DashboardPage(): JSX.Element {
   const { user, loading: authLoading } = useAuth()
-  const { matches, loading: matchesLoading, error: matchesError, runMatchJobs } =
-    useMatchJobs()
+  const {
+    matches,
+    loading: matchesLoading,
+    error: matchesError,
+    runMatchJobs,
+  } = useMatchJobs()
   const { total, saved, loading: statsLoading } = useJobStats()
 
   const [savedJobs, setSavedJobs] = useState<SavedJobRow[]>([])
@@ -122,7 +123,7 @@ export default function DashboardPage(): JSX.Element {
             external_url,
             posted_date
           )
-        `
+        `,
         )
         .eq('user_id', user.id)
         .order('saved_at', { ascending: false })
@@ -151,7 +152,9 @@ export default function DashboardPage(): JSX.Element {
     const hasValues = (value: unknown): boolean => {
       if (!value) return false
       if (Array.isArray(value)) return value.length > 0
-      if (typeof value === 'object') return Object.values(value).some((v) => !!String(v ?? '').trim())
+      if (typeof value === 'object') {
+        return Object.values(value).some((v) => !!String(v ?? '').trim())
+      }
       return !!String(value).trim()
     }
 
@@ -198,7 +201,7 @@ export default function DashboardPage(): JSX.Element {
           certifications,
           projects,
           updated_at
-        `
+        `,
         )
         .eq('user_id', user.id)
         .order('updated_at', { ascending: false, nullsFirst: false })
@@ -281,26 +284,11 @@ export default function DashboardPage(): JSX.Element {
     }
   }, [matchesLoading, matches.length, loadFallbackJobs])
 
-  const ink = 'var(--ink, var(--text))'
-  const muted = 'var(--muted, var(--text-muted, rgba(0, 0, 0, 0.6)))'
-  const surface = 'var(--surface, var(--bg))'
-  const border = 'var(--border, rgba(0, 0, 0, 0.08))'
-
   if (authLoading) {
     return (
       <PageBackground>
         <Container maxWidth="lg" padding="md">
-          <div
-            style={{
-              minHeight: '60vh',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: muted,
-            }}
-          >
-            Loading your dashboard…
-          </div>
+          <div className="dashboard-page-loading">Loading your dashboard…</div>
         </Container>
       </PageBackground>
     )
@@ -309,80 +297,6 @@ export default function DashboardPage(): JSX.Element {
   if (!user) {
     return <Navigate to="/login" replace />
   }
-
-  const cardStyle: React.CSSProperties = {
-    background: surface,
-    border: `1px solid ${border}`,
-    boxShadow: 'var(--shadow-soft, 0 8px 24px rgba(0, 0, 0, 0.05))',
-    borderRadius: 16,
-    padding: 20,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 12,
-  }
-
-  const sectionTitle: React.CSSProperties = {
-    fontSize: 16,
-    fontWeight: 650,
-    color: ink,
-    margin: 0,
-  }
-
-  const bodyText: React.CSSProperties = {
-    color: muted,
-    fontSize: 14,
-    margin: 0,
-  }
-
-  const pillStyle: React.CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: 6,
-    padding: '6px 12px',
-    borderRadius: 999,
-    background: surface,
-    border: `1px solid ${border}`,
-    color: muted,
-    fontSize: 12,
-  }
-
-  const primaryButtonStyle: React.CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    padding: '12px 18px',
-    borderRadius: 999,
-    background: 'var(--accent)',
-    color: 'var(--bg)',
-    fontWeight: 650,
-    border: '1px solid var(--accent)',
-    textDecoration: 'none',
-    fontSize: 14,
-  }
-
-  const ghostButtonStyle: React.CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    padding: '11px 16px',
-    borderRadius: 999,
-    background: 'transparent',
-    color: 'var(--ink, var(--text))',
-    border: '1px solid var(--border, rgba(0, 0, 0, 0.08))',
-    textDecoration: 'none',
-    fontWeight: 600,
-    fontSize: 14,
-  }
-
-  const statChip = (label: string, value: string | number) => (
-    <div style={pillStyle} key={label}>
-      <span style={{ width: 8, height: 8, borderRadius: '999px', background: 'var(--accent)' }} />
-      <span style={{ fontWeight: 600, color: ink }}>{value}</span>
-      <span>{label}</span>
-    </div>
-  )
 
   const JobLink = ({
     job,
@@ -394,410 +308,312 @@ export default function DashboardPage(): JSX.Element {
     const href = job.external_url || `/jobs/${job.id}`
     const isExternal = /^https?:\/\//i.test(href)
     return isExternal ? (
-      <a
-        href={href}
-        target="_blank"
-        rel="noreferrer"
-        style={{ color: 'inherit', textDecoration: 'none' }}
-      >
+      <a href={href} target="_blank" rel="noreferrer">
         {children}
       </a>
     ) : (
-      <Link to={href} style={{ color: 'inherit', textDecoration: 'none' }}>
-        {children}
-      </Link>
+      <Link to={href}>{children}</Link>
     )
   }
 
+  const resumeSectionIcons: Record<ResumeSectionKey, JSX.Element> = {
+    contact: <Icon name="compass" size="sm" hideAccent />,
+    summary: <Icon name="scroll" size="sm" hideAccent />,
+    experience: <Icon name="briefcase" size="sm" hideAccent />,
+    education: <Icon name="book" size="sm" hideAccent />,
+    skills: <Icon name="stars" size="sm" hideAccent />,
+    certifications: <Icon name="key" size="sm" hideAccent />,
+    projects: <Icon name="lighthouse" size="sm" hideAccent />,
+  }
+
+  const trackedJobsLabel =
+    statsLoading || total == null ? '–' : total.toString()
+  const savedJobsLabel =
+    statsLoading || saved == null ? '–' : saved.toString()
+  const matchesCount =
+    matches.length || fallbackJobs.length || 0
+  const matchesLabel =
+    matchesLoading && matchesCount === 0 ? '–' : matchesCount.toString()
+
   return (
-    <PageBackground className="dashboard-page">
+    <PageBackground>
       <Container maxWidth="xl" padding="md">
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 20,
-            color: 'var(--ink, var(--text))',
-            paddingTop: 12,
-            paddingBottom: 24,
-          }}
-        >
-          <section
-            className="dashboard-hero"
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'minmax(0, 1.4fr) minmax(0, 1fr)',
-              gap: 20,
-              alignItems: 'stretch',
-            }}
-          >
-            <div
-              style={{
-                ...cardStyle,
-                gap: 16,
-                padding: 24,
-              }}
-            >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <div style={{ ...pillStyle, alignSelf: 'flex-start', background: 'var(--hero-overlay, var(--surface))' }}>
-                  <span style={{ fontWeight: 600, color: 'var(--ink, var(--text))' }}>Welcome back</span>
-                  <span>Everything you need in one place</span>
-                </div>
-                <h1
-                  style={{
-                    fontSize: 28,
-                    margin: 0,
-                    lineHeight: 1.25,
-                    color: 'var(--ink, var(--text))',
-                  }}
-                >
-                  Take control of your search with a clear home base.
-                </h1>
-                <p style={bodyText}>
-                  Track roles, keep your resume moving, and jump into the right tools without
-                  context switching.
-                </p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 4 }}>
-                  <Link to="/jobs" style={primaryButtonStyle}>
-                    Browse jobs
-                  </Link>
-                  <Link to="/resumes" style={ghostButtonStyle}>
-                    Open resume builder
-                  </Link>
-                </div>
+        <div className="dashboard-page">
+          {/* HERO */}
+          <section className="hero-shell">
+            <div className="hero-header">
+              <div className="dashboard-hero-icon">
+                <Icon name="compass" size="md" />
               </div>
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                {statChip('Jobs tracked', statsLoading ? '…' : total)}
-                {statChip('Saved roles', statsLoading ? '…' : saved)}
-                {statChip('New matches', matchesLoading ? '…' : matches.length)}
+              <div className="hero-header-main">
+                <p className="text-xs muted">{copy.nav.dashboard}</p>
+                <h1 className="font-display">{copy.dashboard.greeting}</h1>
+                <p className="muted">
+                  Track roles, keep your resume moving, and jump into the right tools
+                  without context switching.
+                </p>
               </div>
             </div>
 
-            <div
-              style={{
-                ...cardStyle,
-                padding: 0,
-                overflow: 'hidden',
-                display: 'flex',
-                alignItems: 'stretch',
-              }}
-            >
-              <div
-                style={{
-                  background: 'var(--surface)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: 10,
-                }}
-              >
-                <img
-                  src={heroImage}
-                  alt="Relevnt dashboard hero"
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    borderRadius: 14,
-                  }}
-                />
+            <div className="hero-actions-accent">
+              <div className="hero-actions-primary">
+                <Link to="/jobs" className="primary-button">
+                  Browse jobs
+                </Link>
+                <Link to="/resumes" className="ghost-button">
+                  Open resume builder
+                </Link>
+              </div>
+
+              <div className="hero-actions-metrics">
+                <span className="hero-metric-pill">
+                  <span className="font-semibold">{trackedJobsLabel}</span> Jobs tracked
+                </span>
+                <span className="hero-metric-pill">
+                  <span className="font-semibold">{savedJobsLabel}</span> Saved roles
+                </span>
+                <span className="hero-metric-pill">
+                  <span className="font-semibold">{matchesLabel}</span> New matches
+                </span>
               </div>
             </div>
           </section>
 
-          <section
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 0.9fr)',
-              gap: 18,
-            }}
-          >
-            <div style={{ display: 'grid', gap: 18 }}>
-              <div style={cardStyle}>
-                <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, flexWrap: 'wrap' }}>
-                  <div>
-                    <h2 style={sectionTitle}>Recommended roles for you</h2>
-                    <p style={{ ...bodyText, marginTop: 4 }}>Based on your profile and preferences.</p>
+          {/* MAIN GRID */}
+          <section className="dashboard-main-grid">
+            {/* LEFT COLUMN */}
+            <div className="dashboard-column">
+              {/* Recommended roles */}
+              <div className="surface-card dashboard-card">
+                <header className="dashboard-card-header">
+                  <div className="dashboard-card-header-text">
+                    <h2 className="dashboard-section-title">
+                      Recommended roles for you
+                    </h2>
+                    <p className="muted text-sm">
+                      Based on your profile and preferences.
+                    </p>
                   </div>
-                  <Link to="/jobs" style={{ ...ghostButtonStyle, padding: '8px 12px', fontSize: 13 }}>
+                  <Link to="/jobs" className="ghost-button button-sm">
                     View all jobs
                   </Link>
                 </header>
 
                 {(matchesLoading || fallbackLoading) && (
-                  <p style={bodyText}>Loading recommendations…</p>
+                  <p className="muted text-sm">Loading recommendations…</p>
                 )}
+
                 {!matchesLoading && matchesError && (
-                  <p style={{ ...bodyText, color: 'var(--danger, var(--accent))' }}>
+                  <p className="muted text-sm text-danger">
                     {matchesError.message || 'Unable to load recommendations.'}
                   </p>
                 )}
+
                 {!fallbackLoading && fallbackError && matches.length === 0 && (
-                  <p style={{ ...bodyText, color: 'var(--danger, var(--accent))' }}>
-                    {fallbackError}
-                  </p>
+                  <p className="muted text-sm text-danger">{fallbackError}</p>
                 )}
 
-                {!matchesLoading && !fallbackLoading && recommendedJobs.length === 0 && (
-                  <div style={{ ...cardStyle, background: 'var(--surface)', alignItems: 'flex-start', gap: 10 }}>
-                    <p style={{ ...bodyText, margin: 0 }}>
-                      No recommendations yet. Set your preferences and start browsing roles.
-                    </p>
-                    <Link to="/jobs" style={{ ...ghostButtonStyle, padding: '10px 14px' }}>
-                      Browse roles
-                    </Link>
-                  </div>
-                )}
+                {!matchesLoading &&
+                  !fallbackLoading &&
+                  recommendedJobs.length === 0 && (
+                    <div className="dashboard-empty-state">
+                      <p className="muted text-sm">
+                        No recommendations yet. Set your preferences and start
+                        browsing roles.
+                      </p>
+                      <Link to="/jobs" className="ghost-button button-xs">
+                        Browse roles
+                      </Link>
+                    </div>
+                  )}
 
-                {!matchesLoading && !fallbackLoading && recommendedJobs.length > 0 && (
-                  <div style={{ display: 'grid', gap: 12 }}>
-                    {recommendedJobs.map((job) => (
-                      <JobLink key={job.id} job={job}>
-                        <div
-                          style={{
-                            border: '1px solid var(--border, rgba(0, 0, 0, 0.08))',
-                            borderRadius: 12,
-                            padding: 12,
-                            display: 'grid',
-                            gap: 4,
-                            background: 'var(--surface)',
-                          }}
-                        >
-                          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'baseline' }}>
-                            <div style={{ fontWeight: 650, color: ink }}>
-                              {job.title}
+                {!matchesLoading &&
+                  !fallbackLoading &&
+                  recommendedJobs.length > 0 && (
+                    <div className="dashboard-job-list">
+                      {recommendedJobs.map((job) => (
+                        <JobLink key={job.id} job={job}>
+                          <div className="dashboard-job-item">
+                            <div className="dashboard-job-title-row">
+                              <div className="dashboard-job-title">{job.title}</div>
+                              {job.scoreLabel && (
+                                <span className="hero-metric-pill hero-metric-pill--compact">
+                                  {job.scoreLabel}
+                                </span>
+                              )}
                             </div>
-                            {job.scoreLabel && (
-                              <span style={{ ...pillStyle, padding: '4px 10px', fontSize: 11 }}>
-                                {job.scoreLabel}
-                              </span>
-                            )}
+                            <div className="dashboard-job-meta">
+                              {job.company && <span>{job.company}</span>}
+                              {job.company && job.location && <span>•</span>}
+                              {job.location && <span>{job.location}</span>}
+                            </div>
                           </div>
-                          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', color: muted, fontSize: 13 }}>
-                            {job.company && <span>{job.company}</span>}
-                            {job.company && job.location && <span>•</span>}
-                            {job.location && <span>{job.location}</span>}
-                          </div>
-                        </div>
-                      </JobLink>
-                    ))}
-                  </div>
-                )}
+                        </JobLink>
+                      ))}
+                    </div>
+                  )}
               </div>
 
-              <div style={cardStyle}>
-                <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, flexWrap: 'wrap' }}>
-                  <div>
-                    <h2 style={sectionTitle}>Saved jobs</h2>
-                    <p style={{ ...bodyText, marginTop: 4 }}>Quick access to the roles you bookmarked.</p>
+              {/* Saved jobs */}
+              <div className="surface-card dashboard-card">
+                <header className="dashboard-card-header">
+                  <div className="dashboard-card-header-text">
+                    <h2 className="dashboard-section-title">Saved jobs</h2>
+                    <p className="muted text-sm">
+                      Quick access to the roles you bookmarked.
+                    </p>
                   </div>
-                  <Link to="/jobs" style={{ ...ghostButtonStyle, padding: '8px 12px', fontSize: 13 }}>
+                  <Link to="/jobs" className="ghost-button button-sm">
                     Go to jobs
                   </Link>
                 </header>
 
-                {savedJobsLoading && <p style={bodyText}>Loading saved jobs…</p>}
+                {savedJobsLoading && (
+                  <p className="muted text-sm">Loading saved jobs…</p>
+                )}
+
                 {!savedJobsLoading && savedJobsError && (
-                  <p style={{ ...bodyText, color: 'var(--danger, var(--accent))' }}>
-                    {savedJobsError}
-                  </p>
+                  <p className="muted text-sm text-danger">{savedJobsError}</p>
                 )}
 
-                {!savedJobsLoading && !savedJobsError && savedJobs.length === 0 && (
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 12,
-                      textAlign: 'center',
-                      padding: 12,
-                    }}
-                  >
-                    <img
-                      src={emptyJobsIllustration}
-                      alt="No saved jobs"
-                      style={{ width: 160, opacity: 0.9 }}
+                {!savedJobsLoading &&
+                  !savedJobsError &&
+                  savedJobs.length === 0 && (
+                    <EmptyState
+                      type="saved"
+                      action={{
+                        label: "Find roles to save",
+                        onClick: () => { },
+                      }}
                     />
-                    <p style={{ ...bodyText, margin: 0 }}>
-                      Nothing saved yet. Keep roles you care about in one place.
-                    </p>
-                    <Link to="/jobs" style={{ ...primaryButtonStyle, padding: '10px 16px', fontSize: 13 }}>
-                      Find roles to save
-                    </Link>
-                  </div>
-                )}
+                  )}
 
-                {!savedJobsLoading && !savedJobsError && savedJobs.length > 0 && (
-                  <div style={{ display: 'grid', gap: 10 }}>
-                    {savedJobs.map((savedJob) => {
-                      const job = savedJob.jobs
-                      if (!job) return null
-                      const item: JobListItem = {
-                        id: job.id,
-                        title: job.title || 'Untitled role',
-                        company: job.company,
-                        location: job.location,
-                        external_url: job.external_url || undefined,
-                      }
-                      return (
-                        <JobLink key={savedJob.id} job={item}>
-                          <div
-                            style={{
-                              border: '1px solid var(--border, rgba(0, 0, 0, 0.08))',
-                              borderRadius: 12,
-                              padding: 12,
-                              display: 'grid',
-                              gap: 6,
-                              background: 'var(--surface)',
-                            }}
-                          >
-                            <div style={{ fontWeight: 650, color: ink }}>
-                              {item.title}
+                {!savedJobsLoading &&
+                  !savedJobsError &&
+                  savedJobs.length > 0 && (
+                    <div className="dashboard-saved-list">
+                      {savedJobs.map((savedJob) => {
+                        const job = savedJob.jobs
+                        if (!job) return null
+                        const item: JobListItem = {
+                          id: job.id,
+                          title: job.title || 'Untitled role',
+                          company: job.company,
+                          location: job.location,
+                          external_url: job.external_url || undefined,
+                        }
+                        return (
+                          <JobLink key={savedJob.id} job={item}>
+                            <div className="dashboard-job-item">
+                              <div className="dashboard-job-title">
+                                {item.title}
+                              </div>
+                              <div className="dashboard-job-meta">
+                                {item.company && <span>{item.company}</span>}
+                                {item.company && item.location && <span>•</span>}
+                                {item.location && <span>{item.location}</span>}
+                              </div>
                             </div>
-                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', color: muted, fontSize: 13 }}>
-                              {item.company && <span>{item.company}</span>}
-                              {item.company && item.location && <span>•</span>}
-                              {item.location && <span>{item.location}</span>}
-                            </div>
-                          </div>
-                        </JobLink>
-                      )
-                    })}
-                  </div>
-                )}
+                          </JobLink>
+                        )
+                      })}
+                    </div>
+                  )}
               </div>
             </div>
 
-            <div style={{ display: 'grid', gap: 18 }}>
-              <div style={cardStyle}>
-                <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, flexWrap: 'wrap' }}>
-                  <div>
-                    <h2 style={sectionTitle}>Resume progress</h2>
-                    <p style={{ ...bodyText, marginTop: 4 }}>
+            {/* RIGHT COLUMN */}
+            <div className="dashboard-column">
+              {/* Resume progress */}
+              <div className="surface-card dashboard-card">
+                <header className="dashboard-card-header">
+                  <div className="dashboard-card-header-text">
+                    <h2 className="dashboard-section-title">Resume progress</h2>
+                    <p className="muted text-sm">
                       Track the essentials before you send your next application.
                     </p>
                   </div>
-                  <Link to="/resumes" style={{ ...ghostButtonStyle, padding: '8px 12px', fontSize: 13 }}>
+                  <Link to="/resumes" className="ghost-button button-sm">
                     Open resume builder
                   </Link>
                 </header>
 
-                {resumeLoading && <p style={bodyText}>Checking your resume…</p>}
+                {resumeLoading && (
+                  <p className="muted text-sm">Checking your resume…</p>
+                )}
+
                 {!resumeLoading && resumeError && (
-                  <p style={{ ...bodyText, color: 'var(--danger, var(--accent))' }}>
-                    {resumeError}
-                  </p>
+                  <p className="muted text-sm text-danger">{resumeError}</p>
                 )}
 
                 {!resumeLoading && !resumeError && (
                   <>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-                      <div style={{ fontWeight: 700, color: 'var(--ink, var(--text))', fontSize: 18 }}>
+                    <div className="dashboard-progress-header">
+                      <div className="dashboard-progress-percent">
                         {resumeProgress.percent}% complete
                       </div>
                       {resumeProgress.title && (
-                        <span style={{ ...pillStyle, padding: '4px 10px', fontSize: 12 }}>
+                        <span className="hero-metric-pill hero-metric-pill--compact">
                           {resumeProgress.title}
                         </span>
                       )}
                     </div>
-                    <div
-                      style={{
-                        width: '100%',
-                        height: 10,
-                        borderRadius: 999,
-                        background: 'var(--border, rgba(0, 0, 0, 0.08))',
-                        overflow: 'hidden',
-                      }}
-                    >
+                    <div className="dashboard-progress-bar-container">
                       <div
-                        style={{
-                          width: `${resumeProgress.percent}%`,
-                          height: '100%',
-                          background: 'var(--accent)',
-                          transition: 'width 0.3s ease',
-                        }}
+                        className="dashboard-progress-bar-fill"
+                        style={{ width: `${resumeProgress.percent}%` }}
                       />
                     </div>
-                    <div style={{ display: 'grid', gap: 8 }}>
+                    <ul className="dashboard-section-list">
                       {resumeProgress.sections.map((section) => (
-                        <div
-                          key={section.key}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            gap: 10,
-                            padding: '8px 10px',
-                            borderRadius: 10,
-                            background: surface,
-                            border: `1px solid ${border}`,
-                          }}
-                        >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: ink }}>
-                            <span
-                              aria-hidden
-                              style={{
-                                width: 10,
-                                height: 10,
-                                borderRadius: '999px',
-                                background: section.complete
-                                  ? 'var(--accent)'
-                                  : border,
-                                display: 'inline-block',
-                              }}
-                            />
-                            <span style={{ fontWeight: 600 }}>{section.label}</span>
+                        <li key={section.key} className="resume-progress-row">
+                          <div className="resume-progress-left">
+                            {resumeSectionIcons[section.key]}
+                            <span className="font-semibold">{section.label}</span>
                           </div>
-                          <span style={{ color: muted, fontSize: 13 }}>
+                          <span className="resume-progress-status muted text-sm">
                             {section.complete ? 'Complete' : 'In progress'}
                           </span>
-                        </div>
+                        </li>
                       ))}
-                    </div>
+                    </ul>
                   </>
                 )}
               </div>
 
-              <div style={cardStyle}>
-                <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, flexWrap: 'wrap' }}>
-                  <div>
-                    <h2 style={sectionTitle}>Your toolbox</h2>
-                    <p style={{ ...bodyText, marginTop: 4 }}>
+              {/* Toolbox */}
+              <div className="surface-card dashboard-card">
+                <header className="dashboard-card-header">
+                  <div className="dashboard-card-header-text">
+                    <h2 className="dashboard-section-title">Your toolbox</h2>
+                    <p className="muted text-sm">
                       Jump straight into the tools that save you time.
                     </p>
                   </div>
                 </header>
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-                    gap: 12,
-                  }}
-                >
+
+                <div className="dashboard-toolbox-grid">
                   {[
                     {
-                      icon: resumeOptimizerIcon,
+                      icon: <Icon name="scroll" size="md" />,
                       label: 'Resume optimizer',
                       description: 'Tune your resume for each role.',
                       to: '/resumes',
                     },
                     {
-                      icon: jobAlertsIcon,
+                      icon: <Icon name="stars" size="md" />,
                       label: 'Job alerts',
                       description: 'Get notified when roles match.',
                       to: '/job-preferences',
                     },
                     {
-                      icon: interviewPrepIcon,
+                      icon: <Icon name="book" size="md" />,
                       label: 'Interview prep',
                       description: 'Practice with the right prompts.',
                       to: '/learn',
                     },
                     {
-                      icon: portfolioBuilderIcon,
+                      icon: <Icon name="lighthouse" size="md" />,
                       label: 'Portfolio builder',
                       description: 'Keep your wins in one place.',
                       to: '/profile/professional',
@@ -806,27 +622,15 @@ export default function DashboardPage(): JSX.Element {
                     <Link
                       key={tool.label}
                       to={tool.to}
-                      style={{
-                        border: '1px solid var(--border, rgba(0, 0, 0, 0.08))',
-                        borderRadius: 12,
-                        padding: 12,
-                        background: 'var(--surface)',
-                        display: 'grid',
-                        gap: 8,
-                        color: 'var(--ink, var(--text))',
-                        textDecoration: 'none',
-                      }}
+                      className="tool-card surface-card"
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <img
-                          src={tool.icon}
-                          alt={tool.label}
-                          className="icon-handdrawn"
-                          style={{ width: 32, height: 32, objectFit: 'contain' }}
-                        />
-                        <div style={{ fontWeight: 700 }}>{tool.label}</div>
+                      <div className="tool-card-main">
+                        {tool.icon}
+                        <div>
+                          <h3>{tool.label}</h3>
+                          <p className="muted text-sm">{tool.description}</p>
+                        </div>
                       </div>
-                      <p style={{ ...bodyText, margin: 0 }}>{tool.description}</p>
                     </Link>
                   ))}
                 </div>

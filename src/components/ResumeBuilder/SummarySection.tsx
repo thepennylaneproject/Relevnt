@@ -3,6 +3,8 @@ import { SectionCard } from './SectionCard'
 import { ResumeSummary } from '../../types/resume-builder.types'
 import { AIButton } from './AIButton'
 import { useAITask } from '../../hooks/useAITask'
+import { inputClass, labelClass, textareaClass } from './sectionStyles'
+import { Stars } from "lucide-react"
 
 interface Props {
   summary: ResumeSummary
@@ -43,23 +45,23 @@ export const SummarySection: React.FC<Props> = ({ summary, onChange, colors }) =
     <SectionCard
       title="Summary"
       description="A sharp, outcome focused snapshot that sets the frame for your story."
-      icon="📝"
+      icon={<Stars className="w-4 h-4 text-[#1F2933]" />}
       colors={colors}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div className="space-y-4">
         <div>
-          <label style={labelStyle}>Headline (optional)</label>
+          <label className={labelClass}>Headline (optional)</label>
           <input
-            style={inputStyle}
+            className={inputClass}
             value={summary.headline ?? ''}
             onChange={handleFieldChange('headline')}
             placeholder="Mission driven digital marketing strategist & AI product builder"
           />
         </div>
 
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-            <label style={{ ...labelStyle, marginBottom: 0 }}>Summary</label>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between gap-3">
+            <label className={labelClass}>Summary</label>
             <AIButton
               label="Rewrite Professional"
               onClick={handleRewrite}
@@ -68,37 +70,15 @@ export const SummarySection: React.FC<Props> = ({ summary, onChange, colors }) =
             />
           </div>
           <textarea
-            style={textareaStyle}
+            className={textareaClass}
             rows={5}
             value={summary.summary}
             onChange={handleFieldChange('summary')}
             placeholder="2 to 4 lines that describe who you are, what you do best, and the value you create."
           />
-          {error && <div style={{ fontSize: 12, color: '#ef4444', marginTop: 4 }}>{error.message}</div>}
+          {error && <div className="text-xs text-rose-600">{error.message}</div>}
         </div>
       </div>
     </SectionCard>
   )
-}
-
-const labelStyle: React.CSSProperties = {
-  display: 'block',
-  fontSize: 12,
-  color: '#9ca3af',
-  marginBottom: 4,
-}
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '8px 10px',
-  borderRadius: 8,
-  border: '1px solid rgba(148, 163, 184, 0.7)',
-  background: 'rgba(15, 23, 42, 0.9)',
-  color: '#e5e7eb',
-  fontSize: 13,
-}
-
-const textareaStyle: React.CSSProperties = {
-  ...inputStyle,
-  resize: 'vertical',
 }

@@ -4,6 +4,8 @@ import { SectionCard } from './SectionCard'
 import { EducationItemCard } from './EducationItemCard'
 import { ResumeEducationItem } from '../../types/resume-builder.types'
 import { RelevntColors } from '../../hooks/useRelevntColors'
+import { addButtonClass } from './sectionStyles'
+import { GraduationCap } from "lucide-react"
 
 interface EducationSectionProps {
   id: string
@@ -47,13 +49,12 @@ export const EducationSection: React.FC<EducationSectionProps> = ({
 
   return (
     <SectionCard
-      id={id}
       title="Education"
-      icon="🎓"
       description="Formal education, bootcamps, and high impact training."
+      icon={<GraduationCap className="w-4 h-4 text-[#1F2933]" />}
       colors={colors}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div className="space-y-4">
         {items.map((item, index) => (
           <EducationItemCard
             key={item.id || index}
@@ -66,23 +67,11 @@ export const EducationSection: React.FC<EducationSectionProps> = ({
         <button
           type="button"
           onClick={addItem}
-          style={addButtonStyle}
+          className={addButtonClass}
         >
           + Add education
         </button>
       </div>
     </SectionCard>
   )
-}
-
-const addButtonStyle: React.CSSProperties = {
-  marginTop: 4,
-  padding: '6px 10px',
-  borderRadius: 999,
-  border: '1px dashed rgba(148, 163, 184, 0.7)',
-  background: 'transparent',
-  color: '#e5e7eb',
-  fontSize: 13,
-  cursor: 'pointer',
-  alignSelf: 'flex-start',
 }

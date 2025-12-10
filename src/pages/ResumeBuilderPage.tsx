@@ -1,8 +1,9 @@
-import React, { useRef, useState } from 'react'
-import { useParams } from 'react-router-dom'
-import { useResumeBuilder } from '../hooks/useResumeBuilder'
-import { useExtractResume } from '../hooks/useExtractResume'
-import { ResumeBuilderLayout } from '../pages/ResumeBuilderLayout'
+// src/pages/ResumeBuilderPage.tsx
+import * as React from 'react'
+import { useState, useMemo } from 'react'
+
+import PageBackground from '../components/shared/PageBackground'
+import { Container } from '../components/shared/Container'
 import { ContactSection } from '../components/ResumeBuilder/ContactSection'
 import { SummarySection } from '../components/ResumeBuilder/SummarySection'
 import { SkillsSection } from '../components/ResumeBuilder/SkillsSection'
@@ -10,276 +11,185 @@ import { ExperienceSection } from '../components/ResumeBuilder/ExperienceSection
 import { EducationSection } from '../components/ResumeBuilder/EducationSection'
 import { CertificationsSection } from '../components/ResumeBuilder/CertificationsSection'
 import { ProjectsSection } from '../components/ResumeBuilder/ProjectsSection'
+import { SectionCard } from '../components/ResumeBuilder/SectionCard'
 import { ResumePreview } from '../components/ResumeBuilder/ResumePreview'
+import { Icon, IconName } from '../components/ui/Icon'
+import { copy } from '../lib/copy'
 import { useRelevntColors } from '../hooks/useRelevntColors'
-import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist'
 import type { ResumeDraft } from '../types/resume-builder.types'
 
-// Configure PDF.js worker
-GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
+type ActiveSection =
+  | 'contact'
+  | 'summary'
+  | 'skills'
+  | 'experience'
+  | 'education'
+  | 'certifications'
+  | 'projects'
 
-export const ResumeBuilderPage: React.FC = () => {
-  const { resumeId } = useParams<{ resumeId: string }>() // adjust to your route
+const SECTION_META: {
+  id: ActiveSection
+  label: string
+  icon: IconName
+}[] = [
+    { id: 'contact', label: copy.resumes.sections.contact.title, icon: 'compass' },
+    { id: 'summary', label: copy.resumes.sections.summary.title, icon: 'scroll' },
+    { id: 'skills', label: copy.resumes.sections.skills.title, icon: 'stars' },
+    { id: 'experience', label: copy.resumes.sections.experience.title, icon: 'briefcase' },
+    { id: 'education', label: copy.resumes.sections.education.title, icon: 'book' },
+    { id: 'certifications', label: copy.resumes.sections.certifications.title, icon: 'key' },
+    { id: 'projects', label: copy.resumes.sections.projects.title, icon: 'lighthouse' },
+  ]
 
-  const {
-    draft,
-    status,
-    error,
-    isDirty,
-    lastSavedAt,
-    updateContact,
-    updateSummary,
-    setSkillGroups,
-    setExperience,
-    setEducation,
-    setCertifications,
-    setProjects,
-    setDraft,
-  } = useResumeBuilder({ resumeId })
+const ResumeBuilderPage: React.FC = () => {
+  const [activeSection, setActiveSection] = useState<ActiveSection>('contact')
 
-  const { extract, loading: extracting } = useExtractResume()
-  const [uploadError, setUploadError] = useState<string | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  // shared state (can tighten types later)
+  const [contact, setContact] = useState<any>({})
+  const [summary, setSummary] = useState<any>('')
+  const [skillGroups, setSkillGroups] = useState<any[]>([])
+  const [experienceItems, setExperienceItems] = useState<any[]>([])
+  const [educationItems, setEducationItems] = useState<any[]>([])
+  const [certificationItems, setCertificationItems] = useState<any[]>([])
+  const [projectItems, setProjectItems] = useState<any[]>([])
 
-  // If you have a theme system, pull colors from there.
   const colors = useRelevntColors()
 
-  const handleUploadClick = () => {
-    fileInputRef.current?.click()
-  }
-
-  const extractTextFromPDF = async (file: File): Promise<string> => {
-    const arrayBuffer = await file.arrayBuffer()
-    const pdf = await getDocument({ data: arrayBuffer }).promise
-    let fullText = ''
-
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i)
-      const textContent = await page.getTextContent()
-      const pageText = textContent.items.map((item: any) => item.str).join(' ')
-      fullText += pageText + '\n'
-    }
-
-    return fullText
-  }
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    setUploadError(null)
-
-    try {
-      let resumeText = ''
-
-      if (file.type === 'application/pdf') {
-        resumeText = await extractTextFromPDF(file)
-      } else if (file.type === 'text/plain') {
-        resumeText = await file.text()
-      } else {
-        setUploadError('Please upload a PDF or TXT file')
-        return
-      }
-
-      const result = await extract(resumeText)
-
-      if (result && result.success && result.data) {
-        const extractedData = result.data
-
-        const newDraft: ResumeDraft = {
-          contact: {
-            fullName: extractedData.fullName || '',
-            email: extractedData.email || '',
-            phone: extractedData.phone || '',
-            location: extractedData.location || '',
-            headline: '',
-            links: [],
-          },
-          summary: {
-            headline: '',
-            summary: extractedData.summary || '',
-          },
-          experience: extractedData.experience?.map((exp, idx) => ({
-            id: `exp-${idx}`,
-            title: exp.title || '',
-            company: exp.company || '',
-            location: exp.location || '',
-            startDate: exp.startDate || '',
-            endDate: exp.endDate || '',
-            current: exp.current || false,
-            bullets: exp.bullets?.join('\n') || '',
-          })) || [],
-          education: extractedData.education?.map((edu, idx) => ({
-            id: `edu-${idx}`,
-            institution: edu.institution || '',
-            degree: edu.degree || '',
-            fieldOfStudy: edu.fieldOfStudy || '',
-            startDate: edu.startDate || '',
-            endDate: edu.endDate || '',
-          })) || [],
-          certifications: extractedData.certifications?.map((cert, idx) => ({
-            id: `cert-${idx}`,
-            name: cert.name || '',
-            issuer: cert.issuer || '',
-            year: cert.year || '',
-          })) || [],
-          projects: [],
-          skillGroups: extractedData.skills?.length
-            ? [{
-              label: 'Skills',
-              skills: extractedData.skills,
-            }]
-            : [],
-          lastUpdatedAt: new Date().toISOString(),
-        }
-
-        setDraft(() => newDraft)
-      }
-    } catch (err) {
-      console.error('Failed to upload and extract:', err)
-      setUploadError(err instanceof Error ? err.message : 'Failed to extract resume')
-    }
-
-    // Reset input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
-    }
-  }
-
-  const headerActions = (
-    <>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".pdf,.txt"
-        onChange={handleFileChange}
-        style={{ display: 'none' }}
-      />
-      <button
-        onClick={handleUploadClick}
-        disabled={extracting}
-        style={{
-          padding: '8px 16px',
-          borderRadius: 8,
-          border: '1px solid rgba(129, 140, 248, 0.7)',
-          background: 'rgba(30, 64, 175, 0.1)',
-          color: '#4f46e5',
-          fontSize: 13,
-          fontWeight: 600,
-          cursor: extracting ? 'not-allowed' : 'pointer',
-          opacity: extracting ? 0.6 : 1,
-        }}
-      >
-        {extracting ? '⏳ Extracting...' : '📄 Upload Resume'}
-      </button>
-    </>
+  const draft: ResumeDraft = useMemo(
+    () =>
+    ({
+      contact,
+      summary: { summary },
+      experience: experienceItems,
+      education: educationItems,
+      skillGroups,
+      projects: projectItems,
+      certifications: certificationItems,
+    } as ResumeDraft),
+    [
+      contact,
+      summary,
+      experienceItems,
+      educationItems,
+      skillGroups,
+      projectItems,
+      certificationItems,
+    ]
   )
-
-  const editor = (
-    <>
-      {error && (
-        <div
-          style={{
-            padding: 12,
-            borderRadius: 8,
-            border: '1px solid rgba(248, 113, 113, 0.7)',
-            background: 'rgba(127, 29, 29, 0.4)',
-            color: '#fee2e2',
-            fontSize: 13,
-          }}
-        >
-          {error}
-        </div>
-      )}
-
-      {uploadError && (
-        <div
-          style={{
-            padding: 12,
-            borderRadius: 8,
-            border: '1px solid rgba(251, 191, 36, 0.7)',
-            background: 'rgba(120, 53, 15, 0.4)',
-            color: '#fef3c7',
-            fontSize: 13,
-          }}
-        >
-          {uploadError}
-        </div>
-      )}
-
-      <section id="contact">
-        <ContactSection
-          contact={draft.contact}
-          onChange={updateContact}
-          colors={colors}
-        />
-      </section>
-
-      <section id="summary">
-        <SummarySection
-          summary={draft.summary}
-          onChange={updateSummary}
-          colors={colors}
-        />
-      </section>
-
-      <section id="skills">
-        <SkillsSection
-          id="skills"
-          skillGroups={draft.skillGroups}
-          onChange={setSkillGroups}
-          colors={colors}
-        />
-      </section>
-
-      <section id="experience">
-        <ExperienceSection
-          id="experience"
-          items={draft.experience}
-          onChange={setExperience}
-          colors={colors}
-        />
-      </section>
-
-      <section id="education">
-        <EducationSection
-          id="education"
-          items={draft.education}
-          onChange={setEducation}
-          colors={colors}
-        />
-      </section>
-
-      <section id="certifications">
-        <CertificationsSection
-          id="certifications"
-          items={draft.certifications}
-          onChange={setCertifications}
-          colors={colors}
-        />
-      </section>
-
-      <section id="projects">
-        <ProjectsSection
-          id="projects"
-          items={draft.projects}
-          onChange={setProjects}
-          colors={colors}
-        />
-      </section>
-    </>
-  )
-
-  const preview = <ResumePreview draft={draft} />
 
   return (
-    <ResumeBuilderLayout
-      status={status}
-      isDirty={isDirty}
-      lastSavedAt={lastSavedAt}
-      headerActions={headerActions}
-      editor={editor}
-      preview={preview}
-    />
+    <PageBackground>
+      <Container maxWidth="xl" padding="md">
+        <div className="resume-page">
+          {/* HERO */}
+          <section className="hero-shell">
+            <div className="hero-header">
+              <div className="hero-icon">
+                <Icon name="scroll" size="md" />
+              </div>
+              <div className="hero-header-main">
+                <p className="text-xs muted">{copy.nav.resumes}</p>
+                <h1 className="font-display">{copy.resumes.pageTitle}</h1>
+                <p className="muted">
+                  {copy.resumes.pageSubtitle}
+                </p>
+              </div>
+            </div>
+
+            <div className="hero-actions-accent">
+              <nav className="resume-section-nav">
+                {SECTION_META.map((section) => {
+                  const isActive = section.id === activeSection
+                  return (
+                    <button
+                      key={section.id}
+                      type="button"
+                      onClick={() => setActiveSection(section.id)}
+                      className={`resume-section-nav-btn ${isActive ? 'resume-section-nav-btn--active' : ''}`}
+                    >
+                      <Icon name={section.icon} size="sm" hideAccent={!isActive} />
+                      <span className="sr-only">{section.label}</span>
+                    </button>
+                  )
+                })}
+              </nav>
+            </div>
+          </section>
+
+          {/* EDITOR + PREVIEW IN 2-COLUMN GRID */}
+          <section className="page-two-column">
+            {/* LEFT: active editor section */}
+            <div className="card-shell card-shell--soft">
+
+              {activeSection === 'contact' && (
+                <ContactSection contact={contact} onChange={setContact} />
+              )}
+
+              {activeSection === 'summary' && (
+                <SummarySection summary={summary} onChange={setSummary} />
+              )}
+
+              {activeSection === 'skills' && (
+                <SkillsSection
+                  id="skills"
+                  skillGroups={skillGroups}
+                  onChange={setSkillGroups}
+                  colors={colors}
+                />
+              )}
+
+              {activeSection === 'experience' && (
+                <ExperienceSection
+                  id="experience"
+                  items={experienceItems}
+                  onChange={setExperienceItems}
+                  colors={colors}
+                />
+              )}
+
+              {activeSection === 'education' && (
+                <EducationSection
+                  id="education"
+                  items={educationItems}
+                  onChange={setEducationItems}
+                  colors={colors}
+                />
+              )}
+
+              {activeSection === 'certifications' && (
+                <CertificationsSection
+                  id="certifications"
+                  items={certificationItems}
+                  onChange={setCertificationItems}
+                  colors={colors}
+                />
+              )}
+
+              {activeSection === 'projects' && (
+                <ProjectsSection
+                  id="projects"
+                  items={projectItems}
+                  onChange={setProjectItems}
+                  colors={colors}
+                />
+              )}
+            </div>
+
+            {/* RIGHT: preview card */}
+            <div className="card-shell card-shell--soft">
+              <div>
+                <h2 className="text-sm font-semibold">Preview</h2>
+                <p className="muted text-xs">
+                  Your resume layout will update as you fill in each section.
+                </p>
+              </div>
+              <ResumePreview draft={draft} />
+            </div>
+          </section>
+        </div>
+      </Container>
+    </PageBackground>
   )
 }
+
+export default ResumeBuilderPage

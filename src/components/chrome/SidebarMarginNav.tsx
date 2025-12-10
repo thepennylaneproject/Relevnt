@@ -1,24 +1,17 @@
 import React from 'react'
 import { useLocation, Link } from 'react-router-dom'
-import {
-  DashboardIcon,
-  JobsIcon,
-  ApplicationsIcon,
-  ResumeIcon,
-  CoursesIcon,
-  VoiceToneIcon,
-  SettingsIcon,
-} from '../../components/icons/HandDrawnIcons'
-import { useRelevntColors } from '../../hooks'
+import { Icon, IconName } from '../ui/Icon'
+import { copy } from '../../lib/copy'
 
-const NAV_ITEMS = [
-  { path: '/dashboard', label: 'Dash', Icon: DashboardIcon },
-  { path: '/jobs', label: 'Jobs', Icon: JobsIcon },
-  { path: '/applications', label: 'Apps', Icon: ApplicationsIcon },
-  { path: '/resumes', label: 'CVs', Icon: ResumeIcon },
-  { path: '/learn', label: 'Learn', Icon: CoursesIcon },
-  { path: '/voice', label: 'Voice', Icon: VoiceToneIcon },
-  { path: '/settings', label: 'Prefs', Icon: SettingsIcon },
+// Map navigation items to our custom hand-drawn icons
+const NAV_ITEMS: Array<{ path: string; label: string; icon: IconName }> = [
+  { path: '/dashboard', label: copy.nav.dashboard, icon: 'compass' },
+  { path: '/jobs', label: copy.nav.jobs, icon: 'briefcase' },
+  { path: '/applications', label: copy.nav.applications, icon: 'paper-airplane' },
+  { path: '/resumes', label: copy.nav.resumes, icon: 'scroll' },
+  { path: '/learn', label: copy.nav.learn, icon: 'book' },
+  { path: '/voice', label: copy.nav.voice, icon: 'microphone' },
+  { path: '/settings', label: copy.nav.settings, icon: 'pocket-watch' },
 ]
 
 const DOODLES: Record<string, string> = {
@@ -33,39 +26,32 @@ const DOODLES: Record<string, string> = {
 
 export default function SidebarMarginNav() {
   const { pathname } = useLocation()
-  const colors = useRelevntColors()
   const active = (path: string) => pathname.startsWith(path)
   const doodle =
     DOODLES[Object.keys(DOODLES).find((p) => pathname.startsWith(p)) ?? '/dashboard']
 
   return (
-    <aside
-      className="margin-nav"
-      style={
-        {
-          '--nav-bg': colors.surface,
-          '--nav-border': colors.borderLight,
-          '--nav-ink': colors.text,
-          '--nav-muted': colors.textSecondary,
-          '--nav-accent': colors.primary,
-          '--nav-hover-bg': colors.surfaceHover,
-          '--nav-active-bg': colors.focus,
-        } as React.CSSProperties
-      }
-    >
+    <aside className="margin-nav">
       <div className="margin-nav__doodle">
         <img src={doodle} alt="" />
       </div>
 
       <nav className="margin-nav__nav">
         <ul>
-          {NAV_ITEMS.map(({ path, label, Icon }) => {
+          {NAV_ITEMS.map(({ path, label, icon }) => {
             const isActive = active(path)
             return (
               <li key={path}>
-                <Link to={path} className={`margin-nav__item${isActive ? ' active' : ''}`}>
-                  <span className="margin-nav__icon">
-                    <Icon size={22} strokeWidth={1.7} color={colors.primary} />
+                <Link
+                  to={path}
+                  className={`margin-nav__item nav-item${isActive ? ' nav-item--active active' : ''}`}
+                >
+                  <span className="margin-nav__icon icon-nav">
+                    <Icon
+                      name={icon}
+                      size="md"
+                      hideAccent={!isActive}
+                    />
                   </span>
                   <span className="margin-nav__label">{label}</span>
                 </Link>
@@ -77,3 +63,4 @@ export default function SidebarMarginNav() {
     </aside>
   )
 }
+

@@ -1,7 +1,6 @@
 import React from 'react'
 import { Modal } from '../shared/Modal'
 import { useLearningCourses, type LearningCourse } from '../../hooks'
-import { useRelevntColors } from '../../hooks'
 
 export interface SkillLearningModalProps {
   open: boolean
@@ -12,26 +11,23 @@ export interface SkillLearningModalProps {
 
 export function SkillLearningModal({ open, onClose, skillSlug, skillName }: SkillLearningModalProps) {
   const { courses, isLoading, error } = useLearningCourses(skillSlug)
-  const colors = useRelevntColors()
 
   const title = skillName ? `Learning options for ${skillName}` : 'Learning options'
 
   const renderCourse = (course: LearningCourse) => (
     <div
       key={course.id}
+      className="surface-card"
       style={{
         display: 'flex',
         alignItems: 'center',
         gap: 12,
         padding: '10px 12px',
-        borderRadius: 12,
-        border: `1px solid ${colors.borderLight}`,
-        backgroundColor: colors.surface,
       }}
     >
       <div style={{ display: 'grid', gap: 4, flex: 1 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: colors.text }}>{course.title}</div>
-        <div style={{ fontSize: 12, color: colors.textSecondary }}>
+        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{course.title}</div>
+        <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
           {course.providerName || course.providerSlug} • {course.isFree ? 'Free' : 'Paid'}
           {course.estimatedHours != null ? ` • ~${course.estimatedHours} hrs` : ''}
         </div>
@@ -40,14 +36,9 @@ export function SkillLearningModal({ open, onClose, skillSlug, skillName }: Skil
         href={course.url || '#'}
         target="_blank"
         rel="noreferrer"
+        className="ghost-button"
         style={{
-          padding: '8px 12px',
-          borderRadius: 999,
-          border: `1px solid ${colors.borderLight}`,
-          backgroundColor: colors.background,
-          color: colors.text,
           fontSize: 12,
-          fontWeight: 600,
           textDecoration: 'none',
         }}
       >
@@ -59,14 +50,14 @@ export function SkillLearningModal({ open, onClose, skillSlug, skillName }: Skil
   return (
     <Modal isOpen={open} onClose={onClose} title={title} size="lg">
       <div style={{ display: 'grid', gap: 10 }}>
-        {isLoading && <p style={{ fontSize: 12, color: colors.textSecondary }}>Loading courses…</p>}
+        {isLoading && <p style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Loading courses…</p>}
         {error && (
-          <p style={{ fontSize: 12, color: colors.error }}>
+          <p style={{ fontSize: 12, color: 'var(--color-error)' }}>
             We couldn&apos;t load courses right now.
           </p>
         )}
         {!isLoading && !error && courses.length === 0 && (
-          <p style={{ fontSize: 12, color: colors.textSecondary }}>No courses found yet.</p>
+          <p style={{ fontSize: 12, color: 'var(--text-secondary)' }}>No courses found yet.</p>
         )}
         {!isLoading && !error && courses.map(renderCourse)}
       </div>

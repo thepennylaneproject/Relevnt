@@ -43,8 +43,8 @@
   node_bundler = "esbuild"
 
 [[scheduled.functions]]
-function = "ingest_jobs"
-cron = "0 * * * *"
+function = "jobs_cron"
+cron = "*/15 * * * *"
 
   # Directory for functions (already set in [build] but can override)
   directory = "netlify/functions"
@@ -195,4 +195,3 @@ cron = "0 * * * *"
 # - Give you a .netlify.app domain
 # 
 # =====================================================
-

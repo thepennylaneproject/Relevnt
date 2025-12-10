@@ -1,6 +1,5 @@
 // src/components/layout/Footer.tsx
 import React from 'react'
-import { useRelevntTheme } from '../../contexts/RelevntThemeProvider'
 import { Container } from '../shared/Container'
 
 export interface FooterProps {
@@ -8,14 +7,13 @@ export interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = ({ className }) => {
-    const { colors } = useRelevntTheme()
-
     return (
         <footer
             className={className}
             style={{
-                background: colors.surface,
-                borderTop: `1px solid ${colors.border}`,
+                background: 'var(--surface)',
+                borderTop: '1px solid var(--border-subtle)',
+                marginTop: 'auto',
             }}
         >
             <Container maxWidth="lg" padding="md">
@@ -23,9 +21,9 @@ export const Footer: React.FC<FooterProps> = ({ className }) => {
                     style={{
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: 16,
-                        paddingTop: 8,
-                        paddingBottom: 16,
+                        gap: 24,
+                        paddingTop: 32,
+                        paddingBottom: 32,
                     }}
                 >
                     <div
@@ -34,20 +32,24 @@ export const Footer: React.FC<FooterProps> = ({ className }) => {
                             flexWrap: 'wrap',
                             justifyContent: 'space-between',
                             alignItems: 'center',
-                            gap: 12,
+                            gap: 16,
                             fontSize: 13,
-                            color: colors.textSecondary,
+                            color: 'var(--text-secondary)',
                         }}
                     >
-                        <span>Authentic intelligence for real people navigating broken systems.</span>
-                        <span>Relevnt • Est. 2025</span>
+                        <span style={{ fontWeight: 500, color: 'var(--text)' }}>Authentic intelligence for real people navigating broken systems.</span>
+                        <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
+                            <span>Relevnt</span>
+                            <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--color-accent)' }} />
+                            <span>Est. 2025</span>
+                        </div>
                     </div>
                     <div
                         style={{
-                            borderTop: `1px solid ${colors.borderLight}`,
-                            paddingTop: 12,
+                            borderTop: '1px solid var(--border-subtle)',
+                            paddingTop: 16,
                             textAlign: 'center',
-                            color: colors.mutedText,
+                            color: 'var(--text-muted)',
                             fontSize: 12,
                         }}
                     >
