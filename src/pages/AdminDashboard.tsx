@@ -346,7 +346,11 @@ function UsersTab() {
 
   const updateUser = async (id: string, patch: Partial<AdminUser>) => {
     setSavingId(id)
-    const { error } = await supabase.from('profiles').update(patch).eq('id', id)
+    // Filter out null values to match DB schema expectations  
+    const cleanPatch = Object.fromEntries(
+      Object.entries(patch).filter(([_, v]) => v !== null)
+    )
+    const { error } = await supabase.from('profiles').update(cleanPatch).eq('id', id)
     if (error) {
       console.error(error)
       // Optionally show toast error
@@ -368,7 +372,7 @@ function UsersTab() {
         }
         // Creating a profile requires the auth user id – admin supplies it here.
         const { error } = await supabase.from('profiles').insert({
-          id: userForm.id || undefined,
+          id: userForm.id!,
           email: userForm.email,
           full_name: userForm.full_name,
           plan_tier: userForm.plan_tier,
@@ -756,6 +760,7 @@ function SourcesTab() {
         endpoint_url: newSource.api_url,
         website_url: newSource.website_url,
         update_frequency: newSource.update_frequency,
+        source_key: newSource.slug || newSource.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
         enabled: newSource.enabled,
       })
       if (error) throw error
@@ -1009,16 +1014,61 @@ function SourcesTab() {
 
 /* Ingestion */
 function IngestionTab() {
+  const [healthData, setHealthData] = useState<{
+    latestRun: any | null;
+    sourceHealth: any[];
+    recentRuns: any[];
+  } | null>(null);
   const [ingestionState, setIngestionState] = useState<{ source: string; cursor: any; last_run_at: string | null }[]>([])
   const [jobCounts, setJobCounts] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
   const [runningAll, setRunningAll] = useState(false)
   const [runningSource, setRunningSource] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [adminSecret, setAdminSecret] = useState<string>(() => {
+    return localStorage.getItem('admin_secret') || ''
+  })
+  const [showSecretModal, setShowSecretModal] = useState(false)
+  const [secretInput, setSecretInput] = useState('')
+
+  const saveAdminSecret = () => {
+    localStorage.setItem('admin_secret', secretInput)
+    setAdminSecret(secretInput)
+    setShowSecretModal(false)
+    setSecretInput('')
+  }
+
+  const clearAdminSecret = () => {
+    localStorage.removeItem('admin_secret')
+    setAdminSecret('')
+    setShowSecretModal(true)
+  }
 
   async function fetchData() {
     setLoading(true)
+    setError(null)
     try {
-      // Fetch ingestion state
+      // Fetch new observability data
+      if (adminSecret) {
+        const healthRes = await fetch('/.netlify/functions/admin_ingestion_health', {
+          headers: {
+            'x-admin-secret': adminSecret,
+          },
+        })
+
+        if (healthRes.ok) {
+          const healthJson = await healthRes.json()
+          if (healthJson.success) {
+            setHealthData(healthJson.data)
+          }
+        } else if (healthRes.status === 401 || healthRes.status === 403) {
+          setError('Invalid admin secret. Please update it in settings.')
+        } else {
+          console.warn('Failed to fetch health data:', healthRes.status)
+        }
+      }
+
+      // Fetch legacy ingestion state
       const { data: stateData } = await supabase
         .from('job_ingestion_state')
         .select('source, cursor, last_run_at')
@@ -1038,6 +1088,7 @@ function IngestionTab() {
       setJobCounts(counts)
     } catch (err) {
       console.error('Error loading ingestion data:', err)
+      setError('Failed to load data')
     } finally {
       setLoading(false)
     }
@@ -1047,10 +1098,22 @@ function IngestionTab() {
     fetchData()
   }, [])
 
+
   async function runAllIngestion() {
+    if (!adminSecret) {
+      setShowSecretModal(true)
+      return
+    }
     setRunningAll(true)
     try {
-      const res = await fetch('/.netlify/functions/ingest_jobs', { method: 'POST' })
+      const res = await fetch('/.netlify/functions/admin_ingest_trigger', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-secret': adminSecret,
+        },
+        body: JSON.stringify({}),
+      })
       const data = await res.json()
       if (data.success) {
         await fetchData()
@@ -1066,9 +1129,20 @@ function IngestionTab() {
   }
 
   async function runSourceIngestion(source: string) {
+    if (!adminSecret) {
+      setShowSecretModal(true)
+      return
+    }
     setRunningSource(source)
     try {
-      const res = await fetch(`/.netlify/functions/ingest_jobs?source=${source}`, { method: 'POST' })
+      const res = await fetch('/.netlify/functions/admin_ingest_trigger', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-secret': adminSecret,
+        },
+        body: JSON.stringify({ sources: [source] }),
+      })
       const data = await res.json()
       if (data.success) {
         await fetchData()
@@ -1087,22 +1161,245 @@ function IngestionTab() {
 
   return (
     <div className="page-stack">
+      {/* Admin Secret Modal */}
+      {showSecretModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.7)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+        }}>
+          <div className="surface-card" style={{ maxWidth: 500, width: '90%' }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>Admin Secret Required</h3>
+            <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16 }}>
+              Enter your admin secret to access observability features. This is stored in your browser's localStorage.
+            </p>
+            <input
+              type="password"
+              className="rl-input"
+              placeholder="Enter admin secret..."
+              value={secretInput}
+              onChange={(e) => setSecretInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && secretInput && saveAdminSecret()}
+              autoFocus
+            />
+            <div style={{ marginTop: 16, display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => setShowSecretModal(false)} className="ghost-button">
+                Cancel
+              </button>
+              <button onClick={saveAdminSecret} disabled={!secretInput} className="primary-button">
+                Save Secret
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
         <div>
-          <h3 style={{ fontSize: 16, fontWeight: 700 }}>Ingestion Status</h3>
+          <h3 style={{ fontSize: 16, fontWeight: 700 }}>Ingestion Observability</h3>
           <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-            Monitor and control job ingestion from all sources.
+            Monitor job ingestion runs, source health, and execution history.
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
+          {adminSecret && (
+            <button
+              onClick={clearAdminSecret}
+              className="ghost-button"
+              title="Clear stored admin secret"
+              style={{ fontSize: 11, padding: '6px 10px' }}
+            >
+              🔑 Reset Secret
+            </button>
+          )}
+          {!adminSecret && (
+            <button
+              onClick={() => setShowSecretModal(true)}
+              className="ghost-button"
+              style={{ fontSize: 11, padding: '6px 10px' }}
+            >
+              🔑 Set Secret
+            </button>
+          )}
           <button onClick={fetchData} className="ghost-button" disabled={loading}>
-            Refresh
+            {loading ? 'Refreshing...' : 'Refresh'}
           </button>
-          <button onClick={runAllIngestion} className="primary-button" disabled={runningAll}>
+          <button onClick={runAllIngestion} className="primary-button" disabled={runningAll || !adminSecret}>
             {runningAll ? '⏳ Running...' : '▶ Run All Ingestion'}
           </button>
         </div>
       </div>
+
+      {error && (
+        <div style={{ padding: 12, background: 'var(--surface-error)', borderRadius: 8, color: 'var(--color-error)', fontSize: 13 }}>
+          {error}
+        </div>
+      )}
+
+      {/* Latest Run Summary */}
+      {healthData?.latestRun && (
+        <div className="surface-card">
+          <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16 }}>Latest Run</h4>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+            <div>
+              <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>Status</div>
+              <span className="rl-badge" style={{
+                fontSize: 12,
+                background: healthData.latestRun.status === 'success' ? 'var(--surface-success)' :
+                  healthData.latestRun.status === 'partial' ? 'var(--surface-warning)' : 'var(--surface-error)',
+                color: healthData.latestRun.status === 'success' ? 'var(--color-success)' :
+                  healthData.latestRun.status === 'partial' ? 'var(--color-warning)' : 'var(--color-error)',
+              }}>
+                {healthData.latestRun.status.toUpperCase()}
+              </span>
+            </div>
+            <div>
+              <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>Triggered By</div>
+              <div style={{ fontSize: 14, fontWeight: 500 }}>{healthData.latestRun.triggered_by}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>Started</div>
+              <div style={{ fontSize: 13 }}>{new Date(healthData.latestRun.started_at).toLocaleString()}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>Inserted</div>
+              <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--color-success)' }}>{healthData.latestRun.total_inserted}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>Duplicates</div>
+              <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-secondary)' }}>{healthData.latestRun.total_duplicates}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>Failed Sources</div>
+              <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--color-error)' }}>{healthData.latestRun.total_failed_sources}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Source Health */}
+      {healthData?.sourceHealth && healthData.sourceHealth.length > 0 && (
+        <div className="surface-card">
+          <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16 }}>Source Health</h4>
+          <div style={{ overflow: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+              <thead style={{ background: 'var(--surface-hover)', borderBottom: '1px solid var(--border-subtle)' }}>
+                <tr>
+                  <th style={{ padding: '8px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>Source</th>
+                  <th style={{ padding: '8px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>Status</th>
+                  <th style={{ padding: '8px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>Last Run</th>
+                  <th style={{ padding: '8px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>Last Success</th>
+                  <th style={{ padding: '8px 12px', textAlign: 'right', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>Inserted</th>
+                  <th style={{ padding: '8px 12px', textAlign: 'right', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>Failures</th>
+                  <th style={{ padding: '8px 12px', textAlign: 'center', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {healthData.sourceHealth.map((health: any) => (
+                  <tr key={health.source} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                    <td style={{ padding: '8px 12px' }}>
+                      <code style={{ fontSize: 12, background: 'var(--surface-hover)', padding: '2px 6px', borderRadius: 4 }}>
+                        {health.source}
+                      </code>
+                    </td>
+                    <td style={{ padding: '8px 12px' }}>
+                      <span style={{
+                        fontSize: 11,
+                        color: health.is_degraded ? 'var(--color-error)' : 'var(--color-success)',
+                        fontWeight: 600,
+                      }}>
+                        {health.is_degraded ? '⚠️ Degraded' : '✓ Healthy'}
+                      </span>
+                    </td>
+                    <td style={{ padding: '8px 12px', fontSize: 12, color: 'var(--text-secondary)' }}>
+                      {health.last_run_at ? new Date(health.last_run_at).toLocaleString() : '—'}
+                    </td>
+                    <td style={{ padding: '8px 12px', fontSize: 12, color: 'var(--text-secondary)' }}>
+                      {health.last_success_at ? new Date(health.last_success_at).toLocaleString() : '—'}
+                    </td>
+                    <td style={{ padding: '8px 12px', textAlign: 'right', fontWeight: 600 }}>
+                      {health.last_counts?.inserted || 0}
+                    </td>
+                    <td style={{ padding: '8px 12px', textAlign: 'right' }}>
+                      <span style={{ color: health.consecutive_failures > 0 ? 'var(--color-error)' : 'var(--text-secondary)' }}>
+                        {health.consecutive_failures || 0}
+                      </span>
+                    </td>
+                    <td style={{ padding: '8px 12px', textAlign: 'center' }}>
+                      <button
+                        onClick={() => runSourceIngestion(health.source)}
+                        disabled={runningSource === health.source}
+                        className="ghost-button"
+                        style={{ padding: '4px 8px', fontSize: 11 }}
+                      >
+                        {runningSource === health.source ? '⏳' : '▶'} Run
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Recent Runs */}
+      {healthData?.recentRuns && healthData.recentRuns.length > 0 && (
+        <div className="surface-card">
+          <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16 }}>Recent Runs (Last 20)</h4>
+          <div style={{ overflow: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+              <thead style={{ background: 'var(--surface-hover)', borderBottom: '1px solid var(--border-subtle)' }}>
+                <tr>
+                  <th style={{ padding: '8px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>Started</th>
+                  <th style={{ padding: '8px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>Status</th>
+                  <th style={{ padding: '8px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>Trigger</th>
+                  <th style={{ padding: '8px 12px', textAlign: 'right', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>Normalized</th>
+                  <th style={{ padding: '8px 12px', textAlign: 'right', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>Inserted</th>
+                  <th style={{ padding: '8px 12px', textAlign: 'right', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>Dupes</th>
+                  <th style={{ padding: '8px 12px', textAlign: 'right', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>Failed</th>
+                </tr>
+              </thead>
+              <tbody>
+                {healthData.recentRuns.map((run: any) => (
+                  <tr key={run.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                    <td style={{ padding: '8px 12px', fontSize: 12, color: 'var(--text-secondary)' }}>
+                      {new Date(run.started_at).toLocaleString()}
+                    </td>
+                    <td style={{ padding: '8px 12px' }}>
+                      <span className="rl-badge" style={{
+                        fontSize: 11,
+                        background: run.status === 'success' ? 'var(--surface-success)' :
+                          run.status === 'partial' ? 'var(--surface-warning)' :
+                            run.status === 'running' ? 'var(--surface-info)' : 'var(--surface-error)',
+                        color: run.status === 'success' ? 'var(--color-success)' :
+                          run.status === 'partial' ? 'var(--color-warning)' :
+                            run.status === 'running' ? 'var(--color-info)' : 'var(--color-error)',
+                      }}>
+                        {run.status}
+                      </span>
+                    </td>
+                    <td style={{ padding: '8px 12px', fontSize: 12 }}>{run.triggered_by}</td>
+                    <td style={{ padding: '8px 12px', textAlign: 'right', fontSize: 12 }}>{run.total_normalized}</td>
+                    <td style={{ padding: '8px 12px', textAlign: 'right', fontWeight: 600, color: 'var(--color-success)' }}>{run.total_inserted}</td>
+                    <td style={{ padding: '8px 12px', textAlign: 'right', color: 'var(--text-secondary)', fontSize: 12 }}>{run.total_duplicates}</td>
+                    <td style={{ padding: '8px 12px', textAlign: 'right', color: run.total_failed_sources > 0 ? 'var(--color-error)' : 'var(--text-secondary)', fontSize: 12 }}>
+                      {run.total_failed_sources}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Stats Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
@@ -1115,75 +1412,9 @@ function IngestionTab() {
           <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Active Sources</div>
         </div>
         <div className="surface-card" style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--text)' }}>{loading ? '...' : ingestionState.length}</div>
-          <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Sources Tracked</div>
+          <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--text)' }}>{loading ? '...' : (healthData?.sourceHealth?.length || 0)}</div>
+          <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Monitored Sources</div>
         </div>
-      </div>
-
-      {/* Jobs by Source */}
-      <div className="surface-card">
-        <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16 }}>Jobs by Source</h4>
-        {loading ? (
-          <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-secondary)' }}>Loading...</div>
-        ) : Object.keys(jobCounts).length === 0 ? (
-          <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-secondary)' }}>No jobs indexed yet.</div>
-        ) : (
-          <div style={{ display: 'grid', gap: 8 }}>
-            {Object.entries(jobCounts)
-              .sort((a, b) => b[1] - a[1])
-              .map(([source, count]) => (
-                <div key={source} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', background: 'var(--surface-hover)', borderRadius: 6 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <code style={{ fontSize: 12, background: 'var(--surface-card)', padding: '2px 6px', borderRadius: 4 }}>{source}</code>
-                    <span style={{ fontSize: 14, fontWeight: 500 }}>{count.toLocaleString()} jobs</span>
-                  </div>
-                  <button
-                    onClick={() => runSourceIngestion(source)}
-                    disabled={runningSource === source}
-                    className="ghost-button"
-                    style={{ padding: '4px 8px', fontSize: 11 }}
-                  >
-                    {runningSource === source ? '⏳' : '▶'} Ingest
-                  </button>
-                </div>
-              ))}
-          </div>
-        )}
-      </div>
-
-      {/* Ingestion State */}
-      <div className="surface-card">
-        <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16 }}>Ingestion State</h4>
-        {loading ? (
-          <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-secondary)' }}>Loading...</div>
-        ) : ingestionState.length === 0 ? (
-          <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-secondary)' }}>No ingestion state recorded yet.</div>
-        ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                <th style={{ padding: '8px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>Source</th>
-                <th style={{ padding: '8px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>Last Run</th>
-                <th style={{ padding: '8px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>Cursor</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ingestionState.map((state, i) => (
-                <tr key={i} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                  <td style={{ padding: '8px 12px' }}>
-                    <code style={{ fontSize: 12 }}>{state.source}</code>
-                  </td>
-                  <td style={{ padding: '8px 12px', fontSize: 12, color: 'var(--text-secondary)' }}>
-                    {state.last_run_at ? new Date(state.last_run_at).toLocaleString() : '—'}
-                  </td>
-                  <td style={{ padding: '8px 12px', fontSize: 11, color: 'var(--text-secondary)', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {state.cursor ? JSON.stringify(state.cursor) : '—'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
       </div>
     </div>
   )

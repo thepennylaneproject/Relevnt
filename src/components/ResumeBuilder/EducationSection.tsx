@@ -11,7 +11,7 @@ interface EducationSectionProps {
   id: string
   items: ResumeEducationItem[]
   onChange: (items: ResumeEducationItem[]) => void
-  colors: RelevntColors
+  colors?: RelevntColors
 }
 
 export const EducationSection: React.FC<EducationSectionProps> = ({
@@ -52,7 +52,6 @@ export const EducationSection: React.FC<EducationSectionProps> = ({
       title="Education"
       description="Formal education, bootcamps, and high impact training."
       icon={<GraduationCap className="w-4 h-4 text-[#1F2933]" />}
-      colors={colors}
     >
       <div className="space-y-4">
         {items.map((item, index) => (

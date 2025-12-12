@@ -142,7 +142,7 @@ export const useResumeBuilder = (
     setError(null)
 
     const payload = {
-      parsed_fields: draft,
+      parsed_fields: draft as any,
     }
 
     const { error: upsertError } = await supabaseClient

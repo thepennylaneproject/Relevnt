@@ -23,13 +23,13 @@ export type EventName =
   | 'login'
   | 'logout'
   | 'password_reset'
-  
+
   // Onboarding events
   | 'onboarding_started'
   | 'onboarding_completed'
   | 'first_resume_upload'
   | 'first_analysis'
-  
+
   // Product events
   | 'analysis_run'
   | 'analysis_limit_reached'
@@ -40,7 +40,8 @@ export type EventName =
   | 'job_saved'
   | 'job_applied'
   | 'application_tracked'
-  
+  | 'persona_switched'
+
   // Marketing & upgrade events
   | 'upgrade_prompt_viewed'
   | 'upgrade_clicked'
@@ -52,7 +53,7 @@ export type EventName =
   | 'promo_applied'
   | 'promo_expired'
   | 'reactivation_triggered'
-  
+
   // Error events
   | 'error_occurred'
   | 'api_call_failed';
@@ -239,33 +240,33 @@ export const conversionFunnelEvents = {
   // Starter → Pro
   starterAnalysisLimitReached: (analysisCount: number) =>
     trackEvent('analysis_limit_reached', { analysis_count: analysisCount }),
-  
+
   starterUpgradePromptViewed: () =>
     trackEvent('upgrade_prompt_viewed', { from_tier: 'starter', to_tier: 'pro' }),
-  
+
   starterUpgradeClicked: () =>
     trackEvent('upgrade_clicked', { from_tier: 'starter', to_tier: 'pro' }),
-  
+
   starterUpgraded: () =>
     trackEvent('tier_upgraded', { from_tier: 'starter', to_tier: 'pro' }),
 
   // Pro → Premium
   proUpgradePromptViewed: () =>
     trackEvent('upgrade_prompt_viewed', { from_tier: 'pro', to_tier: 'premium' }),
-  
+
   proUpgradeClicked: () =>
     trackEvent('upgrade_clicked', { from_tier: 'pro', to_tier: 'premium' }),
-  
+
   proUpgraded: () =>
     trackEvent('tier_upgraded', { from_tier: 'pro', to_tier: 'premium' }),
 
   // Promo events
   eduPromoApplied: (duration_days: number) =>
     trackEvent('promo_applied', { promo_type: 'edu', duration_days }),
-  
+
   eduPromoExpired: () =>
     trackEvent('promo_expired', { promo_type: 'edu' }),
-  
+
   reactivationTriggered: (days_since_churn: number) =>
     trackEvent('reactivation_triggered', { days_since_churn }),
 };
@@ -276,18 +277,25 @@ export const conversionFunnelEvents = {
 export const productEvents = {
   resumeAnalyzed: (duration_ms: number, modelUsed: string) =>
     trackEvent('analysis_run', { feature: 'resume_analysis', duration_ms, model: modelUsed }),
-  
+
   jobMatched: (matchScore: number, sourceId: string) =>
     trackEvent('job_searched', { match_score: matchScore, source: sourceId }),
-  
+
   interviewPrepStarted: (jobTitle: string) =>
     trackEvent('interview_prep_started', { job_title: jobTitle }),
-  
+
   skillGapViewed: (skillsMissing: number) =>
     trackEvent('skill_gap_viewed', { skills_missing: skillsMissing }),
-  
+
   applicationTracked: (sourceId: string, matchScore: number) =>
     trackEvent('application_tracked', { source: sourceId, match_score: matchScore }),
+
+  personaSwitched: (fromPersonaId: string | null, toPersonaId: string, toPersonaName: string) =>
+    trackEvent('persona_switched', {
+      from_persona_id: fromPersonaId,
+      to_persona_id: toPersonaId,
+      to_persona_name: toPersonaName
+    }),
 };
 
 // Retry queued events when app regains connection

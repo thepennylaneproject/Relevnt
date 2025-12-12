@@ -10,7 +10,7 @@ interface CertificationsSectionProps {
   id: string
   items: ResumeCertificationItem[]
   onChange: (items: ResumeCertificationItem[]) => void
-  colors: RelevntColors
+  colors?: RelevntColors
 }
 
 export const CertificationsSection: React.FC<CertificationsSectionProps> = ({
@@ -53,7 +53,6 @@ export const CertificationsSection: React.FC<CertificationsSectionProps> = ({
       title="Certifications"
       description="License, certs, and credentials that move the needle."
       icon={<Award className="w-4 h-4 text-[#1F2933]" />}
-      colors={colors}
     >
       <div className="space-y-4">
         {items.map((item, index) => (

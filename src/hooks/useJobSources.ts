@@ -3,26 +3,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 
 // Shape taken from your job_sources table
-export interface JobSource {
-  id: string
-  name: string
-  source_key: string
-  api_url: string | null
-  active: boolean | null
-  last_fetch: string | null
-  rate_limit_per_minute: number | null
-  created_at: string | null
-  updated_at: string | null
-  slug: string | null
-  website: string | null
-  mode: string | null               // 'rss' | 'api' but string is fine for now
-  api_key_required: boolean | null
-  api_key: string | null
-  update_frequency: string | null    // e.g. 'daily'
-  enabled: boolean | null
-  last_sync: string | null
-  last_error: string | null
-}
+import { Database } from '../lib/database.types'
+export type JobSource = Database['public']['Tables']['job_sources']['Row']
 
 interface UseJobSourcesReturn {
   sources: JobSource[]

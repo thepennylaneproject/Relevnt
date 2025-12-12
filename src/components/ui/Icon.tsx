@@ -42,7 +42,8 @@ export type IconName =
   | 'anchor'
   | 'check'
   | 'search'
-  | 'alert-triangle';
+  | 'alert-triangle'
+  | 'plus';
 
 export type IconSize = 'sm' | 'md' | 'lg' | 'xl' | 'hero';
 
@@ -349,6 +350,13 @@ const iconDefinitions: Record<IconName, IconDefinition> = {
       'M32 22v16M32 46v2',
     ],
     dotPosition: { cx: 32, cy: 16 },
+  },
+
+  plus: {
+    paths: [
+      'M32 12v40M12 32h40',
+    ],
+    dotPosition: { cx: 32, cy: 32 },
   },
 };
 

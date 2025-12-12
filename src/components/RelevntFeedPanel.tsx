@@ -1,7 +1,6 @@
-// src/components/RelevntFeedPanel.tsx
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import useMatchJobs from '../hooks/useMatchJobs'
-import useCareerTracks from '../hooks/useCareerTracks'
+import { usePersonas } from '../hooks/usePersonas'
 import type { MatchJobsResult } from '../hooks/useMatchJobs'
 
 type JobLike = {
@@ -17,11 +16,9 @@ type JobLike = {
 }
 
 export function RelevntFeedPanel() {
-  const { tracks, loading: tracksLoading } = useCareerTracks()
+  const { activePersona, loading: personasLoading } = usePersonas()
   const { matches, loading: feedLoading, error: feedError, runMatchJobs } =
     useMatchJobs()
-
-  const [activeTrackId, setActiveTrackId] = useState<string | null>(null)
 
   const [minScore, setMinScore] = useState(50)
   const [minSalary, setMinSalary] = useState(0)
@@ -30,27 +27,21 @@ export function RelevntFeedPanel() {
   const [selectedMatch, setSelectedMatch] = useState<MatchJobsResult | null>(null)
   const [showWhyModal, setShowWhyModal] = useState(false)
 
-  // pick a default track when tracks load
+  // run matching whenever active persona changes
   useEffect(() => {
-    if (!activeTrackId && tracks.length > 0) {
-      const defaultTrack =
-        tracks.find((t) => t.is_default) || tracks[0]
-      setActiveTrackId(defaultTrack.id)
+    if (activePersona) {
+      runMatchJobs(null, activePersona.id)
+    } else {
+      // no active persona, maybe fallback or clear
+      // runMatchJobs(null, null) 
+      // Actually, if we want a "default" feed even without persona?
+      // For now, let's try to match with generic profile if permitted, 
+      // but requirement says "Ensure active persona ID flows into hook".
+      // If no persona, maybe we don't match or match generally?
+      // Let's match generally if no persona.
+      runMatchJobs(null, null)
     }
-  }, [tracks, activeTrackId])
-
-  // run matching whenever active track changes
-  useEffect(() => {
-    if (!activeTrackId && tracks.length === 0) {
-      // no tracks, still want a generic feed
-      runMatchJobs(null)
-      return
-    }
-
-    if (activeTrackId) {
-      runMatchJobs(activeTrackId)
-    }
-  }, [activeTrackId, tracks.length, runMatchJobs])
+  }, [activePersona, runMatchJobs])
 
   const filteredMatches = useMemo(() => {
     return matches.filter((m: MatchJobsResult) => {
@@ -85,37 +76,18 @@ export function RelevntFeedPanel() {
       <div className="feed-stack">
         {/* top controls: track selector + explainer */}
         <div className="surface-card feed-controls">
-          <div className="feed-track-selector">
-            <label className="section-label">Career focus</label>
-            {tracksLoading ? (
-              <div className="muted text-sm">
-                Loading tracks…
-              </div>
-            ) : tracks.length === 0 ? (
-              <div className="muted text-sm">
-                You have not created tracks yet. This feed is using your general
-                profile and resume.
-              </div>
-            ) : (
-              <select
-                value={activeTrackId ?? ''}
-                onChange={(e) =>
-                  setActiveTrackId(e.target.value || null)
-                }
-                className="input-pill"
-              >
-                {tracks.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name}
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
-
           <div className="feed-explainer muted text-xs">
-            Relevnt uses this focus area, your resume, and current market data to
-            score and explain which roles are worth your energy first.
+            {activePersona ? (
+              <>
+                Showing matches for <strong>{activePersona.name}</strong>. Relevnt uses this
+                persona's preferences, your resume, and market data to score roles.
+              </>
+            ) : (
+              <>
+                Select a persona above to see targeted matches. Currently showing general
+                recommendations based on your profile.
+              </>
+            )}
           </div>
         </div>
 

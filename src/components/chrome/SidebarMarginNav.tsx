@@ -10,6 +10,7 @@ const NAV_ITEMS: Array<{ path: string; label: string; icon: IconName }> = [
   { path: '/applications', label: copy.nav.applications, icon: 'paper-airplane' },
   { path: '/resumes', label: copy.nav.resumes, icon: 'scroll' },
   { path: '/learn', label: copy.nav.learn, icon: 'book' },
+  { path: '/personas', label: copy.nav.personas, icon: 'lighthouse' },
   { path: '/voice', label: copy.nav.voice, icon: 'microphone' },
   { path: '/settings', label: copy.nav.settings, icon: 'pocket-watch' },
 ]
@@ -20,6 +21,7 @@ const DOODLES: Record<string, string> = {
   '/applications': '/doodles/sidebar-notebook.svg',
   '/resumes': '/doodles/sidebar-tools.svg',
   '/learn': '/doodles/sidebar-wanderer.svg',
+  '/personas': '/doodles/sidebar-lighthouse.svg',
   '/voice': '/doodles/sidebar-notes.svg',
   '/settings': '/doodles/sidebar-phoenix.svg',
 }

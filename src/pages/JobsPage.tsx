@@ -16,6 +16,9 @@ import { Icon } from '../components/ui/Icon'
 import { EmptyState } from '../components/ui/EmptyState'
 import { copy } from '../lib/copy'
 import type { JobRow } from '../shared/types'
+import { PersonaSwitcher } from '../components/personas/PersonaSwitcher'
+import { usePersonas } from '../hooks/usePersonas'
+import { RelevanceTuner } from '../components/personas/RelevanceTuner'
 
 type JobSourceRow = {
   id: string
@@ -46,6 +49,7 @@ const PAGE_SIZE = 50
 export default function JobsPage() {
   const [activeTab, setActiveTab] = useState<'feed' | 'browse'>('feed')
   const { user } = useAuth()
+  const { activePersona } = usePersonas()
 
   // browse side (jobs list from Supabase)
   const [jobs, setJobs] = useState<JobRow[]>([])
@@ -109,19 +113,36 @@ export default function JobsPage() {
         .order('posted_date', { ascending: false, nullsFirst: false })
         .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1)
 
-      if (search.trim()) {
-        const term = `%${search.trim()}%`
+      // Persona-based filtering: augment search with persona keywords if search is empty
+      let effectiveSearch = search.trim()
+      if (!effectiveSearch && activePersona?.preferences?.job_title_keywords?.length) {
+        // Use first keyword from persona as default search
+        effectiveSearch = activePersona.preferences.job_title_keywords[0]
+      }
+
+      if (effectiveSearch) {
+        const term = `%${effectiveSearch}%`
         query = query.or(
           `title.ilike.${term},company.ilike.${term},location.ilike.${term}`
         )
       }
 
-      if (locationFilter.trim()) {
-        const loc = `%${locationFilter.trim()}%`
+      // Persona-based location filtering
+      let effectiveLocation = locationFilter.trim()
+      if (!effectiveLocation && activePersona?.preferences?.locations?.length) {
+        effectiveLocation = activePersona.preferences.locations[0]
+      }
+
+      if (effectiveLocation) {
+        const loc = `%${effectiveLocation}%`
         query = query.ilike('location', loc)
       }
 
-      if (remoteOnlyBrowse) {
+      // Persona-based remote filtering
+      const shouldFilterRemote = remoteOnlyBrowse ||
+        (!remoteOnlyBrowse && activePersona?.preferences?.remote_preference === 'remote')
+
+      if (shouldFilterRemote) {
         query = query.or('remote_type.eq.remote,location.ilike.%Remote%')
       }
 
@@ -163,8 +184,13 @@ export default function JobsPage() {
         query = query.gte('posted_date', isoDate)
       }
 
-      if (minSalaryBrowse > 0) {
-        query = query.gte('salary_max', minSalaryBrowse)
+      // Persona-based minimum salary filtering
+      const effectiveMinSalary = minSalaryBrowse > 0
+        ? minSalaryBrowse
+        : (activePersona?.preferences?.min_salary || 0)
+
+      if (effectiveMinSalary > 0) {
+        query = query.gte('salary_max', effectiveMinSalary)
       }
 
       const { data, error } = await query
@@ -199,6 +225,7 @@ export default function JobsPage() {
     postedSince,
     minSalaryBrowse,
     page,
+    activePersona,
   ])
 
   // saved jobs for current user
@@ -331,6 +358,24 @@ export default function JobsPage() {
   }, [loadSavedJobs])
 
   const renderFeedTab = () => {
+    if (!activePersona) {
+      return (
+        <div className="jobs-section-stack">
+          <section className="surface-card jobs-context">
+            <div className="jobs-context-main">
+              <Icon name="compass" size="md" />
+              <div>
+                <h2 className="text-sm font-medium">No Active Persona</h2>
+                <p className="muted text-xs">
+                  Please select or create a persona using the switcher above to see your personalized feed.
+                </p>
+              </div>
+            </div>
+          </section>
+        </div>
+      )
+    }
+
     return (
       <div className="jobs-section-stack">
         <section className="surface-card jobs-context">
@@ -339,27 +384,49 @@ export default function JobsPage() {
             <div>
               <h2 className="text-sm font-medium">{copy.jobs.tabs.feed}</h2>
               <p className="muted text-xs">
-                This feed uses your profile, resume, and salary floor to highlight roles worth your
-                energy first.
+                Jobs ranked by AI using your {activePersona.name} persona preferences.
+                Adjust the weights below to fine-tune your results.
               </p>
             </div>
           </div>
         </section>
-        <RelevntFeedPanel />
+
+        {/* Relevance Tuner */}
+        <RelevanceTuner onWeightsChange={(_weights) => {
+          // When weights change, the useMatchedJobs hook will automatically refetch
+          // For now, we'll rely on the state in the component itself
+          // Future: Could trigger an explicit refetch here
+        }} />
+
+        {/* Job Feed */}
+        <div className="jobs-feed-container">
+          <RelevntFeedPanel />
+        </div>
       </div>
     )
   }
 
   const renderBrowseTab = () => {
+    const hasPersonaFilters = activePersona?.preferences && (
+      activePersona.preferences.job_title_keywords?.length > 0 ||
+      activePersona.preferences.locations?.length > 0 ||
+      activePersona.preferences.remote_preference === 'remote' ||
+      activePersona.preferences.min_salary
+    )
+
     return (
       <div className="jobs-section-stack">
         <section className="surface-card jobs-context jobs-context-browse">
           <div className="jobs-context-main">
             <Filter className="w-5 h-5 text-graphite" aria-hidden="true" />
             <div>
-              <h2 className="text-sm font-medium">Browsing all roles</h2>
+              <h2 className="text-sm font-medium">
+                {hasPersonaFilters && activePersona ? `Browsing as ${activePersona.name}` : 'Browsing all roles'}
+              </h2>
               <p className="muted text-xs">
-                The full stream from every source. Keep filters tight to stay focused.
+                {hasPersonaFilters
+                  ? 'Jobs are filtered based on your persona preferences. Manual filters will override these defaults.'
+                  : 'The full stream from every source. Keep filters tight to stay focused.'}
               </p>
             </div>
           </div>
@@ -662,28 +729,43 @@ export default function JobsPage() {
                 <p className="muted">
                   Relevnt ranks roles by your skills, preferences, and salary floor so you can spend
                   energy where it counts.
+                  {activePersona ? (
+                    <span>
+                      {' '}
+                      Viewing as <strong>{activePersona.name}</strong>.
+                    </span>
+                  ) : null}
                 </p>
               </div>
             </div>
 
             <div className="hero-actions-accent">
               <div className="hero-actions-primary">
-                <div className="jobs-tabs">
-                  <button
-                    type="button"
-                    className={`jobs-tab ${activeTab === 'feed' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('feed')}
-                  >
-                    Relevnt Feed
-                  </button>
-                  <button
-                    type="button"
-                    className={`jobs-tab ${activeTab === 'browse' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('browse')}
-                  >
-                    All jobs
-                  </button>
-                </div>
+                <PersonaSwitcher />
+              </div>
+            </div>
+
+            {/* <div className="hero-actions-accent">
+              <div className="hero-actions-primary">
+                <div className="jobs-tabs">...</div>
+            </div> */ }
+
+            <div className="jobs-tabs-container" style={{ marginTop: '24px' }}>
+              <div className="jobs-tabs">
+                <button
+                  type="button"
+                  className={`jobs-tab ${activeTab === 'feed' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('feed')}
+                >
+                  Relevnt Feed
+                </button>
+                <button
+                  type="button"
+                  className={`jobs-tab ${activeTab === 'browse' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('browse')}
+                >
+                  All jobs
+                </button>
               </div>
             </div>
           </section>

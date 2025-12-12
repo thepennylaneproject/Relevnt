@@ -18,6 +18,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useAuth } from './useAuth'
 import { supabase } from '../lib/supabase'
+import { productEvents } from '../services/analytics.service'
 import type {
     UserPersona,
     CreatePersonaInput,
@@ -262,6 +263,10 @@ export function usePersonas(): UsePersonasReturn {
             throw new Error('Not authenticated')
         }
 
+        // Track which persona we're switching from
+        const previousActivePersona = personas.find(p => p.is_active)
+        const targetPersona = personas.find(p => p.id === id)
+
         // Optimistic update
         setPersonas(prev => prev.map(p => ({
             ...p,
@@ -272,6 +277,15 @@ export function usePersonas(): UsePersonasReturn {
             setError(null)
 
             await apiRequest('POST', `/personas?id=${id}&action=set-active`)
+
+            // Track analytics event
+            if (targetPersona) {
+                productEvents.personaSwitched(
+                    previousActivePersona?.id || null,
+                    targetPersona.id,
+                    targetPersona.name
+                )
+            }
         } catch (err) {
             const message = err instanceof Error ? err.message : 'Failed to set active persona'
             console.error('Error setting active persona:', err)
@@ -280,7 +294,7 @@ export function usePersonas(): UsePersonasReturn {
             await fetchPersonas()
             throw err
         }
-    }, [userId, fetchPersonas])
+    }, [userId, personas, fetchPersonas])
 
     // ---------------------------------------------------------------------------
     // RETURN

@@ -18,19 +18,19 @@ export const ResumePreview: React.FC<Props> = ({ draft }) => {
 
   if (!hasAnyContent) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>
-        <p style={{ fontSize: 14, margin: 0 }}>Your resume layout will appear here as you fill in each section.</p>
+      <div className="resume-preview__empty">
+        <p className="resume-preview__empty-text">Your resume layout will appear here as you fill in each section.</p>
       </div>
     )
   }
 
   return (
-    <div style={{ padding: 24, backgroundColor: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13, lineHeight: 1.6, color: 'var(--text)' }}>
+    <div className="resume-preview">
       {/* Contact */}
       {draft.contact.fullName && (
-        <div style={{ marginBottom: 20, textAlign: 'center' }}>
-          <h2 style={{ fontSize: 20, fontWeight: 600, margin: '0 0 4px', color: 'var(--text)' }}>{draft.contact.fullName}</h2>
-          <div style={{ fontSize: 12, color: 'var(--text-muted)', display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
+        <div className="resume-preview__header">
+          <h2 className="resume-preview__name">{draft.contact.fullName}</h2>
+          <div className="resume-preview__contact-row">
             {draft.contact.email && <span>{draft.contact.email}</span>}
             {draft.contact.phone && <span>{draft.contact.phone}</span>}
             {draft.contact.location && <span>{draft.contact.location}</span>}
@@ -40,26 +40,26 @@ export const ResumePreview: React.FC<Props> = ({ draft }) => {
 
       {/* Summary */}
       {draft.summary.summary && (
-        <div style={{ marginBottom: 20 }}>
-          <h3 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 8px', color: 'var(--text)', borderBottom: '1px solid var(--border)', paddingBottom: 4 }}>Summary</h3>
-          <p style={{ margin: 0, fontSize: 12, lineHeight: 1.5 }}>{draft.summary.summary}</p>
+        <div className="resume-preview__section">
+          <h3 className="resume-preview__section-title">Summary</h3>
+          <p className="resume-preview__summary-text">{draft.summary.summary}</p>
         </div>
       )}
 
       {/* Experience */}
       {draft.experience.length > 0 && (
-        <div style={{ marginBottom: 20 }}>
-          <h3 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 8px', color: 'var(--text)', borderBottom: '1px solid var(--border)', paddingBottom: 4 }}>Experience</h3>
+        <div className="resume-preview__section">
+          <h3 className="resume-preview__section-title">Experience</h3>
           {draft.experience.map((exp: any, idx: number) => (
-            <div key={idx} style={{ marginBottom: 12 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
-                <strong style={{ fontSize: 13 }}>{exp.title || 'Position'}</strong>
-                <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+            <div key={idx} className="resume-preview__item">
+              <div className="resume-preview__item-header">
+                <strong className="resume-preview__item-title">{exp.title || 'Position'}</strong>
+                <span className="resume-preview__item-date">
                   {exp.startDate} - {exp.endDate || 'Present'}
                 </span>
               </div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>{exp.company}</div>
-              {exp.description && <p style={{ margin: 0, fontSize: 12, lineHeight: 1.5 }}>{exp.description}</p>}
+              <div className="resume-preview__item-subtitle">{exp.company}</div>
+              {exp.bullets && <p className="resume-preview__item-description">{exp.bullets}</p>}
             </div>
           ))}
         </div>
@@ -67,17 +67,17 @@ export const ResumePreview: React.FC<Props> = ({ draft }) => {
 
       {/* Education */}
       {draft.education.length > 0 && (
-        <div style={{ marginBottom: 20 }}>
-          <h3 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 8px', color: 'var(--text)', borderBottom: '1px solid var(--border)', paddingBottom: 4 }}>Education</h3>
+        <div className="resume-preview__section">
+          <h3 className="resume-preview__section-title">Education</h3>
           {draft.education.map((edu: any, idx: number) => (
-            <div key={idx} style={{ marginBottom: 12 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
-                <strong style={{ fontSize: 13 }}>{edu.degree || 'Degree'}</strong>
-                <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                  {edu.graduationDate}
+            <div key={idx} className="resume-preview__item">
+              <div className="resume-preview__item-header">
+                <strong className="resume-preview__item-title">{edu.degree || 'Degree'}</strong>
+                <span className="resume-preview__item-date">
+                  {edu.endDate || edu.graduationDate}
                 </span>
               </div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{edu.school}</div>
+              <div className="resume-preview__item-subtitle">{edu.institution || edu.school}</div>
             </div>
           ))}
         </div>
@@ -85,12 +85,12 @@ export const ResumePreview: React.FC<Props> = ({ draft }) => {
 
       {/* Skills */}
       {draft.skillGroups.length > 0 && (
-        <div style={{ marginBottom: 20 }}>
-          <h3 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 8px', color: 'var(--text)', borderBottom: '1px solid var(--border)', paddingBottom: 4 }}>Skills</h3>
+        <div className="resume-preview__section">
+          <h3 className="resume-preview__section-title">Skills</h3>
           {draft.skillGroups.map((group: any, idx: number) => (
-            <div key={idx} style={{ marginBottom: 8 }}>
-              {group.category && <strong style={{ fontSize: 12 }}>{group.category}: </strong>}
-              <span style={{ fontSize: 12 }}>{group.skills?.join(', ')}</span>
+            <div key={idx} className="resume-preview__skill-group">
+              {group.label && <strong className="resume-preview__skill-category">{group.label}: </strong>}
+              <span className="resume-preview__skill-list">{group.skills?.join(', ')}</span>
             </div>
           ))}
         </div>
@@ -98,11 +98,13 @@ export const ResumePreview: React.FC<Props> = ({ draft }) => {
 
       {/* Certifications */}
       {draft.certifications.length > 0 && (
-        <div style={{ marginBottom: 20 }}>
-          <h3 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 8px', color: 'var(--text)', borderBottom: '1px solid var(--border)', paddingBottom: 4 }}>Certifications</h3>
+        <div className="resume-preview__section">
+          <h3 className="resume-preview__section-title">Certifications</h3>
           {draft.certifications.map((cert: any, idx: number) => (
-            <div key={idx} style={{ marginBottom: 8, fontSize: 12 }}>
-              <strong>{cert.name}</strong> - {cert.issuer} ({cert.date})
+            <div key={idx} className="resume-preview__cert-item">
+              <span className="resume-preview__cert-name">{cert.name}</span>
+              {cert.issuer && <> - {cert.issuer}</>}
+              {cert.year && <> ({cert.year})</>}
             </div>
           ))}
         </div>
@@ -110,12 +112,12 @@ export const ResumePreview: React.FC<Props> = ({ draft }) => {
 
       {/* Projects */}
       {draft.projects.length > 0 && (
-        <div style={{ marginBottom: 20 }}>
-          <h3 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 8px', color: 'var(--text)', borderBottom: '1px solid var(--border)', paddingBottom: 4 }}>Projects</h3>
+        <div className="resume-preview__section">
+          <h3 className="resume-preview__section-title">Projects</h3>
           {draft.projects.map((proj: any, idx: number) => (
-            <div key={idx} style={{ marginBottom: 12 }}>
-              <strong style={{ fontSize: 13 }}>{proj.name || 'Project'}</strong>
-              {proj.description && <p style={{ margin: '4px 0 0', fontSize: 12, lineHeight: 1.5 }}>{proj.description}</p>}
+            <div key={idx} className="resume-preview__item">
+              <strong className="resume-preview__item-title">{proj.name || 'Project'}</strong>
+              {proj.description && <p className="resume-preview__item-description">{proj.description}</p>}
             </div>
           ))}
         </div>

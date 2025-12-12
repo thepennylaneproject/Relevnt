@@ -273,8 +273,8 @@ export function useApplications(options: UseApplicationsOptions = {}): UseApplic
       const payload = {
         user_id: user.id,
         job_id: jobId,
-        company: data.company,
-        position: data.position,
+        company: data.company!,
+        position: data.position!,
         location: data.location ?? null,
         status: data.status ?? 'applied',
         applied_date: today,

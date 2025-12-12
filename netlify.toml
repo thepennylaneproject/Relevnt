@@ -42,12 +42,20 @@
   # Node.js version for functions
   node_bundler = "esbuild"
 
-[[scheduled.functions]]
-function = "jobs_cron"
-cron = "*/15 * * * *"
-
   # Directory for functions (already set in [build] but can override)
   directory = "netlify/functions"
+
+# =====================================================
+# SCHEDULED FUNCTIONS
+# =====================================================
+
+# Job Ingestion - runs every hour
+[functions.jobs_cron]
+  schedule = "0 * * * *"  # Every hour at minute 0
+
+# Daily Analytics Summary - runs daily at 2am UTC
+[functions.daily_summaries]
+  schedule = "0 2 * * *"  # Daily at 2am UTC
 
 # ðŸŽ“ Why esbuild?
 # - Super fast bundler for serverless functions

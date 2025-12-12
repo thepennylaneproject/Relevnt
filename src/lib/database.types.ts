@@ -290,6 +290,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "ai_usage_tracking_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs_normalized"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "ai_usage_tracking_resume_id_fkey"
             columns: ["resume_id"]
             isOneToOne: false
@@ -528,6 +535,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "applications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs_normalized"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "applications_resume_id_fkey"
             columns: ["resume_id"]
             isOneToOne: false
@@ -539,6 +553,120 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      auto_apply_logs: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          id: string
+          job_id: string | null
+          rule_id: string | null
+          status: string | null
+          submission_url: string | null
+          user_id: string
+          withdrawn_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          job_id?: string | null
+          rule_id?: string | null
+          status?: string | null
+          submission_url?: string | null
+          user_id: string
+          withdrawn_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          job_id?: string | null
+          rule_id?: string | null
+          status?: string | null
+          submission_url?: string | null
+          user_id?: string
+          withdrawn_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auto_apply_logs_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auto_apply_logs_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs_normalized"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auto_apply_logs_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "auto_apply_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      auto_apply_rules: {
+        Row: {
+          active_days: string[] | null
+          created_at: string | null
+          enabled: boolean | null
+          exclude_companies: string[] | null
+          id: string
+          include_only_companies: string[] | null
+          match_score_threshold: number | null
+          max_applications_per_week: number | null
+          name: string
+          persona_id: string | null
+          require_all_keywords: string[] | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          active_days?: string[] | null
+          created_at?: string | null
+          enabled?: boolean | null
+          exclude_companies?: string[] | null
+          id?: string
+          include_only_companies?: string[] | null
+          match_score_threshold?: number | null
+          max_applications_per_week?: number | null
+          name: string
+          persona_id?: string | null
+          require_all_keywords?: string[] | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          active_days?: string[] | null
+          created_at?: string | null
+          enabled?: boolean | null
+          exclude_companies?: string[] | null
+          id?: string
+          include_only_companies?: string[] | null
+          match_score_threshold?: number | null
+          max_applications_per_week?: number | null
+          name?: string
+          persona_id?: string | null
+          require_all_keywords?: string[] | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auto_apply_rules_persona_id_fkey"
+            columns: ["persona_id"]
+            isOneToOne: false
+            referencedRelation: "user_personas"
             referencedColumns: ["id"]
           },
         ]
@@ -637,6 +765,120 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      career_profiles: {
+        Row: {
+          created_at: string | null
+          id: string
+          profile: Json | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          profile?: Json | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          profile?: Json | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      career_tracks: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_default: boolean
+          min_salary: number | null
+          name: string
+          preferred_locations: string[] | null
+          primary_resume_id: string | null
+          target_titles: string[] | null
+          updated_at: string
+          user_id: string
+          work_mode: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_default?: boolean
+          min_salary?: number | null
+          name: string
+          preferred_locations?: string[] | null
+          primary_resume_id?: string | null
+          target_titles?: string[] | null
+          updated_at?: string
+          user_id: string
+          work_mode?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_default?: boolean
+          min_salary?: number | null
+          name?: string
+          preferred_locations?: string[] | null
+          primary_resume_id?: string | null
+          target_titles?: string[] | null
+          updated_at?: string
+          user_id?: string
+          work_mode?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "career_tracks_primary_resume_id_fkey"
+            columns: ["primary_resume_id"]
+            isOneToOne: false
+            referencedRelation: "resumes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "career_tracks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coach_client_relationships: {
+        Row: {
+          client_id: string
+          coach_id: string
+          created_at: string | null
+          id: string
+          notes: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          client_id: string
+          coach_id: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          client_id?: string
+          coach_id?: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       contacts: {
         Row: {
@@ -750,6 +992,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "cover_letters_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs_normalized"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "cover_letters_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -857,6 +1106,13 @@ export type Database = {
             referencedRelation: "jobs"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "interview_sessions_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs_normalized"
+            referencedColumns: ["id"]
+          },
         ]
       }
       job_applications: {
@@ -907,30 +1163,70 @@ export type Database = {
             referencedRelation: "jobs"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "job_applications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs_normalized"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      job_ingestion_state: {
+        Row: {
+          cursor: Json | null
+          last_run_at: string | null
+          source: string
+        }
+        Insert: {
+          cursor?: Json | null
+          last_run_at?: string | null
+          source: string
+        }
+        Update: {
+          cursor?: Json | null
+          last_run_at?: string | null
+          source?: string
+        }
+        Relationships: []
       }
       job_matches: {
         Row: {
           created_at: string
+          expires_at: string | null
+          explanation: string | null
           id: string
+          is_dismissed: boolean | null
           job_id: string
+          match_factors: Json | null
           match_score: number
+          persona_id: string | null
           user_id: string
           values_alignment: number | null
         }
         Insert: {
           created_at?: string
+          expires_at?: string | null
+          explanation?: string | null
           id?: string
+          is_dismissed?: boolean | null
           job_id: string
+          match_factors?: Json | null
           match_score: number
+          persona_id?: string | null
           user_id: string
           values_alignment?: number | null
         }
         Update: {
           created_at?: string
+          expires_at?: string | null
+          explanation?: string | null
           id?: string
+          is_dismissed?: boolean | null
           job_id?: string
+          match_factors?: Json | null
           match_score?: number
+          persona_id?: string | null
           user_id?: string
           values_alignment?: number | null
         }
@@ -942,6 +1238,20 @@ export type Database = {
             referencedRelation: "jobs"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "job_matches_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs_normalized"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_matches_persona_id_fkey"
+            columns: ["persona_id"]
+            isOneToOne: false
+            referencedRelation: "user_personas"
+            referencedColumns: ["id"]
+          },
         ]
       }
       job_preferences: {
@@ -949,12 +1259,14 @@ export type Database = {
           allowed_timezones: string[] | null
           auto_apply_max_apps_per_day: number | null
           auto_apply_min_match_score: number | null
+          avoid_keywords: string[] | null
           created_at: string | null
           enable_auto_apply: boolean | null
           exclude_companies: string[] | null
           exclude_contract_types: string[] | null
           exclude_titles: string[] | null
           id: string
+          include_keywords: string[] | null
           min_salary: number | null
           preferred_locations: string[] | null
           primary_title: string | null
@@ -971,12 +1283,14 @@ export type Database = {
           allowed_timezones?: string[] | null
           auto_apply_max_apps_per_day?: number | null
           auto_apply_min_match_score?: number | null
+          avoid_keywords?: string[] | null
           created_at?: string | null
           enable_auto_apply?: boolean | null
           exclude_companies?: string[] | null
           exclude_contract_types?: string[] | null
           exclude_titles?: string[] | null
           id?: string
+          include_keywords?: string[] | null
           min_salary?: number | null
           preferred_locations?: string[] | null
           primary_title?: string | null
@@ -993,12 +1307,14 @@ export type Database = {
           allowed_timezones?: string[] | null
           auto_apply_max_apps_per_day?: number | null
           auto_apply_min_match_score?: number | null
+          avoid_keywords?: string[] | null
           created_at?: string | null
           enable_auto_apply?: boolean | null
           exclude_companies?: string[] | null
           exclude_contract_types?: string[] | null
           exclude_titles?: string[] | null
           id?: string
+          include_keywords?: string[] | null
           min_salary?: number | null
           preferred_locations?: string[] | null
           primary_title?: string | null
@@ -1015,64 +1331,70 @@ export type Database = {
       }
       job_sources: {
         Row: {
-          active: boolean | null
-          api_key: string | null
           api_key_required: boolean | null
-          api_url: string | null
+          auth_mode: string | null
           created_at: string | null
           enabled: boolean | null
+          endpoint_url: string | null
           id: string
           last_error: string | null
           last_fetch: string | null
           last_sync: string | null
+          metadata: Json | null
           mode: string | null
           name: string
+          public_key: string | null
           rate_limit_per_minute: number | null
+          secret_key: string | null
           slug: string | null
           source_key: string
           update_frequency: string | null
           updated_at: string | null
-          website: string | null
+          website_url: string | null
         }
         Insert: {
-          active?: boolean | null
-          api_key?: string | null
           api_key_required?: boolean | null
-          api_url?: string | null
+          auth_mode?: string | null
           created_at?: string | null
           enabled?: boolean | null
+          endpoint_url?: string | null
           id?: string
           last_error?: string | null
           last_fetch?: string | null
           last_sync?: string | null
+          metadata?: Json | null
           mode?: string | null
           name: string
+          public_key?: string | null
           rate_limit_per_minute?: number | null
+          secret_key?: string | null
           slug?: string | null
           source_key: string
           update_frequency?: string | null
           updated_at?: string | null
-          website?: string | null
+          website_url?: string | null
         }
         Update: {
-          active?: boolean | null
-          api_key?: string | null
           api_key_required?: boolean | null
-          api_url?: string | null
+          auth_mode?: string | null
           created_at?: string | null
           enabled?: boolean | null
+          endpoint_url?: string | null
           id?: string
           last_error?: string | null
           last_fetch?: string | null
           last_sync?: string | null
+          metadata?: Json | null
           mode?: string | null
           name?: string
+          public_key?: string | null
           rate_limit_per_minute?: number | null
+          secret_key?: string | null
           slug?: string | null
           source_key?: string
           update_frequency?: string | null
           updated_at?: string | null
-          website?: string | null
+          website_url?: string | null
         }
         Relationships: []
       }
@@ -1115,110 +1437,156 @@ export type Database = {
       jobs: {
         Row: {
           benefits: Json | null
-          company: string
+          company: string | null
           company_logo_url: string | null
           competitiveness_level: string | null
           created_at: string | null
           dedup_key: string | null
           description: string | null
+          employment_type: string | null
+          external_id: string | null
           external_job_id: string | null
           external_source: string | null
           external_url: string | null
           extracted_structure: Json | null
           id: string
+          is_active: boolean | null
           is_official: boolean | null
           job_type: string | null
+          keywords: string[] | null
           location: string | null
           match_reasons: Json | null
           match_score: number | null
+          normalized_company: string | null
+          normalized_location: string | null
+          normalized_title: string | null
           original_posting_url: string | null
           posted_date: string | null
           probability_estimate: number | null
           ranking_score: number | null
+          raw: Json | null
+          raw_payload: Json | null
+          remote_type: string | null
           requirements: Json | null
           responsibilities: Json | null
           salary_max: number | null
           salary_min: number | null
           salary_range: string | null
           saved_date: string | null
+          source: string | null
+          source_id: string | null
+          source_slug: string | null
           source_url: string | null
           status: string | null
           title: string
           updated_at: string | null
           url: string | null
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           benefits?: Json | null
-          company: string
+          company?: string | null
           company_logo_url?: string | null
           competitiveness_level?: string | null
           created_at?: string | null
           dedup_key?: string | null
           description?: string | null
+          employment_type?: string | null
+          external_id?: string | null
           external_job_id?: string | null
           external_source?: string | null
           external_url?: string | null
           extracted_structure?: Json | null
           id?: string
+          is_active?: boolean | null
           is_official?: boolean | null
           job_type?: string | null
+          keywords?: string[] | null
           location?: string | null
           match_reasons?: Json | null
           match_score?: number | null
+          normalized_company?: string | null
+          normalized_location?: string | null
+          normalized_title?: string | null
           original_posting_url?: string | null
           posted_date?: string | null
           probability_estimate?: number | null
           ranking_score?: number | null
+          raw?: Json | null
+          raw_payload?: Json | null
+          remote_type?: string | null
           requirements?: Json | null
           responsibilities?: Json | null
           salary_max?: number | null
           salary_min?: number | null
           salary_range?: string | null
           saved_date?: string | null
+          source?: string | null
+          source_id?: string | null
+          source_slug?: string | null
           source_url?: string | null
           status?: string | null
           title: string
           updated_at?: string | null
           url?: string | null
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           benefits?: Json | null
-          company?: string
+          company?: string | null
           company_logo_url?: string | null
           competitiveness_level?: string | null
           created_at?: string | null
           dedup_key?: string | null
           description?: string | null
+          employment_type?: string | null
+          external_id?: string | null
           external_job_id?: string | null
           external_source?: string | null
           external_url?: string | null
           extracted_structure?: Json | null
           id?: string
+          is_active?: boolean | null
           is_official?: boolean | null
           job_type?: string | null
+          keywords?: string[] | null
           location?: string | null
           match_reasons?: Json | null
           match_score?: number | null
+          normalized_company?: string | null
+          normalized_location?: string | null
+          normalized_title?: string | null
           original_posting_url?: string | null
           posted_date?: string | null
           probability_estimate?: number | null
           ranking_score?: number | null
+          raw?: Json | null
+          raw_payload?: Json | null
+          remote_type?: string | null
           requirements?: Json | null
           responsibilities?: Json | null
           salary_max?: number | null
           salary_min?: number | null
           salary_range?: string | null
           saved_date?: string | null
+          source?: string | null
+          source_id?: string | null
+          source_slug?: string | null
           source_url?: string | null
           status?: string | null
           title?: string
           updated_at?: string | null
           url?: string | null
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "jobs_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "job_sources"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "jobs_user_id_fkey"
             columns: ["user_id"]
@@ -1440,6 +1808,50 @@ export type Database = {
         }
         Relationships: []
       }
+      learning_recommendations: {
+        Row: {
+          created_at: string | null
+          estimated_duration_weeks: number | null
+          expires_at: string | null
+          id: string
+          persona_id: string | null
+          reason_text: string | null
+          recommended_courses: Json | null
+          target_skill: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          estimated_duration_weeks?: number | null
+          expires_at?: string | null
+          id?: string
+          persona_id?: string | null
+          reason_text?: string | null
+          recommended_courses?: Json | null
+          target_skill: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          estimated_duration_weeks?: number | null
+          expires_at?: string | null
+          id?: string
+          persona_id?: string | null
+          reason_text?: string | null
+          recommended_courses?: Json | null
+          target_skill?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_recommendations_persona_id_fkey"
+            columns: ["persona_id"]
+            isOneToOne: false
+            referencedRelation: "user_personas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       learning_search_cache: {
         Row: {
           created_at: string | null
@@ -1496,6 +1908,71 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      persona_preferences: {
+        Row: {
+          company_size: string[] | null
+          created_at: string | null
+          excluded_companies: string[] | null
+          growth_focus: string[] | null
+          id: string
+          industries: string[] | null
+          job_title_keywords: string[] | null
+          locations: string[] | null
+          max_salary: number | null
+          min_salary: number | null
+          mission_values: string[] | null
+          nice_to_have_skills: string[] | null
+          persona_id: string
+          remote_preference: string | null
+          required_skills: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_size?: string[] | null
+          created_at?: string | null
+          excluded_companies?: string[] | null
+          growth_focus?: string[] | null
+          id?: string
+          industries?: string[] | null
+          job_title_keywords?: string[] | null
+          locations?: string[] | null
+          max_salary?: number | null
+          min_salary?: number | null
+          mission_values?: string[] | null
+          nice_to_have_skills?: string[] | null
+          persona_id: string
+          remote_preference?: string | null
+          required_skills?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_size?: string[] | null
+          created_at?: string | null
+          excluded_companies?: string[] | null
+          growth_focus?: string[] | null
+          id?: string
+          industries?: string[] | null
+          job_title_keywords?: string[] | null
+          locations?: string[] | null
+          max_salary?: number | null
+          min_salary?: number | null
+          mission_values?: string[] | null
+          nice_to_have_skills?: string[] | null
+          persona_id?: string
+          remote_preference?: string | null
+          required_skills?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "persona_preferences_persona_id_fkey"
+            columns: ["persona_id"]
+            isOneToOne: true
+            referencedRelation: "user_personas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       preferences: {
         Row: {
@@ -1661,6 +2138,48 @@ export type Database = {
         }
         Relationships: []
       }
+      relevance_tuner_settings: {
+        Row: {
+          created_at: string | null
+          id: string
+          industry_weight: number | null
+          is_default: boolean | null
+          location_weight: number | null
+          name: string
+          remote_weight: number | null
+          salary_weight: number | null
+          skill_weight: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          industry_weight?: number | null
+          is_default?: boolean | null
+          location_weight?: number | null
+          name: string
+          remote_weight?: number | null
+          salary_weight?: number | null
+          skill_weight?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          industry_weight?: number | null
+          is_default?: boolean | null
+          location_weight?: number | null
+          name?: string
+          remote_weight?: number | null
+          salary_weight?: number | null
+          skill_weight?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       resumes: {
         Row: {
           ats_score: number | null
@@ -1668,12 +2187,17 @@ export type Database = {
           certifications: Json | null
           created_at: string | null
           education: Json | null
+          file_name: string | null
+          file_size_bytes: number | null
           id: string
           is_default: boolean | null
           keywords: Json | null
           languages: Json | null
           last_optimization_date: string | null
+          mime_type: string | null
           optimization_history: Json | null
+          parsed_fields: Json | null
+          parsed_text: string | null
           personal_info: Json | null
           projects: Json | null
           skills: Json | null
@@ -1690,12 +2214,17 @@ export type Database = {
           certifications?: Json | null
           created_at?: string | null
           education?: Json | null
+          file_name?: string | null
+          file_size_bytes?: number | null
           id?: string
           is_default?: boolean | null
           keywords?: Json | null
           languages?: Json | null
           last_optimization_date?: string | null
+          mime_type?: string | null
           optimization_history?: Json | null
+          parsed_fields?: Json | null
+          parsed_text?: string | null
           personal_info?: Json | null
           projects?: Json | null
           skills?: Json | null
@@ -1712,12 +2241,17 @@ export type Database = {
           certifications?: Json | null
           created_at?: string | null
           education?: Json | null
+          file_name?: string | null
+          file_size_bytes?: number | null
           id?: string
           is_default?: boolean | null
           keywords?: Json | null
           languages?: Json | null
           last_optimization_date?: string | null
+          mime_type?: string | null
           optimization_history?: Json | null
+          parsed_fields?: Json | null
+          parsed_text?: string | null
           personal_info?: Json | null
           projects?: Json | null
           skills?: Json | null
@@ -1765,6 +2299,13 @@ export type Database = {
             referencedRelation: "jobs"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "saved_jobs_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs_normalized"
+            referencedColumns: ["id"]
+          },
         ]
       }
       skill_gap_analyses: {
@@ -1801,6 +2342,13 @@ export type Database = {
             columns: ["job_id"]
             isOneToOne: false
             referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "skill_gap_analyses_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs_normalized"
             referencedColumns: ["id"]
           },
         ]
@@ -1864,6 +2412,215 @@ export type Database = {
           },
         ]
       }
+      user_keyword_preferences: {
+        Row: {
+          avoid_keywords: string[]
+          created_at: string
+          include_keywords: string[]
+          learning_style: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avoid_keywords?: string[]
+          created_at?: string
+          include_keywords?: string[]
+          learning_style?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avoid_keywords?: string[]
+          created_at?: string
+          include_keywords?: string[]
+          learning_style?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_keyword_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_keywords: {
+        Row: {
+          keywords: string[]
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          keywords: string[]
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          keywords?: string[]
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_match_preferences: {
+        Row: {
+          created_at: string
+          location_mode: string
+          min_salary_local: number | null
+          min_salary_relocate: number | null
+          min_salary_remote: number | null
+          updated_at: string
+          user_id: string
+          weight_growth: number
+          weight_location: number
+          weight_mission: number
+          weight_remote: number
+          weight_salary: number
+        }
+        Insert: {
+          created_at?: string
+          location_mode?: string
+          min_salary_local?: number | null
+          min_salary_relocate?: number | null
+          min_salary_remote?: number | null
+          updated_at?: string
+          user_id: string
+          weight_growth?: number
+          weight_location?: number
+          weight_mission?: number
+          weight_remote?: number
+          weight_salary?: number
+        }
+        Update: {
+          created_at?: string
+          location_mode?: string
+          min_salary_local?: number | null
+          min_salary_relocate?: number | null
+          min_salary_remote?: number | null
+          updated_at?: string
+          user_id?: string
+          weight_growth?: number
+          weight_location?: number
+          weight_mission?: number
+          weight_remote?: number
+          weight_salary?: number
+        }
+        Relationships: []
+      }
+      user_personas: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_professional_profiles: {
+        Row: {
+          created_at: string
+          earliest_start_raw: string | null
+          evergreen_strengths_polished: string | null
+          evergreen_strengths_raw: string | null
+          evergreen_why_polished: string | null
+          evergreen_why_raw: string | null
+          headline_polished: string | null
+          headline_raw: string | null
+          links: string[] | null
+          links_raw: string | null
+          needs_sponsorship: boolean | null
+          relocate_notes: string | null
+          relocate_preference: string | null
+          summary_polished: string | null
+          summary_raw: string | null
+          target_roles: string[] | null
+          target_roles_raw: string | null
+          top_skills: string[] | null
+          top_skills_raw: string | null
+          travel_preference: string | null
+          updated_at: string
+          user_id: string
+          work_auth_raw: string | null
+          work_types: string[] | null
+        }
+        Insert: {
+          created_at?: string
+          earliest_start_raw?: string | null
+          evergreen_strengths_polished?: string | null
+          evergreen_strengths_raw?: string | null
+          evergreen_why_polished?: string | null
+          evergreen_why_raw?: string | null
+          headline_polished?: string | null
+          headline_raw?: string | null
+          links?: string[] | null
+          links_raw?: string | null
+          needs_sponsorship?: boolean | null
+          relocate_notes?: string | null
+          relocate_preference?: string | null
+          summary_polished?: string | null
+          summary_raw?: string | null
+          target_roles?: string[] | null
+          target_roles_raw?: string | null
+          top_skills?: string[] | null
+          top_skills_raw?: string | null
+          travel_preference?: string | null
+          updated_at?: string
+          user_id: string
+          work_auth_raw?: string | null
+          work_types?: string[] | null
+        }
+        Update: {
+          created_at?: string
+          earliest_start_raw?: string | null
+          evergreen_strengths_polished?: string | null
+          evergreen_strengths_raw?: string | null
+          evergreen_why_polished?: string | null
+          evergreen_why_raw?: string | null
+          headline_polished?: string | null
+          headline_raw?: string | null
+          links?: string[] | null
+          links_raw?: string | null
+          needs_sponsorship?: boolean | null
+          relocate_notes?: string | null
+          relocate_preference?: string | null
+          summary_polished?: string | null
+          summary_raw?: string | null
+          target_roles?: string[] | null
+          target_roles_raw?: string | null
+          top_skills?: string[] | null
+          top_skills_raw?: string | null
+          travel_preference?: string | null
+          updated_at?: string
+          user_id?: string
+          work_auth_raw?: string | null
+          work_types?: string[] | null
+        }
+        Relationships: []
+      }
       user_skill_preferences: {
         Row: {
           avoid_skills: Json | null
@@ -1894,6 +2651,60 @@ export type Database = {
         }
         Relationships: []
       }
+      user_skills: {
+        Row: {
+          created_at: string | null
+          id: string
+          proficiency_level: string | null
+          skill_name: string
+          source: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          proficiency_level?: string | null
+          skill_name: string
+          source?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          proficiency_level?: string | null
+          skill_name?: string
+          source?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      voice_profiles: {
+        Row: {
+          created_at: string | null
+          id: string
+          preset_name: string | null
+          settings: Json | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          preset_name?: string | null
+          settings?: Json | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          preset_name?: string | null
+          settings?: Json | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       feature_usage_stats: {
@@ -1903,6 +2714,26 @@ export type Database = {
           total_cost: number | null
           total_uses: number | null
           unique_users: number | null
+        }
+        Relationships: []
+      }
+      jobs_normalized: {
+        Row: {
+          company: string | null
+          competitiveness_level: string | null
+          created_at: string | null
+          employment_type: string | null
+          external_url: string | null
+          has_salary: boolean | null
+          id: string | null
+          location: string | null
+          match_score: number | null
+          posted_date: string | null
+          remote_type: string | null
+          salary_max: number | null
+          salary_min: number | null
+          source_slug: string | null
+          title: string | null
         }
         Relationships: []
       }
@@ -1963,6 +2794,7 @@ export type Database = {
           used: number
         }[]
       }
+      extract_keywords: { Args: { input_text: string }; Returns: string[] }
       get_tier_distribution: {
         Args: never
         Returns: {
@@ -1980,6 +2812,15 @@ export type Database = {
           current_tier: string
           days_active: number
           user_id: string
+        }[]
+      }
+      match_jobs_for_user: {
+        Args: { p_user_id: string }
+        Returns: {
+          company: string
+          job_id: string
+          score: number
+          title: string
         }[]
       }
       record_ai_usage: {
@@ -2014,6 +2855,8 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
       [_ in never]: never

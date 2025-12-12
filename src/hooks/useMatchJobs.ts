@@ -14,7 +14,7 @@ export type UseMatchJobsResult = {
   matches: MatchJobsResult[]
   loading: boolean
   error: Error | null
-  runMatchJobs: (trackId?: string | null) => Promise<void>
+  runMatchJobs: (trackId?: string | null, personaId?: string | null) => Promise<void>
 }
 
 export default function useMatchJobs(): UseMatchJobsResult {
@@ -25,7 +25,7 @@ export default function useMatchJobs(): UseMatchJobsResult {
   const [error, setError] = useState<Error | null>(null)
 
   const runMatchJobs = useCallback(
-    async (trackId?: string | null) => {
+    async (trackId?: string | null, personaId?: string | null) => {
       if (!user) {
         setError(
           new Error('You need to be signed in to see your personalized feed.')
@@ -42,6 +42,9 @@ export default function useMatchJobs(): UseMatchJobsResult {
         params.set('user_id', user.id)
         if (trackId) {
           params.set('track_id', trackId)
+        }
+        if (personaId) {
+          params.set('persona_id', personaId)
         }
 
         const url = `/.netlify/functions/match_jobs?${params.toString()}`

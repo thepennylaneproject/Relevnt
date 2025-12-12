@@ -17,6 +17,8 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { usePersonas } from '../../hooks/usePersonas'
+import { useResumes } from '../../hooks/useResumes'
+import { useAuth } from '../../contexts/AuthContext'
 import type { UserPersona } from '../../types/v2-personas'
 
 // =============================================================================
@@ -52,9 +54,18 @@ export function PersonaSwitcher({
     compact = false,
 }: PersonaSwitcherProps) {
     const { personas, activePersona, loading, setActivePersona } = usePersonas()
+    const { user } = useAuth()
+    const { resumes, loading: resumesLoading } = useResumes(user!)
     const [isOpen, setIsOpen] = useState(false)
     const [switching, setSwitching] = useState(false)
     const dropdownRef = useRef<HTMLDivElement>(null)
+
+    // Helper to get resume name by ID
+    const getResumeName = (resumeId: string | null | undefined): string | null => {
+        if (!resumeId || resumesLoading) return null
+        const resume = resumes.find(r => r.id === resumeId)
+        return resume?.title || null
+    }
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -159,7 +170,14 @@ export function PersonaSwitcher({
                             role="option"
                             aria-selected={persona.id === activePersona?.id}
                         >
-                            <span style={styles.itemName}>{persona.name}</span>
+                            <div style={styles.itemContent}>
+                                <span style={styles.itemName}>{persona.name}</span>
+                                {getResumeName(persona.resume_id) && (
+                                    <span style={styles.resumeSubtitle}>
+                                        📄 {getResumeName(persona.resume_id)}
+                                    </span>
+                                )}
+                            </div>
                             {persona.id === activePersona?.id && (
                                 <span style={styles.checkmark}>✓</span>
                             )}
@@ -196,6 +214,8 @@ const styles: Record<string, React.CSSProperties> = {
     container: {
         position: 'relative',
         display: 'inline-block',
+        width: '100%',
+        maxWidth: '220px',
     },
 
     triggerButton: {
@@ -213,12 +233,15 @@ const styles: Record<string, React.CSSProperties> = {
         transition: 'all 0.2s ease',
         minWidth: '160px',
         justifyContent: 'space-between',
+        width: '100%',
+        maxWidth: '220px',
     },
 
     compactButton: {
         padding: '6px 12px',
         fontSize: '13px',
         minWidth: '140px',
+        maxWidth: '180px',
     },
 
     disabledButton: {
@@ -249,6 +272,7 @@ const styles: Record<string, React.CSSProperties> = {
         left: 0,
         right: 0,
         minWidth: '200px',
+        maxWidth: '100vw',
         backgroundColor: 'var(--surface-secondary, #1a1a1a)',
         border: '1px solid var(--border-subtle, #333)',
         borderRadius: '8px',
@@ -277,7 +301,24 @@ const styles: Record<string, React.CSSProperties> = {
         color: 'var(--accent-primary, #d4af37)',
     },
 
+    itemContent: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '2px',
+        flex: 1,
+        overflow: 'hidden',
+    },
+
     itemName: {
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+        fontWeight: 500,
+    },
+
+    resumeSubtitle: {
+        fontSize: '12px',
+        color: 'var(--text-tertiary, #666)',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',

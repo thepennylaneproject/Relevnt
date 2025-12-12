@@ -15,7 +15,14 @@ import {
   type NormalizedJob,
 } from '../../src/shared/jobSources'
 
-export type IngestResult = { source: string; count: number }
+export type IngestResult = {
+  source: string;
+  count: number;
+  normalized: number;
+  duplicates: number;
+  status: 'success' | 'failed';
+  error?: string;
+}
 type IngestionCursor = { page?: number; since?: string | null }
 type IngestionState = { cursor: IngestionCursor; last_run_at: string | null }
 
@@ -478,7 +485,7 @@ async function upsertJobs(jobs: NormalizedJob[]) {
   return { inserted: data?.length ?? 0 }
 }
 
-async function ingest(source: JobSource) {
+async function ingest(source: JobSource, runId?: string) {
   const supabase = createAdminClient()
   const pagination = SOURCE_PAGINATION[source.slug] || {}
   const state = await loadIngestionState(supabase, source.slug)
@@ -492,74 +499,141 @@ async function ingest(source: JobSource) {
   const runStartedAt = new Date().toISOString()
   let totalNormalized = 0
   let totalInserted = 0
+  let totalDuplicates = 0
+  let sourceStatus: 'success' | 'failed' = 'success'
+  let sourceError: string | null = null
+
+  // Create source run log if runId provided
+  let sourceRunId: string | null = null
+  if (runId) {
+    const { data: sourceRun, error: sourceRunError } = await supabase
+      .from('job_ingestion_run_sources')
+      .insert({
+        run_id: runId,
+        source: source.slug,
+        started_at: runStartedAt,
+        status: 'running',
+        page_start: page,
+        cursor_in: { page, since },
+      })
+      .select('id')
+      .single()
+
+    if (!sourceRunError && sourceRun) {
+      sourceRunId = sourceRun.id
+    }
+  }
 
   console.log(
     `ingest_jobs: starting ingest for ${source.slug} with cursor`,
     JSON.stringify({ page, since })
   )
 
-  for (let i = 0; i < maxPages; i++) {
-    const url = buildSourceUrl(source, { page, since })
+  try {
+    for (let i = 0; i < maxPages; i++) {
+      const url = buildSourceUrl(source, { page, since })
 
-    if (!url) {
-      console.warn(`ingest_jobs: no URL for ${source.slug}, skipping`)
-      break
-    }
+      if (!url) {
+        console.warn(`ingest_jobs: no URL for ${source.slug}, skipping`)
+        break
+      }
 
-    console.log(
-      `ingest_jobs: fetching from ${source.slug} (${url}) [page ${page}]`
-    )
-
-    const raw = await fetchJson(url, source, { page, since })
-    if (!raw) {
-      console.warn(`ingest_jobs: no data from ${source.slug} on page ${page}`)
-      break
-    }
-
-    let normalized: NormalizedJob[] = []
-    try {
-      const normalizedResult = await Promise.resolve(source.normalize(raw))
-      normalized = normalizedResult || []
-    } catch (err) {
-      console.error(`ingest_jobs: normalize failed for ${source.slug}`, err)
-      break
-    }
-
-    if (!normalized.length) {
       console.log(
-        `ingest_jobs: no jobs after normalize for ${source.slug} on page ${page}`
+        `ingest_jobs: fetching from ${source.slug} (${url}) [page ${page}]`
       )
-      page = 1 // reset so next run starts at beginning
-      break
+
+      const raw = await fetchJson(url, source, { page, since })
+      if (!raw) {
+        console.warn(`ingest_jobs: no data from ${source.slug} on page ${page}`)
+        break
+      }
+
+      let normalized: NormalizedJob[] = []
+      try {
+        const normalizedResult = await Promise.resolve(source.normalize(raw))
+        normalized = normalizedResult || []
+      } catch (err) {
+        console.error(`ingest_jobs: normalize failed for ${source.slug}`, err)
+        break
+      }
+
+      if (!normalized.length) {
+        console.log(
+          `ingest_jobs: no jobs after normalize for ${source.slug} on page ${page}`
+        )
+        page = 1 // reset so next run starts at beginning
+        break
+      }
+
+      totalNormalized += normalized.length
+      const duplicateCount = normalized.length
+      console.log(
+        `ingest_jobs: normalized ${normalized.length} jobs from ${source.slug} on page ${page}`
+      )
+
+      const { inserted } = await upsertJobs(normalized)
+      totalInserted += inserted
+      totalDuplicates += (duplicateCount - inserted)
+      console.log(
+        `ingest_jobs: upserted ${inserted} jobs from ${source.slug} on page ${page}`
+      )
+
+      if (normalized.length < expectedPageSize) {
+        // Likely the last page; reset cursor so next run starts from the beginning
+        page = 1
+        break
+      }
+
+      page += 1
     }
-
-    totalNormalized += normalized.length
-    console.log(
-      `ingest_jobs: normalized ${normalized.length} jobs from ${source.slug} on page ${page}`
-    )
-
-    const { inserted } = await upsertJobs(normalized)
-    totalInserted += inserted
-    console.log(
-      `ingest_jobs: upserted ${inserted} jobs from ${source.slug} on page ${page}`
-    )
-
-    if (normalized.length < expectedPageSize) {
-      // Likely the last page; reset cursor so next run starts from the beginning
-      page = 1
-      break
-    }
-
-    page += 1
+  } catch (ingestError) {
+    sourceStatus = 'failed'
+    sourceError = ingestError instanceof Error ? ingestError.message : String(ingestError)
+    console.error(`ingest_jobs: error during ingest for ${source.slug}`, ingestError)
   }
+
+  const finishedAt = new Date().toISOString()
 
   console.log(
     `ingest_jobs: finished ingest for ${source.slug}`,
     JSON.stringify({
       totalNormalized,
       totalInserted,
+      totalDuplicates,
       nextPage: page,
+      status: sourceStatus,
     })
+  )
+
+  // Update source run log
+  if (sourceRunId) {
+    await supabase
+      .from('job_ingestion_run_sources')
+      .update({
+        finished_at: finishedAt,
+        status: sourceStatus,
+        page_end: page,
+        normalized_count: totalNormalized,
+        inserted_count: totalInserted,
+        duplicate_count: totalDuplicates,
+        error_message: sourceError,
+        cursor_out: { page, since: runStartedAt },
+      })
+      .eq('id', sourceRunId)
+  }
+
+  // Update source health
+  await supabase.from('job_source_health').upsert(
+    {
+      source: source.slug,
+      last_run_at: finishedAt,
+      last_success_at: sourceStatus === 'success' ? finishedAt : undefined,
+      last_error_at: sourceStatus === 'failed' ? finishedAt : undefined,
+      consecutive_failures: sourceStatus === 'failed' ? 1 : 0, // simplified logic
+      last_counts: { normalized: totalNormalized, inserted: totalInserted, duplicates: totalDuplicates },
+      is_degraded: sourceStatus === 'failed',
+    },
+    { onConflict: 'source' }
   )
 
   await persistIngestionState(
@@ -575,7 +649,7 @@ async function ingest(source: JobSource) {
       .from('job_sources')
       .update({
         last_sync: runStartedAt,
-        last_error: null, // clear any previous error
+        last_error: sourceError,
         updated_at: new Date().toISOString(),
       })
       .eq('slug', source.slug)
@@ -595,12 +669,21 @@ async function ingest(source: JobSource) {
     )
   }
 
-  return { source: source.slug, count: totalInserted }
+  return {
+    source: source.slug,
+    count: totalInserted,
+    normalized: totalNormalized,
+    duplicates: totalDuplicates,
+    status: sourceStatus,
+    error: sourceError || undefined,
+  }
 }
 
 export async function runIngestion(
-  requestedSlug: string | null = null
+  requestedSlug: string | null = null,
+  triggeredBy: 'schedule' | 'manual' | 'admin' = 'manual'
 ): Promise<IngestResult[]> {
+  const supabase = createAdminClient()
   const sourcesToRun: JobSource[] = requestedSlug
     ? ALL_SOURCES.filter((s) => s.slug === requestedSlug)
     : ALL_SOURCES
@@ -609,15 +692,47 @@ export async function runIngestion(
     throw new Error(`No matching job source for slug: ${requestedSlug}`)
   }
 
+  const startedAt = new Date().toISOString()
+
+  // Create ingestion run record
+  const { data: run, error: runError } = await supabase
+    .from('job_ingestion_runs')
+    .insert({
+      started_at: startedAt,
+      status: 'running',
+      triggered_by: triggeredBy,
+      sources_requested: sourcesToRun.map((s) => s.slug),
+    })
+    .select('id')
+    .single()
+
+  if (runError || !run) {
+    console.error('ingest_jobs: failed to create run record', runError)
+    // Continue without run tracking
+  }
+
+  const runId = run?.id || null
   const results: IngestResult[] = []
+  let failedSourceCount = 0
 
   for (const source of sourcesToRun) {
     try {
-      const result = await ingest(source)
+      const result = await ingest(source, runId || undefined)
       results.push(result)
+      if (result.status === 'failed') {
+        failedSourceCount++
+      }
     } catch (err) {
       console.error(`ingest_jobs: fatal error while ingesting ${source.slug}`, err)
-      results.push({ source: source.slug, count: 0 })
+      results.push({
+        source: source.slug,
+        count: 0,
+        normalized: 0,
+        duplicates: 0,
+        status: 'failed',
+        error: err instanceof Error ? err.message : String(err),
+      })
+      failedSourceCount++
     }
   }
 
@@ -626,6 +741,29 @@ export async function runIngestion(
     return acc
   }, {})
   console.log('ingest_jobs: completed ingestion run', summary)
+
+  // Update run record
+  if (runId) {
+    const totalNormalized = results.reduce((sum, r) => sum + r.normalized, 0)
+    const totalInserted = results.reduce((sum, r) => sum + r.count, 0)
+    const totalDuplicates = results.reduce((sum, r) => sum + r.duplicates, 0)
+    const overallStatus = failedSourceCount === sourcesToRun.length ? 'failed' :
+      failedSourceCount > 0 ? 'partial' : 'success'
+
+    await supabase
+      .from('job_ingestion_runs')
+      .update({
+        finished_at: new Date().toISOString(),
+        status: overallStatus,
+        total_normalized: totalNormalized,
+        total_inserted: totalInserted,
+        total_duplicates: totalDuplicates,
+        total_failed_sources: failedSourceCount,
+        error_summary: failedSourceCount > 0 ?
+          `${failedSourceCount}/${sourcesToRun.length} sources failed` : null,
+      })
+      .eq('id', runId)
+  }
 
   return results
 }

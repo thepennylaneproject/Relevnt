@@ -11,7 +11,7 @@ interface ExperienceSectionProps {
   id: string
   items: ResumeExperienceItem[]
   onChange: (items: ResumeExperienceItem[]) => void
-  colors: RelevntColors
+  colors?: RelevntColors
 }
 
 export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
@@ -49,7 +49,6 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
       title="Experience"
       description="Roles where you did the most damage, quantified and structured."
       icon={<Briefcase className="w-4 h-4 text-[#1F2933]" />}
-      colors={colors}
     >
       <div className="space-y-4">
         {items.map((item, index) => (

@@ -122,6 +122,7 @@ export function useCareerProfile(): UseCareerProfileReturn {
         { data: profileData, error: profileError },
         { data: voiceData, error: voiceError },
         { data: bulletData, error: bulletError },
+        { data: jobPrefsData },
       ] = await Promise.all([
         supabase
           .from('career_profiles')
@@ -138,21 +139,33 @@ export function useCareerProfile(): UseCareerProfileReturn {
           .select('*')
           .eq('user_id', userId)
           .order('created_at', { ascending: false }),
+        supabase
+          .from('job_preferences')
+          .select('*')
+          .eq('user_id', userId)
+          .maybeSingle(),
       ]);
 
       if (profileError) throw profileError;
       if (voiceError) throw voiceError;
+      if (profileError) throw profileError;
+      if (voiceError) throw voiceError;
       if (bulletError) throw bulletError;
+      // jobPrefsError might be null if not found (maybeSingle), which is fine
+
+
+      // career_profiles table has a 'profile' column which is JSON
+      const profileJson = (profileData?.profile as any) || {}
 
       const combinedProfile: CareerProfile = {
         id: profileData?.id || '',
         user_id: userId,
-        full_name: profileData?.full_name,
-        current_title: profileData?.current_title,
-        years_experience: profileData?.years_experience,
-        skills: profileData?.skills || [],
-        certifications: profileData?.certifications || [],
-        job_preferences: profileData?.job_preferences || {},
+        full_name: profileJson.full_name,
+        current_title: profileJson.current_title,
+        years_experience: profileJson.years_experience,
+        skills: profileJson.skills || [],
+        certifications: profileJson.certifications || [],
+        job_preferences: (jobPrefsData as unknown as JobPreferences) || {},
         voice_profile: (voiceData as VoiceProfile) || {},
         bullet_bank: (bulletData as BulletPoint[]) || [],
         created_at: profileData?.created_at || new Date().toISOString(),
@@ -188,12 +201,13 @@ export function useCareerProfile(): UseCareerProfileReturn {
           .from('career_profiles')
           .upsert({
             user_id: userId,
-            full_name: updates.full_name,
-            current_title: updates.current_title,
-            years_experience: updates.years_experience,
-            skills: updates.skills,
-            certifications: updates.certifications,
-            job_preferences: updates.job_preferences,
+            profile: {
+              full_name: updates.full_name,
+              current_title: updates.current_title,
+              years_experience: updates.years_experience,
+              skills: updates.skills,
+              certifications: updates.certifications,
+            },
             updated_at: new Date().toISOString(),
           });
 
@@ -261,12 +275,12 @@ export function useCareerProfile(): UseCareerProfileReturn {
         };
 
         const { error: updateError } = await supabase
-          .from('career_profiles')
-          .update({
-            job_preferences: updatedPreferences,
+          .from('job_preferences')
+          .upsert({
+            user_id: userId,
+            ...updatedPreferences,
             updated_at: new Date().toISOString(),
-          })
-          .eq('user_id', userId);
+          });
 
         if (updateError) throw updateError;
 

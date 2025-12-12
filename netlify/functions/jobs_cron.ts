@@ -5,7 +5,7 @@ export const handler: Handler = async () => {
   const startedAt = Date.now()
 
   try {
-    const results = await runIngestion()
+    const results = await runIngestion(null, 'schedule')
     const summary = results.reduce<Record<string, number>>((acc, r) => {
       acc[r.source] = r.count
       return acc

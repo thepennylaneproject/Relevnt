@@ -9,12 +9,12 @@ export const AI_INTEGRATIONS = {
     description: 'Extract structured data from resume text',
     category: 'parsing',
     providers: {
-      starter: 'openai-gpt4o',
-      pro: 'openai-gpt4o',
-      premium: 'openai-gpt4o',
+      starter: 'aimlapi',
+      pro: 'aimlapi',
+      premium: 'aimlapi',
     },
-    fallbackChain: ['openai-gpt4o', 'anthropic-sonnet4'],
-    estimatedCost: { starter: 0.01, pro: 0.01, premium: 0.01 },
+    fallbackChain: ['aimlapi', 'openai-gpt4o', 'anthropic-sonnet4'],
+    estimatedCost: { starter: 0.005, pro: 0.005, premium: 0.005 },
   },
   'job-extraction': {
     name: 'Job Description Extraction',
@@ -169,6 +169,7 @@ export const TIER_LIMITS = {
 };
 
 export const PROVIDERS = {
+  'aimlapi': { name: 'AI/ML API', tier: 'economy', costPerMToken: 0.07 },
   'deepseek': { name: 'DeepSeek', tier: 'economy', costPerMToken: 0.14 },
   'google-gemini': { name: 'Google Gemini', tier: 'mid', costPerMToken: 0.1 },
   'anthropic-sonnet4': { name: 'Claude Sonnet 4', tier: 'premium', costPerMToken: 3.0 },

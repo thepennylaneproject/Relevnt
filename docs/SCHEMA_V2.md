@@ -7,6 +7,8 @@ This document describes the V2 database schema additions for Relevnt's career op
 ```mermaid
 erDiagram
     users ||--o{ user_personas : "has many"
+    users ||--o{ resumes : "has many"
+    user_personas ||--o| resumes : "associated with"
     user_personas ||--|| persona_preferences : "has one"
     
     users ||--o{ job_matches : "has many"
@@ -32,6 +34,26 @@ erDiagram
 ---
 
 ## Tables
+
+### user_personas
+
+User job search personas with associated preferences and optional resume link.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | UUID | Primary key |
+| `user_id` | UUID | References `auth.users` |
+| `name` | VARCHAR(255) | Persona display name |
+| `description` | TEXT | Optional persona description |
+| `is_active` | BOOLEAN | Currently active persona flag |
+| `resume_id` | UUID | References `resumes` (optional) |
+| `created_at` / `updated_at` | TIMESTAMPTZ | Timestamps |
+
+**Constraint**: `UNIQUE (user_id, name)`
+
+**Note**: When a resume is deleted, the `resume_id` is set to NULL (ON DELETE SET NULL), preserving the persona.
+
+---
 
 ### job_matches
 
@@ -170,3 +192,4 @@ Links coaches to their clients.
 - Migration: [`20241211_v2_schema_expansion.sql`](file:///Users/sarahsahl/Desktop/relevnt-fresh/supabase/migrations/20241211_v2_schema_expansion.sql)
 - Types: [`v2-schema.ts`](file:///Users/sarahsahl/Desktop/relevnt-fresh/src/types/v2-schema.ts)
 - Personas (Phase B): [`20241210_add_personas.sql`](file:///Users/sarahsahl/Desktop/relevnt-fresh/supabase/migrations/20241210_add_personas.sql)
+- Persona-Resume Association: [`20241211_add_persona_resume_association.sql`](file:///Users/sarahsahl/Desktop/relevnt-fresh/supabase/migrations/20241211_add_persona_resume_association.sql)

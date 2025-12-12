@@ -147,6 +147,7 @@ async function handleListPersonas(
         name: p.name,
         description: p.description,
         is_active: p.is_active,
+        resume_id: p.resume_id || null,
         created_at: p.created_at,
         updated_at: p.updated_at,
         preferences: p.persona_preferences?.[0] || null,
@@ -202,6 +203,7 @@ async function handleGetPersona(
         name: persona.name,
         description: persona.description,
         is_active: persona.is_active,
+        resume_id: persona.resume_id || null,
         created_at: persona.created_at,
         updated_at: persona.updated_at,
         preferences: persona.persona_preferences?.[0] || null,
@@ -251,6 +253,24 @@ async function handleCreatePersona(
 
     const supabase = createAuthenticatedClient(token)
 
+    // Validate resume ownership if resume_id is provided
+    if (input.resume_id) {
+        const { data: resume, error: resumeError } = await supabase
+            .from('resumes')
+            .select('id')
+            .eq('id', input.resume_id)
+            .eq('user_id', userId)
+            .single()
+
+        if (resumeError || !resume) {
+            return createResponse(400, {
+                success: false,
+                error: 'Invalid resume',
+                message: 'Resume not found or does not belong to user',
+            })
+        }
+    }
+
     // If this should be active, deactivate others first
     if (input.is_active) {
         await supabase
@@ -268,6 +288,7 @@ async function handleCreatePersona(
             name: input.name.trim(),
             description: input.description || null,
             is_active: input.is_active || false,
+            resume_id: input.resume_id || null,
         })
         .select()
         .single()
@@ -325,6 +346,7 @@ async function handleCreatePersona(
         name: persona.name,
         description: persona.description,
         is_active: persona.is_active,
+        resume_id: persona.resume_id || null,
         created_at: persona.created_at,
         updated_at: persona.updated_at,
         preferences,
@@ -367,6 +389,24 @@ async function handleUpdatePersona(
 
     const supabase = createAuthenticatedClient(token)
 
+    // Validate resume ownership if resume_id is being updated
+    if (input.resume_id !== undefined && input.resume_id !== null) {
+        const { data: resume, error: resumeError } = await supabase
+            .from('resumes')
+            .select('id')
+            .eq('id', input.resume_id)
+            .eq('user_id', userId)
+            .single()
+
+        if (resumeError || !resume) {
+            return createResponse(400, {
+                success: false,
+                error: 'Invalid resume',
+                message: 'Resume not found or does not belong to user',
+            })
+        }
+    }
+
     // Build persona update object
     const personaUpdate: Record<string, any> = {}
     if (input.name !== undefined) {
@@ -381,6 +421,9 @@ async function handleUpdatePersona(
     }
     if (input.description !== undefined) {
         personaUpdate.description = input.description
+    }
+    if (input.resume_id !== undefined) {
+        personaUpdate.resume_id = input.resume_id
     }
     if (input.is_active !== undefined) {
         personaUpdate.is_active = input.is_active

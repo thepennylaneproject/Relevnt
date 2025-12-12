@@ -19,7 +19,8 @@ import JobPreferencesPage from './pages/JobPreferencesPage'
 import LearnPage from './pages/LearnPage'
 import ProfilePersonalPage from './pages/ProfilePersonalPage'
 import ProfileProfessionalPage from './pages/ProfileProfessionalPage'
-import ResumeBuilderPage  from './pages/ResumeBuilderPage'
+import ResumeBuilderPage from './pages/ResumeBuilderPage'
+import PersonaManagementPage from './pages/PersonaManagementPage'
 import SidebarMarginNav from './components/chrome/SidebarMarginNav'
 import './styles/margin-nav.css'
 
@@ -74,6 +75,10 @@ function AppInner() {
             <Route
               path="/resumes"
               element={isAuthed ? <ResumeBuilderPage /> : <Navigate to="/login" replace />}
+            />
+            <Route
+              path="/personas"
+              element={isAuthed ? <PersonaManagementPage /> : <Navigate to="/login" replace />}
             />
             <Route
               path="/jobs"

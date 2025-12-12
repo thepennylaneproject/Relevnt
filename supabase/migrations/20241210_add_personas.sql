@@ -65,6 +65,12 @@ CREATE INDEX IF NOT EXISTS idx_persona_preferences_persona_id
 
 ALTER TABLE user_personas ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Users can view their personas" ON user_personas;
+DROP POLICY IF EXISTS "Users can insert their personas" ON user_personas;
+DROP POLICY IF EXISTS "Users can update their personas" ON user_personas;
+DROP POLICY IF EXISTS "Users can delete their personas" ON user_personas;
+
 -- Users can view their own personas
 CREATE POLICY "Users can view their personas" ON user_personas
   FOR SELECT
@@ -90,6 +96,12 @@ CREATE POLICY "Users can delete their personas" ON user_personas
 -- =============================================================================
 
 ALTER TABLE persona_preferences ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Users can view their persona preferences" ON persona_preferences;
+DROP POLICY IF EXISTS "Users can insert their persona preferences" ON persona_preferences;
+DROP POLICY IF EXISTS "Users can update their persona preferences" ON persona_preferences;
+DROP POLICY IF EXISTS "Users can delete their persona preferences" ON persona_preferences;
 
 -- Users can view preferences for their own personas
 CREATE POLICY "Users can view their persona preferences" ON persona_preferences

@@ -17,6 +17,8 @@
 
 import { useState, useEffect, FormEvent } from 'react'
 import { usePersonas } from '../../hooks/usePersonas'
+import { useResumes } from '../../hooks/useResumes'
+import { useAuth } from '../../contexts/AuthContext'
 import type {
     UserPersona,
     PersonaPreferences,
@@ -90,6 +92,11 @@ export function PersonaEditor({
     const [saving, setSaving] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
+    // Resume selection
+    const { user } = useAuth()
+    const { resumes, loading: resumesLoading } = useResumes(user!)
+    const [resumeId, setResumeId] = useState<string>('')
+
     // ---------------------------------------------------------------------------
     // INITIALIZE FROM PERSONA
     // ---------------------------------------------------------------------------
@@ -99,6 +106,7 @@ export function PersonaEditor({
             setName(persona.name)
             setDescription(persona.description || '')
             setIsActive(persona.is_active)
+            setResumeId(persona.resume_id || '')
 
             const prefs = persona.preferences
             if (prefs) {
@@ -115,6 +123,7 @@ export function PersonaEditor({
             setName('')
             setDescription('')
             setIsActive(true) // New personas default to active
+            setResumeId('')
             setJobTitleKeywords('')
             setMinSalary('')
             setMaxSalary('')
@@ -181,6 +190,7 @@ export function PersonaEditor({
                     name: name.trim(),
                     description: description.trim() || null,
                     is_active: isActive,
+                    resume_id: resumeId || null,
                     preferences,
                 }
                 await updatePersona(persona.id, updateData)
@@ -203,6 +213,7 @@ export function PersonaEditor({
                     name: name.trim(),
                     description: description.trim() || null,
                     is_active: isActive,
+                    resume_id: resumeId || null,
                     preferences,
                 }
                 const newPersona = await createPersona(createData)
@@ -276,6 +287,29 @@ export function PersonaEditor({
                         />
                         <span>Set as active persona</span>
                     </label>
+                </div>
+
+                <div style={styles.field}>
+                    <label htmlFor="resume-select" style={styles.label}>
+                        Associated Resume (Optional)
+                    </label>
+                    <select
+                        id="resume-select"
+                        value={resumeId}
+                        onChange={(e) => setResumeId(e.target.value)}
+                        style={styles.select}
+                        disabled={resumesLoading}
+                    >
+                        <option value="">None</option>
+                        {resumes.map((resume) => (
+                            <option key={resume.id} value={resume.id}>
+                                {resume.title}
+                            </option>
+                        ))}
+                    </select>
+                    <span style={styles.hint}>
+                        Link this persona to a specific resume
+                    </span>
                 </div>
             </div>
 

@@ -100,6 +100,9 @@ export interface UserPersona {
     /** Whether this is the currently active persona */
     is_active: boolean
 
+    /** Associated resume ID (optional) */
+    resume_id?: string | null
+
     /** Creation timestamp */
     created_at: string
 
@@ -127,6 +130,9 @@ export interface CreatePersonaInput {
     /** Whether to set as active immediately */
     is_active?: boolean
 
+    /** Associated resume ID (optional) */
+    resume_id?: string | null
+
     /** Optional initial preferences */
     preferences?: Omit<PersonaPreferences, 'id' | 'persona_id' | 'created_at' | 'updated_at'>
 }
@@ -143,6 +149,9 @@ export interface UpdatePersonaInput {
 
     /** Updated active status */
     is_active?: boolean
+
+    /** Updated resume ID */
+    resume_id?: string | null
 
     /** Updated preferences (partial update supported) */
     preferences?: Partial<Omit<PersonaPreferences, 'id' | 'persona_id' | 'created_at' | 'updated_at'>>

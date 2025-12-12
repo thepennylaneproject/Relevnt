@@ -11,7 +11,7 @@ interface ProjectsSectionProps {
   id: string
   items: ResumeProjectItem[]
   onChange: (items: ResumeProjectItem[]) => void
-  colors: RelevntColors
+  colors?: RelevntColors
 }
 
 export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
@@ -52,7 +52,6 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
       title="Projects"
       description="Founder builds, side projects, and proof of concept work."
       icon={<FolderOpen className="w-4 h-4 text-[#1F2933]" />}
-      colors={colors}
     >
       <div className="space-y-4">
         {items.map((item, index) => (

@@ -74,20 +74,27 @@ export function useJobPreferences(): UseJobPreferencesReturn {
       setError(null)
 
       const { data, error: loadErr } = await supabase
-        .from('user_match_preferences') // ← unified table
+        .from('job_preferences') // ← unified table
         .select('*')
         .eq('user_id', user.id)
         .maybeSingle()
 
       if (loadErr) {
-        console.warn('Failed to load user_match_preferences', loadErr)
+        console.warn('Failed to load job_preferences', loadErr)
         // fall back to defaults, do not hard-error the UI
         setPrefs(buildDefaults())
         setLoading(false)
         return
       }
 
-      const row = data ?? {}
+      if (!data) {
+        // No preferences found, use defaults
+        setPrefs(buildDefaults())
+        setLoading(false)
+        return
+      }
+
+      const row = data
 
       const next: JobPreferences = {
         primary_title: row.primary_title ?? '',
@@ -154,7 +161,7 @@ export function useJobPreferences(): UseJobPreferencesReturn {
     }
 
     const { error: upsertErr } = await supabase
-      .from('user_match_preferences') // ← same table
+      .from('job_preferences') // ← same table
       .upsert(payload, { onConflict: 'user_id' })
 
     if (upsertErr) {

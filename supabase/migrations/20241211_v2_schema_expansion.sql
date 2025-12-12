@@ -157,171 +157,183 @@ CREATE INDEX IF NOT EXISTS idx_coach_client_relationships_client
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------
--- 8a. job_matches RLS (already enabled, add persona-aware policies)
--- -----------------------------------------------------------------------------
+-- =============================================================================
+-- RLS Policies for job_matches
+-- =============================================================================
 -- Note: Assuming RLS is already enabled on job_matches
+ALTER TABLE job_matches ENABLE ROW LEVEL SECURITY;
 
--- Drop existing policies if they exist (to recreate with updated logic)
+-- Drop existing policies if they exist
 DROP POLICY IF EXISTS "Users view their own job matches" ON job_matches;
-DROP POLICY IF EXISTS "Users manage their own job matches" ON job_matches;
+DROP POLICY IF EXISTS "Users insert their own job matches" ON job_matches;
+DROP POLICY IF EXISTS "Users update their own job matches" ON job_matches;
+DROP POLICY IF EXISTS "Users delete their own job matches" ON job_matches;
 
 CREATE POLICY "Users view their own job matches" ON job_matches
-  FOR SELECT
-  USING (user_id = auth.uid());
+  FOR SELECT USING (user_id = auth.uid());
 
 CREATE POLICY "Users insert their own job matches" ON job_matches
-  FOR INSERT
-  WITH CHECK (user_id = auth.uid());
+  FOR INSERT WITH CHECK (user_id = auth.uid());
 
 CREATE POLICY "Users update their own job matches" ON job_matches
-  FOR UPDATE
-  USING (user_id = auth.uid());
+  FOR UPDATE USING (user_id = auth.uid());
 
 CREATE POLICY "Users delete their own job matches" ON job_matches
-  FOR DELETE
-  USING (user_id = auth.uid());
+  FOR DELETE USING (user_id = auth.uid());
 
--- -----------------------------------------------------------------------------
--- 8b. auto_apply_rules RLS
--- -----------------------------------------------------------------------------
+-- =============================================================================
+-- RLS Policies for auto_apply_rules
+-- =============================================================================
 
 ALTER TABLE auto_apply_rules ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Users view their own auto apply rules" ON auto_apply_rules;
+DROP POLICY IF EXISTS "Users insert their own auto apply rules" ON auto_apply_rules;
+DROP POLICY IF EXISTS "Users update their own auto apply rules" ON auto_apply_rules;
+DROP POLICY IF EXISTS "Users delete their own auto apply rules" ON auto_apply_rules;
+
 CREATE POLICY "Users view their own auto apply rules" ON auto_apply_rules
-  FOR SELECT
-  USING (user_id = auth.uid());
+  FOR SELECT USING (user_id = auth.uid());
 
 CREATE POLICY "Users insert their own auto apply rules" ON auto_apply_rules
-  FOR INSERT
-  WITH CHECK (user_id = auth.uid());
+  FOR INSERT WITH CHECK (user_id = auth.uid());
 
 CREATE POLICY "Users update their own auto apply rules" ON auto_apply_rules
-  FOR UPDATE
-  USING (user_id = auth.uid());
+  FOR UPDATE USING (user_id = auth.uid());
 
 CREATE POLICY "Users delete their own auto apply rules" ON auto_apply_rules
-  FOR DELETE
-  USING (user_id = auth.uid());
+  FOR DELETE USING (user_id = auth.uid());
 
--- -----------------------------------------------------------------------------
--- 8c. auto_apply_logs RLS
--- -----------------------------------------------------------------------------
+-- =============================================================================
+-- RLS Policies for auto_apply_logs
+-- =============================================================================
 
 ALTER TABLE auto_apply_logs ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Users view their own auto apply logs" ON auto_apply_logs;
+DROP POLICY IF EXISTS "Users insert their own auto apply logs" ON auto_apply_logs;
+DROP POLICY IF EXISTS "Users update their own auto apply logs" ON auto_apply_logs;
+DROP POLICY IF EXISTS "Users delete their own auto apply logs" ON auto_apply_logs;
+
 CREATE POLICY "Users view their own auto apply logs" ON auto_apply_logs
-  FOR SELECT
-  USING (user_id = auth.uid());
+  FOR SELECT USING (user_id = auth.uid());
 
 CREATE POLICY "Users insert their own auto apply logs" ON auto_apply_logs
-  FOR INSERT
-  WITH CHECK (user_id = auth.uid());
+  FOR INSERT WITH CHECK (user_id = auth.uid());
 
 CREATE POLICY "Users update their own auto apply logs" ON auto_apply_logs
-  FOR UPDATE
-  USING (user_id = auth.uid());
+  FOR UPDATE USING (user_id = auth.uid());
 
 CREATE POLICY "Users delete their own auto apply logs" ON auto_apply_logs
-  FOR DELETE
-  USING (user_id = auth.uid());
+  FOR DELETE USING (user_id = auth.uid());
 
--- -----------------------------------------------------------------------------
--- 8d. relevance_tuner_settings RLS
--- -----------------------------------------------------------------------------
+-- =============================================================================
+-- RLS Policies for relevance_tuner_settings
+-- =============================================================================
 
 ALTER TABLE relevance_tuner_settings ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Users view their own relevance tuner settings" ON relevance_tuner_settings;
+DROP POLICY IF EXISTS "Users insert their own relevance tuner settings" ON relevance_tuner_settings;
+DROP POLICY IF EXISTS "Users update their own relevance tuner settings" ON relevance_tuner_settings;
+DROP POLICY IF EXISTS "Users delete their own relevance tuner settings" ON relevance_tuner_settings;
+
 CREATE POLICY "Users view their own relevance tuner settings" ON relevance_tuner_settings
-  FOR SELECT
-  USING (user_id = auth.uid());
+  FOR SELECT USING (user_id = auth.uid());
 
 CREATE POLICY "Users insert their own relevance tuner settings" ON relevance_tuner_settings
-  FOR INSERT
-  WITH CHECK (user_id = auth.uid());
+  FOR INSERT WITH CHECK (user_id = auth.uid());
 
 CREATE POLICY "Users update their own relevance tuner settings" ON relevance_tuner_settings
-  FOR UPDATE
-  USING (user_id = auth.uid());
+  FOR UPDATE USING (user_id = auth.uid());
 
 CREATE POLICY "Users delete their own relevance tuner settings" ON relevance_tuner_settings
-  FOR DELETE
-  USING (user_id = auth.uid());
+  FOR DELETE USING (user_id = auth.uid());
 
--- -----------------------------------------------------------------------------
--- 8e. user_skills RLS
--- -----------------------------------------------------------------------------
+-- =============================================================================
+-- RLS Policies for user_skills
+-- =============================================================================
 
 ALTER TABLE user_skills ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Users view their own skills" ON user_skills;
+DROP POLICY IF EXISTS "Users insert their own skills" ON user_skills;
+DROP POLICY IF EXISTS "Users update their own skills" ON user_skills;
+DROP POLICY IF EXISTS "Users delete their own skills" ON user_skills;
+
 CREATE POLICY "Users view their own skills" ON user_skills
-  FOR SELECT
-  USING (user_id = auth.uid());
+  FOR SELECT USING (user_id = auth.uid());
 
 CREATE POLICY "Users insert their own skills" ON user_skills
-  FOR INSERT
-  WITH CHECK (user_id = auth.uid());
+  FOR INSERT WITH CHECK (user_id = auth.uid());
 
 CREATE POLICY "Users update their own skills" ON user_skills
-  FOR UPDATE
-  USING (user_id = auth.uid());
+  FOR UPDATE USING (user_id = auth.uid());
 
 CREATE POLICY "Users delete their own skills" ON user_skills
-  FOR DELETE
-  USING (user_id = auth.uid());
+  FOR DELETE USING (user_id = auth.uid());
 
--- -----------------------------------------------------------------------------
--- 8f. learning_recommendations RLS
--- -----------------------------------------------------------------------------
+-- =============================================================================
+-- RLS Policies for learning_recommendations
+-- =============================================================================
 
 ALTER TABLE learning_recommendations ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Users view their own learning recommendations" ON learning_recommendations;
+DROP POLICY IF EXISTS "Users insert their own learning recommendations" ON learning_recommendations;
+DROP POLICY IF EXISTS "Users update their own learning recommendations" ON learning_recommendations;
+DROP POLICY IF EXISTS "Users delete their own learning recommendations" ON learning_recommendations;
+
 CREATE POLICY "Users view their own learning recommendations" ON learning_recommendations
-  FOR SELECT
-  USING (user_id = auth.uid());
+  FOR SELECT USING (user_id = auth.uid());
 
 CREATE POLICY "Users insert their own learning recommendations" ON learning_recommendations
-  FOR INSERT
-  WITH CHECK (user_id = auth.uid());
+  FOR INSERT WITH CHECK (user_id = auth.uid());
 
 CREATE POLICY "Users update their own learning recommendations" ON learning_recommendations
-  FOR UPDATE
-  USING (user_id = auth.uid());
+  FOR UPDATE USING (user_id = auth.uid());
 
 CREATE POLICY "Users delete their own learning recommendations" ON learning_recommendations
-  FOR DELETE
-  USING (user_id = auth.uid());
+  FOR DELETE USING (user_id = auth.uid());
 
--- -----------------------------------------------------------------------------
--- 8g. coach_client_relationships RLS
--- -----------------------------------------------------------------------------
+-- =============================================================================
+-- RLS Policies for coach_client_relationships
+-- =============================================================================
 -- Special case: coaches and clients have different access patterns
 
 ALTER TABLE coach_client_relationships ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Coaches view their client relationships" ON coach_client_relationships;
+DROP POLICY IF EXISTS "Clients view their coach relationships" ON coach_client_relationships;
+DROP POLICY IF EXISTS "Coaches create client relationships" ON coach_client_relationships;
+DROP POLICY IF EXISTS "Coaches update client relationships" ON coach_client_relationships;
+DROP POLICY IF EXISTS "Coaches delete client relationships" ON coach_client_relationships;
+
 -- Coaches can view relationships where they are the coach
 CREATE POLICY "Coaches view their client relationships" ON coach_client_relationships
-  FOR SELECT
-  USING (coach_id = auth.uid());
+  FOR SELECT USING (coach_id = auth.uid());
 
 -- Clients can view relationships where they are the client
 CREATE POLICY "Clients view their coach relationships" ON coach_client_relationships
-  FOR SELECT
-  USING (client_id = auth.uid());
+  FOR SELECT USING (client_id = auth.uid());
 
--- Only coaches can create relationships
+-- Only coaches can create relationships (for their own coaching)
 CREATE POLICY "Coaches create client relationships" ON coach_client_relationships
-  FOR INSERT
-  WITH CHECK (coach_id = auth.uid());
+  FOR INSERT WITH CHECK (coach_id = auth.uid());
 
--- Only coaches can update relationships
+-- Only coaches can update their client relationships
 CREATE POLICY "Coaches update client relationships" ON coach_client_relationships
-  FOR UPDATE
-  USING (coach_id = auth.uid());
+  FOR UPDATE USING (coach_id = auth.uid());
 
--- Only coaches can delete relationships
+-- Only coaches can delete their client relationships
 CREATE POLICY "Coaches delete client relationships" ON coach_client_relationships
-  FOR DELETE
-  USING (coach_id = auth.uid());
+  FOR DELETE USING (coach_id = auth.uid());
 
 -- =============================================================================
 -- 9. UPDATED_AT TRIGGERS

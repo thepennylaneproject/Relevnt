@@ -120,6 +120,7 @@ export interface AutoApplyLog {
 export interface RelevanceTunerSettings {
     id: string
     user_id: string
+    persona_id?: string | null
     name: string
     skill_weight: number
     salary_weight: number
@@ -136,6 +137,7 @@ export interface RelevanceTunerSettings {
  */
 export interface CreateRelevanceTunerInput {
     name: string
+    persona_id?: string | null
     skill_weight?: number
     salary_weight?: number
     location_weight?: number
@@ -150,9 +152,20 @@ export interface CreateRelevanceTunerInput {
 export type UpdateRelevanceTunerInput = Partial<CreateRelevanceTunerInput>
 
 /**
+ * Weight configuration object used in matching logic
+ */
+export interface WeightConfig {
+    skill_weight: number
+    salary_weight: number
+    location_weight: number
+    remote_weight: number
+    industry_weight: number
+}
+
+/**
  * Default relevance weights
  */
-export const DEFAULT_RELEVANCE_WEIGHTS: Omit<RelevanceTunerSettings, 'id' | 'user_id' | 'name' | 'is_default' | 'created_at' | 'updated_at'> = {
+export const DEFAULT_RELEVANCE_WEIGHTS: WeightConfig = {
     skill_weight: 0.3,
     salary_weight: 0.25,
     location_weight: 0.15,

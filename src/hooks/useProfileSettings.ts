@@ -14,11 +14,11 @@ type ProfileRow = {
   timezone: string | null
   location: string | null
   layout_density: string | null
-  onboarding_completed: boolean | null
-  onboarding_step: string | null
+  onboarding_completed: boolean | null // Allowing null for read, but will handle strictness
+  onboarding_step: number | null // Changed to number
   created_at: string | null
   updated_at: string | null
-  auto_apply_active: boolean | null
+  auto_apply_active: boolean // Strict boolean
   voice_preset: string | null
   voice_custom_sample: string | null
   voice_formality: number | null
@@ -161,9 +161,13 @@ export function useProfileSettings(): UseProfileSettingsReturn {
       setSaveError(null)
 
       const payload = mapSettingsToRow(next)
+      // Filter out null values to match DB schema expectations (undefined ok, null not ok)
+      const cleanPayload = Object.fromEntries(
+        Object.entries(payload).filter(([_, v]) => v !== null)
+      )
       const { error: supaError } = await supabase
         .from('profiles')
-        .update(payload)
+        .update(cleanPayload)
         .eq('id', user.id)
 
       if (supaError) {

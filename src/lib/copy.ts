@@ -28,7 +28,7 @@ export const copy = {
     footer: 'Relevnt • Est. 2025',
     copyright: '© 2025 Relevnt. All rights reserved.',
   },
-  
+
   // ─────────────────────────────────────────────────────────────────────────
   // NAVIGATION
   // ─────────────────────────────────────────────────────────────────────────
@@ -39,9 +39,10 @@ export const copy = {
     resumes: 'CVs',
     learn: 'Learn',
     voice: 'Voice',
+    personas: 'Personas',
     settings: 'Prefs',
   },
-  
+
   // ─────────────────────────────────────────────────────────────────────────
   // ONBOARDING
   // ─────────────────────────────────────────────────────────────────────────
@@ -52,17 +53,17 @@ export const copy = {
     startButton: "Start for free",
     signInButton: "Sign in",
   },
-  
+
   // ─────────────────────────────────────────────────────────────────────────
   // DASHBOARD
   // ─────────────────────────────────────────────────────────────────────────
   dashboard: {
     greeting: "Welcome back. Let's find clarity.",
-    analysisCount: (used: number, total: number) => 
+    analysisCount: (used: number, total: number) =>
       `You've used ${used} of ${total} analyses this month.`,
     transparencyReady: "Transparency report ready.",
   },
-  
+
   // ─────────────────────────────────────────────────────────────────────────
   // JOBS
   // ─────────────────────────────────────────────────────────────────────────
@@ -94,7 +95,7 @@ export const copy = {
       explanation: "See how this score was calculated",
     },
   },
-  
+
   // ─────────────────────────────────────────────────────────────────────────
   // APPLICATIONS
   // ─────────────────────────────────────────────────────────────────────────
@@ -116,7 +117,7 @@ export const copy = {
     },
     emptyPrompt: "No applications yet. When you apply to a job, log it here so Future You has receipts.",
   },
-  
+
   // ─────────────────────────────────────────────────────────────────────────
   // RESUMES / CVs
   // ─────────────────────────────────────────────────────────────────────────
@@ -168,7 +169,7 @@ export const copy = {
       },
     },
   },
-  
+
   // ─────────────────────────────────────────────────────────────────────────
   // VOICE PROFILE
   // ─────────────────────────────────────────────────────────────────────────
@@ -233,7 +234,16 @@ export const copy = {
     saveButton: "Save voice profile",
     savedNote: "You can change this later in your settings. Your agent will start using this voice for new applications after you save.",
   },
-  
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // PERSONAS
+  // ─────────────────────────────────────────────────────────────────────────
+  personas: {
+    pageTitle: "Personas",
+    pageSubtitle: "Create different versions of yourself for different job markets. Switch between them to tailor your feed and applications.",
+    emptyState: "You usually wear more than one hat. Define your first persona to start targeting specific roles.",
+  },
+
   // ─────────────────────────────────────────────────────────────────────────
   // PROFESSIONAL PROFILE
   // ─────────────────────────────────────────────────────────────────────────
@@ -275,7 +285,7 @@ export const copy = {
     },
     saveButton: "Save profile",
   },
-  
+
   // ─────────────────────────────────────────────────────────────────────────
   // SETTINGS / PREFERENCES
   // ─────────────────────────────────────────────────────────────────────────
@@ -350,7 +360,7 @@ export const copy = {
       saveChanges: "Save changes",
     },
   },
-  
+
   // ─────────────────────────────────────────────────────────────────────────
   // LEARN
   // ─────────────────────────────────────────────────────────────────────────
@@ -359,7 +369,7 @@ export const copy = {
     pageSubtitle: "Close the gaps the market cares about most, without signing your life away to another bootcamp.",
     comingSoon: "Content coming soon.",
   },
-  
+
   // ─────────────────────────────────────────────────────────────────────────
   // TRANSPARENCY / AI EXPLANATIONS
   // ─────────────────────────────────────────────────────────────────────────
@@ -370,7 +380,7 @@ export const copy = {
     loading: "We're unpacking the reasoning. One sec — we'll show our work.",
     matchExplanation: "This match score is based on skill keywords, experience level, and language alignment. You can view or adjust any factor below.",
   },
-  
+
   // ─────────────────────────────────────────────────────────────────────────
   // UPGRADE / GATING
   // ─────────────────────────────────────────────────────────────────────────
@@ -384,7 +394,7 @@ export const copy = {
     upgradeButton: "Upgrade now",
     learnMore: "Learn more",
   },
-  
+
   // ─────────────────────────────────────────────────────────────────────────
   // ERRORS & ALERTS
   // ─────────────────────────────────────────────────────────────────────────
@@ -400,7 +410,7 @@ export const copy = {
     goBack: "Go back",
     refresh: "Refresh",
   },
-  
+
   // ─────────────────────────────────────────────────────────────────────────
   // SUCCESS STATES
   // ─────────────────────────────────────────────────────────────────────────
@@ -412,7 +422,7 @@ export const copy = {
     settingsSaved: "Settings saved.",
     voiceSaved: "Voice profile saved. Your agent will use this going forward.",
   },
-  
+
   // ─────────────────────────────────────────────────────────────────────────
   // CONFIRMATIONS
   // ─────────────────────────────────────────────────────────────────────────
@@ -421,7 +431,7 @@ export const copy = {
     upgraded: "Upgrade successful — clarity unlocked.",
     backOnTrack: "You're back on track.",
   },
-  
+
   // ─────────────────────────────────────────────────────────────────────────
   // BUTTONS / ACTIONS (Generic)
   // ─────────────────────────────────────────────────────────────────────────
@@ -456,7 +466,7 @@ export const copy = {
     signOut: "Log out",
     signUp: "Sign up",
   },
-  
+
   // ─────────────────────────────────────────────────────────────────────────
   // EMPTY STATES
   // ─────────────────────────────────────────────────────────────────────────
@@ -494,7 +504,7 @@ export const copy = {
       description: "Paste a job post or upload a résumé to see how the system sees you. We'll show our work.",
     },
   },
-  
+
   // ─────────────────────────────────────────────────────────────────────────
   // PRICING
   // ─────────────────────────────────────────────────────────────────────────
@@ -518,7 +528,7 @@ export const copy = {
       },
     },
   },
-  
+
   // ─────────────────────────────────────────────────────────────────────────
   // ETHICAL AI SECTION
   // ─────────────────────────────────────────────────────────────────────────

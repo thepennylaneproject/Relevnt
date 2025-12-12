@@ -15,6 +15,7 @@ import { callGoogleGemini } from './providers/google';
 import { searchBrave } from './providers/brave';
 import { searchTavily } from './providers/tavily';
 import { processLocal } from './providers/local';
+import { callAimlApi, AimlApiMessage } from './providers/aimlapi';
 
 interface AIRequest {
   task: string;
@@ -156,7 +157,7 @@ Rules:
     try {
       console.log(`Attempting ${task} with provider: ${provider}`);
 
-      const result = await callProvider(provider, processedInput, options);
+      const result = await callProvider(provider, task, processedInput, options);
 
       if (result.success) {
         // ✅ FIXED: trackUsage takes 4 params: userId, task, tokens, costUSD
@@ -196,11 +197,63 @@ Rules:
  */
 async function callProvider(
   provider: string,
+  task: string,
   input: any,
   options: any
 ): Promise<AIResponse> {
   try {
     switch (provider) {
+      // AIMLAPI - primary provider for resume extraction (50% cost savings)
+      case 'aimlapi':
+        const aimlMessages: AimlApiMessage[] = [
+          { role: 'system', content: options.systemPrompt || 'You are a helpful career assistant.' },
+          { role: 'user', content: typeof input === 'string' ? input : JSON.stringify(input) }
+        ];
+
+        // Use a capable model for extraction
+        const aimlResult = await callAimlApi('gpt-4o-mini', aimlMessages, 0.1, 4000);
+
+        if (!aimlResult.success) {
+          return {
+            success: false,
+            error: aimlResult.error || 'AIMLAPI call failed',
+            tokensUsed: 0,
+            costEstimate: 0,
+          };
+        }
+
+        // Parse JSON for structured response tasks
+        let parsedAimlData: any = aimlResult.content;
+        if (task === 'extract-resume') {
+          try {
+            let cleanedResult = aimlResult.content.trim();
+            if (cleanedResult.startsWith('```json')) {
+              cleanedResult = cleanedResult.replace(/^```json\n?/, '').replace(/\n?```$/, '');
+            } else if (cleanedResult.startsWith('```')) {
+              cleanedResult = cleanedResult.replace(/^```\n?/, '').replace(/\n?```$/, '');
+            }
+
+            parsedAimlData = JSON.parse(cleanedResult);
+            console.log('✅ Successfully parsed AIMLAPI JSON response for extract-resume');
+          } catch (parseError) {
+            console.error('❌ Failed to parse AIMLAPI response as JSON:', parseError);
+            console.error('Raw AIMLAPI response:', aimlResult.content);
+            return {
+              success: false,
+              error: 'AI returned invalid JSON. Please try again.',
+              tokensUsed: 0,
+              costEstimate: 0,
+            };
+          }
+        }
+
+        return {
+          success: true,
+          data: parsedAimlData,
+          tokensUsed: 0,
+          costEstimate: 0,
+        };
+
       case 'deepseek':
         const deepseekResult = await callDeepSeek(input, options.systemPrompt || 'You are a helpful assistant');
         return {
@@ -219,9 +272,36 @@ async function callProvider(
           input,
           options.systemPrompt || 'You are a helpful career assistant.'
         );
+
+        // Parse JSON for structured response tasks
+        let parsedData = openaiResult;
+        if (task === 'extract-resume') {
+          try {
+            // Clean the response - remove markdown code blocks if present
+            let cleanedResult = openaiResult.trim();
+            if (cleanedResult.startsWith('```json')) {
+              cleanedResult = cleanedResult.replace(/^```json\n?/, '').replace(/\n?```$/, '');
+            } else if (cleanedResult.startsWith('```')) {
+              cleanedResult = cleanedResult.replace(/^```\n?/, '').replace(/\n?```$/, '');
+            }
+
+            parsedData = JSON.parse(cleanedResult);
+            console.log('✅ Successfully parsed AI JSON response for extract-resume');
+          } catch (parseError) {
+            console.error('❌ Failed to parse AI response as JSON:', parseError);
+            console.error('Raw AI response:', openaiResult);
+            return {
+              success: false,
+              error: 'AI returned invalid JSON. Please try again.',
+              tokensUsed: 0,
+              costEstimate: 0,
+            };
+          }
+        }
+
         return {
           success: true,
-          data: openaiResult,
+          data: parsedData,
           tokensUsed: 0,
           costEstimate: 0,
         };
@@ -231,9 +311,36 @@ async function callProvider(
           input,
           options.systemPrompt || 'You are a helpful career assistant.'
         );
+
+        // Parse JSON for structured response tasks
+        let parsedAnthropicData = anthropicResult;
+        if (task === 'extract-resume') {
+          try {
+            // Clean the response - remove markdown code blocks if present
+            let cleanedResult = String(anthropicResult).trim();
+            if (cleanedResult.startsWith('```json')) {
+              cleanedResult = cleanedResult.replace(/^```json\n?/, '').replace(/\n?```$/, '');
+            } else if (cleanedResult.startsWith('```')) {
+              cleanedResult = cleanedResult.replace(/^```\n?/, '').replace(/\n?```$/, '');
+            }
+
+            parsedAnthropicData = JSON.parse(cleanedResult);
+            console.log('✅ Successfully parsed Anthropic JSON response for extract-resume');
+          } catch (parseError) {
+            console.error('❌ Failed to parse Anthropic response as JSON:', parseError);
+            console.error('Raw Anthropic response:', anthropicResult);
+            return {
+              success: false,
+              error: 'AI returned invalid JSON. Please try again.',
+              tokensUsed: 0,
+              costEstimate: 0,
+            };
+          }
+        }
+
         return {
           success: true,
-          data: anthropicResult,
+          data: parsedAnthropicData,
           tokensUsed: 0,
           costEstimate: 0,
         };

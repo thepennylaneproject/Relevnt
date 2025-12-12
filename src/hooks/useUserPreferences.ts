@@ -62,19 +62,10 @@ export function useUserPreferences(): UseUserPreferencesResult {
       setError(null)
       try {
         const { data, error } = await supabase
-          .from('profiles')
-          .select(
-            [
-              'min_salary',
-              'remote_preference',
-              'preferred_locations',
-              'keywords_include',
-              'keywords_exclude',
-              'target_titles',
-            ].join(', ')
-          )
-          .eq('id', user.id) // profiles.id is auth user id
-          .single<ProfileRow>()
+          .from('job_preferences')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle()
 
         if (error) {
           console.warn('useUserPreferences: load failed', error)
@@ -87,27 +78,12 @@ export function useUserPreferences(): UseUserPreferencesResult {
 
         if (!cancelled) {
           const next: UserPreferences = {
-            min_salary:
-              typeof data?.min_salary === 'number'
-                ? data.min_salary
-                : data?.min_salary
-                ? Number(data.min_salary)
-                : null,
-            remote_preference:
-              (data?.remote_preference as
-                | 'remote_only'
-                | 'hybrid'
-                | 'onsite'
-                | ''
-                | null) ?? '',
-            preferred_locations:
-              (data?.preferred_locations as string) ?? '',
-            keywords_include:
-              (data?.keywords_include as string) ?? '',
-            keywords_exclude:
-              (data?.keywords_exclude as string) ?? '',
-            target_titles:
-              (data?.target_titles as string) ?? '',
+            min_salary: data?.min_salary ?? null,
+            remote_preference: (data?.remote_preference as any) ?? '',
+            preferred_locations: (data?.preferred_locations as string[])?.join(', ') ?? '',
+            keywords_include: (data?.include_keywords as string[])?.join(', ') ?? '',
+            keywords_exclude: (data?.avoid_keywords as string[])?.join(', ') ?? '',
+            target_titles: data?.primary_title ?? '',
           }
           setPrefs(next)
         }
@@ -149,21 +125,17 @@ export function useUserPreferences(): UseUserPreferencesResult {
       try {
         const payload = {
           min_salary: merged.min_salary,
-          remote_preference:
-            merged.remote_preference || null,
-          preferred_locations:
-            merged.preferred_locations || null,
-          keywords_include:
-            merged.keywords_include || null,
-          keywords_exclude:
-            merged.keywords_exclude || null,
-          target_titles: merged.target_titles || null,
+          remote_preference: merged.remote_preference || null,
+          preferred_locations: merged.preferred_locations ? merged.preferred_locations.split(',').map(s => s.trim()) : [],
+          include_keywords: merged.keywords_include ? merged.keywords_include.split(',').map(s => s.trim()) : [],
+          avoid_keywords: merged.keywords_exclude ? merged.keywords_exclude.split(',').map(s => s.trim()) : [],
+          primary_title: merged.target_titles || null,
         }
 
         const { error } = await supabase
-          .from('profiles')
+          .from('job_preferences')
           .update(payload)
-          .eq('id', user.id)
+          .eq('user_id', user.id)
 
         if (error) {
           console.warn(
