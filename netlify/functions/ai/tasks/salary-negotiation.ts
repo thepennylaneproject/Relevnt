@@ -1,11 +1,10 @@
 /**
  * Task: Salary Negotiation Advisor
- * 
+ *
  * Provides salary negotiation strategies and market data
  */
 
-import { callAnthropic } from '../providers/anthropic'
-import { searchBrave } from '../providers/brave'
+import { routeLegacyTask } from '../legacyTaskRouter'
 
 // ============================================================================
 // TYPES
@@ -43,51 +42,19 @@ export async function adviseSalaryNegotiation(
   offerAmount?: number
 ): Promise<SalaryNegotiationResponse> {
   try {
-    // Search for market data
-    const searchResults = await searchBrave(
-      `${position} salary ${location} 2025 market rate`,
-      { count: 5 }
-    )
+    const response = await routeLegacyTask('salary-negotiation', {
+      position,
+      company,
+      location,
+      yourExperience,
+      offerAmount,
+    })
 
-    const prompt = `Provide salary negotiation advice.
-
-Position: ${position}
-Company: ${company}
-Location: ${location}
-Experience: ${yourExperience}
-${offerAmount ? `Current Offer: $${offerAmount}` : ''}
-
-Market Research:
-${searchResults.results.map((r) => r.title).join('\n')}
-
-Provide advice in JSON:
-{
-  "marketRange": {
-    "min": number,
-    "max": number,
-    "median": number,
-    "currency": "USD"
-  },
-  "recommendedAsk": number,
-  "negotiationStrategy": ["strategy1"],
-  "redFlags": ["red_flag"],
-  "benefits": ["benefit_to_request"]
-}`
-
-    const response = await callAnthropic('claude-sonnet-4-20250514', [
-      { role: 'user', content: prompt },
-    ])
-
-    if (!response.success) {
-      throw new Error(response.error)
+    if (!response.ok || !response.output) {
+      throw new Error(response.error_message || 'AI routing failed')
     }
 
-    const jsonMatch = response.content.match(/\{[\s\S]*\}/)
-    if (!jsonMatch) {
-      throw new Error('No JSON in response')
-    }
-
-    const data = JSON.parse(jsonMatch[0])
+    const data = (response.output as any).data || response.output
 
     return {
       success: true,

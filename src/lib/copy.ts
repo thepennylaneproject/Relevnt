@@ -36,6 +36,7 @@ export const copy = {
     dashboard: 'Dash',
     jobs: 'Jobs',
     applications: 'Apps',
+    autoApplyQueue: 'Queue',
     resumes: 'CVs',
     learn: 'Learn',
     voice: 'Voice',
@@ -473,7 +474,7 @@ export const copy = {
   emptyStates: {
     applications: {
       title: "Your story starts here",
-      description: "When you apply to your first role, we'll track every step together — no spreadsheets required.",
+      description: "No applications yet? No problem. Use the helper below to draft answers for your first one, or log it when you're ready.",
     },
     jobs: {
       title: "Fresh opportunities await",

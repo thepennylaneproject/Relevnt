@@ -20,6 +20,31 @@ export const ExperienceItemCard: React.FC<ExperienceItemCardProps> = ({
   const { execute, loading, error } = useAITask()
   const [lastAction, setLastAction] = useState<'generate' | 'rewrite' | null>(null)
 
+  const coerceBulletsToString = (payload: any): string => {
+    if (!payload) return ''
+    if (typeof payload === 'string') return payload
+    if (Array.isArray(payload)) return payload.map((b: any) => `• ${b}`).join('\n')
+
+    // Handle nested API response: { success: true, data: { bullets: [...] } }
+    if (typeof payload === 'object' && payload.data && Array.isArray(payload.data.bullets)) {
+      return payload.data.bullets.map((b: any) => `• ${b}`).join('\n')
+    }
+    // Handle direct bullets array: { bullets: [...] }
+    if (typeof payload === 'object' && Array.isArray(payload.bullets)) {
+      return payload.bullets.map((b: any) => `• ${b}`).join('\n')
+    }
+
+    // Handle nested rewritten: { data: { rewritten: "..." } }
+    if (typeof payload === 'object' && payload.data && typeof payload.data.rewritten === 'string') {
+      return payload.data.rewritten
+    }
+    // Handle direct rewritten: { rewritten: "..." }
+    if (typeof payload === 'object' && typeof payload.rewritten === 'string') {
+      return payload.rewritten
+    }
+    return ''
+  }
+
   const handleGenerateBullets = async () => {
     setLastAction('generate')
     try {
@@ -30,9 +55,10 @@ export const ExperienceItemCard: React.FC<ExperienceItemCardProps> = ({
       })
 
       if (result.success && result.data) {
+        const bullets = coerceBulletsToString(result.data)
         onChange({
           ...item,
-          bullets: (result.data as any).bullets || result.data,
+          bullets: bullets || item.bullets,
         })
       }
     } catch (err) {
@@ -49,9 +75,10 @@ export const ExperienceItemCard: React.FC<ExperienceItemCardProps> = ({
       })
 
       if (result.success && result.data) {
+        const bullets = coerceBulletsToString(result.data)
         onChange({
           ...item,
-          bullets: (result.data as any).rewritten || result.data,
+          bullets: bullets || item.bullets,
         })
       }
     } catch (err) {
@@ -160,6 +187,6 @@ export const ExperienceItemCard: React.FC<ExperienceItemCardProps> = ({
       >
         ✕ Remove experience
       </button>
-    </div>
+    </div >
   )
 }

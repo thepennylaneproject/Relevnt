@@ -1,5 +1,5 @@
 // src/pages/ResumeBuilder/components/SkillsSection.tsx
-import React, { ChangeEvent, useState } from 'react'
+import React, { ChangeEvent, useEffect, useState } from 'react'
 import { SectionCard } from './SectionCard'
 import { ResumeSkillGroup } from '../../types/resume-builder.types'
 import { RelevntColors } from '../../hooks/useRelevntColors'
@@ -18,10 +18,64 @@ interface SkillsSectionProps {
 export const SkillsSection: React.FC<SkillsSectionProps> = ({ id, skillGroups, onChange, colors }) => {
   const { execute, loading, error } = useAITask()
   const [lastActionIndex, setLastActionIndex] = useState<number | null>(null)
+  const [skillInputs, setSkillInputs] = useState<Record<string, string>>({})
+  const [pendingSuggestions, setPendingSuggestions] = useState<Record<string, string[]>>({})
+
+  // Keep local text inputs in sync with incoming props while preserving edits in progress
+  useEffect(() => {
+    setSkillInputs((prev) => {
+      const next: Record<string, string> = {}
+      skillGroups.forEach((group, index) => {
+        const key = group.id || `${id}-${index}`
+        next[key] = prev[key] ?? (group.skills || []).join(', ')
+      })
+      return next
+    })
+  }, [skillGroups, id])
+
+  const getGroupKey = React.useCallback((group: ResumeSkillGroup, index: number) => {
+    return group.id || `${id}-${index}`
+  }, [id])
+
+  const handleAddSkill = (index: number, skillToAdd: string) => {
+    const group = skillGroups[index]
+    const key = getGroupKey(group, index)
+
+    // Add to main skills list
+    const merged = [...group.skills, skillToAdd]
+    const next = [...skillGroups]
+    next[index] = { ...next[index], skills: merged }
+
+    // Update input state
+    setSkillInputs(prev => ({
+      ...prev,
+      [key]: merged.join(', ')
+    }))
+
+    // Remove from pending
+    setPendingSuggestions(prev => ({
+      ...prev,
+      [key]: (prev[key] || []).filter(s => s !== skillToAdd)
+    }))
+
+    onChange(next)
+  }
+
+  const handleDismissSkill = (index: number, skillToDismiss: string) => {
+    const group = skillGroups[index]
+    const key = getGroupKey(group, index)
+
+    setPendingSuggestions(prev => ({
+      ...prev,
+      [key]: (prev[key] || []).filter(s => s !== skillToDismiss)
+    }))
+  }
 
   const handleSuggestSkills = (index: number) => async () => {
     setLastActionIndex(index)
     const group = skillGroups[index]
+    const key = getGroupKey(group, index)
+
     try {
       const result = await execute('suggest-skills', {
         category: group.label,
@@ -29,13 +83,31 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ id, skillGroups, o
       })
 
       if (result.success && result.data) {
-        const newSkills = (result.data as any).skills || result.data
-        // Merge with existing, avoiding duplicates
-        const merged = Array.from(new Set([...group.skills, ...newSkills]))
+        let newSkills: string[] = []
 
-        const next = [...skillGroups]
-        next[index] = { ...next[index], skills: merged }
-        onChange(next)
+        // Handle nested API response: { success: true, data: { skills: [...] } }
+        if ((result.data as any).data && Array.isArray((result.data as any).data.skills)) {
+          newSkills = (result.data as any).data.skills
+        }
+        // Handle direct response: { skills: [...] }
+        else if (Array.isArray((result.data as any).skills)) {
+          newSkills = (result.data as any).skills
+        }
+        // Handle direct array response (unlikely but possible)
+        else if (Array.isArray(result.data)) {
+          newSkills = result.data as string[]
+        }
+
+        // Filter out skills we already have
+        const currentSet = new Set(group.skills.map(s => s.toLowerCase()))
+        const suggestions = newSkills.filter(s => !currentSet.has(s.toLowerCase()))
+
+        if (suggestions.length > 0) {
+          setPendingSuggestions(prev => ({
+            ...prev,
+            [key]: suggestions
+          }))
+        }
       }
     } catch (err) {
       console.error('Failed to suggest skills', err)
@@ -52,9 +124,10 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ id, skillGroups, o
       }
 
   const handleGroupSkillsChange =
-    (index: number) =>
+    (index: number, key: string) =>
       (e: ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value
+        setSkillInputs((prev) => ({ ...prev, [key]: value }))
         const list = value.split(',').map((s) => s.trim()).filter(Boolean)
         const next = [...skillGroups]
         next[index] = { ...next[index], skills: list }
@@ -87,7 +160,7 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ id, skillGroups, o
       <div className="space-y-4">
         {skillGroups.map((group, index) => (
           <div
-            key={group.label || index}
+            key={getGroupKey(group, index)}
             className={itemCardClass}
           >
             <div className="flex gap-3">
@@ -121,10 +194,50 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ id, skillGroups, o
               </div>
               <input
                 className={inputClass}
-                value={(group.skills || []).join(', ')}
-                onChange={handleGroupSkillsChange(index)}
+                value={skillInputs[getGroupKey(group, index)] ?? (group.skills || []).join(', ')}
+                onChange={handleGroupSkillsChange(index, getGroupKey(group, index))}
                 placeholder="Demand generation, Campaign strategy, CRM architecture"
               />
+
+              {/* Pending Suggestions */}
+              {pendingSuggestions[getGroupKey(group, index)]?.length > 0 && (
+                <div className="mt-2 text-sm">
+                  <span className="mb-1 block text-xs font-medium text-muted-foreground">Detailed Suggestions (Click to add):</span>
+                  <div className="flex flex-wrap gap-2">
+                    {pendingSuggestions[getGroupKey(group, index)].map((skill) => (
+                      <div key={skill} className="flex overflow-hidden rounded-md border border-indigo-200 bg-indigo-50 text-indigo-700">
+                        <button
+                          type="button"
+                          onClick={() => handleAddSkill(index, skill)}
+                          className="px-2 py-1 text-xs font-medium hover:bg-indigo-100"
+                        >
+                          + {skill}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDismissSkill(index, skill)}
+                          className="border-l border-indigo-200 px-1.5 py-1 text-xs hover:bg-indigo-100 hover:text-indigo-900"
+                          title="Dismiss"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => setPendingSuggestions(prev => {
+                        const next = { ...prev }
+                        delete next[getGroupKey(group, index)]
+                        return next
+                      })}
+                      className="text-xs text-muted-foreground hover:text-foreground hover:underline px-1"
+                    >
+                      Dismiss All
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {error && lastActionIndex === index && (
                 <div className="text-xs text-rose-600">{error.message}</div>
               )}

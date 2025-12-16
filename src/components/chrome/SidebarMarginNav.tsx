@@ -8,6 +8,7 @@ const NAV_ITEMS: Array<{ path: string; label: string; icon: IconName }> = [
   { path: '/dashboard', label: copy.nav.dashboard, icon: 'compass' },
   { path: '/jobs', label: copy.nav.jobs, icon: 'briefcase' },
   { path: '/applications', label: copy.nav.applications, icon: 'paper-airplane' },
+  { path: '/auto-apply/queue', label: copy.nav.autoApplyQueue, icon: 'scroll' },
   { path: '/resumes', label: copy.nav.resumes, icon: 'scroll' },
   { path: '/learn', label: copy.nav.learn, icon: 'book' },
   { path: '/personas', label: copy.nav.personas, icon: 'lighthouse' },

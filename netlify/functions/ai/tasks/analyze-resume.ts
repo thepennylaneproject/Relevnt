@@ -4,7 +4,7 @@
  * Comprehensive resume analysis with ATS scoring and recommendations
  */
 
-import { callAnthropic } from '../providers/anthropic'
+import { routeLegacyTask } from '../legacyTaskRouter'
 
 // ============================================================================
 // TYPES
@@ -36,37 +36,14 @@ export interface ResumeAnalysisResponse {
  */
 export async function analyzeResume(resumeText: string): Promise<ResumeAnalysisResponse> {
   try {
-    const prompt = `Analyze this resume professionally.
+    const result = await routeLegacyTask('analyze-resume', { resumeText })
 
-Resume:
-${resumeText}
-
-Provide comprehensive analysis in JSON:
-{
-  "atsScore": number 0-100,
-  "overallAssessment": "excellent|good|needs-improvement",
-  "strengths": ["strength1"],
-  "weaknesses": ["weakness1"],
-  "suggestions": [
-    {"category": "category", "priority": "high", "suggestion": "string"}
-  ],
-  "estimatedInterviewRate": number 0-100
-}`
-
-    const response = await callAnthropic('claude-sonnet-4-20250514', [
-      { role: 'user', content: prompt },
-    ])
-
-    if (!response.success) {
-      throw new Error(response.error)
+    if (!result.ok || !result.output) {
+      throw new Error(result.error_message || 'AI routing failed')
     }
 
-    const jsonMatch = response.content.match(/\{[\s\S]*\}/)
-    if (!jsonMatch) {
-      throw new Error('No JSON in response')
-    }
-
-    const data = JSON.parse(jsonMatch[0])
+    const payload = (result.output as any).data || result.output
+    const data = payload || {}
 
     return {
       success: true,

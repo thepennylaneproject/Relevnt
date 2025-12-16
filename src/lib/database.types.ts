@@ -74,6 +74,36 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_cache: {
+        Row: {
+          cache_key: string
+          created_at: string | null
+          expires_at: string
+          payload: Json
+          quality: string
+          task_name: string
+          user_tier: string
+        }
+        Insert: {
+          cache_key: string
+          created_at?: string | null
+          expires_at: string
+          payload: Json
+          quality: string
+          task_name: string
+          user_tier: string
+        }
+        Update: {
+          cache_key?: string
+          created_at?: string | null
+          expires_at?: string
+          payload?: Json
+          quality?: string
+          task_name?: string
+          user_tier?: string
+        }
+        Relationships: []
+      }
       ai_interactions: {
         Row: {
           created_at: string | null
@@ -120,6 +150,69 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      ai_invocations: {
+        Row: {
+          cache_hit: boolean | null
+          cost_estimate: number | null
+          created_at: string | null
+          error_code: string | null
+          error_message: string | null
+          id: number
+          input_size: number | null
+          latency_ms: number | null
+          model: string
+          output_size: number | null
+          provider: string
+          quality: string
+          reason: string | null
+          success: boolean | null
+          task_name: string
+          tier: string
+          trace_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          cache_hit?: boolean | null
+          cost_estimate?: number | null
+          created_at?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          id?: number
+          input_size?: number | null
+          latency_ms?: number | null
+          model: string
+          output_size?: number | null
+          provider: string
+          quality: string
+          reason?: string | null
+          success?: boolean | null
+          task_name: string
+          tier: string
+          trace_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          cache_hit?: boolean | null
+          cost_estimate?: number | null
+          created_at?: string | null
+          error_code?: string | null
+          error_message?: string | null
+          id?: number
+          input_size?: number | null
+          latency_ms?: number | null
+          model?: string
+          output_size?: number | null
+          provider?: string
+          quality?: string
+          reason?: string | null
+          success?: boolean | null
+          task_name?: string
+          tier?: string
+          trace_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
       ai_model_configs: {
         Row: {
@@ -357,32 +450,71 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_daily_summaries: {
+        Row: {
+          created_at: string
+          day: string
+          id: string
+          meta: Json | null
+          metric_key: string
+          metric_value: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          day: string
+          id?: string
+          meta?: Json | null
+          metric_key: string
+          metric_value?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          id?: string
+          meta?: Json | null
+          metric_key?: string
+          metric_value?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       analytics_events: {
         Row: {
-          created_at: string | null
+          created_at: string
           event_name: string
+          event_time: string
           id: string
+          page_path: string | null
           properties: Json | null
+          referrer: string | null
           session_id: string | null
-          source: string | null
+          user_agent: string | null
           user_id: string | null
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
           event_name: string
+          event_time?: string
           id?: string
+          page_path?: string | null
           properties?: Json | null
+          referrer?: string | null
           session_id?: string | null
-          source?: string | null
+          user_agent?: string | null
           user_id?: string | null
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
           event_name?: string
+          event_time?: string
           id?: string
+          page_path?: string | null
           properties?: Json | null
+          referrer?: string | null
           session_id?: string | null
-          source?: string | null
+          user_agent?: string | null
           user_id?: string | null
         }
         Relationships: []
@@ -440,6 +572,7 @@ export type Database = {
           ai_suggestions: Json | null
           applied_date: string
           ats_optimization_applied: boolean | null
+          attempt_count: number | null
           company: string
           cover_letter: string | null
           cover_letter_draft: string | null
@@ -450,9 +583,13 @@ export type Database = {
           id: string
           interview_date: string | null
           job_id: string | null
+          last_attempt_at: string | null
+          last_error: string | null
           location: string | null
+          metadata: Json | null
           notes: string | null
           offer_date: string | null
+          persona_id: string | null
           position: string
           qa_answers: Json | null
           ranking_explanation: string | null
@@ -461,8 +598,11 @@ export type Database = {
           recruiter_phone: string | null
           response_deadline: string | null
           resume_id: string | null
+          rule_id: string | null
           salary_expectation: string | null
           status: string | null
+          submission_method: string | null
+          trace_id: string | null
           updated_at: string | null
           user_id: string
         }
@@ -470,6 +610,7 @@ export type Database = {
           ai_suggestions?: Json | null
           applied_date?: string
           ats_optimization_applied?: boolean | null
+          attempt_count?: number | null
           company: string
           cover_letter?: string | null
           cover_letter_draft?: string | null
@@ -480,9 +621,13 @@ export type Database = {
           id?: string
           interview_date?: string | null
           job_id?: string | null
+          last_attempt_at?: string | null
+          last_error?: string | null
           location?: string | null
+          metadata?: Json | null
           notes?: string | null
           offer_date?: string | null
+          persona_id?: string | null
           position: string
           qa_answers?: Json | null
           ranking_explanation?: string | null
@@ -491,8 +636,11 @@ export type Database = {
           recruiter_phone?: string | null
           response_deadline?: string | null
           resume_id?: string | null
+          rule_id?: string | null
           salary_expectation?: string | null
           status?: string | null
+          submission_method?: string | null
+          trace_id?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -500,6 +648,7 @@ export type Database = {
           ai_suggestions?: Json | null
           applied_date?: string
           ats_optimization_applied?: boolean | null
+          attempt_count?: number | null
           company?: string
           cover_letter?: string | null
           cover_letter_draft?: string | null
@@ -510,9 +659,13 @@ export type Database = {
           id?: string
           interview_date?: string | null
           job_id?: string | null
+          last_attempt_at?: string | null
+          last_error?: string | null
           location?: string | null
+          metadata?: Json | null
           notes?: string | null
           offer_date?: string | null
+          persona_id?: string | null
           position?: string
           qa_answers?: Json | null
           ranking_explanation?: string | null
@@ -521,8 +674,11 @@ export type Database = {
           recruiter_phone?: string | null
           response_deadline?: string | null
           resume_id?: string | null
+          rule_id?: string | null
           salary_expectation?: string | null
           status?: string | null
+          submission_method?: string | null
+          trace_id?: string | null
           updated_at?: string | null
           user_id?: string
         }
@@ -542,10 +698,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "applications_persona_id_fkey"
+            columns: ["persona_id"]
+            isOneToOne: false
+            referencedRelation: "user_personas"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "applications_resume_id_fkey"
             columns: ["resume_id"]
             isOneToOne: false
             referencedRelation: "resumes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "auto_apply_rules"
             referencedColumns: ["id"]
           },
           {
@@ -559,35 +729,47 @@ export type Database = {
       }
       auto_apply_logs: {
         Row: {
+          artifacts: Json | null
+          attempt_count: number | null
           created_at: string | null
           error_message: string | null
           id: string
           job_id: string | null
+          persona_id: string | null
           rule_id: string | null
           status: string | null
           submission_url: string | null
+          trace_id: string | null
           user_id: string
           withdrawn_at: string | null
         }
         Insert: {
+          artifacts?: Json | null
+          attempt_count?: number | null
           created_at?: string | null
           error_message?: string | null
           id?: string
           job_id?: string | null
+          persona_id?: string | null
           rule_id?: string | null
           status?: string | null
           submission_url?: string | null
+          trace_id?: string | null
           user_id: string
           withdrawn_at?: string | null
         }
         Update: {
+          artifacts?: Json | null
+          attempt_count?: number | null
           created_at?: string | null
           error_message?: string | null
           id?: string
           job_id?: string | null
+          persona_id?: string | null
           rule_id?: string | null
           status?: string | null
           submission_url?: string | null
+          trace_id?: string | null
           user_id?: string
           withdrawn_at?: string | null
         }
@@ -607,7 +789,85 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "auto_apply_logs_persona_id_fkey"
+            columns: ["persona_id"]
+            isOneToOne: false
+            referencedRelation: "user_personas"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "auto_apply_logs_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "auto_apply_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      auto_apply_queue: {
+        Row: {
+          created_at: string | null
+          id: string
+          job_id: string
+          metadata: Json | null
+          persona_id: string | null
+          priority: number | null
+          processed_at: string | null
+          rule_id: string
+          scheduled_for: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          job_id: string
+          metadata?: Json | null
+          persona_id?: string | null
+          priority?: number | null
+          processed_at?: string | null
+          rule_id: string
+          scheduled_for?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          job_id?: string
+          metadata?: Json | null
+          persona_id?: string | null
+          priority?: number | null
+          processed_at?: string | null
+          rule_id?: string
+          scheduled_for?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auto_apply_queue_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auto_apply_queue_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs_normalized"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auto_apply_queue_persona_id_fkey"
+            columns: ["persona_id"]
+            isOneToOne: false
+            referencedRelation: "user_personas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auto_apply_queue_rule_id_fkey"
             columns: ["rule_id"]
             isOneToOne: false
             referencedRelation: "auto_apply_rules"
@@ -621,13 +881,17 @@ export type Database = {
           created_at: string | null
           enabled: boolean | null
           exclude_companies: string[] | null
+          failed_applications: number | null
           id: string
           include_only_companies: string[] | null
+          last_run_at: string | null
           match_score_threshold: number | null
           max_applications_per_week: number | null
           name: string
           persona_id: string | null
           require_all_keywords: string[] | null
+          successful_applications: number | null
+          total_applications: number | null
           updated_at: string | null
           user_id: string
         }
@@ -636,13 +900,17 @@ export type Database = {
           created_at?: string | null
           enabled?: boolean | null
           exclude_companies?: string[] | null
+          failed_applications?: number | null
           id?: string
           include_only_companies?: string[] | null
+          last_run_at?: string | null
           match_score_threshold?: number | null
           max_applications_per_week?: number | null
           name: string
           persona_id?: string | null
           require_all_keywords?: string[] | null
+          successful_applications?: number | null
+          total_applications?: number | null
           updated_at?: string | null
           user_id: string
         }
@@ -651,13 +919,17 @@ export type Database = {
           created_at?: string | null
           enabled?: boolean | null
           exclude_companies?: string[] | null
+          failed_applications?: number | null
           id?: string
           include_only_companies?: string[] | null
+          last_run_at?: string | null
           match_score_threshold?: number | null
           max_applications_per_week?: number | null
           name?: string
           persona_id?: string | null
           require_all_keywords?: string[] | null
+          successful_applications?: number | null
+          total_applications?: number | null
           updated_at?: string | null
           user_id?: string
         }
@@ -1115,6 +1387,67 @@ export type Database = {
           },
         ]
       }
+      job_application_artifacts: {
+        Row: {
+          ai_trace_id: string | null
+          artifact_type: string
+          content: string
+          format: string
+          generated_at: string | null
+          id: string
+          job_id: string
+          metadata: Json | null
+          persona_id: string | null
+          user_id: string
+        }
+        Insert: {
+          ai_trace_id?: string | null
+          artifact_type: string
+          content: string
+          format?: string
+          generated_at?: string | null
+          id?: string
+          job_id: string
+          metadata?: Json | null
+          persona_id?: string | null
+          user_id: string
+        }
+        Update: {
+          ai_trace_id?: string | null
+          artifact_type?: string
+          content?: string
+          format?: string
+          generated_at?: string | null
+          id?: string
+          job_id?: string
+          metadata?: Json | null
+          persona_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_application_artifacts_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_application_artifacts_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs_normalized"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_application_artifacts_persona_id_fkey"
+            columns: ["persona_id"]
+            isOneToOne: false
+            referencedRelation: "user_personas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_applications: {
         Row: {
           applied_at: string | null
@@ -1171,6 +1504,119 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      job_ingestion_run_sources: {
+        Row: {
+          created_at: string
+          cursor_in: Json | null
+          cursor_out: Json | null
+          duplicate_count: number
+          error_message: string | null
+          finished_at: string | null
+          http_status: number | null
+          id: string
+          inserted_count: number
+          normalized_count: number
+          page_end: number
+          page_start: number
+          run_id: string
+          source: string
+          started_at: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          cursor_in?: Json | null
+          cursor_out?: Json | null
+          duplicate_count?: number
+          error_message?: string | null
+          finished_at?: string | null
+          http_status?: number | null
+          id?: string
+          inserted_count?: number
+          normalized_count?: number
+          page_end?: number
+          page_start?: number
+          run_id: string
+          source: string
+          started_at?: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          cursor_in?: Json | null
+          cursor_out?: Json | null
+          duplicate_count?: number
+          error_message?: string | null
+          finished_at?: string | null
+          http_status?: number | null
+          id?: string
+          inserted_count?: number
+          normalized_count?: number
+          page_end?: number
+          page_start?: number
+          run_id?: string
+          source?: string
+          started_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_ingestion_run_sources_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "job_ingestion_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_ingestion_runs: {
+        Row: {
+          created_at: string
+          error_summary: string | null
+          finished_at: string | null
+          id: string
+          meta: Json | null
+          sources_requested: string[]
+          started_at: string
+          status: string
+          total_duplicates: number
+          total_failed_sources: number
+          total_inserted: number
+          total_normalized: number
+          triggered_by: string
+        }
+        Insert: {
+          created_at?: string
+          error_summary?: string | null
+          finished_at?: string | null
+          id?: string
+          meta?: Json | null
+          sources_requested?: string[]
+          started_at?: string
+          status?: string
+          total_duplicates?: number
+          total_failed_sources?: number
+          total_inserted?: number
+          total_normalized?: number
+          triggered_by?: string
+        }
+        Update: {
+          created_at?: string
+          error_summary?: string | null
+          finished_at?: string | null
+          id?: string
+          meta?: Json | null
+          sources_requested?: string[]
+          started_at?: string
+          status?: string
+          total_duplicates?: number
+          total_failed_sources?: number
+          total_inserted?: number
+          total_normalized?: number
+          triggered_by?: string
+        }
+        Relationships: []
       }
       job_ingestion_state: {
         Row: {
@@ -1326,6 +1772,39 @@ export type Database = {
           target_functions?: string[] | null
           updated_at?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      job_source_health: {
+        Row: {
+          consecutive_failures: number
+          is_degraded: boolean
+          last_counts: Json | null
+          last_error_at: string | null
+          last_run_at: string | null
+          last_success_at: string | null
+          source: string
+          updated_at: string
+        }
+        Insert: {
+          consecutive_failures?: number
+          is_degraded?: boolean
+          last_counts?: Json | null
+          last_error_at?: string | null
+          last_run_at?: string | null
+          last_success_at?: string | null
+          source: string
+          updated_at?: string
+        }
+        Update: {
+          consecutive_failures?: number
+          is_degraded?: boolean
+          last_counts?: Json | null
+          last_error_at?: string | null
+          last_run_at?: string | null
+          last_success_at?: string | null
+          source?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -2060,6 +2539,7 @@ export type Database = {
           notif_high_match: boolean | null
           notif_weekly_digest: boolean | null
           onboarding_completed: boolean | null
+          onboarding_state: Json | null
           onboarding_step: number | null
           plan_tier: string | null
           preferred_name: string | null
@@ -2091,6 +2571,7 @@ export type Database = {
           notif_high_match?: boolean | null
           notif_weekly_digest?: boolean | null
           onboarding_completed?: boolean | null
+          onboarding_state?: Json | null
           onboarding_step?: number | null
           plan_tier?: string | null
           preferred_name?: string | null
@@ -2122,6 +2603,7 @@ export type Database = {
           notif_high_match?: boolean | null
           notif_weekly_digest?: boolean | null
           onboarding_completed?: boolean | null
+          onboarding_state?: Json | null
           onboarding_step?: number | null
           plan_tier?: string | null
           preferred_name?: string | null
@@ -2517,6 +2999,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           name: string
+          resume_id: string | null
           updated_at: string | null
           user_id: string
         }
@@ -2526,6 +3009,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           name: string
+          resume_id?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -2535,10 +3019,19 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           name?: string
+          resume_id?: string | null
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_user_personas_resume"
+            columns: ["resume_id"]
+            isOneToOne: false
+            referencedRelation: "resumes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_professional_profiles: {
         Row: {
@@ -2765,24 +3258,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      v_conversion_funnel: {
-        Row: {
-          avg_days_to_upgrade: number | null
-          conversion_rate_percent: number | null
-          signup_date: string | null
-          signups: number | null
-          upgraded_to_pro: number | null
-        }
-        Relationships: []
-      }
-      v_daily_active_users: {
-        Row: {
-          active_users: number | null
-          date: string | null
-          users_analyzing: number | null
-        }
-        Relationships: []
       }
     }
     Functions: {

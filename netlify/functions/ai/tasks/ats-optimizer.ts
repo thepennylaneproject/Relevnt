@@ -5,7 +5,7 @@
  * Suggests keyword improvements, formatting fixes, etc.
  */
 
-import { callDeepSeek } from '../providers/deepseek'
+import { routeLegacyTask } from '../legacyTaskRouter'
 
 // ============================================================================
 // TYPES
@@ -33,35 +33,13 @@ export interface ATSOptimizationResponse {
  */
 export async function optimizeForATS(resumeText: string): Promise<ATSOptimizationResponse> {
   try {
-    const prompt = `Analyze this resume for ATS (Applicant Tracking System) compatibility.
+    const response = await routeLegacyTask('optimize-resume', { resumeText })
 
-Resume:
-${resumeText}
-
-Provide analysis in this JSON format:
-{
-  "currentScore": number 0-100,
-  "optimizedScore": number 0-100 (what it could be),
-  "improvements": ["improvement1"],
-  "keywordGaps": ["missing_keyword"],
-  "formattingIssues": ["issue1"],
-  "readabilityCheck": "string"
-}`
-
-    const response = await callDeepSeek('deepseek-chat', [
-      { role: 'user', content: prompt },
-    ])
-
-    if (!response.success) {
-      throw new Error(response.error)
+    if (!response.ok || !response.output) {
+      throw new Error(response.error_message || 'AI routing failed')
     }
 
-    const jsonMatch = response.content.match(/\{[\s\S]*\}/)
-    if (!jsonMatch) {
-      throw new Error('No JSON in response')
-    }
-
-    const analysis = JSON.parse(jsonMatch[0])
+    const analysis = (response.output as any).data || response.output
 
     return {
       success: true,

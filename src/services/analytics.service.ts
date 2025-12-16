@@ -42,6 +42,11 @@ export type EventName =
   | 'application_tracked'
   | 'persona_switched'
 
+  // Auto-apply events
+  | 'auto_apply_opened_link'
+  | 'auto_apply_marked_submitted'
+  | 'auto_apply_marked_failed'
+
   // Marketing & upgrade events
   | 'upgrade_prompt_viewed'
   | 'upgrade_clicked'
@@ -297,6 +302,21 @@ export const productEvents = {
       to_persona_name: toPersonaName
     }),
 };
+
+/**
+ * Auto-apply event tracking helpers
+ */
+export const autoApplyEvents = {
+  linkOpened: (jobId: string, queueItemId: string) =>
+    trackEvent('auto_apply_opened_link', { job_id: jobId, queue_item_id: queueItemId }),
+
+  markedSubmitted: (queueItemId: string, hasProof: boolean) =>
+    trackEvent('auto_apply_marked_submitted', { queue_item_id: queueItemId, has_proof: hasProof }),
+
+  markedFailed: (queueItemId: string, errorType: string) =>
+    trackEvent('auto_apply_marked_failed', { queue_item_id: queueItemId, error_type: errorType }),
+};
+
 
 // Retry queued events when app regains connection
 if (typeof window !== 'undefined') {

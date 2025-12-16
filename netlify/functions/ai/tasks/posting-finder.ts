@@ -4,7 +4,7 @@
  * Verifies job posting authenticity and finds official URLs
  */
 
-import { searchBrave } from '../providers/brave'
+import { routeLegacyTask } from '../legacyTaskRouter'
 
 // ============================================================================
 // TYPES
@@ -34,40 +34,21 @@ export async function findOfficialPosting(
   location: string
 ): Promise<PostingFinderResponse> {
   try {
-    const query = `"${company}" "${jobTitle}" hiring ${location} site:company OR site:linkedin OR site:indeed`
+    const response = await routeLegacyTask('posting-finder', { jobTitle, company, location })
 
-    const results = await searchBrave(query, { count: 5 })
-
-    if (!results.success) {
-      throw new Error('Search failed')
+    if (!response.ok || !response.output) {
+      throw new Error(response.error_message || 'AI routing failed')
     }
 
-    let bestResult = results.results[0]
-    let isOfficial = false
-    let source: 'company' | 'linkedin' | 'indeed' | 'other' = 'other'
-
-    for (const result of results.results) {
-      if (result.url.includes('linkedin.com/jobs')) {
-        bestResult = result
-        isOfficial = true
-        source = 'linkedin'
-        break
-      }
-      if (result.url.includes('careers.')) {
-        bestResult = result
-        isOfficial = true
-        source = 'company'
-        break
-      }
-    }
+    const posting = (response.output as any).data || response.output
 
     return {
       success: true,
       posting: {
-        officialUrl: bestResult?.url || '',
-        isOfficial,
-        source,
-        verified: isOfficial,
+        officialUrl: posting.url || posting.officialUrl || '',
+        isOfficial: Boolean(posting.isOfficial ?? posting.verified ?? posting.url),
+        source: posting.source || 'other',
+        verified: Boolean(posting.verified ?? posting.isOfficial),
       },
     }
   } catch (error) {

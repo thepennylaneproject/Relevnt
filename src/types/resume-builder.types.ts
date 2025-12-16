@@ -16,6 +16,7 @@ export interface ResumeSummary {
 export interface ResumeSkillGroup {
   label: string  // "Core Skills", "Tools", "Leadership", etc
   skills: string[]
+  id?: string
 }
 
 export interface ResumeExperienceItem {

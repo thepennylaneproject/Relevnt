@@ -42,7 +42,7 @@ export const ResumePreview: React.FC<Props> = ({ draft }) => {
       {draft.summary.summary && (
         <div className="resume-preview__section">
           <h3 className="resume-preview__section-title">Summary</h3>
-          <p className="resume-preview__summary-text">{draft.summary.summary}</p>
+          <p className="resume-preview__summary-text" style={{ whiteSpace: 'pre-line' }}>{draft.summary.summary}</p>
         </div>
       )}
 
@@ -59,7 +59,7 @@ export const ResumePreview: React.FC<Props> = ({ draft }) => {
                 </span>
               </div>
               <div className="resume-preview__item-subtitle">{exp.company}</div>
-              {exp.bullets && <p className="resume-preview__item-description">{exp.bullets}</p>}
+              {exp.bullets && <p className="resume-preview__item-description" style={{ whiteSpace: 'pre-line' }}>{exp.bullets}</p>}
             </div>
           ))}
         </div>

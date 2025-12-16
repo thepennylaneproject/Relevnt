@@ -14,13 +14,16 @@ import ApplicationsPage from './pages/ApplicationsPage'
 import AdminDashboard from './pages/AdminDashboard'
 import SettingsPage from './pages/SettingsPage'
 import AutoApplySettingsPage from './pages/AutoApplySettingPage'
+import AutoApplyQueuePage from './pages/AutoApplyQueuePage'
 import VoiceProfilePage from './pages/VoiceProfilePage'
 import JobPreferencesPage from './pages/JobPreferencesPage'
 import LearnPage from './pages/LearnPage'
 import ProfilePersonalPage from './pages/ProfilePersonalPage'
 import ProfileProfessionalPage from './pages/ProfileProfessionalPage'
 import ResumeBuilderPage from './pages/ResumeBuilderPage'
+import ResumeWorkspacePage from './pages/ResumeWorkspacePage'
 import PersonaManagementPage from './pages/PersonaManagementPage'
+import ResumeListPage from './pages/ResumeListPage'
 import SidebarMarginNav from './components/chrome/SidebarMarginNav'
 import './styles/margin-nav.css'
 
@@ -74,6 +77,10 @@ function AppInner() {
             />
             <Route
               path="/resumes"
+              element={isAuthed ? <ResumeWorkspacePage /> : <Navigate to="/login" replace />}
+            />
+            <Route
+              path="/resumes/builder"
               element={isAuthed ? <ResumeBuilderPage /> : <Navigate to="/login" replace />}
             />
             <Route
@@ -91,6 +98,10 @@ function AppInner() {
             <Route
               path="/auto-apply"
               element={isAuthed ? <AutoApplySettingsPage /> : <Navigate to="/login" replace />}
+            />
+            <Route
+              path="/auto-apply/queue"
+              element={isAuthed ? <AutoApplyQueuePage /> : <Navigate to="/login" replace />}
             />
             <Route
               path="/job-preferences"

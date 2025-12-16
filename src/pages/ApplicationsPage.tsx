@@ -9,6 +9,7 @@ import {
   useApplications,
   type ApplicationStatus,
 } from '../hooks/useApplications'
+import { ApplicationQuestionHelper } from '../components/Applications/ApplicationQuestionHelper'
 
 const STATUS_TABS: (ApplicationStatus | 'all')[] = [
   'all',
@@ -160,111 +161,123 @@ export default function ApplicationsPage() {
             </div>
           </section>
 
-          <section className="surface-card">
-            <h2 className="text-sm font-semibold">Filter by status</h2>
+        </section>
 
-            <div className="filter-button-row">
-              {STATUS_TABS.map((statusKey) => {
-                const label =
-                  statusKey === 'all'
-                    ? 'All'
-                    : statusKey === 'in-progress'
-                      ? 'In progress'
-                      : statusKey.charAt(0).toUpperCase() + statusKey.slice(1)
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+          <div className="lg:col-span-2 space-y-6">
+            <section className="surface-card">
+              <h2 className="text-sm font-semibold">Filter by status</h2>
 
-                const count =
-                  statusKey === 'all'
-                    ? totalApplications
-                    : statusCounts[statusKey as ApplicationStatus] ?? 0
+              <div className="filter-button-row">
+                {STATUS_TABS.map((statusKey) => {
+                  const label =
+                    statusKey === 'all'
+                      ? 'All'
+                      : statusKey === 'in-progress'
+                        ? 'In progress'
+                        : statusKey.charAt(0).toUpperCase() + statusKey.slice(1)
 
-                return renderStatusChip(statusKey, label, count)
-              })}
-            </div>
-          </section>
+                  const count =
+                    statusKey === 'all'
+                      ? totalApplications
+                      : statusCounts[statusKey as ApplicationStatus] ?? 0
 
-          <section className="surface-card">
-            {loading && <p className="muted text-sm">Loading applications…</p>}
-            {error && <p className="muted text-sm text-danger">{error}</p>}
-
-            {!loading && applications.length === 0 ? (
-              <EmptyState
-                type="applications"
-                action={{
-                  label: "Log your first application",
-                  onClick: handleAddApplication,
-                }}
-              />
-            ) : (
-              <div className="item-grid">
-                {applications.map((app) => (
-                  <article key={app.id} className="item-card">
-                    <header className="item-card-header">
-                      <div>
-                        <h2 className="text-sm font-semibold">{app.position}</h2>
-                        <p className="muted text-xs">
-                          {app.company}
-                          {app.location ? ` • ${app.location}` : ''}
-                        </p>
-                      </div>
-
-                      <span className={`pill app-status-pill--${app.status || 'none'}`}>
-                        {renderStatusIcon(app.status)}
-                        <span>{prettyStatusLabel(app.status)}</span>
-                      </span>
-                    </header>
-
-                    <p className="muted text-xs">Updated {formatUpdated(app)}</p>
-
-                    {app.job && (
-                      <p className="muted text-xs">
-                        From job: {app.job.title} at {app.job.company}
-                      </p>
-                    )}
-
-                    {app.notes && (
-                      <p className="text-sm app-notes">
-                        {app.notes}
-                      </p>
-                    )}
-
-                    <footer className="item-card-footer">
-                      <div className="status-field">
-                        <label className="muted text-xs" htmlFor={`status-${app.id}`}>
-                          Set status
-                        </label>
-                        <select
-                          id={`status-${app.id}`}
-                          value={app.status || ''}
-                          onChange={(e) =>
-                            updateStatus(app.id, e.target.value as ApplicationStatus)
-                          }
-                          className="app-status-select"
-                        >
-                          <option value="">Untracked</option>
-                          <option value="applied">Applied</option>
-                          <option value="in-progress">In progress</option>
-                          <option value="offer">Offer</option>
-                          <option value="accepted">Accepted</option>
-                          <option value="rejected">Rejected</option>
-                          <option value="withdrawn">Withdrawn</option>
-                        </select>
-                      </div>
-
-                      <button
-                        type="button"
-                        className="ghost-button button-xs text-danger"
-                        onClick={() => deleteApplication(app.id)}
-                      >
-                        Delete
-                      </button>
-                    </footer>
-                  </article>
-                ))}
+                  return renderStatusChip(statusKey, label, count)
+                })}
               </div>
-            )}
-          </section>
+            </section>
+
+            <section className="surface-card">
+              {loading && <p className="muted text-sm">Loading applications…</p>}
+              {error && <p className="muted text-sm text-danger">{error}</p>}
+
+              {!loading && applications.length === 0 ? (
+                <EmptyState
+                  type="applications"
+                  action={{
+                    label: "Log your first application",
+                    onClick: handleAddApplication,
+                  }}
+                />
+              ) : (
+                <div className="item-grid">
+                  {applications.map((app) => (
+                    <article key={app.id} className="item-card">
+                      <header className="item-card-header">
+                        <div>
+                          <h2 className="text-sm font-semibold">{app.position}</h2>
+                          <p className="muted text-xs">
+                            {app.company}
+                            {app.location ? ` • ${app.location}` : ''}
+                          </p>
+                        </div>
+
+                        <span className={`pill app-status-pill--${app.status || 'none'}`}>
+                          {renderStatusIcon(app.status)}
+                          <span>{prettyStatusLabel(app.status)}</span>
+                        </span>
+                      </header>
+
+                      <p className="muted text-xs">Updated {formatUpdated(app)}</p>
+
+                      {app.job && (
+                        <p className="muted text-xs">
+                          From job: {app.job.title} at {app.job.company}
+                        </p>
+                      )}
+
+                      {app.notes && (
+                        <p className="text-sm app-notes">
+                          {app.notes}
+                        </p>
+                      )}
+
+                      <footer className="item-card-footer">
+                        <div className="status-field">
+                          <label className="muted text-xs" htmlFor={`status-${app.id}`}>
+                            Set status
+                          </label>
+                          <select
+                            id={`status-${app.id}`}
+                            value={app.status || ''}
+                            onChange={(e) =>
+                              updateStatus(app.id, e.target.value as ApplicationStatus)
+                            }
+                            className="app-status-select"
+                          >
+                            <option value="">Untracked</option>
+                            <option value="applied">Applied</option>
+                            <option value="in-progress">In progress</option>
+                            <option value="offer">Offer</option>
+                            <option value="accepted">Accepted</option>
+                            <option value="rejected">Rejected</option>
+                            <option value="withdrawn">Withdrawn</option>
+                          </select>
+                        </div>
+
+                        <button
+                          type="button"
+                          className="ghost-button button-xs text-danger"
+                          onClick={() => deleteApplication(app.id)}
+                        >
+                          Delete
+                        </button>
+                      </footer>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </section>
+          </div>
+
+          <div className="lg:col-span-1">
+            <div className="sticky top-6">
+              <ApplicationQuestionHelper />
+            </div>
+          </div>
         </div>
-      </Container>
-    </PageBackground>
+      </div>
+    </Container>
+    </PageBackground >
   )
 }

@@ -4,7 +4,7 @@
  * Identifies missing skills and provides learning recommendations
  */
 
-import { callDeepSeek } from '../providers/deepseek'
+import { routeLegacyTask } from '../legacyTaskRouter'
 
 // ============================================================================
 // TYPES
@@ -37,43 +37,17 @@ export async function analyzeSkillGaps(
   jobRequirements: string[]
 ): Promise<SkillGapResponse> {
   try {
-    const prompt = `Analyze skill gaps for a career transition.
+    const response = await routeLegacyTask('analyze-skills-gap', {
+      currentSkills,
+      targetRole,
+      jobRequirements,
+    })
 
-Current Skills:
-${currentSkills.join(', ')}
-
-Target Role: ${targetRole}
-
-Job Requirements:
-${jobRequirements.join(', ')}
-
-Provide analysis in JSON format:
-{
-  "gaps": [
-    {
-      "skill": "skill name",
-      "importance": "critical|important|nice-to-have",
-      "difficulty": "beginner|intermediate|advanced"
-    }
-  ],
-  "strengths": ["transferable_skill"],
-  "actionPlan": "learning pathway"
-}`
-
-    const response = await callDeepSeek('deepseek-chat', [
-      { role: 'user', content: prompt },
-    ])
-
-    if (!response.success) {
-      throw new Error(response.error)
+    if (!response.ok || !response.output) {
+      throw new Error(response.error_message || 'AI routing failed')
     }
 
-    const jsonMatch = response.content.match(/\{[\s\S]*\}/)
-    if (!jsonMatch) {
-      throw new Error('No JSON in response')
-    }
-
-    const data = JSON.parse(jsonMatch[0])
+    const data = (response.output as any).data || response.output
 
     return {
       success: true,

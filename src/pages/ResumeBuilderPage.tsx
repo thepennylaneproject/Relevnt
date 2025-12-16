@@ -94,9 +94,13 @@ function draftToText(draft: ResumeDraft): string {
 // COMPONENT
 // ============================================================================
 
-const ResumeBuilderPage: React.FC = () => {
-  const [searchParams] = useSearchParams()
-  const resumeId = searchParams.get('id') || undefined
+type ResumeBuilderPageProps = {
+  embedded?: boolean
+}
+
+const ResumeBuilderPage: React.FC<ResumeBuilderPageProps> = ({ embedded = false }) => {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const resumeIdFromUrl = searchParams.get('id') || undefined
 
   // UI State
   const [activeSection, setActiveSection] = useState<ActiveSection>('contact')
@@ -106,6 +110,7 @@ const ResumeBuilderPage: React.FC = () => {
 
   // Resume data and autosave
   const {
+    resumeId,
     draft,
     setDraft,
     updateContact,
@@ -119,7 +124,16 @@ const ResumeBuilderPage: React.FC = () => {
     isDirty,
     lastSavedAt,
     manualSave,
-  } = useResumeBuilder({ resumeId })
+  } = useResumeBuilder({ resumeId: resumeIdFromUrl })
+
+  // Keep URL in sync once a draft is created
+  React.useEffect(() => {
+    if (resumeId && resumeId !== resumeIdFromUrl) {
+      const next = new URLSearchParams(searchParams)
+      next.set('id', resumeId)
+      setSearchParams(next, { replace: true })
+    }
+  }, [resumeId, resumeIdFromUrl, searchParams, setSearchParams])
 
   // ATS Analysis
   const { analysis, analyze, loading: analyzing } = useResumeAnalysis()
@@ -198,10 +212,9 @@ const ResumeBuilderPage: React.FC = () => {
   // Resume text for job targeting
   const resumeText = useMemo(() => draftToText(draft), [draft])
 
-  return (
-    <PageBackground>
-      <Container maxWidth="xl" padding="md">
-        <div className="resume-builder-page">
+  const content = (
+    <Container maxWidth="xl" padding="md">
+      <div className="resume-builder-page">
 
           {/* ════════════════════════════════════════════════════════════════
               HEADER: Title + Actions
@@ -241,7 +254,7 @@ const ResumeBuilderPage: React.FC = () => {
                 <span className="text-xs muted">{saveStatusText}</span>
               </div>
 
-              {resumeId && isDirty && (
+              {isDirty && (
                 <button
                   type="button"
                   onClick={manualSave}
@@ -407,10 +420,13 @@ const ResumeBuilderPage: React.FC = () => {
               onComplete={handleWizardComplete}
             />
           )}
-        </div>
-      </Container>
-    </PageBackground>
+      </div>
+    </Container>
   )
+
+  if (embedded) return content
+
+  return <PageBackground>{content}</PageBackground>
 }
 
 export default ResumeBuilderPage

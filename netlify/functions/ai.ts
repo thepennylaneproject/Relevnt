@@ -1,5 +1,8 @@
 import type { Handler } from '@netlify/functions'
-import { routeAIRequest } from './ai/ai-router'
+import { runAI } from './ai/run'
+import { routeLegacyTask, isLegacyTask } from './ai/legacyTaskRouter'
+import { createAdminClient, verifyToken } from './utils/supabase'
+import type { UserTier } from '../../src/lib/ai/types'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -50,28 +53,80 @@ const handler: Handler = async (event) => {
     console.log('📥 AI Function called with task:', task);
     console.log('Input preview:', typeof input === 'string' ? input.substring(0, 100) + '...' : input);
 
-    // Extract user info from context if available (Netlify Identity)
-    // For now, we'll use a placeholder or extract from headers if passed
-    const userId = 'user_placeholder'
-    const tier = 'premium' // Default to premium for now to ensure AI access, or extract from user metadata
+    // Extract user identity from Supabase JWT
+    const authHeader = event.headers.authorization || event.headers.Authorization
+    const { userId, error: authError } = await verifyToken(authHeader)
+    if (authError) {
+      return {
+        statusCode: 401,
+        headers: corsHeaders,
+        body: JSON.stringify({ success: false, error: authError }),
+      }
+    }
+
+    let tier: UserTier = 'premium'
+    try {
+      const supabaseAdmin = createAdminClient()
+      const { data } = await supabaseAdmin.auth.getUser(userId!)
+      const rawTier = (data?.user?.user_metadata as any)?.tier
+      const normalized = typeof rawTier === 'string' ? rawTier.toLowerCase() : ''
+      if (normalized === 'starter') {
+        tier = 'free'
+      } else if (normalized === 'pro' || normalized === 'premium' || normalized === 'free' || normalized === 'coach') {
+        tier = normalized as UserTier
+      }
+    } catch (err) {
+      console.warn('Unable to resolve tier from metadata; defaulting to premium', err)
+    }
+
+    // Legacy task support (TaskName from frontend hooks and legacy task files)
+    if (isLegacyTask(task)) {
+      const routed = await routeLegacyTask(task, input, {
+        userId,
+        tier,
+        traceId: body.traceId,
+      })
+
+      return {
+        statusCode: routed.ok ? 200 : 400,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          success: routed.ok,
+          data: routed.output,
+          error: routed.error_message,
+          provider: routed.provider,
+          model: routed.model,
+          trace_id: routed.trace_id,
+        }),
+      }
+    }
 
     console.log('🔄 Routing AI request to backend...');
-    const response = await routeAIRequest({
-      task,
+    const response = await runAI({
+      task: task as any,
       input,
       userId,
-      tier,
+      tier: tier as any,
+      traceId: body.traceId,
     })
 
-    console.log('✅ AI Router response:', { success: response.success, hasData: !!response.data, error: response.error });
+    console.log('✅ AI Router response:', { success: response.ok, hasData: !!response.output, error: response.error_message });
 
     return {
-      statusCode: 200,
+      statusCode: response.ok ? 200 : 400,
       headers: {
         ...corsHeaders,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(response),
+      body: JSON.stringify({
+        ...response,
+        success: response.ok,
+        data: response.output,
+        error: response.error_message,
+      }),
     }
   } catch (err) {
     console.error('❌ AI function error for task', task);
@@ -83,8 +138,9 @@ const handler: Handler = async (event) => {
       statusCode: 500,
       headers: corsHeaders,
       body: JSON.stringify({
+        ok: false,
         success: false,
-        error: err instanceof Error ? err.message : 'AI task failed on the server',
+        error_message: err instanceof Error ? err.message : 'AI task failed on the server',
         details: err instanceof Error ? err.stack : String(err),
       }),
     }

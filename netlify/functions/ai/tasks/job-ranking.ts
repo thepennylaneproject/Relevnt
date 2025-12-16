@@ -5,7 +5,7 @@
  * Considers: skills match, location, salary, growth potential
  */
 
-import { callDeepSeek } from '../providers/deepseek'
+import { routeLegacyTask } from '../legacyTaskRouter'
 
 // ============================================================================
 // TYPES
@@ -45,44 +45,13 @@ export interface JobRankingResponse {
  */
 export async function rankJob(job: ExtractedJob, profile: UserProfile): Promise<JobRankingResponse> {
   try {
-    const prompt = `Score this job fit for a user (0-100 scale).
+    const response = await routeLegacyTask('rank-jobs', { job, profile })
 
-Job:
-- Title: ${job.title}
-- Company: ${job.company}
-- Location: ${job.location}
-- Requirements: ${job.requirements.join(', ')}
-- Salary: $${job.salary?.min}-${job.salary?.max}
-
-User Profile:
-- Skills: ${profile.skills.join(', ')}
-- Experience: ${profile.experience}
-- Location: ${profile.currentLocation}
-- Salary Expectation: $${profile.salaryExpectation.min}-${profile.salaryExpectation.max}
-- Target Roles: ${profile.targetRoles.join(', ')}
-
-Respond with ONLY this JSON:
-{
-  "score": number 0-100,
-  "reasoning": "why",
-  "strongMatches": ["match1"],
-  "gaps": ["gap1"]
-}`
-
-    const response = await callDeepSeek('deepseek-chat', [
-      { role: 'user', content: prompt },
-    ])
-
-    if (!response.success) {
-      throw new Error(response.error)
+    if (!response.ok || !response.output) {
+      throw new Error(response.error_message || 'AI routing failed')
     }
 
-    const jsonMatch = response.content.match(/\{[\s\S]*\}/)
-    if (!jsonMatch) {
-      throw new Error('No JSON in response')
-    }
-
-    const data = JSON.parse(jsonMatch[0])
+    const data = (response.output as any).data || response.output
 
     return {
       success: true,

@@ -23,6 +23,7 @@
 
 import { useState, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
 import type {
   TaskName,
   AITaskResponse,
@@ -149,14 +150,14 @@ export function useAITask(): UseAITaskReturn {
   // Convert career profile to voice profile format
   const voiceProfile: UserVoiceProfile | null = profile?.voice_profile
     ? {
-        voice_preset: profile.voice_profile.voice_preset as VoicePreset | null,
-        voice_custom_sample: profile.voice_profile.writing_sample || null,
-        voice_formality: profile.voice_profile.formality_level || null,
-        voice_playfulness: profile.voice_profile.warmth_level || null,
-        voice_conciseness: profile.voice_profile.conciseness_level || null,
-        full_name: profile.full_name || null,
-        headline: profile.current_title || null,
-      }
+      voice_preset: profile.voice_profile.voice_preset as VoicePreset | null,
+      voice_custom_sample: profile.voice_profile.writing_sample || null,
+      voice_formality: profile.voice_profile.formality_level || null,
+      voice_playfulness: profile.voice_profile.warmth_level || null,
+      voice_conciseness: profile.voice_profile.conciseness_level || null,
+      full_name: profile.full_name || null,
+      headline: profile.current_title || null,
+    }
     : null;
 
   // =========================================================================
@@ -341,8 +342,10 @@ export function useAITask(): UseAITaskReturn {
       const aiClient = getAIClient();
 
       // Set auth token
+      const session = await supabase.auth.getSession();
       const token =
-        (user as any)?.session?.access_token ||
+        session.data.session?.access_token ||
+        (user as any)?.access_token ||
         localStorage.getItem('auth_token') ||
         '';
 

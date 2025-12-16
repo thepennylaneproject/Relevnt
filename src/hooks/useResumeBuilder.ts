@@ -49,6 +49,7 @@ const createEmptyDraft = (id?: string): ResumeDraft => ({
 })
 
 export interface UseResumeBuilderResult {
+  resumeId?: string
   draft: ResumeDraft
   setDraft: (updater: (prev: ResumeDraft) => ResumeDraft) => void
   status: ResumeBuilderStatus
@@ -76,6 +77,13 @@ export const useResumeBuilder = (
 ): UseResumeBuilderResult => {
   const { resumeId, supabaseClient = supabase, autosaveDelayMs = 1500 } = options
 
+  const LOCAL_STORAGE_KEY = 'resume_builder_last_id'
+
+  const initialResumeId =
+    resumeId ||
+    (typeof window !== 'undefined' ? window.localStorage.getItem(LOCAL_STORAGE_KEY) || undefined : undefined)
+
+  const [currentResumeId, setCurrentResumeId] = useState<string | undefined>(initialResumeId)
   const [draft, internalSetDraft] = useState<ResumeDraft>(() => createEmptyDraft(resumeId))
   const [status, setStatus] = useState<ResumeBuilderStatus>('idle')
   const [error, setError] = useState<string | null>(null)
@@ -87,14 +95,69 @@ export const useResumeBuilder = (
 
   // Load existing resume from Supabase if id is provided
   useEffect(() => {
+    setCurrentResumeId(resumeId)
+  }, [resumeId])
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && currentResumeId) {
+      window.localStorage.setItem(LOCAL_STORAGE_KEY, currentResumeId)
+    }
+  }, [currentResumeId])
+
+  // If no resumeId provided, try to load the most recent resume for the signed-in user
+  useEffect(() => {
+    const loadLatest = async () => {
+      if (currentResumeId) return
+      setStatus('loading')
+
+      const { data: userData, error: userError } = await supabaseClient.auth.getUser()
+      if (userError || !userData?.user?.id) {
+        setStatus('idle')
+        return
+      }
+
+      const { data, error: fetchError } = await supabaseClient
+        .from('resumes')
+        .select('id, parsed_fields, updated_at')
+        .eq('user_id', userData.user.id)
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+      if (fetchError || !data) {
+        setStatus('idle')
+        return
+      }
+
+      setCurrentResumeId(data.id)
+
+      const parsedFields = (data.parsed_fields ?? {}) as Partial<ResumeDraft>
+      const loadedDraft: ResumeDraft = {
+        ...createEmptyDraft(data.id),
+        ...parsedFields,
+        id: data.id,
+        lastUpdatedAt: data.updated_at || new Date().toISOString(),
+      }
+
+      internalSetDraft(loadedDraft)
+      setLastSavedAt(data.updated_at ?? new Date().toISOString())
+      setStatus('idle')
+      isInitialLoadRef.current = false
+    }
+
+    loadLatest()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentResumeId])
+
+  useEffect(() => {
     const load = async () => {
-      if (!resumeId) return
+      if (!currentResumeId) return
       setStatus('loading')
 
       const { data, error } = await supabaseClient
         .from('resumes')
         .select('id, parsed_fields, updated_at')
-        .eq('id', resumeId)
+        .eq('id', currentResumeId)
         .single()
 
       if (error) {
@@ -123,7 +186,7 @@ export const useResumeBuilder = (
 
     load()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resumeId])
+  }, [currentResumeId])
 
   const markDirtyAndSetDraft = useCallback((updater: (prev: ResumeDraft) => ResumeDraft) => {
     internalSetDraft((prev) => {
@@ -136,8 +199,52 @@ export const useResumeBuilder = (
     })
   }, [])
 
+  const ensureResumeId = useCallback(async (): Promise<string | null> => {
+    if (currentResumeId) return currentResumeId
+
+    setStatus('saving')
+    const { data: userData, error: userError } = await supabaseClient.auth.getUser()
+    if (userError || !userData?.user?.id) {
+      setError(userError?.message || 'Not authenticated')
+      setStatus('error')
+      return null
+    }
+
+    const insertPayload = {
+      user_id: userData.user.id,
+      title: 'Untitled Resume',
+      parsed_fields: draft as any,
+    }
+
+    const { data, error: insertError } = await supabaseClient
+      .from('resumes')
+      .insert(insertPayload)
+      .select('id, updated_at')
+      .single()
+
+    if (insertError) {
+      console.error('Error creating resume draft', insertError)
+      setError(insertError.message)
+      setStatus('error')
+      return null
+    }
+
+    setCurrentResumeId(data.id)
+    const now = data.updated_at || new Date().toISOString()
+    setLastSavedAt(now)
+    internalSetDraft((prev) => ({
+      ...prev,
+      id: data.id,
+      lastUpdatedAt: now,
+    }))
+    setStatus('idle')
+    setIsDirty(false)
+    return data.id
+  }, [currentResumeId, draft, supabaseClient])
+
   const manualSave = useCallback(async () => {
-    if (!resumeId) return
+    const id = await ensureResumeId()
+    if (!id) return
     setStatus('saving')
     setError(null)
 
@@ -148,7 +255,7 @@ export const useResumeBuilder = (
     const { error: upsertError } = await supabaseClient
       .from('resumes')
       .update(payload)
-      .eq('id', resumeId)
+      .eq('id', id)
 
     if (upsertError) {
       console.error('Error saving resume draft', upsertError)
@@ -166,7 +273,7 @@ export const useResumeBuilder = (
       ...prev,
       lastUpdatedAt: now,
     }))
-  }, [draft, resumeId, supabaseClient])
+  }, [draft, supabaseClient, ensureResumeId])
 
   // Autosave on draft changes
   useEffect(() => {
@@ -174,7 +281,7 @@ export const useResumeBuilder = (
       isInitialLoadRef.current = false
       return
     }
-    if (!resumeId) return
+    if (!currentResumeId && !isDirty) return
     if (!isDirty) return
 
     if (autosaveTimerRef.current) {
@@ -250,6 +357,7 @@ export const useResumeBuilder = (
   }, [markDirtyAndSetDraft])
 
   return {
+    resumeId: currentResumeId,
     draft,
     setDraft: markDirtyAndSetDraft,
     status,
