@@ -1,5 +1,6 @@
 
 import { describe, it, expect, beforeEach, vi, type Mock } from 'vitest'
+import type { HandlerResponse } from '@netlify/functions'
 import { handler } from '../prepare'
 import { runAI } from '../../ai/run'
 import { createAdminClient } from '../../utils/supabase'
@@ -82,7 +83,7 @@ describe('Auto-Apply Prepare Worker', () => {
         // 7. Log Insert
         mockSupabase.insert.mockImplementationOnce(() => Promise.resolve({ error: null }))
 
-        const result = await handler(mockEvent, {} as any)
+        const result = await handler(mockEvent, {} as any) as HandlerResponse
 
         expect(result.statusCode).toBe(200)
         expect(runAI).toHaveBeenCalledTimes(3)

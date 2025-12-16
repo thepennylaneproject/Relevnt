@@ -25,8 +25,9 @@ vi.mock('../../utils/auth', () => ({
     requireAuth: vi.fn(),
 }))
 
+
 import { handler } from '../../build_auto_apply_queue'
-import type { HandlerEvent } from '@netlify/functions'
+import type { HandlerEvent, HandlerResponse } from '@netlify/functions'
 import { requireAuth } from '../../utils/auth'
 
 // =============================================================================
@@ -101,10 +102,10 @@ describe('Authentication', () => {
             body: null,
         }
 
-        const response = await handler(event as HandlerEvent, {} as any)
+        const response = await handler(event as HandlerEvent, {} as any) as HandlerResponse
 
         expect(response.statusCode).toBe(405)
-        expect(JSON.parse(response.body).error).toBe('Method not allowed')
+        expect(JSON.parse(response.body as string).error).toBe('Method not allowed')
     })
 
     test('should work with valid JWT', async () => {
@@ -127,7 +128,7 @@ describe('Authentication', () => {
             body: JSON.stringify({}),
         }
 
-        const response = await handler(event as HandlerEvent, {} as any)
+        const response = await handler(event as HandlerEvent, {} as any) as HandlerResponse
 
         expect(requireAuth).toHaveBeenCalled()
         expect(response.statusCode).toBe(200)
@@ -167,7 +168,7 @@ describe('Authentication', () => {
             body: JSON.stringify({ user_id: 'user-123' }),
         }
 
-        const response = await handler(event as HandlerEvent, {} as any)
+        const response = await handler(event as HandlerEvent, {} as any) as HandlerResponse
 
         expect(response.statusCode).toBe(200)
         expect(requireAuth).not.toHaveBeenCalled() // Should skip normal auth
@@ -184,10 +185,10 @@ describe('Authentication', () => {
             body: JSON.stringify({}), // Missing user_id
         }
 
-        const response = await handler(event as HandlerEvent, {} as any)
+        const response = await handler(event as HandlerEvent, {} as any) as HandlerResponse
 
         expect(response.statusCode).toBe(400)
-        expect(JSON.parse(response.body).error).toBe('user_id required for admin mode')
+        expect(JSON.parse(response.body as string).error).toBe('user_id required for admin mode')
     })
 })
 
@@ -265,10 +266,10 @@ describe('Rule Loading', () => {
             body: JSON.stringify({}),
         }
 
-        const response = await handler(event as HandlerEvent, {} as any)
+        const response = await handler(event as HandlerEvent, {} as any) as HandlerResponse
 
         expect(response.statusCode).toBe(200)
-        const body = JSON.parse(response.body)
+        const body = JSON.parse(response.body as string)
         expect(body.message).toContain('No enabled auto-apply rules')
         expect(body.queued).toBe(0)
     })
@@ -350,7 +351,7 @@ describe('Error Handling', () => {
             body: JSON.stringify({}),
         }
 
-        const response = await handler(event as HandlerEvent, {} as any)
+        const response = await handler(event as HandlerEvent, {} as any) as HandlerResponse
 
         expect(response.statusCode).toBe(500)
     })
@@ -364,10 +365,10 @@ describe('Error Handling', () => {
             body: JSON.stringify({}),
         }
 
-        const response = await handler(event as HandlerEvent, {} as any)
+        const response = await handler(event as HandlerEvent, {} as any) as HandlerResponse
 
         expect(response.statusCode).toBe(401)
-        expect(JSON.parse(response.body).error).toBe('Unauthorized')
+        expect(JSON.parse(response.body as string).error).toBe('Unauthorized')
     })
 })
 

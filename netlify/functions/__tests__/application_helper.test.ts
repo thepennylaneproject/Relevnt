@@ -1,5 +1,6 @@
 
 import { describe, it, expect, beforeEach, vi, type Mock } from 'vitest'
+import type { HandlerResponse } from '@netlify/functions'
 import { handler } from '../application_helper'
 import { runAI } from '../ai/run'
 import { verifyToken, createAdminClient } from '../utils/supabase'
@@ -9,12 +10,14 @@ vi.mock('../ai/run', () => ({
     runAI: vi.fn()
 }))
 
-vi.mock('../utils/supabase', () => ({
-    verifyToken: vi.fn(),
-    createAdminClient: vi.fn(),
-    createResponse: vi.requireActual('../utils/supabase').createResponse,
-    handleCORS: vi.requireActual('../utils/supabase').handleCORS,
-}))
+vi.mock('../utils/supabase', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('../utils/supabase')>()
+    return {
+        ...actual,
+        verifyToken: vi.fn(),
+        createAdminClient: vi.fn(),
+    }
+})
 
 describe('Application Helper Function', () => {
     let mockSupabase: any
@@ -45,7 +48,7 @@ describe('Application Helper Function', () => {
     it('should return 401 if auth fails', async () => {
         (verifyToken as unknown as Mock).mockResolvedValue({ userId: null, error: 'Auth failed' })
 
-        const result = await handler(mockEvent, {} as any)
+        const result = await handler(mockEvent, {} as any) as HandlerResponse
         expect(result.statusCode).toBe(401)
     })
 
@@ -68,10 +71,10 @@ describe('Application Helper Function', () => {
             model: 'gpt-4o'
         })
 
-        const result = await handler(mockEvent, {} as any)
+        const result = await handler(mockEvent, {} as any) as HandlerResponse
 
         expect(result.statusCode).toBe(200)
-        const body = JSON.parse(result.body)
+        const body = JSON.parse(result.body as string)
         expect(body.ok).toBe(true)
         expect(body.output).toEqual(mockAIOutput)
         expect(runAI).toHaveBeenCalledWith(expect.objectContaining({
@@ -82,13 +85,13 @@ describe('Application Helper Function', () => {
     })
 
     it('should default to free tier if profile fetch fails', async () => {
-        (verifyToken as unknown as Mock).mockResolvedValue({ userId: 'user-123', error: null })
-        mockSupabase.single.mockResolvedValue({ data: null, error: 'Not found' })
+        (verifyToken as unknown as Mock).mockResolvedValue({ userId: 'user-123', error: null });
+        mockSupabase.single.mockResolvedValue({ data: null, error: 'Not found' });
 
-            (runAI as unknown as Mock).mockResolvedValue({
-                ok: true,
-                output: {},
-            })
+        (runAI as unknown as Mock).mockResolvedValue({
+            ok: true,
+            output: {},
+        })
 
         await handler(mockEvent, {} as any)
 

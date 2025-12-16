@@ -2,7 +2,7 @@
 import type { Handler } from '@netlify/functions'
 import { createAdminClient } from '../utils/supabase'
 import { runAI } from '../ai/run'
-import type { AITaskName } from '../../src/lib/ai/types'
+import type { AITaskName } from '../../../src/lib/ai/types'
 
 // Helper to stringify resume for AI context
 function formatResumeForAI(resume: any, experiences: any[], education: any[], skills: any[]): string {

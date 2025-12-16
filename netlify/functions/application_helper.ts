@@ -2,7 +2,7 @@
 import type { Handler } from '@netlify/functions'
 import { createResponse, handleCORS, verifyToken, createAdminClient } from './utils/supabase'
 import { runAI } from './ai/run'
-import type { UserTier } from '../src/lib/ai/types'
+import type { UserTier } from '../../src/lib/ai/types'
 
 const JSON_SCHEMA = {
     type: 'object',

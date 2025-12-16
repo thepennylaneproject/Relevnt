@@ -28,11 +28,11 @@ interface HelperResponse {
 }
 
 const MODES: { value: HelperMode; label: string; icon: string }[] = [
-    { value: 'default', label: 'Standard', icon: 'check-circle' },
-    { value: 'concise', label: 'Concise', icon: 'scissors' },
-    { value: 'confident', label: 'Confident', icon: 'lightning' },
-    { value: 'metrics', label: 'Metrics', icon: 'chart-bar' },
-    { value: 'values', label: 'Values', icon: 'heart' },
+    { value: 'default', label: 'Standard', icon: 'check' },
+    { value: 'concise', label: 'Concise', icon: 'scroll' },
+    { value: 'confident', label: 'Confident', icon: 'lighthouse' },
+    { value: 'metrics', label: 'Metrics', icon: 'stars' },
+    { value: 'values', label: 'Values', icon: 'flower' },
 ]
 
 export const ApplicationQuestionHelper: React.FC = () => {
@@ -134,7 +134,7 @@ export const ApplicationQuestionHelper: React.FC = () => {
                         }
                     `}
                 >
-                    <Icon name={m.icon as any} size="xs" />
+                    <Icon name={m.icon as any} size="sm" />
                     {mini ? `Rewrite: ${m.label}` : m.label}
                 </button>
             ))}
@@ -162,7 +162,7 @@ export const ApplicationQuestionHelper: React.FC = () => {
                             Start Over
                         </Button>
                         <Button variant="primary" size="sm" onClick={handleCopy}>
-                            <Icon name="copy" size="sm" className="mr-2" />
+                            <Icon name="check" size="sm" className="mr-2" />
                             Copy
                         </Button>
                     </div>
@@ -213,7 +213,7 @@ export const ApplicationQuestionHelper: React.FC = () => {
         <div className="surface-card">
             <header className="mb-6">
                 <div className="flex items-center gap-2 mb-1">
-                    <Icon name="sparkles" className="text-blue-500" />
+                    <Icon name="stars" className="text-blue-500" />
                     <h2 className="text-lg font-semibold">Application Question Helper</h2>
                 </div>
                 <p className="text-sm muted">
@@ -246,7 +246,7 @@ export const ApplicationQuestionHelper: React.FC = () => {
                             <Icon name="briefcase" size="sm" />
                             Add Context (Optional)
                         </span>
-                        <Icon name={contextOpen ? 'chevron-up' : 'chevron-down'} size="sm" />
+                        <Icon name="plus" size="sm" />
                     </button>
 
                     {contextOpen && (
