@@ -1045,6 +1045,23 @@ export const GreenhouseSource: JobSource = {
         return {
           source_slug: 'greenhouse',
           external_id: `greenhouse:${id}`,
+          title,
+          company,
+          location,
+          employment_type,
+          remote_type,
+          external_url,
+          posted_date,
+          created_at: nowIso,
+          salary_min,
+          salary_max,
+          description,
+          competitiveness_level: null,
+        }
+      })
+  },
+}
+
 // RSS/Atom Feeds (generic RSS job feed support)
 // ---------------------------------------------------------------------------
 
@@ -1311,26 +1328,18 @@ export const LeverSource: JobSource = {
         return {
           source_slug: 'lever',
           external_id: posting.id,
-
           title: posting.text,
           company: null, // Company comes from the URL/config, not the posting
           location,
           employment_type,
           remote_type,
-
           posted_date,
           created_at: nowIso,
           external_url,
-
           salary_min,
           salary_max,
-          competitiveness_level: null,
-
           description,
-          data_raw: row,
-        }
-      })
-          data_raw: posting,
+          competitiveness_level: null,
         }
       })
       .filter((job): job is NormalizedJob => Boolean(job))
