@@ -1075,7 +1075,7 @@ interface RSSFeedSource {
 
 // Helper to parse RSS sources from environment
 function getRSSSources(): RSSFeedSource[] {
-  const json = process.env.RSS_FEEDS_JSON
+  const json = typeof (globalThis as any).process !== 'undefined' && (globalThis as any).process?.env?.RSS_FEEDS_JSON ? (globalThis as any).process.env.RSS_FEEDS_JSON : undefined
   if (!json) return []
   try {
     const parsed = JSON.parse(json)
@@ -1241,7 +1241,7 @@ interface LeverCompanySource {
 
 // Helper to parse Lever sources from environment
 function getLeverSources(): LeverCompanySource[] {
-  const json = process.env.LEVER_SOURCES_JSON
+  const json = typeof (globalThis as any).process !== 'undefined' && (globalThis as any).process?.env?.LEVER_SOURCES_JSON ? (globalThis as any).process.env.LEVER_SOURCES_JSON : undefined
   if (!json) return []
   try {
     const parsed = JSON.parse(json)

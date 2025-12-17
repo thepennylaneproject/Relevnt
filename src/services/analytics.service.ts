@@ -134,7 +134,7 @@ class AnalyticsService {
 
     try {
       // Log to console in development
-      if (process.env.NODE_ENV === 'development') {
+      if (typeof (globalThis as any).process !== 'undefined' && (globalThis as any).process?.env?.NODE_ENV === 'development') {
         console.log('[Analytics]', eventName, properties);
       }
 
