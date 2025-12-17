@@ -688,6 +688,9 @@ describe('Greenhouse normalize', () => {
         expect(result).toHaveLength(1)
         expect(result[0].location).toBeNull()
         expect(result[0].remote_type).toBeNull()
+    })
+})
+
 // =====================================================
 // Lever normalize
 // =====================================================
@@ -856,7 +859,9 @@ describe('Lever normalize', () => {
 
     test('should have correct configuration', async () => {
         const { getSourceConfig } = await import('../../../src/shared/sourceConfig')
+        const { ALL_SOURCES } = await import('../../../src/shared/jobSources')
         const config = getSourceConfig('greenhouse')
+        const slugs = ALL_SOURCES.map((s: any) => s.slug)
 
         expect(config.slug).toBe('greenhouse')
         expect(config.mode).toBe('shallow-curated')

@@ -268,6 +268,9 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
         trustLevel: 'high', // Company-hosted = high quality signal
         trackFreshnessRatio: false,
         notes: 'Greenhouse company career boards. Each configured board is a separate company ATS instance. High trust due to direct company hosting.',
+    },
+
+    // =========================================================================
     // Lever - Premium job board with per-company configuration
     // =========================================================================
     lever: {
