@@ -253,6 +253,21 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
     },
 
     // =========================================================================
+    // Greenhouse - Company Career Boards (meta-source)
+    // =========================================================================
+    // This is a meta-source that iterates through multiple configured Greenhouse boards.
+    // Each board is a separate company's ATS hosted on Greenhouse.
+    // Configuration via GREENHOUSE_BOARDS_JSON env var.
+    greenhouse: {
+        slug: 'greenhouse',
+        mode: 'shallow-curated',
+        enabled: true, // Controlled by ENABLE_SOURCE_GREENHOUSE env var in ingest
+        maxAgeDays: 30,
+        maxPagesPerRun: 1, // Greenhouse doesn't paginate; we fetch all jobs in one request
+        resetPaginationEachRun: false, // No pagination needed
+        trustLevel: 'high', // Company-hosted = high quality signal
+        trackFreshnessRatio: false,
+        notes: 'Greenhouse company career boards. Each configured board is a separate company ATS instance. High trust due to direct company hosting.',
     // Lever - Premium job board with per-company configuration
     // =========================================================================
     lever: {

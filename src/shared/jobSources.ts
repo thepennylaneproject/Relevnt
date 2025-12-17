@@ -976,6 +976,75 @@ export const TheirStackSource: JobSource = {
 }
 
 // ---------------------------------------------------------------------------
+// Greenhouse (Company Career Boards)
+// ---------------------------------------------------------------------------
+// Greenhouse public board API: https://api.greenhouse.io/v1/boards/{board_token}/jobs
+// Returns array of open jobs from a company's Greenhouse ATS board
+
+export const GreenhouseSource: JobSource = {
+  slug: 'greenhouse',
+  displayName: 'Greenhouse',
+  // Note: The actual board token is passed at ingestion time for each company board
+  fetchUrl: 'https://api.greenhouse.io/v1/boards',
+  type: 'board',
+  region: 'global',
+
+  normalize: (raw) => {
+    const anyRaw = raw as any
+    // Greenhouse returns { jobs: [...] } or sometimes just array
+    const rows = asArray<any>(anyRaw?.jobs ?? anyRaw)
+    if (!rows.length) {
+      return []
+    }
+
+    const nowIso = new Date().toISOString()
+
+    return rows
+      .filter((row) => row && row.id && row.title)
+      .map((row): NormalizedJob => {
+        const id = String(row.id)
+        const title = row.title ?? ''
+
+        // Company can come from config, but Greenhouse endpoint doesn't provide it
+        const company = null // Will be enriched from board config
+
+        // Build location from offices, departments, or use raw location
+        let location: string | null = null
+        if (row.offices && Array.isArray(row.offices) && row.offices.length > 0) {
+          const officeNames = row.offices
+            .map((o: any) => o.name ?? o.location)
+            .filter((n: any) => n)
+          location = officeNames.join(', ') || null
+        } else if (row.location) {
+          location = row.location
+        }
+
+        // Try to infer remote type from location or departments
+        let remote_type: RemoteType = inferRemoteTypeFromLocation(location)
+        if (!remote_type && row.departments && Array.isArray(row.departments)) {
+          const deptNames = row.departments.map((d: any) => d.name ?? '').join(' ')
+          remote_type = inferRemoteTypeFromLocation(deptNames)
+        }
+
+        // Employment type: full-time, part-time, contract, etc.
+        const employment_type = row.employment_type ?? null
+
+        // Greenhouse provides posted_date in ISO format
+        const posted_date = safeDate(row.posted_at)
+
+        // External URL - Greenhouse provides absolute_url
+        const external_url = row.absolute_url ?? null
+
+        // Salary not typically in Greenhouse public API
+        const salary_min = null
+        const salary_max = null
+
+        // Build description from title + any additional info
+        const description = row.description ?? null
+
+        return {
+          source_slug: 'greenhouse',
+          external_id: `greenhouse:${id}`,
 // RSS/Atom Feeds (generic RSS job feed support)
 // ---------------------------------------------------------------------------
 
@@ -1258,6 +1327,9 @@ export const LeverSource: JobSource = {
           competitiveness_level: null,
 
           description,
+          data_raw: row,
+        }
+      })
           data_raw: posting,
         }
       })
@@ -1283,6 +1355,7 @@ export const ALL_SOURCES: JobSource[] = [
   TheMuseSource,
   ReedUKSource,
   TheirStackSource,
+  GreenhouseSource,
   LeverSource,
   RSSSource,
 ]

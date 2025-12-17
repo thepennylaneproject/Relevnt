@@ -54,8 +54,17 @@ type PaginationConfig = {
   maxPagesPerRun?: number
 }
 
+// Greenhouse board configuration
+export interface GreenhouseBoard {
+  companyName: string
+  boardToken: string
+  careersUrl?: string // Optional careers page URL
+}
+
 const DEFAULT_PAGE_SIZE = 50
 const DEFAULT_MAX_PAGES_PER_RUN = 3
+const DEFAULT_GREENHOUSE_MAX_BOARDS_PER_RUN = 20
+const DEFAULT_GREENHOUSE_MAX_JOBS_PER_BOARD = 200
 
 const SOURCE_PAGINATION: Record<string, PaginationConfig> = {
   remoteok: { pageParam: 'page', pageSizeParam: 'limit', pageSize: 50 },
@@ -88,6 +97,45 @@ const SOURCE_PAGINATION: Record<string, PaginationConfig> = {
     pageSize: 50,
     maxPagesPerRun: parseInt(process.env.CAREERONESTOP_MAX_PAGES_PER_RUN || '3', 10),
   },
+  // Greenhouse doesn't use pagination; fetches all jobs in single request per board
+  greenhouse: { pageParam: 'page', pageSizeParam: 'limit', pageSize: 1000, maxPagesPerRun: 1 },
+}
+
+// Parse Greenhouse boards from env var
+function parseGreenhouseBoards(): GreenhouseBoard[] {
+  const boardsJson = process.env.GREENHOUSE_BOARDS_JSON
+  if (!boardsJson) {
+    console.log('ingest_jobs: GREENHOUSE_BOARDS_JSON not set, skipping Greenhouse boards')
+    return []
+  }
+
+  try {
+    const boards = JSON.parse(boardsJson)
+    if (!Array.isArray(boards)) {
+      console.warn('ingest_jobs: GREENHOUSE_BOARDS_JSON must be a JSON array')
+      return []
+    }
+
+    // Validate each board has required fields
+    const validBoards = boards.filter((board) => {
+      if (!board.companyName || !board.boardToken) {
+        console.warn(
+          'ingest_jobs: Greenhouse board missing companyName or boardToken:',
+          board
+        )
+        return false
+      }
+      return true
+    })
+
+    console.log(
+      `ingest_jobs: loaded ${validBoards.length} Greenhouse boards from GREENHOUSE_BOARDS_JSON`
+    )
+    return validBoards
+  } catch (err) {
+    console.error('ingest_jobs: failed to parse GREENHOUSE_BOARDS_JSON', err)
+    return []
+  }
   // Lever doesn't use pagination - it uses company-based fetching
   lever: {
     pageParam: undefined, // Not used for Lever
@@ -972,6 +1020,269 @@ function filterByFreshness(
   return { fresh, staleCount };
 }
 
+/**
+ * Special ingest handler for Greenhouse that iterates through multiple configured boards
+ */
+async function ingestGreenhouseBoards(
+  source: JobSource,
+  runId?: string
+): Promise<IngestResult> {
+  const supabase = createAdminClient()
+  const sourceConfig = getSourceConfig(source.slug)
+  const boards = parseGreenhouseBoards()
+
+  if (!boards.length) {
+    console.log('ingest_jobs: no Greenhouse boards configured')
+    return {
+      source: source.slug,
+      count: 0,
+      normalized: 0,
+      duplicates: 0,
+      staleFiltered: 0,
+      status: 'skipped',
+      skipReason: 'no boards configured',
+    }
+  }
+
+  const maxBoardsPerRun = parseInt(
+    process.env.GREENHOUSE_MAX_BOARDS_PER_RUN || String(DEFAULT_GREENHOUSE_MAX_BOARDS_PER_RUN),
+    10
+  )
+  const maxJobsPerBoard = parseInt(
+    process.env.GREENHOUSE_MAX_JOBS_PER_BOARD || String(DEFAULT_GREENHOUSE_MAX_JOBS_PER_BOARD),
+    10
+  )
+
+  const runStartedAt = new Date().toISOString()
+  let totalNormalized = 0
+  let totalInserted = 0
+  let totalDuplicates = 0
+  let totalStaleFiltered = 0
+  let sourceStatus: 'success' | 'failed' = 'success'
+  let sourceError: string | null = null
+
+  // Create source run log if runId provided
+  let sourceRunId: string | null = null
+  if (runId) {
+    const { data: sourceRun, error: sourceRunError } = await supabase
+      .from('job_ingestion_run_sources')
+      .insert({
+        run_id: runId,
+        source: source.slug,
+        started_at: runStartedAt,
+        status: 'running',
+        page_start: 1,
+        cursor_in: { page: 1, since: null },
+      })
+      .select('id')
+      .single()
+
+    if (!sourceRunError && sourceRun) {
+      sourceRunId = sourceRun.id
+    }
+  }
+
+  console.log(
+    `ingest_jobs: starting Greenhouse ingest with ${boards.length} boards (max ${maxBoardsPerRun} per run)`
+  )
+
+  try {
+    // Cap boards processed per run
+    const boardsToProcess = boards.slice(0, maxBoardsPerRun)
+
+    for (const board of boardsToProcess) {
+      try {
+        console.log(`ingest_jobs: fetching jobs from Greenhouse board: ${board.companyName}`)
+
+        // Build Greenhouse API URL for this board
+        const boardUrl = `https://api.greenhouse.io/v1/boards/${board.boardToken}/jobs?content=true`
+
+        const raw = await fetchJson(boardUrl, source, { page: 1 })
+        if (!raw) {
+          console.warn(`ingest_jobs: no data from Greenhouse board ${board.companyName}`)
+          continue
+        }
+
+        // Normalize the response
+        let normalized: NormalizedJob[] = []
+        try {
+          const normalizedResult = await Promise.resolve(source.normalize(raw))
+          normalized = normalizedResult || []
+        } catch (err) {
+          console.error(
+            `ingest_jobs: normalize failed for Greenhouse board ${board.companyName}`,
+            err
+          )
+          continue
+        }
+
+        if (!normalized.length) {
+          console.log(
+            `ingest_jobs: no jobs after normalize for Greenhouse board ${board.companyName}`
+          )
+          continue
+        }
+
+        // Enrich jobs with company name from board config
+        const enrichedNormalized = normalized.map((job) => ({
+          ...job,
+          company: job.company || board.companyName,
+        }))
+
+        // Apply freshness filter
+        const { fresh, staleCount } = filterByFreshness(enrichedNormalized, sourceConfig)
+        totalStaleFiltered += staleCount
+
+        if (staleCount > 0) {
+          console.log(
+            `ingest_jobs: filtered ${staleCount} stale jobs from Greenhouse board ${board.companyName}`
+          )
+        }
+
+        totalNormalized += normalized.length
+
+        if (!fresh.length) {
+          console.log(
+            `ingest_jobs: all jobs stale after freshness filter for Greenhouse board ${board.companyName}`
+          )
+          continue
+        }
+
+        // Cap jobs per board
+        const jobsToInsert = fresh.slice(0, maxJobsPerBoard)
+        if (jobsToInsert.length < fresh.length) {
+          console.log(
+            `ingest_jobs: capping Greenhouse jobs for ${board.companyName}: ${jobsToInsert.length} of ${fresh.length}`
+          )
+        }
+
+        const duplicateCount = jobsToInsert.length
+        console.log(
+          `ingest_jobs: normalized ${normalized.length} → ${jobsToInsert.length} fresh jobs from Greenhouse board ${board.companyName}`
+        )
+
+        const { inserted } = await upsertJobs(jobsToInsert)
+        totalInserted += inserted
+        totalDuplicates += duplicateCount - inserted
+        console.log(
+          `ingest_jobs: upserted ${inserted} jobs from Greenhouse board ${board.companyName}`
+        )
+      } catch (boardError) {
+        console.error(
+          `ingest_jobs: error processing Greenhouse board ${board.companyName}`,
+          boardError
+        )
+        // Continue with next board
+      }
+    }
+
+    // Log if we capped boards
+    if (boardsToProcess.length < boards.length) {
+      console.log(
+        `ingest_jobs: Greenhouse cap enforced: processed ${boardsToProcess.length}/${boards.length} boards`
+      )
+    }
+  } catch (ingestError) {
+    sourceStatus = 'failed'
+    sourceError = ingestError instanceof Error ? ingestError.message : String(ingestError)
+    console.error(`ingest_jobs: error during Greenhouse ingest`, ingestError)
+  }
+
+  const finishedAt = new Date().toISOString()
+
+  // Calculate freshness ratio
+  const freshnessRatio = totalNormalized > 0
+    ? ((totalNormalized - totalStaleFiltered) / totalNormalized)
+    : 1
+
+  console.log(
+    `ingest_jobs: finished Greenhouse ingest`,
+    JSON.stringify({
+      totalNormalized,
+      totalInserted,
+      totalDuplicates,
+      totalStaleFiltered,
+      freshnessRatio: freshnessRatio.toFixed(4),
+      status: sourceStatus,
+    })
+  )
+
+  // Update source run log
+  if (sourceRunId) {
+    await supabase
+      .from('job_ingestion_run_sources')
+      .update({
+        finished_at: finishedAt,
+        status: sourceStatus,
+        page_end: 1,
+        normalized_count: totalNormalized,
+        inserted_count: totalInserted,
+        duplicate_count: totalDuplicates,
+        error_message: sourceError,
+        cursor_out: { page: 1, since: runStartedAt },
+      })
+      .eq('id', sourceRunId)
+  }
+
+  // Update source health
+  await supabase.from('job_source_health').upsert(
+    {
+      source: source.slug,
+      last_run_at: finishedAt,
+      last_success_at: sourceStatus === 'success' ? finishedAt : undefined,
+      last_error_at: sourceStatus === 'failed' ? finishedAt : undefined,
+      consecutive_failures: sourceStatus === 'failed' ? 1 : 0,
+      last_counts: {
+        normalized: totalNormalized,
+        inserted: totalInserted,
+        duplicates: totalDuplicates,
+        staleFiltered: totalStaleFiltered,
+        freshnessRatio,
+      },
+      is_degraded: sourceStatus === 'failed',
+    },
+    { onConflict: 'source' }
+  )
+
+  // Persist state
+  await persistIngestionState(
+    supabase,
+    source.slug,
+    { page: 1, since: runStartedAt },
+    runStartedAt
+  )
+
+  // Update job_sources bookkeeping
+  try {
+    const { error: statusError } = await supabase
+      .from('job_sources')
+      .update({
+        last_sync: runStartedAt,
+        last_error: sourceError,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('slug', source.slug)
+
+    if (statusError) {
+      console.error(
+        'ingest_jobs: failed to update job_sources status for Greenhouse',
+        statusError
+      )
+    }
+  } catch (e) {
+    console.error('ingest_jobs: exception while updating job_sources status for Greenhouse', e)
+  }
+
+  return {
+    source: source.slug,
+    count: totalInserted,
+    normalized: totalNormalized,
+    duplicates: totalDuplicates,
+    staleFiltered: totalStaleFiltered,
+    status: sourceStatus,
+    error: sourceError || undefined,
+  }
+}
 
 async function ingest(source: JobSource, runId?: string): Promise<IngestResult> {
   const supabase = createAdminClient()
@@ -1429,7 +1740,10 @@ export async function runIngestion(
 
   for (const source of sourcesToRun) {
     try {
-      const result = await ingest(source, runId || undefined)
+      // Use special handler for Greenhouse since it manages multiple boards
+      const result = source.slug === 'greenhouse'
+        ? await ingestGreenhouseBoards(source, runId || undefined)
+        : await ingest(source, runId || undefined)
       results.push(result)
       if (result.status === 'failed') {
         failedSourceCount++
