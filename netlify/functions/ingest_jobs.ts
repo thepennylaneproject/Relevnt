@@ -13,6 +13,8 @@ import {
   ALL_SOURCES,
   type JobSource,
   type NormalizedJob,
+  getLeverSources,
+  buildLeverUrl,
 } from '../../src/shared/jobSources'
 import { enrichJob } from '../../src/lib/scoring/jobEnricher'
 import {
@@ -20,6 +22,13 @@ import {
   shouldSkipDueToCooldown,
   type SourceConfig,
 } from '../../src/shared/sourceConfig'
+import {
+  type Company,
+  filterCompaniesDueForSync,
+  calculatePriorityScore,
+  groupCompaniesByPlatform,
+} from '../../src/shared/companiesRegistry'
+import { fetchCompaniesInParallel, fetchFromMultiplePlatforms } from './utils/concurrent-fetcher'
 
 export type IngestResult = {
   source: string;
@@ -75,6 +84,11 @@ const SOURCE_PAGINATION: Record<string, PaginationConfig> = {
     pageSizeParam: 'pageSize',
     pageSize: 50,
     maxPagesPerRun: parseInt(process.env.CAREERONESTOP_MAX_PAGES_PER_RUN || '3', 10),
+  },
+  // Lever doesn't use pagination - it uses company-based fetching
+  lever: {
+    pageParam: undefined, // Not used for Lever
+    maxPagesPerRun: 1,
   },
 }
 
@@ -240,6 +254,11 @@ function buildSourceUrl(
       return null
     }
     return source.fetchUrl
+  }
+
+  // Lever: handled specially in ingest() function, returns null here
+  if (source.slug === 'lever') {
+    return null
   }
 
   return applyCursorToUrl(source.fetchUrl, source, cursor)
@@ -453,6 +472,257 @@ async function fetchJson(
     console.error(`ingest_jobs: network error for ${url}`, err)
     return null
   }
+}
+
+// ============================================================================
+// COMPANY REGISTRY FUNCTIONS
+// ============================================================================
+
+/**
+ * Get companies from registry for a given platform
+ */
+async function getCompaniesFromRegistry(
+  supabase: ReturnType<typeof createAdminClient>,
+  platform: 'lever' | 'greenhouse'
+): Promise<Company[]> {
+  try {
+    const maxCompanies = parseInt(
+      platform === 'lever'
+        ? process.env.LEVER_MAX_COMPANIES_PER_RUN || '20'
+        : process.env.GREENHOUSE_MAX_BOARDS_PER_RUN || '20',
+      10
+    );
+
+    // Try to use priority queue view if available, fall back to table query
+    let companies: any[] = [];
+    try {
+      const { data, error } = await supabase
+        .from('companies_priority_queue')
+        .select('*')
+        .limit(maxCompanies);
+
+      if (!error && data) {
+        companies = data;
+      }
+    } catch (e) {
+      // View may not exist, fall back to table query
+      console.log('Priority queue view not available, using table query');
+    }
+
+    // Fallback: query companies table directly
+    if (companies.length === 0) {
+      const platformField = platform === 'lever' ? 'lever_slug' : 'greenhouse_board_token';
+      const { data, error } = await supabase
+        .from('companies')
+        .select('*')
+        .eq('is_active', true)
+        .not(platformField, 'is', null)
+        .order(
+          'job_creation_velocity',
+          { ascending: false, nullsFirst: false }
+        )
+        .order('growth_score', { ascending: false })
+        .limit(maxCompanies);
+
+      if (error) {
+        console.error(`Failed to query ${platform} companies:`, error);
+        // Fall back to JSON config for backwards compatibility
+        return platform === 'lever' ? getLeverSourcesAsCompanies() : [];
+      }
+
+      companies = data || [];
+    }
+
+    console.log(
+      `ingest_jobs: got ${companies.length} ${platform} companies from registry`
+    );
+    return companies;
+  } catch (err) {
+    console.error(`Failed to get ${platform} companies from registry:`, err);
+    // Fall back to JSON config
+    return platform === 'lever' ? getLeverSourcesAsCompanies() : [];
+  }
+}
+
+/**
+ * Convert Lever JSON config to Company objects (backwards compatibility)
+ */
+function getLeverSourcesAsCompanies(): Company[] {
+  const sources = getLeverSources();
+  return sources.map((source) => ({
+    id: `lever-${source.companyName?.toLowerCase().replace(/\s+/g, '-')}`,
+    name: source.companyName || 'Unknown',
+    lever_slug: source.leverSlug || source.leverApiUrl?.split('/').pop(),
+    priority_tier: 'standard',
+    sync_frequency_hours: 24,
+    is_active: true,
+  }));
+}
+
+/**
+ * Fetch Lever jobs for a company with concurrent rate limiting
+ */
+async function fetchLeverJobsForCompany(
+  company: Company
+): Promise<any[]> {
+  if (!company.lever_slug) return [];
+
+  try {
+    const url = buildLeverUrl({
+      companyName: company.name,
+      leverSlug: company.lever_slug,
+    });
+
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'User-Agent': 'relevnt-job-ingest/1.0',
+        Accept: 'application/json',
+      },
+    });
+
+    if (!res.ok) {
+      console.error(
+        `Lever fetch failed for ${company.name}`,
+        res.status
+      );
+      return [];
+    }
+
+    const data = await res.json().catch(() => null);
+    if (!data) return [];
+
+    const postings = Array.isArray(data) ? data : data.postings ?? [];
+    console.log(
+      `ingest_jobs: got ${postings.length} postings from Lever for ${company.name}`
+    );
+    return postings;
+  } catch (err) {
+    console.error(`Error fetching Lever jobs for ${company.name}:`, err);
+    return [];
+  }
+}
+
+/**
+ * Fetch Greenhouse jobs for a company with concurrent rate limiting
+ */
+async function fetchGreenhouseJobsForCompany(
+  company: Company
+): Promise<any[]> {
+  if (!company.greenhouse_board_token) return [];
+
+  try {
+    const maxJobs = parseInt(
+      process.env.GREENHOUSE_MAX_JOBS_PER_BOARD || '200',
+      10
+    );
+    const url = `https://boards.greenhouse.io/api/v1/boards/${company.greenhouse_board_token}/jobs?content=true`;
+
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'User-Agent': 'relevnt-job-ingest/1.0',
+        Accept: 'application/json',
+      },
+    });
+
+    if (!res.ok) {
+      console.error(
+        `Greenhouse fetch failed for ${company.name}`,
+        res.status
+      );
+      return [];
+    }
+
+    const data = await res.json().catch(() => null);
+    if (!data) return [];
+
+    const jobs = Array.isArray(data.jobs)
+      ? data.jobs.slice(0, maxJobs)
+      : [];
+    console.log(
+      `ingest_jobs: got ${jobs.length} jobs from Greenhouse for ${company.name}`
+    );
+    return jobs;
+  } catch (err) {
+    console.error(`Error fetching Greenhouse jobs for ${company.name}:`, err);
+    return [];
+  }
+}
+
+/**
+ * Fetch from all companies in parallel using concurrent fetcher
+ */
+async function fetchFromAllCompaniesInParallel(
+  supabase: ReturnType<typeof createAdminClient>,
+  platforms: ('lever' | 'greenhouse')[]
+): Promise<{
+  lever: any[];
+  greenhouse: any[];
+}> {
+  const allJobs = { lever: [], greenhouse: [] };
+
+  for (const platform of platforms) {
+    try {
+      const companies = await getCompaniesFromRegistry(supabase, platform);
+
+      if (!companies.length) {
+        console.log(
+          `ingest_jobs: no ${platform} companies to fetch`
+        );
+        continue;
+      }
+
+      // Fetch in parallel with rate limiting
+      const tasks = companies.map((company) => ({
+        companyId: company.id,
+        companyName: company.name,
+        fetchFn:
+          platform === 'lever'
+            ? () => fetchLeverJobsForCompany(company)
+            : () => fetchGreenhouseJobsForCompany(company),
+      }));
+
+      const results = await fetchCompaniesInParallel(tasks, {
+        concurrency: 8,
+        interval: 60000, // 1 minute
+        intervalCap: 100, // 100 requests/minute
+      });
+
+      // Aggregate results
+      const successfulResults = results.filter(
+        (r) => r.status === 'success'
+      );
+      const totalJobs = successfulResults.reduce(
+        (sum, r) => sum + (r.jobCount || 0),
+        0
+      );
+      const failedCount = results.filter(
+        (r) => r.status === 'failed'
+      ).length;
+
+      console.log(
+        `ingest_jobs: ${platform} parallel fetch complete:`,
+        JSON.stringify({
+          total_companies: companies.length,
+          successful: successfulResults.length,
+          failed: failedCount,
+          total_jobs: totalJobs,
+        })
+      );
+
+      for (const result of successfulResults) {
+        allJobs[platform].push(...(result.jobs || []));
+      }
+    } catch (err) {
+      console.error(
+        `Failed to fetch from ${platform} companies:`,
+        err
+      );
+    }
+  }
+
+  return allJobs;
 }
 
 async function loadIngestionState(
@@ -691,81 +961,164 @@ async function ingest(source: JobSource, runId?: string): Promise<IngestResult> 
   )
 
   try {
-    for (let i = 0; i < maxPages; i++) {
-      const url = buildSourceUrl(source, { page, since })
+    // Special handling for Lever and Greenhouse: multi-company parallel fetch
+    if (source.slug === 'lever' || source.slug === 'greenhouse') {
+      const platform = source.slug as 'lever' | 'greenhouse';
+      const enabled =
+        platform === 'lever'
+          ? process.env.ENABLE_SOURCE_LEVER !== 'false'
+          : process.env.ENABLE_SOURCE_GREENHOUSE !== 'false';
 
-      if (!url) {
-        console.warn(`ingest_jobs: no URL for ${source.slug}, skipping`)
-        break
+      if (!enabled) {
+        console.log(`ingest_jobs: ${platform} disabled via ENABLE_SOURCE_${platform.toUpperCase()}`)
+        return {
+          source: source.slug,
+          count: 0,
+          normalized: 0,
+          duplicates: 0,
+          staleFiltered: 0,
+          status: 'skipped',
+          skipReason: 'disabled',
+        }
       }
 
-      console.log(
-        `ingest_jobs: fetching from ${source.slug} (${url}) [page ${page}]`
-      )
+      // Fetch from all companies in parallel using registry
+      const allJobs = await fetchFromAllCompaniesInParallel(supabase, [platform]);
+      const jobsList = allJobs[platform] || [];
 
-      const raw = await fetchJson(url, source, { page, since })
-      if (!raw) {
-        console.warn(`ingest_jobs: no data from ${source.slug} on page ${page}`)
-        break
+      if (!jobsList.length) {
+        console.log(`ingest_jobs: no jobs from ${platform} companies`)
+        return {
+          source: source.slug,
+          count: 0,
+          normalized: 0,
+          duplicates: 0,
+          staleFiltered: 0,
+          status: 'success',
+        }
       }
+
+      console.log(`ingest_jobs: normalizing ${jobsList.length} jobs from ${platform}`)
 
       let normalized: NormalizedJob[] = []
       try {
-        const normalizedResult = await Promise.resolve(source.normalize(raw))
+        const normalizedResult = await Promise.resolve(source.normalize(jobsList))
         normalized = normalizedResult || []
       } catch (err) {
-        console.error(`ingest_jobs: normalize failed for ${source.slug}`, err)
-        break
+        console.error(`ingest_jobs: normalize failed for ${platform}`, err)
+        sourceStatus = 'failed'
+        sourceError = err instanceof Error ? err.message : String(err)
+        throw err
       }
 
-      if (!normalized.length) {
-        console.log(
-          `ingest_jobs: no jobs after normalize for ${source.slug} on page ${page}`
-        )
-        page = 1 // reset so next run starts at beginning
-        break
-      }
+      totalNormalized = normalized.length
 
       // Apply freshness filter
       const { fresh, staleCount } = filterByFreshness(normalized, sourceConfig)
-      totalStaleFiltered += staleCount
+      totalStaleFiltered = staleCount
 
       if (staleCount > 0) {
         console.log(
-          `ingest_jobs: filtered ${staleCount} stale jobs (>${sourceConfig.maxAgeDays} days old) from ${source.slug}`
+          `ingest_jobs: filtered ${staleCount} stale jobs (>${sourceConfig.maxAgeDays} days old) from ${platform}`
         )
       }
-
-      totalNormalized += normalized.length // Track pre-filter count
 
       if (!fresh.length) {
-        console.log(
-          `ingest_jobs: all jobs stale after freshness filter for ${source.slug} on page ${page}`
-        )
-        // If all jobs are stale, we might be paginating into history - stop
-        page = 1
-        break
+        console.log(`ingest_jobs: all ${platform} jobs filtered by freshness`)
+        return {
+          source: source.slug,
+          count: 0,
+          normalized: totalNormalized,
+          duplicates: 0,
+          staleFiltered: totalStaleFiltered,
+          status: 'success',
+        }
       }
 
-      const duplicateCount = fresh.length
-      console.log(
-        `ingest_jobs: normalized ${normalized.length} → ${fresh.length} fresh jobs from ${source.slug} on page ${page}`
-      )
-
+      console.log(`ingest_jobs: upserting ${fresh.length} fresh ${platform} jobs`)
       const { inserted } = await upsertJobs(fresh)
-      totalInserted += inserted
-      totalDuplicates += (duplicateCount - inserted)
-      console.log(
-        `ingest_jobs: upserted ${inserted} jobs from ${source.slug} on page ${page}`
-      )
+      totalInserted = inserted
+      totalDuplicates = fresh.length - inserted
 
-      if (normalized.length < expectedPageSize) {
-        // Likely the last page; reset cursor so next run starts from the beginning
-        page = 1
-        break
+      console.log(`ingest_jobs: finished ${platform} ingest: ${totalInserted} inserted, ${totalDuplicates} duplicates`)
+    } else {
+      // Standard pagination-based ingestion for other sources
+      for (let i = 0; i < maxPages; i++) {
+        const url = buildSourceUrl(source, { page, since })
+
+        if (!url) {
+          console.warn(`ingest_jobs: no URL for ${source.slug}, skipping`)
+          break
+        }
+
+        console.log(
+          `ingest_jobs: fetching from ${source.slug} (${url}) [page ${page}]`
+        )
+
+        const raw = await fetchJson(url, source, { page, since })
+        if (!raw) {
+          console.warn(`ingest_jobs: no data from ${source.slug} on page ${page}`)
+          break
+        }
+
+        let normalized: NormalizedJob[] = []
+        try {
+          const normalizedResult = await Promise.resolve(source.normalize(raw))
+          normalized = normalizedResult || []
+        } catch (err) {
+          console.error(`ingest_jobs: normalize failed for ${source.slug}`, err)
+          break
+        }
+
+        if (!normalized.length) {
+          console.log(
+            `ingest_jobs: no jobs after normalize for ${source.slug} on page ${page}`
+          )
+          page = 1 // reset so next run starts at beginning
+          break
+        }
+
+        // Apply freshness filter
+        const { fresh, staleCount } = filterByFreshness(normalized, sourceConfig)
+        totalStaleFiltered += staleCount
+
+        if (staleCount > 0) {
+          console.log(
+            `ingest_jobs: filtered ${staleCount} stale jobs (>${sourceConfig.maxAgeDays} days old) from ${source.slug}`
+          )
+        }
+
+        totalNormalized += normalized.length // Track pre-filter count
+
+        if (!fresh.length) {
+          console.log(
+            `ingest_jobs: all jobs stale after freshness filter for ${source.slug} on page ${page}`
+          )
+          // If all jobs are stale, we might be paginating into history - stop
+          page = 1
+          break
+        }
+
+        const duplicateCount = fresh.length
+        console.log(
+          `ingest_jobs: normalized ${normalized.length} → ${fresh.length} fresh jobs from ${source.slug} on page ${page}`
+        )
+
+        const { inserted } = await upsertJobs(fresh)
+        totalInserted += inserted
+        totalDuplicates += (duplicateCount - inserted)
+        console.log(
+          `ingest_jobs: upserted ${inserted} jobs from ${source.slug} on page ${page}`
+        )
+
+        if (normalized.length < expectedPageSize) {
+          // Likely the last page; reset cursor so next run starts from the beginning
+          page = 1
+          break
+        }
+
+        page += 1
       }
-
-      page += 1
     }
   } catch (ingestError) {
     sourceStatus = 'failed'

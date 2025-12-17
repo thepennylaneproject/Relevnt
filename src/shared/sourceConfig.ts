@@ -251,6 +251,21 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
         trackFreshnessRatio: true,
         notes: 'Tech job aggregator with technographic data. Uses POST body for search params.',
     },
+
+    // =========================================================================
+    // Lever - Premium job board with per-company configuration
+    // =========================================================================
+    lever: {
+        slug: 'lever',
+        mode: 'shallow-curated',
+        enabled: false, // Controlled by ENABLE_SOURCE_LEVER env var in ingest
+        maxAgeDays: 30,
+        maxPagesPerRun: 1, // Lever uses company-based fetching, not pagination
+        resetPaginationEachRun: true,
+        trustLevel: 'high',
+        trackFreshnessRatio: false,
+        notes: 'Premium job board. Companies configured via LEVER_SOURCES_JSON env var.',
+    },
 };
 
 /**

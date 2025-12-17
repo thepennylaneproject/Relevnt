@@ -12,6 +12,7 @@ import {
     USAJobsSource,
     RemoteOKSource,
     CareerOneStopSource,
+    LeverSource,
     type NormalizedJob,
 } from '../../../src/shared/jobSources'
 
@@ -581,5 +582,172 @@ describe('CareerOneStop normalize', () => {
         const { ALL_SOURCES } = await import('../../../src/shared/jobSources')
         const slugs = ALL_SOURCES.map(s => s.slug)
         expect(slugs).toContain('careeronestop')
+    })
+})
+
+// =====================================================
+// Lever normalize
+// =====================================================
+
+describe('Lever normalize', () => {
+    test('should normalize Lever API response', () => {
+        const mockResponse = [
+            {
+                id: 'lever-123',
+                text: 'Senior Software Engineer',
+                categories: {
+                    location: 'San Francisco, CA',
+                    commitment: 'Full-time',
+                    team: 'Engineering',
+                    department: 'Product',
+                },
+                descriptionPlain: 'We are looking for a senior engineer with 5+ years of experience...',
+                hostedUrl: 'https://jobs.lever.co/company/senior-engineer',
+                applyUrl: 'https://jobs.lever.co/company/senior-engineer/apply',
+                workplaceType: 'on-site',
+                salaryRange: {
+                    currency: 'USD',
+                    min: 150000,
+                    max: 200000,
+                    interval: 'annual',
+                },
+                createdAt: '2024-12-10T00:00:00Z',
+            },
+            {
+                id: 'lever-456',
+                text: 'Frontend Developer',
+                categories: {
+                    location: 'New York, NY',
+                    commitment: 'Full-time',
+                },
+                description: 'Join our frontend team...',
+                hostedUrl: 'https://jobs.lever.co/company/frontend-dev',
+                workplaceType: 'hybrid',
+                createdAt: '2024-12-09',
+            },
+        ]
+
+        const result = LeverSource.normalize(mockResponse) as NormalizedJob[]
+
+        expect(result).toHaveLength(2)
+
+        // First job - full details
+        expect(result[0].source_slug).toBe('lever')
+        expect(result[0].external_id).toBe('lever-123')
+        expect(result[0].title).toBe('Senior Software Engineer')
+        expect(result[0].location).toBe('San Francisco, CA')
+        expect(result[0].employment_type).toBe('Full-time')
+        expect(result[0].remote_type).toBe('onsite')
+        expect(result[0].external_url).toBe('https://jobs.lever.co/company/senior-engineer')
+        expect(result[0].salary_min).toBe(150000)
+        expect(result[0].salary_max).toBe(200000)
+        expect(result[0].description).toBe('We are looking for a senior engineer with 5+ years of experience...')
+
+        // Second job - hybrid, partial details
+        expect(result[1].external_id).toBe('lever-456')
+        expect(result[1].title).toBe('Frontend Developer')
+        expect(result[1].remote_type).toBe('hybrid')
+        expect(result[1].salary_min).toBeNull()
+        expect(result[1].salary_max).toBeNull()
+    })
+
+    test('should handle remote workplace type', () => {
+        const mockResponse = [
+            {
+                id: 'lever-remote',
+                text: 'Remote Developer',
+                categories: {
+                    location: 'Anywhere',
+                },
+                workplaceType: 'remote',
+                hostedUrl: 'https://jobs.lever.co/company/remote-dev',
+                createdAt: '2024-12-10',
+            },
+        ]
+
+        const result = LeverSource.normalize(mockResponse) as NormalizedJob[]
+        expect(result[0].remote_type).toBe('remote')
+    })
+
+    test('should infer remote type from location when workplaceType is missing', () => {
+        const mockResponse = [
+            {
+                id: 'lever-inferred',
+                text: 'Remote Position',
+                categories: {
+                    location: 'Remote - USA',
+                },
+                hostedUrl: 'https://jobs.lever.co/company/remote-pos',
+                createdAt: '2024-12-10',
+            },
+        ]
+
+        const result = LeverSource.normalize(mockResponse) as NormalizedJob[]
+        expect(result[0].remote_type).toBe('remote')
+    })
+
+    test('should fallback to applyUrl when hostedUrl is missing', () => {
+        const mockResponse = [
+            {
+                id: 'lever-no-hosted',
+                text: 'Job Position',
+                categories: {},
+                applyUrl: 'https://jobs.lever.co/company/position/apply',
+                createdAt: '2024-12-10',
+            },
+        ]
+
+        const result = LeverSource.normalize(mockResponse) as NormalizedJob[]
+        expect(result[0].external_url).toBe('https://jobs.lever.co/company/position/apply')
+    })
+
+    test('should handle empty response', () => {
+        const result = LeverSource.normalize([]) as NormalizedJob[]
+        expect(result).toHaveLength(0)
+    })
+
+    test('should filter out jobs without id or text', () => {
+        const mockResponse = [
+            {
+                id: 'lever-valid',
+                text: 'Valid Job',
+                hostedUrl: 'https://jobs.lever.co/company/job1',
+                createdAt: '2024-12-10',
+            },
+            {
+                // Missing id
+                text: 'Invalid Job 1',
+                hostedUrl: 'https://jobs.lever.co/company/job2',
+            },
+            {
+                id: 'lever-invalid-2',
+                // Missing text
+                hostedUrl: 'https://jobs.lever.co/company/job3',
+            },
+        ]
+
+        const result = LeverSource.normalize(mockResponse) as NormalizedJob[]
+        expect(result).toHaveLength(1)
+        expect(result[0].title).toBe('Valid Job')
+    })
+
+    test('should parse Unix timestamp as posted date', () => {
+        const mockResponse = [
+            {
+                id: 'lever-unix',
+                text: 'Job with Unix timestamp',
+                hostedUrl: 'https://jobs.lever.co/company/job',
+                createdAt: 1702252800000, // 2024-12-11 in milliseconds
+            },
+        ]
+
+        const result = LeverSource.normalize(mockResponse) as NormalizedJob[]
+        expect(result[0].posted_date).toBe('2024-12-11')
+    })
+
+    test('should be in ALL_SOURCES', async () => {
+        const { ALL_SOURCES } = await import('../../../src/shared/jobSources')
+        const slugs = ALL_SOURCES.map(s => s.slug)
+        expect(slugs).toContain('lever')
     })
 })
