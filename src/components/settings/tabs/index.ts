@@ -1,0 +1,5 @@
+export { PersonaTab } from './PersonaTab'
+export { CareerTargetsTab } from './CareerTargetsTab'
+export { ProfileTab } from './ProfileTab'
+export { VoiceStyleTab } from './VoiceStyleTab'
+export { SystemAutomationTab } from './SystemAutomationTab'

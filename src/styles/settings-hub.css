@@ -1,0 +1,52 @@
+/* ============================================================================
+   SETTINGS HUB TAB NAVIGATION
+   ============================================================================ */
+
+.settings-tab-nav {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--color-bg-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+}
+
+.settings-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.settings-tab:hover {
+  background: var(--color-bg);
+  color: var(--text);
+}
+
+.settings-tab.is-active {
+  background: var(--color-bg);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Make tabs stack on mobile */
+@media (max-width: 640px) {
+  .settings-tab-nav {
+    flex-direction: column;
+  }
+  
+  .settings-tab {
+    justify-content: flex-start;
+    width: 100%;
+  }
+}

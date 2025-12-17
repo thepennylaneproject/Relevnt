@@ -12,18 +12,12 @@ import DashboardPage from './pages/DashboardPage'
 import JobsPage from './pages/JobsPage'
 import ApplicationsPage from './pages/ApplicationsPage'
 import AdminDashboard from './pages/AdminDashboard'
-import SettingsPage from './pages/SettingsPage'
+import SettingsHub from './pages/SettingsHub'
 import AutoApplySettingsPage from './pages/AutoApplySettingPage'
 import AutoApplyQueuePage from './pages/AutoApplyQueuePage'
-import VoiceProfilePage from './pages/VoiceProfilePage'
-import JobPreferencesPage from './pages/JobPreferencesPage'
 import LearnPage from './pages/LearnPage'
-import ProfilePersonalPage from './pages/ProfilePersonalPage'
-import ProfileProfessionalPage from './pages/ProfileProfessionalPage'
 import ResumeBuilderPage from './pages/ResumeBuilderPage'
 import ResumeWorkspacePage from './pages/ResumeWorkspacePage'
-import PersonaManagementPage from './pages/PersonaManagementPage'
-import ResumeListPage from './pages/ResumeListPage'
 import SidebarMarginNav from './components/chrome/SidebarMarginNav'
 import './styles/margin-nav.css'
 
@@ -84,10 +78,6 @@ function AppInner() {
               element={isAuthed ? <ResumeBuilderPage /> : <Navigate to="/login" replace />}
             />
             <Route
-              path="/personas"
-              element={isAuthed ? <PersonaManagementPage /> : <Navigate to="/login" replace />}
-            />
-            <Route
               path="/jobs"
               element={isAuthed ? <JobsPage /> : <Navigate to="/login" replace />}
             />
@@ -103,31 +93,39 @@ function AppInner() {
               path="/auto-apply/queue"
               element={isAuthed ? <AutoApplyQueuePage /> : <Navigate to="/login" replace />}
             />
+
+            {/* Unified Settings Hub */}
+            <Route
+              path="/settings"
+              element={isAuthed ? <SettingsHub /> : <Navigate to="/login" replace />}
+            />
+
+            {/* Legacy route redirects to Settings Hub tabs */}
             <Route
               path="/job-preferences"
-              element={isAuthed ? <JobPreferencesPage /> : <Navigate to="/login" replace />}
+              element={isAuthed ? <Navigate to="/settings#career" replace /> : <Navigate to="/login" replace />}
             />
             <Route
               path="/profile/personal"
-              element={isAuthed ? <ProfilePersonalPage /> : <Navigate to="/login" replace />}
+              element={isAuthed ? <Navigate to="/settings#profile" replace /> : <Navigate to="/login" replace />}
             />
             <Route
               path="/profile/professional"
-              element={isAuthed ? <ProfileProfessionalPage /> : <Navigate to="/login" replace />}
-            />
-            {/* Keep legacy routes for nav */}
-            <Route
-              path="/settings"
-              element={isAuthed ? <ProfilePersonalPage /> : <Navigate to="/login" replace />}
+              element={isAuthed ? <Navigate to="/settings#profile" replace /> : <Navigate to="/login" replace />}
             />
             <Route
               path="/voice"
-              element={isAuthed ? <VoiceProfilePage /> : <Navigate to="/login" replace />}
+              element={isAuthed ? <Navigate to="/settings#voice" replace /> : <Navigate to="/login" replace />}
             />
             <Route
               path="/settings/voice"
-              element={isAuthed ? <VoiceProfilePage /> : <Navigate to="/login" replace />}
+              element={isAuthed ? <Navigate to="/settings#voice" replace /> : <Navigate to="/login" replace />}
             />
+            <Route
+              path="/personas"
+              element={isAuthed ? <Navigate to="/settings#persona" replace /> : <Navigate to="/login" replace />}
+            />
+
             <Route
               path="/learn"
               element={isAuthed ? <LearnPage /> : <Navigate to="/login" replace />}

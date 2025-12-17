@@ -5,6 +5,7 @@
 
 /* Import design tokens - the foundation of our visual language */
 @import './styles/design-tokens.css';
+@import './styles/settings-hub.css';
 
 /* Import fonts: Fraunces (display), Source Sans 3 (body), JetBrains Mono (code) */
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
