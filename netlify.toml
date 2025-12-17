@@ -83,14 +83,14 @@
 
 # SPA (Single Page Application) routing
 # All routes should serve index.html for client-side routing
+# This must NOT have conditions that prevent matching
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-  force = false
-  conditions = {Role = [""], Country = [""]}
+  # force = false means if a file exists, serve it; else use this rule
 
-# ðŸŽ“ Why this redirect?
+# 🎓 Why this redirect?
 # React Router (or similar) handles routing on client
 # Without this, refreshing /jobs would return 404
 # This serves index.html for all routes, then React Router takes over
