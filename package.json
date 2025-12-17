@@ -18,13 +18,11 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
     "clsx": "^2.0.0",
-    "fast-xml": "^0.0.1",
     "fast-xml-parser": "^5.3.2",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.555.0",
     "mammoth": "^1.11.0",
     "openai": "^6.8.1",
-    "parser": "^0.1.4",
     "pdf-parse": "^2.4.5",
     "pdfjs-dist": "^5.4.394",
     "react": "^18.2.0",
