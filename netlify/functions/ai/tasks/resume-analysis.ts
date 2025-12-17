@@ -93,46 +93,123 @@ const handler: Handler = async (event) => {
       }
     }
 
-    const analysis: AnalysisData = {
-      ats_score: 78,
-      overall_assessment: 'Good',
-      strengths: [
-        'Clear formatting and structure',
-        'Strong use of relevant keywords',
-        'Professional layout and organization',
-        'Good use of metrics and quantifiable achievements',
-      ],
-      weaknesses: [
-        'Could include more specific technical skills',
-        'Some outdated terminology and frameworks',
-        'Limited information about recent projects',
-      ],
-      suggestions: [
-        {
-          category: 'Keywords',
-          priority: 'high',
-          suggestion: 'Add more modern tech stack keywords like "TypeScript", "React 18", "Next.js"',
-          reason: 'These are high-demand skills',
-        },
-        {
-          category: 'Content',
-          priority: 'high',
-          suggestion: 'Include more quantifiable results',
-          reason: 'Metrics make achievements more compelling',
-        },
-      ],
-      keywords_found: ['React', 'JavaScript', 'TypeScript', 'Node.js'],
-      missing_keywords: ['AWS', 'Docker', 'Kubernetes', 'GraphQL'],
-      keyword_density: [
-        { keyword: 'React', percentage: 3.2 },
-        { keyword: 'JavaScript', percentage: 2.8 },
-      ],
-      formatting_issues: [],
-      content_recommendations: [
-        'Use consistent date formatting',
-        'Avoid personal pronouns',
-        'Start bullet points with action verbs',
-      ],
+    // Get resume text content for analysis
+    const resumeText = (resume as any).parsed_text || (resume as any).content || ''
+
+    if (!resumeText || resumeText.trim().length === 0) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          success: false,
+          message: 'Resume content is empty. Please add content to your resume before analyzing.',
+        }),
+      }
+    }
+
+    // Call Anthropic API for real ATS analysis
+    const anthropicApiKey = process.env.ANTHROPIC_API_KEY
+    if (!anthropicApiKey) {
+      throw new Error('Missing ANTHROPIC_API_KEY')
+    }
+
+    const atsPrompt = `Analyze this resume for ATS (Applicant Tracking System) compatibility and provide a detailed assessment.
+
+RESUME CONTENT:
+${resumeText}
+
+Provide a JSON response with the following structure:
+{
+  "ats_score": <number 0-100>,
+  "overall_assessment": "<Excellent|Good|Needs Improvement>",
+  "strengths": ["<strength1>", "<strength2>", ...],
+  "weaknesses": ["<weakness1>", "<weakness2>", ...],
+  "suggestions": [
+    {
+      "category": "<Keywords|Formatting|Content|Structure>",
+      "priority": "<high|medium|low>",
+      "suggestion": "<specific suggestion>",
+      "reason": "<why this matters>"
+    }
+  ],
+  "keywords_found": ["<keyword1>", "<keyword2>", ...],
+  "missing_keywords": ["<keyword1>", "<keyword2>", ...],
+  "keyword_density": [{"keyword": "<keyword>", "percentage": <number>}],
+  "formatting_issues": ["<issue1>", "<issue2>"],
+  "content_recommendations": ["<recommendation1>", "<recommendation2>"]
+}
+
+Focus on:
+1. ATS compatibility (proper formatting, no images, standard fonts)
+2. Keyword optimization for job matching
+3. Clarity and structure
+4. Metrics and quantifiable achievements
+5. Modern technology and skill mentions
+
+Be specific and actionable in your suggestions.`
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': anthropicApiKey,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 2000,
+        messages: [
+          {
+            role: 'user',
+            content: atsPrompt,
+          },
+        ],
+      }),
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('Anthropic API error:', response.status, errorText)
+      throw new Error(`Anthropic API error: ${response.status}`)
+    }
+
+    const apiResponse = await response.json() as any
+
+    let analysis: AnalysisData
+    try {
+      // Extract JSON from the response
+      const responseText = apiResponse.content?.[0]?.text || ''
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/)
+      if (!jsonMatch) {
+        throw new Error('Could not extract JSON from response')
+      }
+      analysis = JSON.parse(jsonMatch[0]) as AnalysisData
+    } catch (parseErr) {
+      console.error('Failed to parse AI response:', parseErr)
+      // Return a basic analysis if parsing fails
+      analysis = {
+        ats_score: 60,
+        overall_assessment: 'Needs Improvement',
+        strengths: ['Resume structure is present'],
+        weaknesses: ['Unable to complete full analysis'],
+        suggestions: [
+          {
+            category: 'Content',
+            priority: 'high',
+            suggestion: 'Try again or contact support if issues persist',
+            reason: 'Initial analysis encountered an issue',
+          },
+        ],
+        keywords_found: [],
+        missing_keywords: [],
+        keyword_density: [],
+        formatting_issues: [],
+        content_recommendations: [],
+      }
+    }
+
+    // Ensure score is in valid range
+    if (typeof analysis.ats_score !== 'number' || analysis.ats_score < 0 || analysis.ats_score > 100) {
+      analysis.ats_score = Math.max(0, Math.min(100, analysis.ats_score || 60))
     }
 
     const { error: updateError } = await supabase
@@ -150,17 +227,18 @@ const handler: Handler = async (event) => {
       body: JSON.stringify({
         success: true,
         data: analysis,
-        cost: 0.001,
-        provider: 'mock',
+        cost: 0.003,
+        provider: 'anthropic',
       }),
     }
   } catch (error) {
+    console.error('Resume analysis error:', error)
     return {
       statusCode: 500,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         success: false,
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: error instanceof Error ? error.message : 'Failed to analyze resume',
       }),
     }
   }
