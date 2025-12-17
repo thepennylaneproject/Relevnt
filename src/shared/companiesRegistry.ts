@@ -7,6 +7,8 @@ export type FundingStage = 'pre-seed' | 'seed' | 'series_a' | 'series_b' | 'seri
 export type PriorityTier = 'high' | 'standard' | 'low';
 export type DiscoveryMethod = 'yc' | 'crunchbase' | 'manual' | 'careers_page' | 'user_submit';
 
+export type ATSType = 'lever' | 'greenhouse' | 'workday' | 'unknown'
+
 export interface Company {
   id: string;
   name: string;
@@ -15,6 +17,11 @@ export interface Company {
   // Platform integrations
   lever_slug?: string;
   greenhouse_board_token?: string;
+
+  // ATS detection (auto-discovered or manual)
+  ats_type?: ATSType;
+  careers_page_url?: string; // Direct URL to company's careers page
+  ats_detected_at?: string; // Timestamp when ATS was last detected/verified
 
   // Metadata
   founding_year?: number;
