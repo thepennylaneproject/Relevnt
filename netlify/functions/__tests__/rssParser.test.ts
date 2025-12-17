@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest'
-import type { Buffer } from 'node:buffer'
+import { Buffer } from 'node:buffer'
 import { parseRSSFeed, sanitizeDescription } from '../utils/rssParser'
 
 describe('RSS Parser', () => {

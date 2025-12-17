@@ -779,7 +779,7 @@ async function fetchFromAllCompaniesInParallel(
   lever: any[];
   greenhouse: any[];
 }> {
-  const allJobs = { lever: [], greenhouse: [] };
+  const allJobs: { lever: any[]; greenhouse: any[] } = { lever: [], greenhouse: [] };
 
   for (const platform of platforms) {
     try {

@@ -264,8 +264,8 @@ describe('RSSSource normalize', () => {
     expect(result).toHaveLength(2)
     expect(result[0].company).toBe('CompanyA')
     expect(result[1].company).toBe('CompanyB')
-    expect(result[0].data_raw.feedUrl).toBe('https://feedA.com')
-    expect(result[1].data_raw.feedUrl).toBe('https://feedB.com')
+    expect((result[0].data_raw as any).feedUrl).toBe('https://feedA.com')
+    expect((result[1].data_raw as any).feedUrl).toBe('https://feedB.com')
   })
 
   test('should set salary fields to null', () => {

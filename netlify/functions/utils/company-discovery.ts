@@ -48,7 +48,7 @@ export async function discoverFromYCombinator(): Promise<DiscoveredCompany[]> {
         const url = `https://api.ycombinator.com/companies?batch=${batch}`;
         const response = await fetch(url, {
           headers: { 'User-Agent': 'relevnt-discovery/1.0' },
-          timeout: 5000,
+
         });
 
         if (!response.ok) continue;
@@ -152,7 +152,7 @@ export async function discoverFromCrunchbase(options?: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(query),
-          timeout: 10000,
+
         });
 
         if (!response.ok) continue;
@@ -206,7 +206,7 @@ export async function discoverFromAngelList(): Promise<DiscoveredCompany[]> {
           `https://api.angel.co/1/tags/${encodeURIComponent(tag)}/startups`,
           {
             headers: { 'User-Agent': 'relevnt-discovery/1.0' },
-            timeout: 5000,
+
           }
         );
 
@@ -262,7 +262,7 @@ export async function detectPlatformsFromCareersPage(
       try {
         const response = await fetch(url, {
           headers: { 'User-Agent': 'relevnt-discovery/1.0' },
-          timeout: 5000,
+
         });
 
         if (!response.ok) continue;
