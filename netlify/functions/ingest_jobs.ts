@@ -204,6 +204,20 @@ function buildSourceUrl(
     return `${source.fetchUrl}?${params.toString()}`
   }
 
+  // USAJOBS requires a Keyword parameter for the API search
+  if (source.slug === 'usajobs') {
+    const config = SOURCE_PAGINATION[source.slug] || {}
+    const page = cursor?.page ?? 1
+    const pageSize = config.pageSize ?? DEFAULT_PAGE_SIZE
+
+    const params = new URLSearchParams({
+      Keyword: 'federal', // Search for federal jobs
+      Page: String(page),
+      ResultsPerPage: String(pageSize),
+    })
+    return `${source.fetchUrl}?${params.toString()}`
+  }
+
   return applyCursorToUrl(source.fetchUrl, source, cursor)
 }
 
