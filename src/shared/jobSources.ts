@@ -1045,9 +1045,275 @@ export const GreenhouseSource: JobSource = {
         return {
           source_slug: 'greenhouse',
           external_id: `greenhouse:${id}`,
+// RSS/Atom Feeds (generic RSS job feed support)
+// ---------------------------------------------------------------------------
+
+interface RSSFeedSource {
+  name: string
+  feedUrl: string
+  defaultCompany?: string
+  defaultLocation?: string
+  trustLevel?: 'high' | 'medium' | 'low'
+}
+
+// Helper to parse RSS sources from environment
+function getRSSSources(): RSSFeedSource[] {
+  const json = process.env.RSS_FEEDS_JSON
+  if (!json) return []
+  try {
+    const parsed = JSON.parse(json)
+    if (!Array.isArray(parsed)) return []
+    return parsed.filter(
+      (item: any) =>
+        item &&
+        typeof item === 'object' &&
+        item.name &&
+        item.feedUrl
+    )
+  } catch (e) {
+    console.error('Failed to parse RSS_FEEDS_JSON:', e)
+    return []
+  }
+}
+
+export const RSSSource: JobSource = {
+  slug: 'rss',
+  displayName: 'RSS Job Feeds',
+  fetchUrl: 'rss://', // Placeholder
+  type: 'aggregator',
+  region: 'global',
+
+  normalize: (raw) => {
+    // Raw expects an array of { item, feedSource, feedUrl } objects
+    const entries = asArray<any>(raw)
+    if (!entries.length) return []
+
+    const nowIso = new Date().toISOString()
+    const jobs: NormalizedJob[] = []
+
+    for (const entry of entries) {
+      try {
+        const item = entry.item
+        const feedSource = entry.feedSource as RSSFeedSource | undefined
+        const feedUrl = entry.feedUrl as string | undefined
+
+        if (!item || typeof item !== 'object') continue
+
+        // Extract core fields
+        const title = (item.title as string | undefined) ?? ''
+        if (!title) continue // Skip items without title
+
+        const link = (item.link as string | undefined) ?? null
+        const description = item.description ?? item.content ?? item.summary ?? null
+        const pubDate = (item.pubDate as string | undefined) ?? (item.published as string | undefined) ?? null
+        const guid = (item.guid as string | undefined) ?? (item.id as string | undefined) ?? null
+
+        // Generate stable external_id from guid, link, or title+date
+        let externalId: string
+        if (guid) {
+          externalId = `rss:${guid}`
+        } else if (link) {
+          // Normalize link as ID for deduplication
+          externalId = `rss:${link}`
+        } else {
+          externalId = `rss:${title}::${pubDate || 'nodated'}`
+        }
+
+        // Apply defaults from feed source config
+        const company = feedSource?.defaultCompany ?? null
+        const location = feedSource?.defaultLocation ?? null
+
+        // Infer remote type from location
+        const remote_type = inferRemoteTypeFromLocation(location)
+
+        // Parse posted date
+        const posted_date = safeDate(pubDate)
+
+        // Sanitize description: remove HTML tags
+        const sanitized_description = description
+          ? stripHtmlFromDescription(description)
+          : null
+
+        // Apply URL as apply URL
+        const external_url = link
+
+        const job: NormalizedJob = {
+          source_slug: 'rss',
+          external_id: externalId,
 
           title,
           company,
+          location,
+          employment_type: null, // RSS feeds typically don't include this
+          remote_type,
+
+          posted_date,
+          created_at: nowIso,
+          external_url,
+
+          salary_min: null, // RSS feeds rarely include salary
+          salary_max: null,
+          competitiveness_level: null,
+
+          description: sanitized_description,
+          data_raw: { item, feedUrl, feedSource },
+        }
+
+        jobs.push(job)
+      } catch (err) {
+        console.warn('RSSSource: skipping malformed item', err)
+        continue
+      }
+    }
+
+    return jobs
+  },
+}
+
+// Helper to strip HTML tags from descriptions
+function stripHtmlFromDescription(html: string | null | undefined): string | null {
+  if (!html) return null
+  let text = html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+  text = text.replace(/<[^>]+>/g, '')
+  text = text
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, '&')
+  text = text.replace(/\s+/g, ' ').trim()
+  return text.length > 0 ? text : null
+}
+
+// ---------------------------------------------------------------------------
+// Lever (job board with per-company configuration)
+// ---------------------------------------------------------------------------
+
+interface LeverJob {
+  id: string
+  text: string
+  categories?: {
+    location?: string
+    commitment?: string
+    team?: string
+    department?: string
+  }
+  description?: string
+  descriptionPlain?: string
+  hostedUrl?: string
+  applyUrl?: string
+  workplaceType?: string
+  salaryRange?: {
+    currency?: string
+    min?: number
+    max?: number
+    interval?: string
+  }
+  country?: string
+  createdAt?: string | number
+}
+
+interface LeverCompanySource {
+  companyName: string
+  leverSlug?: string
+  leverApiUrl?: string
+}
+
+// Helper to parse Lever sources from environment
+function getLeverSources(): LeverCompanySource[] {
+  const json = process.env.LEVER_SOURCES_JSON
+  if (!json) return []
+  try {
+    const parsed = JSON.parse(json)
+    if (!Array.isArray(parsed)) return []
+    return parsed.filter(
+      (item: any) =>
+        item &&
+        typeof item === 'object' &&
+        (item.companyName || item.leverSlug || item.leverApiUrl)
+    )
+  } catch (e) {
+    console.error('Failed to parse LEVER_SOURCES_JSON:', e)
+    return []
+  }
+}
+
+// Helper to build Lever API URL for a company
+function buildLeverUrl(source: LeverCompanySource): string {
+  // If full API URL is provided, use it
+  if (source.leverApiUrl) {
+    return source.leverApiUrl
+  }
+  // Otherwise construct from slug
+  const slug = source.leverSlug || source.companyName?.toLowerCase().replace(/\s+/g, '-')
+  if (!slug) {
+    throw new Error(`Unable to build Lever URL: no slug or API URL for ${source.companyName}`)
+  }
+  return `https://api.lever.co/v0/postings/${slug}`
+}
+
+export const LeverSource: JobSource = {
+  slug: 'lever',
+  displayName: 'Lever',
+  fetchUrl: 'https://api.lever.co/v0/postings', // Base URL, actual URLs come from config
+  type: 'board',
+  region: 'global',
+
+  normalize: (raw) => {
+    const postings = asArray<LeverJob>(raw)
+    if (!postings.length) return []
+
+    const nowIso = new Date().toISOString()
+
+    return postings
+      .map((posting): NormalizedJob | null => {
+        if (!posting || !posting.id || !posting.text) return null
+
+        // Extract location from categories
+        const location = posting.categories?.location ?? null
+
+        // Map workplaceType to remote_type
+        let remote_type: RemoteType = null
+        if (posting.workplaceType) {
+          const wt = posting.workplaceType.toLowerCase()
+          if (wt === 'remote') {
+            remote_type = 'remote'
+          } else if (wt === 'hybrid') {
+            remote_type = 'hybrid'
+          } else if (wt === 'on-site' || wt === 'onsite') {
+            remote_type = 'onsite'
+          }
+        }
+        // Fallback to location-based inference
+        if (!remote_type) {
+          remote_type = inferRemoteTypeFromLocation(location)
+        }
+
+        // Map commitment to employment type
+        const employment_type = posting.categories?.commitment ?? null
+
+        // Use description or descriptionPlain
+        const description = posting.descriptionPlain ?? posting.description ?? null
+
+        // Posted date from createdAt
+        const posted_date = safeDate(posting.createdAt)
+
+        // Salary range
+        const salary_min = parseNumber(posting.salaryRange?.min)
+        const salary_max = parseNumber(posting.salaryRange?.max)
+
+        // Use hostedUrl as primary, fallback to applyUrl
+        const external_url = posting.hostedUrl ?? posting.applyUrl ?? null
+
+        return {
+          source_slug: 'lever',
+          external_id: posting.id,
+
+          title: posting.text,
+          company: null, // Company comes from the URL/config, not the posting
           location,
           employment_type,
           remote_type,
@@ -1064,6 +1330,10 @@ export const GreenhouseSource: JobSource = {
           data_raw: row,
         }
       })
+          data_raw: posting,
+        }
+      })
+      .filter((job): job is NormalizedJob => Boolean(job))
   },
 }
 
@@ -1086,5 +1356,11 @@ export const ALL_SOURCES: JobSource[] = [
   ReedUKSource,
   TheirStackSource,
   GreenhouseSource,
+  LeverSource,
+  RSSSource,
 ]
+
+// Export helpers for use in ingest_jobs
+export { getLeverSources, buildLeverUrl, type LeverCompanySource }
+export { getRSSSources, type RSSFeedSource }
 

@@ -268,6 +268,33 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
         trustLevel: 'high', // Company-hosted = high quality signal
         trackFreshnessRatio: false,
         notes: 'Greenhouse company career boards. Each configured board is a separate company ATS instance. High trust due to direct company hosting.',
+    // Lever - Premium job board with per-company configuration
+    // =========================================================================
+    lever: {
+        slug: 'lever',
+        mode: 'shallow-curated',
+        enabled: false, // Controlled by ENABLE_SOURCE_LEVER env var in ingest
+        maxAgeDays: 30,
+        maxPagesPerRun: 1, // Lever uses company-based fetching, not pagination
+        resetPaginationEachRun: true,
+        trustLevel: 'high',
+        trackFreshnessRatio: false,
+        notes: 'Premium job board. Companies configured via LEVER_SOURCES_JSON env var.',
+    },
+
+    // =========================================================================
+    // RSS/Atom Feeds - Generic RSS job feed support
+    // =========================================================================
+    rss: {
+        slug: 'rss',
+        mode: 'wide-capped',
+        enabled: false, // Controlled by ENABLE_SOURCE_RSS env var in ingest
+        maxAgeDays: 30,
+        maxPagesPerRun: 1, // RSS fetching is per-feed, not paginated
+        resetPaginationEachRun: true,
+        trustLevel: 'medium', // Varies by feed, can be overridden per-feed
+        trackFreshnessRatio: true,
+        notes: 'RSS/Atom feed support. Feeds configured via RSS_FEEDS_JSON env var. Per-feed trust levels configurable.',
     },
 };
 
