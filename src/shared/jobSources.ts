@@ -976,6 +976,150 @@ export const TheirStackSource: JobSource = {
 }
 
 // ---------------------------------------------------------------------------
+// RSS/Atom Feeds (generic RSS job feed support)
+// ---------------------------------------------------------------------------
+
+interface RSSFeedSource {
+  name: string
+  feedUrl: string
+  defaultCompany?: string
+  defaultLocation?: string
+  trustLevel?: 'high' | 'medium' | 'low'
+}
+
+// Helper to parse RSS sources from environment
+function getRSSSources(): RSSFeedSource[] {
+  const json = process.env.RSS_FEEDS_JSON
+  if (!json) return []
+  try {
+    const parsed = JSON.parse(json)
+    if (!Array.isArray(parsed)) return []
+    return parsed.filter(
+      (item: any) =>
+        item &&
+        typeof item === 'object' &&
+        item.name &&
+        item.feedUrl
+    )
+  } catch (e) {
+    console.error('Failed to parse RSS_FEEDS_JSON:', e)
+    return []
+  }
+}
+
+export const RSSSource: JobSource = {
+  slug: 'rss',
+  displayName: 'RSS Job Feeds',
+  fetchUrl: 'rss://', // Placeholder
+  type: 'aggregator',
+  region: 'global',
+
+  normalize: (raw) => {
+    // Raw expects an array of { item, feedSource, feedUrl } objects
+    const entries = asArray<any>(raw)
+    if (!entries.length) return []
+
+    const nowIso = new Date().toISOString()
+    const jobs: NormalizedJob[] = []
+
+    for (const entry of entries) {
+      try {
+        const item = entry.item
+        const feedSource = entry.feedSource as RSSFeedSource | undefined
+        const feedUrl = entry.feedUrl as string | undefined
+
+        if (!item || typeof item !== 'object') continue
+
+        // Extract core fields
+        const title = (item.title as string | undefined) ?? ''
+        if (!title) continue // Skip items without title
+
+        const link = (item.link as string | undefined) ?? null
+        const description = item.description ?? item.content ?? item.summary ?? null
+        const pubDate = (item.pubDate as string | undefined) ?? (item.published as string | undefined) ?? null
+        const guid = (item.guid as string | undefined) ?? (item.id as string | undefined) ?? null
+
+        // Generate stable external_id from guid, link, or title+date
+        let externalId: string
+        if (guid) {
+          externalId = `rss:${guid}`
+        } else if (link) {
+          // Normalize link as ID for deduplication
+          externalId = `rss:${link}`
+        } else {
+          externalId = `rss:${title}::${pubDate || 'nodated'}`
+        }
+
+        // Apply defaults from feed source config
+        const company = feedSource?.defaultCompany ?? null
+        const location = feedSource?.defaultLocation ?? null
+
+        // Infer remote type from location
+        const remote_type = inferRemoteTypeFromLocation(location)
+
+        // Parse posted date
+        const posted_date = safeDate(pubDate)
+
+        // Sanitize description: remove HTML tags
+        const sanitized_description = description
+          ? stripHtmlFromDescription(description)
+          : null
+
+        // Apply URL as apply URL
+        const external_url = link
+
+        const job: NormalizedJob = {
+          source_slug: 'rss',
+          external_id: externalId,
+
+          title,
+          company,
+          location,
+          employment_type: null, // RSS feeds typically don't include this
+          remote_type,
+
+          posted_date,
+          created_at: nowIso,
+          external_url,
+
+          salary_min: null, // RSS feeds rarely include salary
+          salary_max: null,
+          competitiveness_level: null,
+
+          description: sanitized_description,
+          data_raw: { item, feedUrl, feedSource },
+        }
+
+        jobs.push(job)
+      } catch (err) {
+        console.warn('RSSSource: skipping malformed item', err)
+        continue
+      }
+    }
+
+    return jobs
+  },
+}
+
+// Helper to strip HTML tags from descriptions
+function stripHtmlFromDescription(html: string | null | undefined): string | null {
+  if (!html) return null
+  let text = html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+  text = text.replace(/<[^>]+>/g, '')
+  text = text
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, '&')
+  text = text.replace(/\s+/g, ' ').trim()
+  return text.length > 0 ? text : null
+}
+
+// ---------------------------------------------------------------------------
 // Lever (job board with per-company configuration)
 // ---------------------------------------------------------------------------
 
@@ -1140,8 +1284,10 @@ export const ALL_SOURCES: JobSource[] = [
   ReedUKSource,
   TheirStackSource,
   LeverSource,
+  RSSSource,
 ]
 
 // Export helpers for use in ingest_jobs
 export { getLeverSources, buildLeverUrl, type LeverCompanySource }
+export { getRSSSources, type RSSFeedSource }
 

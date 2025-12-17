@@ -266,6 +266,21 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
         trackFreshnessRatio: false,
         notes: 'Premium job board. Companies configured via LEVER_SOURCES_JSON env var.',
     },
+
+    // =========================================================================
+    // RSS/Atom Feeds - Generic RSS job feed support
+    // =========================================================================
+    rss: {
+        slug: 'rss',
+        mode: 'wide-capped',
+        enabled: false, // Controlled by ENABLE_SOURCE_RSS env var in ingest
+        maxAgeDays: 30,
+        maxPagesPerRun: 1, // RSS fetching is per-feed, not paginated
+        resetPaginationEachRun: true,
+        trustLevel: 'medium', // Varies by feed, can be overridden per-feed
+        trackFreshnessRatio: true,
+        notes: 'RSS/Atom feed support. Feeds configured via RSS_FEEDS_JSON env var. Per-feed trust levels configurable.',
+    },
 };
 
 /**

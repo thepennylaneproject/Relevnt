@@ -15,6 +15,8 @@ import {
   type NormalizedJob,
   getLeverSources,
   buildLeverUrl,
+  getRSSSources,
+  type RSSFeedSource,
 } from '../../src/shared/jobSources'
 import { enrichJob } from '../../src/lib/scoring/jobEnricher'
 import {
@@ -29,6 +31,7 @@ import {
   groupCompaniesByPlatform,
 } from '../../src/shared/companiesRegistry'
 import { fetchCompaniesInParallel, fetchFromMultiplePlatforms } from './utils/concurrent-fetcher'
+import { fetchAndParseRSSFeed } from './utils/rssParser'
 
 export type IngestResult = {
   source: string;
@@ -88,6 +91,11 @@ const SOURCE_PAGINATION: Record<string, PaginationConfig> = {
   // Lever doesn't use pagination - it uses company-based fetching
   lever: {
     pageParam: undefined, // Not used for Lever
+    maxPagesPerRun: 1,
+  },
+  // RSS doesn't use pagination - it fetches all configured feeds per run
+  rss: {
+    pageParam: undefined, // Not used for RSS
     maxPagesPerRun: 1,
   },
 }
@@ -651,6 +659,71 @@ async function fetchGreenhouseJobsForCompany(
 }
 
 /**
+ * Fetch from all RSS feeds in parallel
+ */
+async function fetchFromAllRSSFeedsInParallel(
+  maxFeeds: number = 25
+): Promise<Array<{ item: any; feedSource: RSSFeedSource; feedUrl: string }>> {
+  const feeds = getRSSSources()
+  if (!feeds.length) {
+    console.log('ingest_jobs: no RSS feeds configured')
+    return []
+  }
+
+  const feedsToFetch = feeds.slice(0, maxFeeds)
+  console.log(
+    `ingest_jobs: fetching from ${feedsToFetch.length} RSS feeds (max: ${maxFeeds})`
+  )
+
+  const results: Array<{ item: any; feedSource: RSSFeedSource; feedUrl: string }> = []
+
+  // Fetch feeds in parallel with error handling
+  const promises = feedsToFetch.map(async (feed) => {
+    try {
+      console.log(`ingest_jobs: fetching RSS feed: ${feed.name} (${feed.feedUrl})`)
+      const parsed = await fetchAndParseRSSFeed(feed.feedUrl)
+
+      if (parsed.error) {
+        console.warn(
+          `ingest_jobs: RSS feed error for ${feed.name}: ${parsed.error}`
+        )
+        return []
+      }
+
+      if (!parsed.items.length) {
+        console.log(`ingest_jobs: no items in RSS feed: ${feed.name}`)
+        return []
+      }
+
+      console.log(
+        `ingest_jobs: got ${parsed.items.length} items from RSS feed: ${feed.name}`
+      )
+
+      // Convert items to normalized format for RSSSource
+      return parsed.items.map((item) => ({
+        item,
+        feedSource: feed,
+        feedUrl: feed.feedUrl,
+      }))
+    } catch (err) {
+      console.error(`ingest_jobs: error fetching RSS feed ${feed.name}:`, err)
+      return []
+    }
+  })
+
+  const feedResults = await Promise.all(promises)
+  for (const items of feedResults) {
+    results.push(...items)
+  }
+
+  console.log(
+    `ingest_jobs: fetched ${results.length} total items from ${feedsToFetch.length} RSS feeds`
+  )
+
+  return results
+}
+
+/**
  * Fetch from all companies in parallel using concurrent fetcher
  */
 async function fetchFromAllCompaniesInParallel(
@@ -961,8 +1034,83 @@ async function ingest(source: JobSource, runId?: string): Promise<IngestResult> 
   )
 
   try {
-    // Special handling for Lever and Greenhouse: multi-company parallel fetch
-    if (source.slug === 'lever' || source.slug === 'greenhouse') {
+    // Special handling for RSS: fetch all configured feeds
+    if (source.slug === 'rss') {
+      const enabled = process.env.ENABLE_SOURCE_RSS !== 'false'
+
+      if (!enabled) {
+        console.log('ingest_jobs: RSS disabled via ENABLE_SOURCE_RSS')
+        return {
+          source: source.slug,
+          count: 0,
+          normalized: 0,
+          duplicates: 0,
+          staleFiltered: 0,
+          status: 'skipped',
+          skipReason: 'disabled',
+        }
+      }
+
+      const maxFeeds = parseInt(process.env.RSS_MAX_FEEDS_PER_RUN || '25', 10)
+      const feedItems = await fetchFromAllRSSFeedsInParallel(maxFeeds)
+
+      if (!feedItems.length) {
+        console.log('ingest_jobs: no items from RSS feeds')
+        return {
+          source: source.slug,
+          count: 0,
+          normalized: 0,
+          duplicates: 0,
+          staleFiltered: 0,
+          status: 'success',
+        }
+      }
+
+      console.log(`ingest_jobs: normalizing ${feedItems.length} RSS items`)
+
+      let normalized: NormalizedJob[] = []
+      try {
+        const normalizedResult = await Promise.resolve(source.normalize(feedItems))
+        normalized = normalizedResult || []
+      } catch (err) {
+        console.error('ingest_jobs: normalize failed for RSS', err)
+        sourceStatus = 'failed'
+        sourceError = err instanceof Error ? err.message : String(err)
+        throw err
+      }
+
+      totalNormalized = normalized.length
+
+      // Apply freshness filter
+      const { fresh, staleCount } = filterByFreshness(normalized, sourceConfig)
+      totalStaleFiltered = staleCount
+
+      if (staleCount > 0) {
+        console.log(
+          `ingest_jobs: filtered ${staleCount} stale RSS jobs (>${sourceConfig.maxAgeDays} days old)`
+        )
+      }
+
+      if (!fresh.length) {
+        console.log('ingest_jobs: all RSS jobs filtered by freshness')
+        return {
+          source: source.slug,
+          count: 0,
+          normalized: totalNormalized,
+          duplicates: 0,
+          staleFiltered: totalStaleFiltered,
+          status: 'success',
+        }
+      }
+
+      console.log(`ingest_jobs: upserting ${fresh.length} fresh RSS jobs`)
+      const { inserted } = await upsertJobs(fresh)
+      totalInserted = inserted
+      totalDuplicates = fresh.length - inserted
+
+      console.log(`ingest_jobs: finished RSS ingest: ${totalInserted} inserted, ${totalDuplicates} duplicates`)
+    } // Special handling for Lever and Greenhouse: multi-company parallel fetch
+    else if (source.slug === 'lever' || source.slug === 'greenhouse') {
       const platform = source.slug as 'lever' | 'greenhouse';
       const enabled =
         platform === 'lever'
