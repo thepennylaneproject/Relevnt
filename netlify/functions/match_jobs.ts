@@ -16,6 +16,14 @@ import {
   tokenize,
   extractResumeKeywords,
 } from './utils/resumeParsing'
+
+// New ATS-aligned scoring engine
+import {
+  scoreJobBatch,
+  aggregateUserProfile,
+  type EnhancedJobRow,
+  type MatchResult as NewMatchResult
+} from '../../src/lib/scoring'
 // ------------- helpers -------------
 
 function isJobRowArray(data: unknown): data is JobRow[] {
@@ -148,7 +156,48 @@ async function loadUserMatchPreferences(
   return data as UserMatchPreferences
 }
 
-// ------------- scoring engine -------------
+// Convert new scoring engine results to legacy API format
+function convertNewMatchToLegacy(result: NewMatchResult, jobs: Map<string, EnhancedJobRow>): MatchResult {
+  const job = jobs.get(result.job_id)
+  if (!job) {
+    throw new Error(`Job not found: ${result.job_id}`)
+  }
+
+  return {
+    job_id: result.job_id,
+    job: {
+      id: job.id,
+      title: job.title,
+      company: job.company,
+      location: job.location,
+      employment_type: job.employment_type,
+      remote_type: job.remote_type,
+      source_slug: job.source_slug,
+      external_url: job.external_url,
+      posted_date: job.posted_date,
+      created_at: job.created_at,
+      salary_min: job.salary_min,
+      salary_max: job.salary_max,
+      competitiveness_level: job.competitiveness_level,
+      match_score: result.total_score,
+      description: job.description,
+      // Include new ATS fields
+      seniority_level: job.seniority_level,
+      experience_years_min: job.experience_years_min,
+      experience_years_max: job.experience_years_max,
+      required_skills: job.required_skills,
+      preferred_skills: job.preferred_skills,
+      education_level: job.education_level,
+      industry: job.industry,
+      company_size: job.company_size,
+    } as JobRow,
+    score: result.total_score,
+    reasons: result.top_reasons,
+  }
+}
+
+// ------------- scoring engine (legacy) -------------
+
 
 function scoreJobAgainstProfile(job: JobRow, profile: Profile | null): MatchResult {
   let score = 0
@@ -400,18 +449,18 @@ export const handler: Handler = async (event) => {
       }
     }
 
-// 1) Load base profile
-// 1) Load profile
-const { data: profile, error: profileErr } = await supabase
-  .from('profiles')
-  .select('*')
-  .eq('id', userId) // your profiles table uses "id", not "user_id"
-  .maybeSingle()
+    // 1) Load base profile
+    // 1) Load profile
+    const { data: profile, error: profileErr } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId) // your profiles table uses "id", not "user_id"
+      .maybeSingle()
 
-if (profileErr) {
-  console.error('match_jobs: failed to load profile', profileErr)
-  // we fall back to null profile, scoring still works with generic signals
-}
+    if (profileErr) {
+      console.error('match_jobs: failed to load profile', profileErr)
+      // we fall back to null profile, scoring still works with generic signals
+    }
 
     const typedProfile: Profile | null = profile ? (profile as Profile) : null
 
@@ -513,11 +562,11 @@ if (profileErr) {
 
     // Attach job preferences in a flattened way so scoring sees them
     if (jobPrefs) {
-      ;(enrichedProfile as any).job_preferences = jobPrefs
+      ; (enrichedProfile as any).job_preferences = jobPrefs
 
       // Remote preference: e.g. "remote", "hybrid", "on site"
       if (!(enrichedProfile as any).remote_preference && jobPrefs.remote_preference) {
-        ;(enrichedProfile as any).remote_preference = jobPrefs.remote_preference
+        ; (enrichedProfile as any).remote_preference = jobPrefs.remote_preference
       }
 
       // Preferred locations: cities / regions
@@ -525,7 +574,7 @@ if (profileErr) {
         !(enrichedProfile as any).preferred_locations &&
         Array.isArray(jobPrefs.preferred_locations)
       ) {
-        ;(enrichedProfile as any).preferred_locations = jobPrefs.preferred_locations
+        ; (enrichedProfile as any).preferred_locations = jobPrefs.preferred_locations
       }
 
       // Salary floor
@@ -533,7 +582,7 @@ if (profileErr) {
         (enrichedProfile as any).min_salary == null &&
         typeof jobPrefs.min_salary === 'number'
       ) {
-        ;(enrichedProfile as any).min_salary = jobPrefs.min_salary
+        ; (enrichedProfile as any).min_salary = jobPrefs.min_salary
       }
 
       // “No thanks” titles and companies feed into exclude_keywords
@@ -546,7 +595,7 @@ if (profileErr) {
 
       const existingExcludes = normalizeListField(
         (enrichedProfile as any).keywords_exclude ??
-          (enrichedProfile as any).avoid_keywords
+        (enrichedProfile as any).avoid_keywords
       )
 
       const mergedExcludes = [
@@ -556,7 +605,7 @@ if (profileErr) {
       ]
 
       if (mergedExcludes.length > 0) {
-        ;(enrichedProfile as any).keywords_exclude = mergedExcludes
+        ; (enrichedProfile as any).keywords_exclude = mergedExcludes
       }
 
       // Positive keywords: phrases you want us to lean toward
@@ -566,18 +615,18 @@ if (profileErr) {
 
       const existingIncludes = normalizeListField(
         (enrichedProfile as any).keywords_include ??
-          (enrichedProfile as any).target_keywords ??
-          (enrichedProfile as any).skills_primary
+        (enrichedProfile as any).target_keywords ??
+        (enrichedProfile as any).skills_primary
       )
 
       const mergedIncludes = [...existingIncludes, ...includeFromPrefs]
 
       if (mergedIncludes.length > 0) {
-        ;(enrichedProfile as any).keywords_include = mergedIncludes
+        ; (enrichedProfile as any).keywords_include = mergedIncludes
       }
     }
 
-    // 2) Load active jobs
+    // 2) Load active jobs with ATS enrichment fields
     const { data: jobsData, error: jobsErr } = await supabase
       .from('jobs')
       .select(
@@ -596,7 +645,16 @@ if (profileErr) {
         salary_max,
         competitiveness_level,
         match_score,
-        description
+        description,
+        keywords,
+        seniority_level,
+        experience_years_min,
+        experience_years_max,
+        required_skills,
+        preferred_skills,
+        education_level,
+        industry,
+        company_size
       `
       )
       .eq('is_active', true)
@@ -619,11 +677,31 @@ if (profileErr) {
       }
     }
 
-    const jobs = jobsData as JobRow[]
+    const jobs = jobsData as EnhancedJobRow[]
 
-    // 3) Compute scores
-    const results: MatchResult[] = jobs
-      .map((job) => scoreJobAgainstProfile(job, enrichedProfile))
+    // Check if we should use the new scoring engine
+    // Enable new engine via query param: ?engine=v2
+    const useNewEngine = event.queryStringParameters?.engine === 'v2'
+
+    let results: MatchResult[]
+
+    if (useNewEngine) {
+      // Use new ATS-aligned scoring engine
+      try {
+        const userProfile = await aggregateUserProfile(supabase, userId, null)
+        const jobMap = new Map(jobs.map(j => [j.id, j]))
+        const newResults = scoreJobBatch(jobs, userProfile, { minScore: 5, includeSkillGaps: true })
+        results = newResults.map(r => convertNewMatchToLegacy(r, jobMap))
+        console.log(`match_jobs: used v2 engine, scored ${results.length} jobs`)
+      } catch (err) {
+        console.error('match_jobs: v2 engine failed, falling back to legacy', err)
+        // Fallback to legacy
+        results = jobs.map((job) => scoreJobAgainstProfile(job as unknown as JobRow, enrichedProfile))
+      }
+    } else {
+      // Use legacy scoring engine
+      results = jobs.map((job) => scoreJobAgainstProfile(job as unknown as JobRow, enrichedProfile))
+    }
 
     // optional: if you want a floor, use something gentle like:
     const filtered = results.filter((m) => m.score >= 5)
@@ -639,7 +717,7 @@ if (profileErr) {
     }
 
     const sorted = filtered.sort((a, b) => b.score - a.score)
-    
+
     return {
       statusCode: 200,
       body: JSON.stringify({

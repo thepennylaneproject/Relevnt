@@ -14,6 +14,7 @@ import {
   type JobSource,
   type NormalizedJob,
 } from '../../src/shared/jobSources'
+import { enrichJob } from '../../src/lib/scoring/jobEnricher'
 
 export type IngestResult = {
   source: string;
@@ -445,36 +446,47 @@ async function upsertJobs(jobs: NormalizedJob[]) {
 
   const supabase = createAdminClient()
 
+  // Enrich jobs with ATS metadata
+  const enrichedJobs = uniqueJobs.map((j) => {
+    const enrichment = enrichJob(j.title, j.description || '')
+    return {
+      source_slug: j.source_slug,
+      external_id: j.external_id,
+
+      title: j.title,
+      company: j.company,
+      location: j.location,
+      employment_type: j.employment_type,
+      remote_type: j.remote_type,
+
+      posted_date: j.posted_date,
+      created_at: j.created_at,
+      external_url: j.external_url,
+
+      salary_min: j.salary_min,
+      salary_max: j.salary_max,
+      competitiveness_level: j.competitiveness_level,
+
+      description: j.description,
+      is_active: true,
+
+      // ATS enrichment fields
+      seniority_level: enrichment.seniority_level,
+      experience_years_min: enrichment.experience_years_min,
+      experience_years_max: enrichment.experience_years_max,
+      required_skills: enrichment.required_skills.length > 0 ? enrichment.required_skills : null,
+      preferred_skills: enrichment.preferred_skills.length > 0 ? enrichment.preferred_skills : null,
+      education_level: enrichment.education_level,
+      industry: enrichment.industry,
+    }
+  })
+
   const { data, error } = await supabase
     .from('jobs')
-    .upsert(
-      uniqueJobs.map((j) => ({
-        source_slug: j.source_slug,
-        external_id: j.external_id,
-
-        title: j.title,
-        company: j.company,
-        location: j.location,
-        employment_type: j.employment_type,
-        remote_type: j.remote_type,
-
-        posted_date: j.posted_date,
-        created_at: j.created_at,
-        external_url: j.external_url,
-
-        salary_min: j.salary_min,
-        salary_max: j.salary_max,
-        competitiveness_level: j.competitiveness_level,
-
-        description: j.description,
-        // data_raw intentionally omitted until column exists in DB
-        is_active: true,
-      })),
-      {
-        onConflict: 'source_slug,external_id',
-        ignoreDuplicates: false,
-      }
-    )
+    .upsert(enrichedJobs, {
+      onConflict: 'source_slug,external_id',
+      ignoreDuplicates: false,
+    })
     .select('id')
 
   if (error) {

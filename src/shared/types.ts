@@ -1,4 +1,14 @@
 // src/shared/types.ts
+
+// Seniority levels for experience matching
+export type SeniorityLevel = 'junior' | 'mid' | 'senior' | 'lead' | 'director' | 'executive'
+
+// Education levels for qualification matching
+export type EducationLevel = 'none' | 'high_school' | 'associate' | 'bachelor' | 'master' | 'phd'
+
+// Company size categories
+export type CompanySize = 'startup' | 'small' | 'medium' | 'large' | 'enterprise'
+
 export type JobRow = {
   id: string
   title: string
@@ -15,6 +25,16 @@ export type JobRow = {
   competitiveness_level: string | null
   match_score: number | null
   description?: string | null
+
+  // ATS-aligned fields (added 2024-12-16)
+  seniority_level: SeniorityLevel | string | null
+  experience_years_min: number | null
+  experience_years_max: number | null
+  required_skills: string[] | null
+  preferred_skills: string[] | null
+  education_level: EducationLevel | string | null
+  industry: string | null
+  company_size: CompanySize | string | null
 }
 
 export type MatchResult = {
@@ -40,10 +60,10 @@ export type UserMatchPreferences = {
 
   // How to treat location when scoring
   location_mode:
-    | 'local_only'
-    | 'remote_only'
-    | 'remote_or_local'
-    | 'relocate_if_high_salary'
+  | 'local_only'
+  | 'remote_only'
+  | 'remote_or_local'
+  | 'relocate_if_high_salary'
 
   // Salary floors by mode (in the user's primary currency)
   min_salary_local: number | null
