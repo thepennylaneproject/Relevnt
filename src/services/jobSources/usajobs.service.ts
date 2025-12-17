@@ -75,7 +75,7 @@ class USAJobsService {
   private baseUrl = 'https://data.usajobs.gov/api/search';
   private userAgent = 'Relevnt-CareerAssistant (contact@relevnt.work)'; // Required by USAJOBS
 
-  constructor(apiKey: string = process.env.REACT_APP_USAJOBS_API_KEY || '') {
+  constructor(apiKey: string = (typeof (globalThis as any).process !== 'undefined' && (globalThis as any).process?.env?.REACT_APP_USAJOBS_API_KEY) || '') {
     if (!apiKey) {
       throw new Error('USAJOBS API key not found. Set REACT_APP_USAJOBS_API_KEY in .env');
     }
