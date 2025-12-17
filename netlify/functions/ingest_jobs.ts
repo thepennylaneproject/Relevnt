@@ -209,11 +209,10 @@ function buildSourceUrl(
   }
 
   if (source.slug === 'careeronestop') {
-    const userId = process.env.CAREERONESTOP_USER_ID
-    const token = process.env.CAREERONESTOP_TOKEN
+    const apiKey = process.env.CAREERONESTOP_API_KEY
 
-    if (!userId || !token) {
-      console.error('ingest_jobs: missing CAREERONESTOP_USER_ID or CAREERONESTOP_TOKEN')
+    if (!apiKey) {
+      console.error('ingest_jobs: missing CAREERONESTOP_API_KEY')
       return null
     }
 
@@ -226,6 +225,7 @@ function buildSourceUrl(
 
     // CareerOneStop v2 API URL format:
     // /v2/jobsearch/{userId}/{keyword}/{location}/{radius}/{sortColumns}/{sortOrder}/{startRecord}/{pageSize}/{days}
+    // The API key serves as the userId in the URL path
     const config = SOURCE_PAGINATION[source.slug] || {}
     const page = cursor?.page ?? 1
     const pageSize = config.pageSize ?? 50
@@ -239,7 +239,7 @@ function buildSourceUrl(
     const sortOrder = 'DESC'
     const days = '30' // Last 30 days
 
-    const baseUrl = `https://api.careeronestop.org/v2/jobsearch/${userId}/${encodeURIComponent(
+    const baseUrl = `https://api.careeronestop.org/v2/jobsearch/${apiKey}/${encodeURIComponent(
       keyword
     )}/${encodeURIComponent(location)}/${radius}/${sortColumns}/${sortOrder}/${startRecord}/${pageSize}/${days}`
 
@@ -339,16 +339,16 @@ function buildHeaders(source?: JobSource): Record<string, string> {
   }
 
   if (source?.slug === 'careeronestop') {
-    const token = process.env.CAREERONESTOP_TOKEN
-    if (!token) {
-      console.error('ingest_jobs: missing CAREERONESTOP_TOKEN')
+    const apiKey = process.env.CAREERONESTOP_API_KEY
+    if (!apiKey) {
+      console.error('ingest_jobs: missing CAREERONESTOP_API_KEY')
       return {
         'User-Agent': 'relevnt-job-ingest/1.0',
         Accept: 'application/json',
       }
     }
     return {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${apiKey}`,
       'User-Agent': 'relevnt-job-ingest/1.0',
       Accept: 'application/json',
     }
