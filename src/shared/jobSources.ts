@@ -976,6 +976,152 @@ export const TheirStackSource: JobSource = {
 }
 
 // ---------------------------------------------------------------------------
+// Lever (job board with per-company configuration)
+// ---------------------------------------------------------------------------
+
+interface LeverJob {
+  id: string
+  text: string
+  categories?: {
+    location?: string
+    commitment?: string
+    team?: string
+    department?: string
+  }
+  description?: string
+  descriptionPlain?: string
+  hostedUrl?: string
+  applyUrl?: string
+  workplaceType?: string
+  salaryRange?: {
+    currency?: string
+    min?: number
+    max?: number
+    interval?: string
+  }
+  country?: string
+  createdAt?: string | number
+}
+
+interface LeverCompanySource {
+  companyName: string
+  leverSlug?: string
+  leverApiUrl?: string
+}
+
+// Helper to parse Lever sources from environment
+function getLeverSources(): LeverCompanySource[] {
+  const json = process.env.LEVER_SOURCES_JSON
+  if (!json) return []
+  try {
+    const parsed = JSON.parse(json)
+    if (!Array.isArray(parsed)) return []
+    return parsed.filter(
+      (item: any) =>
+        item &&
+        typeof item === 'object' &&
+        (item.companyName || item.leverSlug || item.leverApiUrl)
+    )
+  } catch (e) {
+    console.error('Failed to parse LEVER_SOURCES_JSON:', e)
+    return []
+  }
+}
+
+// Helper to build Lever API URL for a company
+function buildLeverUrl(source: LeverCompanySource): string {
+  // If full API URL is provided, use it
+  if (source.leverApiUrl) {
+    return source.leverApiUrl
+  }
+  // Otherwise construct from slug
+  const slug = source.leverSlug || source.companyName?.toLowerCase().replace(/\s+/g, '-')
+  if (!slug) {
+    throw new Error(`Unable to build Lever URL: no slug or API URL for ${source.companyName}`)
+  }
+  return `https://api.lever.co/v0/postings/${slug}`
+}
+
+export const LeverSource: JobSource = {
+  slug: 'lever',
+  displayName: 'Lever',
+  fetchUrl: 'https://api.lever.co/v0/postings', // Base URL, actual URLs come from config
+  type: 'board',
+  region: 'global',
+
+  normalize: (raw) => {
+    const postings = asArray<LeverJob>(raw)
+    if (!postings.length) return []
+
+    const nowIso = new Date().toISOString()
+
+    return postings
+      .map((posting): NormalizedJob | null => {
+        if (!posting || !posting.id || !posting.text) return null
+
+        // Extract location from categories
+        const location = posting.categories?.location ?? null
+
+        // Map workplaceType to remote_type
+        let remote_type: RemoteType = null
+        if (posting.workplaceType) {
+          const wt = posting.workplaceType.toLowerCase()
+          if (wt === 'remote') {
+            remote_type = 'remote'
+          } else if (wt === 'hybrid') {
+            remote_type = 'hybrid'
+          } else if (wt === 'on-site' || wt === 'onsite') {
+            remote_type = 'onsite'
+          }
+        }
+        // Fallback to location-based inference
+        if (!remote_type) {
+          remote_type = inferRemoteTypeFromLocation(location)
+        }
+
+        // Map commitment to employment type
+        const employment_type = posting.categories?.commitment ?? null
+
+        // Use description or descriptionPlain
+        const description = posting.descriptionPlain ?? posting.description ?? null
+
+        // Posted date from createdAt
+        const posted_date = safeDate(posting.createdAt)
+
+        // Salary range
+        const salary_min = parseNumber(posting.salaryRange?.min)
+        const salary_max = parseNumber(posting.salaryRange?.max)
+
+        // Use hostedUrl as primary, fallback to applyUrl
+        const external_url = posting.hostedUrl ?? posting.applyUrl ?? null
+
+        return {
+          source_slug: 'lever',
+          external_id: posting.id,
+
+          title: posting.text,
+          company: null, // Company comes from the URL/config, not the posting
+          location,
+          employment_type,
+          remote_type,
+
+          posted_date,
+          created_at: nowIso,
+          external_url,
+
+          salary_min,
+          salary_max,
+          competitiveness_level: null,
+
+          description,
+          data_raw: posting,
+        }
+      })
+      .filter((job): job is NormalizedJob => Boolean(job))
+  },
+}
+
+// ---------------------------------------------------------------------------
 // Combined export for ingest_jobs
 // ---------------------------------------------------------------------------
 
@@ -993,5 +1139,9 @@ export const ALL_SOURCES: JobSource[] = [
   TheMuseSource,
   ReedUKSource,
   TheirStackSource,
+  LeverSource,
 ]
+
+// Export helpers for use in ingest_jobs
+export { getLeverSources, buildLeverUrl, type LeverCompanySource }
 

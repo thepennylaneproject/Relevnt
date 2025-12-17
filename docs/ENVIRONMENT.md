@@ -34,6 +34,11 @@ This project uses Supabase + Netlify Functions with an AI routing layer. Copy `.
 - `THEIRSTACK_API_KEY` – TheirStack aggregator API key
 - `ENABLE_SOURCE_THEIRSTACK` – Enable/disable TheirStack ingestion (default: true)
 - `THEIRSTACK_MAX_RESULTS_PER_RUN` – Max jobs per run (default: 300)
+- `ENABLE_SOURCE_LEVER` – Enable/disable Lever job board ingestion (default: false)
+- `LEVER_SOURCES_JSON` – JSON array of Lever company configs: `[{"companyName": "Company Name", "leverSlug": "company-slug"}, ...]`
+  - Each entry can have: `companyName` (required), `leverSlug` or `leverApiUrl` (at least one required)
+  - Example: `[{"companyName": "Acme Corp", "leverSlug": "acme"}, {"companyName": "TechCo", "leverApiUrl": "https://api.lever.co/v0/postings/techco"}]`
+- `LEVER_MAX_COMPANIES_PER_RUN` – Maximum companies to fetch per ingestion run (default: 20)
 
 ## Payments / Analytics
 - `REACT_APP_STRIPE_PUBLIC_KEY`

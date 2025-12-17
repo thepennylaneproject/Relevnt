@@ -13,6 +13,8 @@ import {
   ALL_SOURCES,
   type JobSource,
   type NormalizedJob,
+  getLeverSources,
+  buildLeverUrl,
 } from '../../src/shared/jobSources'
 import { enrichJob } from '../../src/lib/scoring/jobEnricher'
 import {
@@ -75,6 +77,11 @@ const SOURCE_PAGINATION: Record<string, PaginationConfig> = {
     pageSizeParam: 'pageSize',
     pageSize: 50,
     maxPagesPerRun: parseInt(process.env.CAREERONESTOP_MAX_PAGES_PER_RUN || '3', 10),
+  },
+  // Lever doesn't use pagination - it uses company-based fetching
+  lever: {
+    pageParam: undefined, // Not used for Lever
+    maxPagesPerRun: 1,
   },
 }
 
@@ -240,6 +247,11 @@ function buildSourceUrl(
       return null
     }
     return source.fetchUrl
+  }
+
+  // Lever: handled specially in ingest() function, returns null here
+  if (source.slug === 'lever') {
+    return null
   }
 
   return applyCursorToUrl(source.fetchUrl, source, cursor)
@@ -691,81 +703,220 @@ async function ingest(source: JobSource, runId?: string): Promise<IngestResult> 
   )
 
   try {
-    for (let i = 0; i < maxPages; i++) {
-      const url = buildSourceUrl(source, { page, since })
-
-      if (!url) {
-        console.warn(`ingest_jobs: no URL for ${source.slug}, skipping`)
-        break
+    // Special handling for Lever: multi-company fetch
+    if (source.slug === 'lever') {
+      const enabled = process.env.ENABLE_SOURCE_LEVER !== 'false'
+      if (!enabled) {
+        console.log('ingest_jobs: Lever disabled via ENABLE_SOURCE_LEVER')
+        return {
+          source: source.slug,
+          count: 0,
+          normalized: 0,
+          duplicates: 0,
+          staleFiltered: 0,
+          status: 'skipped',
+          skipReason: 'disabled',
+        }
       }
 
+      const leverSources = getLeverSources()
+      if (!leverSources.length) {
+        console.log('ingest_jobs: no Lever companies configured in LEVER_SOURCES_JSON')
+        return {
+          source: source.slug,
+          count: 0,
+          normalized: 0,
+          duplicates: 0,
+          staleFiltered: 0,
+          status: 'success',
+        }
+      }
+
+      const maxCompanies = parseInt(process.env.LEVER_MAX_COMPANIES_PER_RUN || '20', 10)
+      const companiesToFetch = leverSources.slice(0, maxCompanies)
       console.log(
-        `ingest_jobs: fetching from ${source.slug} (${url}) [page ${page}]`
+        `ingest_jobs: fetching from ${companiesToFetch.length} Lever companies (limit: ${maxCompanies})`
       )
 
-      const raw = await fetchJson(url, source, { page, since })
-      if (!raw) {
-        console.warn(`ingest_jobs: no data from ${source.slug} on page ${page}`)
-        break
+      // Fetch from all companies and combine postings
+      const allPostings: any[] = []
+      for (const leverSource of companiesToFetch) {
+        try {
+          const leverUrl = buildLeverUrl(leverSource)
+          console.log(`ingest_jobs: fetching Lever jobs for ${leverSource.companyName} from ${leverUrl}`)
+
+          const res = await fetch(leverUrl, {
+            method: 'GET',
+            headers: {
+              'User-Agent': 'relevnt-job-ingest/1.0',
+              Accept: 'application/json',
+            },
+          })
+
+          if (!res.ok) {
+            console.error(
+              `ingest_jobs: Lever fetch failed for ${leverSource.companyName}`,
+              res.status,
+              res.statusText
+            )
+            continue
+          }
+
+          const data = await res.json().catch((err) => {
+            console.error(`ingest_jobs: failed to parse JSON for Lever ${leverSource.companyName}`, err)
+            return null
+          })
+
+          if (!data) {
+            console.warn(`ingest_jobs: no data from Lever for ${leverSource.companyName}`)
+            continue
+          }
+
+          // Lever API returns array of postings directly or wrapped in 'postings' field
+          const postings = Array.isArray(data) ? data : data.postings ?? []
+          console.log(
+            `ingest_jobs: got ${postings.length} postings from Lever for ${leverSource.companyName}`
+          )
+          allPostings.push(...postings)
+        } catch (err) {
+          console.error(`ingest_jobs: error fetching Lever for ${leverSource.companyName}`, err)
+          continue
+        }
       }
+
+      if (!allPostings.length) {
+        console.log('ingest_jobs: no postings from any Lever companies')
+        return {
+          source: source.slug,
+          count: 0,
+          normalized: 0,
+          duplicates: 0,
+          staleFiltered: 0,
+          status: 'success',
+        }
+      }
+
+      console.log(`ingest_jobs: normalizing ${allPostings.length} postings from Lever`)
 
       let normalized: NormalizedJob[] = []
       try {
-        const normalizedResult = await Promise.resolve(source.normalize(raw))
+        const normalizedResult = await Promise.resolve(source.normalize(allPostings))
         normalized = normalizedResult || []
       } catch (err) {
-        console.error(`ingest_jobs: normalize failed for ${source.slug}`, err)
-        break
+        console.error(`ingest_jobs: normalize failed for Lever`, err)
+        sourceStatus = 'failed'
+        sourceError = err instanceof Error ? err.message : String(err)
+        throw err
       }
 
-      if (!normalized.length) {
-        console.log(
-          `ingest_jobs: no jobs after normalize for ${source.slug} on page ${page}`
-        )
-        page = 1 // reset so next run starts at beginning
-        break
-      }
+      totalNormalized = normalized.length
 
       // Apply freshness filter
       const { fresh, staleCount } = filterByFreshness(normalized, sourceConfig)
-      totalStaleFiltered += staleCount
+      totalStaleFiltered = staleCount
 
       if (staleCount > 0) {
         console.log(
-          `ingest_jobs: filtered ${staleCount} stale jobs (>${sourceConfig.maxAgeDays} days old) from ${source.slug}`
+          `ingest_jobs: filtered ${staleCount} stale jobs (>${sourceConfig.maxAgeDays} days old) from Lever`
         )
       }
-
-      totalNormalized += normalized.length // Track pre-filter count
 
       if (!fresh.length) {
-        console.log(
-          `ingest_jobs: all jobs stale after freshness filter for ${source.slug} on page ${page}`
-        )
-        // If all jobs are stale, we might be paginating into history - stop
-        page = 1
-        break
+        console.log(`ingest_jobs: all Lever jobs filtered by freshness`)
+        return {
+          source: source.slug,
+          count: 0,
+          normalized: totalNormalized,
+          duplicates: 0,
+          staleFiltered: totalStaleFiltered,
+          status: 'success',
+        }
       }
 
-      const duplicateCount = fresh.length
-      console.log(
-        `ingest_jobs: normalized ${normalized.length} → ${fresh.length} fresh jobs from ${source.slug} on page ${page}`
-      )
-
+      console.log(`ingest_jobs: upserting ${fresh.length} fresh Lever jobs`)
       const { inserted } = await upsertJobs(fresh)
-      totalInserted += inserted
-      totalDuplicates += (duplicateCount - inserted)
-      console.log(
-        `ingest_jobs: upserted ${inserted} jobs from ${source.slug} on page ${page}`
-      )
+      totalInserted = inserted
+      totalDuplicates = fresh.length - inserted
 
-      if (normalized.length < expectedPageSize) {
-        // Likely the last page; reset cursor so next run starts from the beginning
-        page = 1
-        break
+      console.log(`ingest_jobs: finished Lever ingest: ${totalInserted} inserted, ${totalDuplicates} duplicates`)
+    } else {
+      // Standard pagination-based ingestion for other sources
+      for (let i = 0; i < maxPages; i++) {
+        const url = buildSourceUrl(source, { page, since })
+
+        if (!url) {
+          console.warn(`ingest_jobs: no URL for ${source.slug}, skipping`)
+          break
+        }
+
+        console.log(
+          `ingest_jobs: fetching from ${source.slug} (${url}) [page ${page}]`
+        )
+
+        const raw = await fetchJson(url, source, { page, since })
+        if (!raw) {
+          console.warn(`ingest_jobs: no data from ${source.slug} on page ${page}`)
+          break
+        }
+
+        let normalized: NormalizedJob[] = []
+        try {
+          const normalizedResult = await Promise.resolve(source.normalize(raw))
+          normalized = normalizedResult || []
+        } catch (err) {
+          console.error(`ingest_jobs: normalize failed for ${source.slug}`, err)
+          break
+        }
+
+        if (!normalized.length) {
+          console.log(
+            `ingest_jobs: no jobs after normalize for ${source.slug} on page ${page}`
+          )
+          page = 1 // reset so next run starts at beginning
+          break
+        }
+
+        // Apply freshness filter
+        const { fresh, staleCount } = filterByFreshness(normalized, sourceConfig)
+        totalStaleFiltered += staleCount
+
+        if (staleCount > 0) {
+          console.log(
+            `ingest_jobs: filtered ${staleCount} stale jobs (>${sourceConfig.maxAgeDays} days old) from ${source.slug}`
+          )
+        }
+
+        totalNormalized += normalized.length // Track pre-filter count
+
+        if (!fresh.length) {
+          console.log(
+            `ingest_jobs: all jobs stale after freshness filter for ${source.slug} on page ${page}`
+          )
+          // If all jobs are stale, we might be paginating into history - stop
+          page = 1
+          break
+        }
+
+        const duplicateCount = fresh.length
+        console.log(
+          `ingest_jobs: normalized ${normalized.length} → ${fresh.length} fresh jobs from ${source.slug} on page ${page}`
+        )
+
+        const { inserted } = await upsertJobs(fresh)
+        totalInserted += inserted
+        totalDuplicates += (duplicateCount - inserted)
+        console.log(
+          `ingest_jobs: upserted ${inserted} jobs from ${source.slug} on page ${page}`
+        )
+
+        if (normalized.length < expectedPageSize) {
+          // Likely the last page; reset cursor so next run starts from the beginning
+          page = 1
+          break
+        }
+
+        page += 1
       }
-
-      page += 1
     }
   } catch (ingestError) {
     sourceStatus = 'failed'
