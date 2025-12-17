@@ -45,6 +45,10 @@ type JobSourceRow = {
   update_frequency: string | null
   last_sync: string | null
   last_error: string | null
+  trust_level?: string | null
+  max_age_days?: number | null
+  max_pages_per_run?: number | null
+  cooldown_minutes?: number | null
 }
 
 // ============================================================
@@ -652,8 +656,11 @@ function SourcesTab() {
   const [error, setError] = useState<string | null>(null)
   const [savingId, setSavingId] = useState<string | null>(null)
   const [triggeringId, setTriggeringId] = useState<string | null>(null)
+  const [testingId, setTestingId] = useState<string | null>(null)
   const [editingSource, setEditingSource] = useState<JobSourceRow | null>(null)
   const [showAddModal, setShowAddModal] = useState(false)
+  const [selectedSources, setSelectedSources] = useState<Set<string>>(new Set())
+  const [showBulkActions, setShowBulkActions] = useState(false)
   const [newSource, setNewSource] = useState({
     name: '',
     slug: '',
@@ -661,6 +668,10 @@ function SourcesTab() {
     api_url: '',
     website_url: '',
     update_frequency: 'daily',
+    trust_level: 'medium',
+    max_age_days: '30',
+    max_pages_per_run: '10',
+    cooldown_minutes: '0',
     enabled: true,
   })
 
@@ -795,6 +806,100 @@ function SourcesTab() {
     return new Date(date).toLocaleString()
   }
 
+  function toggleSourceSelection(sourceId: string) {
+    setSelectedSources(prev => {
+      const next = new Set(prev)
+      if (next.has(sourceId)) {
+        next.delete(sourceId)
+      } else {
+        next.add(sourceId)
+      }
+      return next
+    })
+  }
+
+  function selectAllSources() {
+    if (selectedSources.size === sources.length) {
+      setSelectedSources(new Set())
+    } else {
+      setSelectedSources(new Set(sources.map(s => s.id)))
+    }
+  }
+
+  async function bulkToggleEnabled(enabled: boolean) {
+    if (selectedSources.size === 0) return
+    setSavingId('bulk')
+    try {
+      const ids = Array.from(selectedSources)
+      for (const id of ids) {
+        await supabase
+          .from('job_sources')
+          .update({ enabled, updated_at: new Date().toISOString() })
+          .eq('id', id)
+      }
+      setSelectedSources(new Set())
+      await fetchSources()
+    } catch (err) {
+      console.error('Bulk toggle error:', err)
+      alert('Failed to update sources')
+    } finally {
+      setSavingId(null)
+      setShowBulkActions(false)
+    }
+  }
+
+  async function bulkTriggerIngestion() {
+    if (selectedSources.size === 0) return
+    setTriggeringId('bulk')
+    try {
+      const selectedSourceSlugs = sources
+        .filter(s => selectedSources.has(s.id))
+        .map(s => s.slug)
+        .filter(Boolean) as string[]
+
+      const res = await fetch('/.netlify/functions/admin_ingest_trigger', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sources: selectedSourceSlugs }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        alert(`Ingestion triggered for ${selectedSourceSlugs.length} source(s)`)
+        setSelectedSources(new Set())
+        await fetchSources()
+      } else {
+        alert(`Failed: ${data.error}`)
+      }
+    } catch (err) {
+      console.error('Bulk ingestion error:', err)
+      alert('Failed to trigger ingestion')
+    } finally {
+      setTriggeringId(null)
+      setShowBulkActions(false)
+    }
+  }
+
+  async function testConnection(source: JobSourceRow) {
+    setTestingId(source.id)
+    try {
+      const url = source.endpoint_url || source.website_url
+      if (!url) {
+        alert('No endpoint URL configured')
+        return
+      }
+      const res = await fetch(url, { method: 'HEAD', mode: 'no-cors' })
+      if (res.ok || res.status === 0) {
+        alert(`✓ Connection successful (${source.name})`)
+      } else {
+        alert(`⚠ Connection returned ${res.status} (${source.name})`)
+      }
+    } catch (err) {
+      alert(`✗ Connection failed (${source.name}): ${err instanceof Error ? err.message : 'Unknown error'}`)
+    } finally {
+      setTestingId(null)
+    }
+  }
+
   return (
     <div className="page-stack">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
@@ -802,17 +907,49 @@ function SourcesTab() {
           <h3 style={{ fontSize: 16, fontWeight: 700 }}>Job Source Integrations</h3>
           <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
             Manage API integrations and trigger ingestion runs.
+            {selectedSources.size > 0 && <span style={{ marginLeft: 12, color: 'var(--color-accent)', fontWeight: 600 }}>({selectedSources.size} selected)</span>}
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button onClick={fetchSources} className="ghost-button" disabled={loading}>
             {loading ? 'Refreshing...' : 'Refresh'}
           </button>
+          {selectedSources.size > 0 && (
+            <button
+              onClick={() => setShowBulkActions(!showBulkActions)}
+              className="primary-button"
+              style={{ background: 'var(--color-warning)' }}
+            >
+              ⚙ Bulk Actions ({selectedSources.size})
+            </button>
+          )}
           <button onClick={() => setShowAddModal(true)} className="primary-button">
             + Add Source
           </button>
         </div>
       </div>
+
+      {/* Bulk Actions Panel */}
+      {showBulkActions && selectedSources.size > 0 && (
+        <article className="surface-card" style={{ background: 'var(--surface-warning)', borderLeft: '4px solid var(--color-warning)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <h4 style={{ fontSize: 14, fontWeight: 600 }}>Bulk Actions for {selectedSources.size} source(s)</h4>
+            <button onClick={() => setShowBulkActions(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18 }}>×</button>
+          </div>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <button onClick={() => bulkToggleEnabled(true)} disabled={savingId === 'bulk'} className="primary-button" style={{ background: 'var(--color-success)' }}>
+              {savingId === 'bulk' ? '⏳' : '✓'} Enable All
+            </button>
+            <button onClick={() => bulkToggleEnabled(false)} disabled={savingId === 'bulk'} className="primary-button" style={{ background: 'var(--color-error)' }}>
+              {savingId === 'bulk' ? '⏳' : '✗'} Disable All
+            </button>
+            <button onClick={bulkTriggerIngestion} disabled={triggeringId === 'bulk'} className="primary-button">
+              {triggeringId === 'bulk' ? '⏳ Running' : '▶ Trigger Ingestion'}
+            </button>
+            <button onClick={() => setSelectedSources(new Set())} className="ghost-button">Cancel</button>
+          </div>
+        </article>
+      )}
 
       {error && (
         <div style={{ padding: 12, background: 'var(--surface-error)', borderRadius: 8, color: 'var(--color-error)', fontSize: 13 }}>
@@ -831,11 +968,11 @@ function SourcesTab() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
             <label className="rl-label">
-              Name
+              Name *
               <input className="rl-input" value={newSource.name} onChange={e => setNewSource(s => ({ ...s, name: e.target.value }))} placeholder="e.g. RemoteOK" />
             </label>
             <label className="rl-label">
-              Slug
+              Slug *
               <input className="rl-input" value={newSource.slug} onChange={e => setNewSource(s => ({ ...s, slug: e.target.value }))} placeholder="e.g. remoteok" />
             </label>
             <label className="rl-label">
@@ -861,6 +998,26 @@ function SourcesTab() {
                 <option value="daily">Daily</option>
                 <option value="weekly">Weekly</option>
               </select>
+            </label>
+            <label className="rl-label">
+              Trust Level
+              <select className="rl-select" value={newSource.trust_level} onChange={e => setNewSource(s => ({ ...s, trust_level: e.target.value }))}>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </label>
+            <label className="rl-label">
+              Max Age Days
+              <input className="rl-input" type="number" value={newSource.max_age_days} onChange={e => setNewSource(s => ({ ...s, max_age_days: e.target.value }))} placeholder="30" />
+            </label>
+            <label className="rl-label">
+              Max Pages Per Run
+              <input className="rl-input" type="number" value={newSource.max_pages_per_run} onChange={e => setNewSource(s => ({ ...s, max_pages_per_run: e.target.value }))} placeholder="10" />
+            </label>
+            <label className="rl-label">
+              Cooldown Minutes
+              <input className="rl-input" type="number" value={newSource.cooldown_minutes} onChange={e => setNewSource(s => ({ ...s, cooldown_minutes: e.target.value }))} placeholder="0" />
             </label>
           </div>
           <div style={{ marginTop: 16, display: 'flex', gap: 8 }}>
@@ -910,10 +1067,33 @@ function SourcesTab() {
               Auth Mode
               <input className="rl-input" value={editingSource.auth_mode || ''} onChange={e => setEditingSource(s => s ? { ...s, auth_mode: e.target.value } : null)} placeholder="e.g. bearer, basic, apikey" />
             </label>
+            <label className="rl-label">
+              Trust Level
+              <select className="rl-select" value={editingSource.trust_level || 'medium'} onChange={e => setEditingSource(s => s ? { ...s, trust_level: e.target.value } : null)}>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </label>
+            <label className="rl-label">
+              Max Age Days
+              <input className="rl-input" type="number" value={editingSource.max_age_days || 30} onChange={e => setEditingSource(s => s ? { ...s, max_age_days: parseInt(e.target.value) || null } : null)} />
+            </label>
+            <label className="rl-label">
+              Max Pages Per Run
+              <input className="rl-input" type="number" value={editingSource.max_pages_per_run || 10} onChange={e => setEditingSource(s => s ? { ...s, max_pages_per_run: parseInt(e.target.value) || null } : null)} />
+            </label>
+            <label className="rl-label">
+              Cooldown Minutes
+              <input className="rl-input" type="number" value={editingSource.cooldown_minutes || 0} onChange={e => setEditingSource(s => s ? { ...s, cooldown_minutes: parseInt(e.target.value) || null } : null)} />
+            </label>
           </div>
-          <div style={{ marginTop: 16, display: 'flex', gap: 8 }}>
+          <div style={{ marginTop: 16, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <button onClick={() => saveSource(editingSource)} disabled={savingId === editingSource.id} className="primary-button">
               {savingId === editingSource.id ? 'Saving...' : 'Save Changes'}
+            </button>
+            <button onClick={() => testConnection(editingSource)} disabled={testingId === editingSource.id} className="ghost-button">
+              {testingId === editingSource.id ? '⏳' : '🔗'} Test Connection
             </button>
             <button onClick={() => setEditingSource(null)} className="ghost-button">Cancel</button>
           </div>
@@ -921,27 +1101,43 @@ function SourcesTab() {
       )}
 
       {/* Sources Table */}
-      <div className="surface-card" style={{ padding: 0, overflow: 'hidden' }}>
+      <div className="surface-card" style={{ padding: 0, overflow: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead style={{ background: 'var(--surface-hover)', borderBottom: '1px solid var(--border-subtle)' }}>
             <tr>
-              {['Source', 'Slug', 'Mode', 'Status', 'Last Sync', 'Error', 'Actions'].map(h => (
+              <th style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', width: 40 }}>
+                <input
+                  type="checkbox"
+                  checked={sources.length > 0 && selectedSources.size === sources.length}
+                  onChange={selectAllSources}
+                  style={{ accentColor: 'var(--color-accent)', width: 16, height: 16 }}
+                />
+              </th>
+              {['Source', 'Slug', 'Mode', 'Trust', 'Config', 'Status', 'Last Sync', 'Error', 'Actions'].map(h => (
                 <th key={h} style={{ padding: '12px 16px', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {loading && (
-              <tr><td colSpan={7} style={{ padding: 24, textAlign: 'center', color: 'var(--text-secondary)' }}>Loading sources...</td></tr>
+              <tr><td colSpan={10} style={{ padding: 24, textAlign: 'center', color: 'var(--text-secondary)' }}>Loading sources...</td></tr>
             )}
             {!loading && sources.length === 0 && (
-              <tr><td colSpan={7} style={{ padding: 40, textAlign: 'center', color: 'var(--text-secondary)' }}>
+              <tr><td colSpan={10} style={{ padding: 40, textAlign: 'center', color: 'var(--text-secondary)' }}>
                 <Icon name="scroll" size="lg" className="color-secondary" />
                 <p style={{ marginTop: 8 }}>No job sources configured yet.</p>
               </td></tr>
             )}
             {!loading && sources.map(source => (
               <tr key={source.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                <td style={{ padding: '12px 16px', width: 40 }}>
+                  <input
+                    type="checkbox"
+                    checked={selectedSources.has(source.id)}
+                    onChange={() => toggleSourceSelection(source.id)}
+                    style={{ accentColor: 'var(--color-accent)', width: 16, height: 16 }}
+                  />
+                </td>
                 <td style={{ padding: '12px 16px' }}>
                   <div style={{ fontWeight: 600, fontSize: 14 }}>{source.name}</div>
                   {source.website_url && (
@@ -959,6 +1155,18 @@ function SourcesTab() {
                   <span className="rl-badge" style={{ fontSize: 11 }}>{source.mode || 'api'}</span>
                 </td>
                 <td style={{ padding: '12px 16px' }}>
+                  <span style={{ fontSize: 11, padding: '2px 6px', borderRadius: 4, background: source.trust_level === 'high' ? 'var(--surface-success)' : source.trust_level === 'medium' ? 'var(--surface-warning)' : 'var(--surface-error)', color: source.trust_level === 'high' ? 'var(--color-success)' : source.trust_level === 'medium' ? 'var(--color-warning)' : 'var(--color-error)', fontWeight: 600 }}>
+                    {source.trust_level || 'medium'}
+                  </span>
+                </td>
+                <td style={{ padding: '12px 16px', fontSize: 11, color: 'var(--text-secondary)' }}>
+                  <div style={{ lineHeight: '1.4' }}>
+                    {source.max_age_days && <div>Age: {source.max_age_days}d</div>}
+                    {source.max_pages_per_run && <div>Pages: {source.max_pages_per_run}</div>}
+                    {source.cooldown_minutes && <div>Cooldown: {source.cooldown_minutes}m</div>}
+                  </div>
+                </td>
+                <td style={{ padding: '12px 16px' }}>
                   <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, cursor: 'pointer' }}>
                     <input
                       type="checkbox"
@@ -968,7 +1176,7 @@ function SourcesTab() {
                       style={{ accentColor: 'var(--color-accent)', width: 16, height: 16 }}
                     />
                     <span style={{ color: source.enabled ? 'var(--color-success)' : 'var(--text-secondary)' }}>
-                      {source.enabled ? 'Enabled' : 'Disabled'}
+                      {source.enabled ? 'On' : 'Off'}
                     </span>
                   </label>
                 </td>
@@ -981,25 +1189,28 @@ function SourcesTab() {
                       ⚠️ {source.last_error}
                     </span>
                   ) : (
-                    <span style={{ fontSize: 12, color: 'var(--color-success)' }}>✓ OK</span>
+                    <span style={{ fontSize: 12, color: 'var(--color-success)' }}>✓</span>
                   )}
                 </td>
                 <td style={{ padding: '12px 16px' }}>
-                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                     <button
                       onClick={() => triggerIngestion(source)}
                       disabled={triggeringId === source.id || !source.enabled}
                       className="ghost-button"
-                      style={{ padding: '4px 8px', fontSize: 11 }}
+                      style={{ padding: '4px 6px', fontSize: 11 }}
                       title={!source.enabled ? 'Enable source first' : 'Run ingestion now'}
                     >
-                      {triggeringId === source.id ? '⏳' : '▶'} Ingest
+                      {triggeringId === source.id ? '⏳' : '▶'}
                     </button>
-                    <button onClick={() => setEditingSource(source)} className="ghost-button" style={{ padding: '4px 8px', fontSize: 11 }}>
-                      Edit
+                    <button onClick={() => testConnection(source)} disabled={testingId === source.id} className="ghost-button" style={{ padding: '4px 6px', fontSize: 11 }} title="Test connection">
+                      {testingId === source.id ? '⏳' : '🔗'}
                     </button>
-                    <button onClick={() => deleteSource(source.id)} className="ghost-button" style={{ padding: '4px 8px', fontSize: 11, color: 'var(--color-error)' }}>
-                      Delete
+                    <button onClick={() => setEditingSource(source)} className="ghost-button" style={{ padding: '4px 6px', fontSize: 11 }} title="Edit">
+                      ✎
+                    </button>
+                    <button onClick={() => deleteSource(source.id)} className="ghost-button" style={{ padding: '4px 6px', fontSize: 11, color: 'var(--color-error)' }} title="Delete">
+                      ✕
                     </button>
                   </div>
                 </td>
