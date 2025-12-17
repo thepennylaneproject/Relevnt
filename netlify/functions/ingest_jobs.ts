@@ -15,14 +15,21 @@ import {
   type NormalizedJob,
 } from '../../src/shared/jobSources'
 import { enrichJob } from '../../src/lib/scoring/jobEnricher'
+import {
+  getSourceConfig,
+  shouldSkipDueToCooldown,
+  type SourceConfig,
+} from '../../src/shared/sourceConfig'
 
 export type IngestResult = {
   source: string;
   count: number;
   normalized: number;
   duplicates: number;
-  status: 'success' | 'failed';
+  staleFiltered: number;
+  status: 'success' | 'failed' | 'skipped';
   error?: string;
+  skipReason?: string;
 }
 type IngestionCursor = { page?: number; since?: string | null }
 type IngestionState = { cursor: IngestionCursor; last_run_at: string | null }
@@ -497,21 +504,77 @@ async function upsertJobs(jobs: NormalizedJob[]) {
   return { inserted: data?.length ?? 0 }
 }
 
-async function ingest(source: JobSource, runId?: string) {
+/**
+ * Filter jobs by freshness based on source config
+ * Jobs older than maxAgeDays are filtered out
+ */
+function filterByFreshness(
+  jobs: NormalizedJob[],
+  config: SourceConfig
+): { fresh: NormalizedJob[]; staleCount: number } {
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - config.maxAgeDays);
+  const cutoffTime = cutoffDate.getTime();
+
+  const fresh: NormalizedJob[] = [];
+  let staleCount = 0;
+
+  for (const job of jobs) {
+    // If no posted_date, assume it's fresh (conservative)
+    if (!job.posted_date) {
+      fresh.push(job);
+      continue;
+    }
+
+    const postedDate = new Date(job.posted_date);
+    if (isNaN(postedDate.getTime())) {
+      // Invalid date, assume fresh
+      fresh.push(job);
+      continue;
+    }
+
+    if (postedDate.getTime() >= cutoffTime) {
+      fresh.push(job);
+    } else {
+      staleCount++;
+    }
+  }
+
+  return { fresh, staleCount };
+}
+
+
+async function ingest(source: JobSource, runId?: string): Promise<IngestResult> {
   const supabase = createAdminClient()
   const pagination = SOURCE_PAGINATION[source.slug] || {}
+  const sourceConfig = getSourceConfig(source.slug)
   const state = await loadIngestionState(supabase, source.slug)
 
-  let page = state.cursor.page ?? 1
+  // Check cooldown
+  if (state.last_run_at && shouldSkipDueToCooldown(source.slug, new Date(state.last_run_at))) {
+    console.log(`ingest_jobs: skipping ${source.slug} due to cooldown`)
+    return {
+      source: source.slug,
+      count: 0,
+      normalized: 0,
+      duplicates: 0,
+      staleFiltered: 0,
+      status: 'skipped',
+      skipReason: 'cooldown',
+    }
+  }
+
+  // Use config for pagination, with fallback to old SOURCE_PAGINATION
+  let page = sourceConfig.resetPaginationEachRun ? 1 : (state.cursor.page ?? 1)
   const since = state.cursor.since ?? state.last_run_at ?? null
-  const maxPages =
-    pagination.maxPagesPerRun ?? DEFAULT_MAX_PAGES_PER_RUN
+  const maxPages = sourceConfig.maxPagesPerRun ?? pagination.maxPagesPerRun ?? DEFAULT_MAX_PAGES_PER_RUN
   const expectedPageSize = pagination.pageSize ?? DEFAULT_PAGE_SIZE
 
   const runStartedAt = new Date().toISOString()
   let totalNormalized = 0
   let totalInserted = 0
   let totalDuplicates = 0
+  let totalStaleFiltered = 0
   let sourceStatus: 'success' | 'failed' = 'success'
   let sourceError: string | null = null
 
@@ -538,7 +601,7 @@ async function ingest(source: JobSource, runId?: string) {
 
   console.log(
     `ingest_jobs: starting ingest for ${source.slug} with cursor`,
-    JSON.stringify({ page, since })
+    JSON.stringify({ page, since, maxPages, mode: sourceConfig.mode, maxAgeDays: sourceConfig.maxAgeDays })
   )
 
   try {
@@ -577,13 +640,33 @@ async function ingest(source: JobSource, runId?: string) {
         break
       }
 
-      totalNormalized += normalized.length
-      const duplicateCount = normalized.length
+      // Apply freshness filter
+      const { fresh, staleCount } = filterByFreshness(normalized, sourceConfig)
+      totalStaleFiltered += staleCount
+
+      if (staleCount > 0) {
+        console.log(
+          `ingest_jobs: filtered ${staleCount} stale jobs (>${sourceConfig.maxAgeDays} days old) from ${source.slug}`
+        )
+      }
+
+      totalNormalized += normalized.length // Track pre-filter count
+
+      if (!fresh.length) {
+        console.log(
+          `ingest_jobs: all jobs stale after freshness filter for ${source.slug} on page ${page}`
+        )
+        // If all jobs are stale, we might be paginating into history - stop
+        page = 1
+        break
+      }
+
+      const duplicateCount = fresh.length
       console.log(
-        `ingest_jobs: normalized ${normalized.length} jobs from ${source.slug} on page ${page}`
+        `ingest_jobs: normalized ${normalized.length} → ${fresh.length} fresh jobs from ${source.slug} on page ${page}`
       )
 
-      const { inserted } = await upsertJobs(normalized)
+      const { inserted } = await upsertJobs(fresh)
       totalInserted += inserted
       totalDuplicates += (duplicateCount - inserted)
       console.log(
@@ -606,12 +689,19 @@ async function ingest(source: JobSource, runId?: string) {
 
   const finishedAt = new Date().toISOString()
 
+  // Calculate freshness ratio
+  const freshnessRatio = totalNormalized > 0
+    ? ((totalNormalized - totalStaleFiltered) / totalNormalized)
+    : 1
+
   console.log(
     `ingest_jobs: finished ingest for ${source.slug}`,
     JSON.stringify({
       totalNormalized,
       totalInserted,
       totalDuplicates,
+      totalStaleFiltered,
+      freshnessRatio: freshnessRatio.toFixed(4),
       nextPage: page,
       status: sourceStatus,
     })
@@ -630,6 +720,9 @@ async function ingest(source: JobSource, runId?: string) {
         duplicate_count: totalDuplicates,
         error_message: sourceError,
         cursor_out: { page, since: runStartedAt },
+        // New fields for freshness tracking (will be ignored if columns don't exist yet)
+        // stale_filtered_count: totalStaleFiltered,
+        // freshness_ratio: freshnessRatio,
       })
       .eq('id', sourceRunId)
   }
@@ -642,7 +735,13 @@ async function ingest(source: JobSource, runId?: string) {
       last_success_at: sourceStatus === 'success' ? finishedAt : undefined,
       last_error_at: sourceStatus === 'failed' ? finishedAt : undefined,
       consecutive_failures: sourceStatus === 'failed' ? 1 : 0, // simplified logic
-      last_counts: { normalized: totalNormalized, inserted: totalInserted, duplicates: totalDuplicates },
+      last_counts: {
+        normalized: totalNormalized,
+        inserted: totalInserted,
+        duplicates: totalDuplicates,
+        staleFiltered: totalStaleFiltered,
+        freshnessRatio
+      },
       is_degraded: sourceStatus === 'failed',
     },
     { onConflict: 'source' }
@@ -686,6 +785,7 @@ async function ingest(source: JobSource, runId?: string) {
     count: totalInserted,
     normalized: totalNormalized,
     duplicates: totalDuplicates,
+    staleFiltered: totalStaleFiltered,
     status: sourceStatus,
     error: sourceError || undefined,
   }
@@ -696,9 +796,22 @@ export async function runIngestion(
   triggeredBy: 'schedule' | 'manual' | 'admin' = 'manual'
 ): Promise<IngestResult[]> {
   const supabase = createAdminClient()
-  const sourcesToRun: JobSource[] = requestedSlug
-    ? ALL_SOURCES.filter((s) => s.slug === requestedSlug)
-    : ALL_SOURCES
+
+  // Filter sources: if a specific slug is requested, use it; otherwise use all enabled sources
+  let sourcesToRun: JobSource[]
+  if (requestedSlug) {
+    sourcesToRun = ALL_SOURCES.filter((s) => s.slug === requestedSlug)
+  } else {
+    // Filter to only enabled sources based on sourceConfig
+    sourcesToRun = ALL_SOURCES.filter((s) => {
+      const config = getSourceConfig(s.slug)
+      if (!config.enabled) {
+        console.log(`ingest_jobs: skipping disabled source ${s.slug}`)
+        return false
+      }
+      return true
+    })
+  }
 
   if (!sourcesToRun.length) {
     throw new Error(`No matching job source for slug: ${requestedSlug}`)
@@ -741,6 +854,7 @@ export async function runIngestion(
         count: 0,
         normalized: 0,
         duplicates: 0,
+        staleFiltered: 0,
         status: 'failed',
         error: err instanceof Error ? err.message : String(err),
       })
