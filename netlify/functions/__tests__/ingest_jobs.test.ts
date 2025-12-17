@@ -583,3 +583,126 @@ describe('CareerOneStop normalize', () => {
         expect(slugs).toContain('careeronestop')
     })
 })
+
+describe('Greenhouse normalize', () => {
+    test('should normalize Greenhouse API response', () => {
+        const { GreenhouseSource } = require('../../../src/shared/jobSources')
+
+        const mockResponse = {
+            jobs: [
+                {
+                    id: 123456,
+                    title: 'Senior Full Stack Engineer',
+                    description: 'We are looking for an experienced engineer...',
+                    posted_at: '2024-12-10T10:00:00Z',
+                    absolute_url: 'https://example.greenhouse.io/jobs/123456',
+                    employment_type: 'Full-time',
+                    offices: [
+                        { name: 'San Francisco, CA' },
+                        { name: 'New York, NY' },
+                    ],
+                    departments: [
+                        { name: 'Engineering' },
+                    ],
+                },
+                {
+                    id: 789012,
+                    title: 'Product Manager',
+                    description: 'Join our product team...',
+                    posted_at: '2024-12-09T15:30:00Z',
+                    absolute_url: 'https://example.greenhouse.io/jobs/789012',
+                    employment_type: 'Full-time',
+                    offices: [
+                        { name: 'Remote' },
+                    ],
+                },
+            ],
+        }
+
+        const result = GreenhouseSource.normalize(mockResponse) as NormalizedJob[]
+
+        expect(result).toHaveLength(2)
+
+        // First job
+        expect(result[0].source_slug).toBe('greenhouse')
+        expect(result[0].external_id).toBe('greenhouse:123456')
+        expect(result[0].title).toBe('Senior Full Stack Engineer')
+        expect(result[0].location).toBe('San Francisco, CA, New York, NY')
+        expect(result[0].external_url).toBe('https://example.greenhouse.io/jobs/123456')
+        expect(result[0].employment_type).toBe('Full-time')
+        expect(result[0].description).toBe('We are looking for an experienced engineer...')
+        expect(result[0].posted_date).toBe('2024-12-10')
+
+        // Second job with remote
+        expect(result[1].external_id).toBe('greenhouse:789012')
+        expect(result[1].title).toBe('Product Manager')
+        expect(result[1].remote_type).toBe('remote')
+    })
+
+    test('should handle empty response', () => {
+        const { GreenhouseSource } = require('../../../src/shared/jobSources')
+
+        const result = GreenhouseSource.normalize({ jobs: [] }) as NormalizedJob[]
+        expect(result).toHaveLength(0)
+    })
+
+    test('should handle missing fields gracefully', () => {
+        const { GreenhouseSource } = require('../../../src/shared/jobSources')
+
+        const mockResponse = {
+            jobs: [
+                {
+                    id: 111,
+                    title: 'Developer',
+                    // Missing: description, posted_at, absolute_url, offices, employment_type
+                },
+            ],
+        }
+
+        const result = GreenhouseSource.normalize(mockResponse) as NormalizedJob[]
+        expect(result).toHaveLength(1)
+        expect(result[0].external_id).toBe('greenhouse:111')
+        expect(result[0].company).toBeNull()
+        expect(result[0].location).toBeNull()
+        expect(result[0].external_url).toBeNull()
+        expect(result[0].posted_date).toBeNull()
+    })
+
+    test('should handle jobs with no offices or departments', () => {
+        const { GreenhouseSource } = require('../../../src/shared/jobSources')
+
+        const mockResponse = {
+            jobs: [
+                {
+                    id: 222,
+                    title: 'Data Engineer',
+                    description: 'Data work required',
+                    absolute_url: 'https://example.greenhouse.io/jobs/222',
+                    // No offices or departments
+                },
+            ],
+        }
+
+        const result = GreenhouseSource.normalize(mockResponse) as NormalizedJob[]
+        expect(result).toHaveLength(1)
+        expect(result[0].location).toBeNull()
+        expect(result[0].remote_type).toBeNull()
+    })
+
+    test('should be in ALL_SOURCES', async () => {
+        const { ALL_SOURCES } = await import('../../../src/shared/jobSources')
+        const slugs = ALL_SOURCES.map(s => s.slug)
+        expect(slugs).toContain('greenhouse')
+    })
+
+    test('should have correct configuration', async () => {
+        const { getSourceConfig } = await import('../../../src/shared/sourceConfig')
+        const config = getSourceConfig('greenhouse')
+
+        expect(config.slug).toBe('greenhouse')
+        expect(config.mode).toBe('shallow-curated')
+        expect(config.enabled).toBe(true)
+        expect(config.trustLevel).toBe('high')
+        expect(config.maxAgeDays).toBe(30)
+    })
+})
