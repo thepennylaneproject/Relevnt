@@ -296,20 +296,18 @@ function buildSourceUrl(
     return `${source.fetchUrl}?${params.toString()}`
   }
 
-  // TheirStack uses POST, URL doesn't need params
-  if (source.slug === 'theirstack') {
-    const apiKey = process.env.THEIRSTACK_API_KEY
-    if (!apiKey) {
-      console.error('ingest_jobs: missing THEIRSTACK_API_KEY')
-      return null
-    }
-    // Check if source is enabled via env var
-    const enabled = process.env.ENABLE_SOURCE_THEIRSTACK !== 'false'
-    if (!enabled) {
-      console.log('ingest_jobs: TheirStack disabled via ENABLE_SOURCE_THEIRSTACK')
-      return null
-    }
-    return source.fetchUrl
+  // USAJOBS requires a Keyword parameter for the API search
+  if (source.slug === 'usajobs') {
+    const config = SOURCE_PAGINATION[source.slug] || {}
+    const page = cursor?.page ?? 1
+    const pageSize = config.pageSize ?? DEFAULT_PAGE_SIZE
+
+    const params = new URLSearchParams({
+      Keyword: 'federal', // Search for federal jobs
+      Page: String(page),
+      ResultsPerPage: String(pageSize),
+    })
+    return `${source.fetchUrl}?${params.toString()}`
   }
 
   // Lever: handled specially in ingest() function, returns null here
