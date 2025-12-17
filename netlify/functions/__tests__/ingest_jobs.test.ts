@@ -11,6 +11,7 @@ import {
     ReedUKSource,
     USAJobsSource,
     RemoteOKSource,
+    CareerOneStopSource,
     type NormalizedJob,
 } from '../../../src/shared/jobSources'
 
@@ -371,5 +372,214 @@ describe('Edge cases', () => {
         expect(result[0]).toHaveProperty('salary_max')
         expect(result[0]).toHaveProperty('competitiveness_level')
         expect(result[0]).toHaveProperty('description')
+    })
+})
+
+// =====================================================
+// THEIRSTACK TESTS
+// =====================================================
+
+describe('TheirStack normalize', () => {
+    test('should normalize TheirStack API response', async () => {
+        const { TheirStackSource } = await import('../../../src/shared/jobSources')
+
+        const mockResponse = {
+            data: [
+                {
+                    id: 'ts-12345',
+                    title: 'Senior Backend Engineer',
+                    company: 'Tech Startup',
+                    location: 'San Francisco, CA',
+                    url: 'https://theirstack.com/jobs/12345',
+                    salary_min: 150000,
+                    salary_max: 200000,
+                    posted_at: '2024-12-10',
+                    body: 'We are looking for a backend engineer...',
+                    remote: true,
+                    employment_type: 'Full-time',
+                    seniority_level: 'Senior',
+                    technologies: ['Python', 'PostgreSQL', 'AWS'],
+                },
+            ],
+        }
+
+        const result = TheirStackSource.normalize(mockResponse) as NormalizedJob[]
+
+        expect(result).toHaveLength(1)
+        expect(result[0].source_slug).toBe('theirstack')
+        expect(result[0].external_id).toBe('theirstack:ts-12345')
+        expect(result[0].title).toBe('Senior Backend Engineer')
+        expect(result[0].company).toBe('Tech Startup')
+        expect(result[0].location).toBe('San Francisco, CA')
+        expect(result[0].salary_min).toBe(150000)
+        expect(result[0].salary_max).toBe(200000)
+        expect(result[0].remote_type).toBe('remote')
+        expect(result[0].description).toBe('We are looking for a backend engineer...')
+    })
+
+    test('should handle empty response', async () => {
+        const { TheirStackSource } = await import('../../../src/shared/jobSources')
+        const result = TheirStackSource.normalize({ data: [] }) as NormalizedJob[]
+        expect(result).toHaveLength(0)
+    })
+
+    test('should produce stable dedupe key', async () => {
+        const { TheirStackSource } = await import('../../../src/shared/jobSources')
+
+        const mockJob = {
+            id: 'stable-id-123',
+            title: 'Engineer',
+            company: 'Company',
+            url: 'https://example.com/job/123',
+        }
+
+        const result1 = TheirStackSource.normalize({ data: [mockJob] }) as NormalizedJob[]
+        const result2 = TheirStackSource.normalize({ data: [mockJob] }) as NormalizedJob[]
+
+        // external_id should be stable given same input
+        expect(result1[0].external_id).toBe(result2[0].external_id)
+        expect(result1[0].external_id).toBe('theirstack:stable-id-123')
+    })
+
+    test('should detect remote type from boolean', async () => {
+        const { TheirStackSource } = await import('../../../src/shared/jobSources')
+
+        const remoteJob = { id: '1', title: 'Test', remote: true }
+        const hybridJob = { id: '2', title: 'Test', hybrid: true }
+        const onsiteJob = { id: '3', title: 'Test', location: 'Office' }
+
+        const result = TheirStackSource.normalize({
+            data: [remoteJob, hybridJob, onsiteJob],
+        }) as NormalizedJob[]
+
+        expect(result[0].remote_type).toBe('remote')
+        expect(result[1].remote_type).toBe('hybrid')
+        expect(result[2].remote_type).toBeNull() // 'Office' doesn't match remote/hybrid
+    })
+
+    test('should be in ALL_SOURCES', async () => {
+        const { ALL_SOURCES } = await import('../../../src/shared/jobSources')
+        const slugs = ALL_SOURCES.map(s => s.slug)
+        expect(slugs).toContain('theirstack')
+    })
+})
+
+// =====================================================
+// CAREERONESTOP TESTS
+// =====================================================
+
+describe('CareerOneStop normalize', () => {
+    test('should normalize CareerOneStop API response', () => {
+        const mockResponse = {
+            Jobs: [
+                {
+                    JvId: 'COS-12345',
+                    JobTitle: 'Data Analyst',
+                    Company: 'Federal Agency',
+                    Location: 'Washington, DC',
+                    URL: 'https://www.careeronestop.org/job/12345',
+                    JobDesc: 'Analyze data for policy decisions...',
+                    DatePosted: '2024-12-10',
+                    EmploymentType: 'Full-time',
+                    MinSalary: 75000,
+                    MaxSalary: 95000,
+                },
+                {
+                    JvId: 'COS-67890',
+                    JobTitle: 'Software Developer',
+                    Company: 'Tech Contractor',
+                    Location: 'Remote, USA',
+                    URL: 'https://www.careeronestop.org/job/67890',
+                    JobDesc: 'Build government software systems...',
+                    DatePosted: '2024-12-09',
+                },
+            ],
+        }
+
+        const result = CareerOneStopSource.normalize(mockResponse) as NormalizedJob[]
+
+        expect(result).toHaveLength(2)
+
+        // First job
+        expect(result[0].source_slug).toBe('careeronestop')
+        expect(result[0].external_id).toBe('careeronestop:COS-12345')
+        expect(result[0].title).toBe('Data Analyst')
+        expect(result[0].company).toBe('Federal Agency')
+        expect(result[0].location).toBe('Washington, DC')
+        expect(result[0].external_url).toBe('https://www.careeronestop.org/job/12345')
+        expect(result[0].salary_min).toBe(75000)
+        expect(result[0].salary_max).toBe(95000)
+        expect(result[0].employment_type).toBe('Full-time')
+
+        // Second job (remote, no salary)
+        expect(result[1].remote_type).toBe('remote')
+        expect(result[1].salary_min).toBeNull()
+        expect(result[1].salary_max).toBeNull()
+    })
+
+    test('should handle empty response', () => {
+        const result = CareerOneStopSource.normalize({ Jobs: [] }) as NormalizedJob[]
+        expect(result).toHaveLength(0)
+    })
+
+    test('should handle missing fields gracefully', () => {
+        const mockResponse = {
+            Jobs: [
+                {
+                    JvId: 'COS-111',
+                    JobTitle: 'Entry Level Position',
+                    // Missing: Company, Location, URL, JobDesc, DatePosted
+                },
+            ],
+        }
+
+        const result = CareerOneStopSource.normalize(mockResponse) as NormalizedJob[]
+        expect(result).toHaveLength(1)
+        expect(result[0].external_id).toBe('careeronestop:COS-111')
+        expect(result[0].company).toBeNull()
+        expect(result[0].location).toBeNull()
+        expect(result[0].external_url).toBeNull()
+    })
+
+    test('should produce stable dedupe key from JvId', () => {
+        const mockJob = {
+            JvId: 'stable-id-123',
+            JobTitle: 'Engineer',
+            Company: 'Company',
+            URL: 'https://example.com/job/123',
+        }
+
+        const result1 = CareerOneStopSource.normalize({ Jobs: [mockJob] }) as NormalizedJob[]
+        const result2 = CareerOneStopSource.normalize({ Jobs: [mockJob] }) as NormalizedJob[]
+
+        // external_id should be stable given same input
+        expect(result1[0].external_id).toBe(result2[0].external_id)
+        expect(result1[0].external_id).toBe('careeronestop:stable-id-123')
+    })
+
+    test('should fallback to URL when JvId is missing', () => {
+        const mockJob = {
+            JobTitle: 'No ID Job',
+            URL: 'https://careeronestop.org/unique-url',
+        }
+
+        const result = CareerOneStopSource.normalize({ Jobs: [mockJob] }) as NormalizedJob[]
+        expect(result[0].external_id).toBe('careeronestop:https://careeronestop.org/unique-url')
+    })
+
+    test('should fallback to title+company when both JvId and URL are missing', () => {
+        const mockJob = {
+            JobTitle: 'Mystery Job',
+            Company: 'Unknown Corp',
+        }
+
+        const result = CareerOneStopSource.normalize({ Jobs: [mockJob] }) as NormalizedJob[]
+        expect(result[0].external_id).toBe('careeronestop:Mystery Job::Unknown Corp')
+    })
+
+    test('should be in ALL_SOURCES', async () => {
+        const { ALL_SOURCES } = await import('../../../src/shared/jobSources')
+        const slugs = ALL_SOURCES.map(s => s.slug)
+        expect(slugs).toContain('careeronestop')
     })
 })

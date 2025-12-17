@@ -27,7 +27,13 @@ This project uses Supabase + Netlify Functions with an AI routing layer. Copy `.
 - `FINDWORK_API_KEY`, `JOOBLE_API_KEY`, `THEMUSE_API_KEY`, `REED_API_KEY`
 - `USAJOBS_API_KEY`, `USAJOBS_USER_AGENT`
 - `ADZUNA_APP_ID`, `ADZUNA_APP_KEY`
-- `CAREERONESTOP_API_KEY`, `CAREERONESTOP_USER_ID`
+- `CAREERONESTOP_USER_ID` – CareerOneStop registered User ID
+- `CAREERONESTOP_TOKEN` – CareerOneStop API token (Bearer auth)
+- `ENABLE_SOURCE_CAREERONESTOP` – Enable/disable CareerOneStop ingestion (default: true)
+- `CAREERONESTOP_MAX_PAGES_PER_RUN` – Max pages per run (default: 3)
+- `THEIRSTACK_API_KEY` – TheirStack aggregator API key
+- `ENABLE_SOURCE_THEIRSTACK` – Enable/disable TheirStack ingestion (default: true)
+- `THEIRSTACK_MAX_RESULTS_PER_RUN` – Max jobs per run (default: 300)
 
 ## Payments / Analytics
 - `REACT_APP_STRIPE_PUBLIC_KEY`

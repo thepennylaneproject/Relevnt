@@ -379,20 +379,24 @@ export const AdzunaUSSource: JobSource = {
 }
 
 // ---------------------------------------------------------------------------
-// CareerOneStop (US gov-backed, broad roles) – DEFINED BUT DISABLED IN ALL_SOURCES
+// CareerOneStop (US gov-backed, broad roles)
 // ---------------------------------------------------------------------------
 
 export const CareerOneStopSource: JobSource = {
   slug: 'careeronestop',
   displayName: 'CareerOneStop',
   fetchUrl: 'https://api.careeronestop.org',
+  type: 'aggregator',
+  region: 'us',
 
   normalize: (raw) => {
     const anyRaw = raw as any
 
+    // CareerOneStop v2 API response structure
     const candidate =
       anyRaw?.Jobs ??
-      anyRaw?.jobsearchresult ??
+      anyRaw?.JobsList ??
+      anyRaw?.jobs ??
       anyRaw
 
     const rows = asArray<any>(candidate)
@@ -407,29 +411,42 @@ export const CareerOneStopSource: JobSource = {
     const nowIso = new Date().toISOString()
 
     return rows.map((row: any): NormalizedJob => {
-      const title = row.JobTitle ?? ''
-      const company = row.Company ?? null
-      const location = row.Location ?? null
-      const url = row.URL ?? null
-      const description = row.Description ?? null
-      const posted = row.AcquisitionDate ?? null
+      // Map CareerOneStop v2 API fields
+      const id = row.JvId ?? row.jvId ?? null
+      const title = row.JobTitle ?? row.Title ?? ''
+      const company = row.Company ?? row.CompanyName ?? null
+      const location = row.Location ?? row.City ?? null
+      const url = row.URL ?? row.Url ?? row.JobDetailsURL ?? null
+      const description = row.JobDesc ?? row.Description ?? row.JobDescription ?? null
+      const posted = safeDate(row.DatePosted ?? row.AccquisitionDate ?? row.AcquisitionDate)
+
+      // Generate stable external_id: prefer JvId, fallback to URL, then hash
+      let externalId: string
+      if (id) {
+        externalId = `careeronestop:${id}`
+      } else if (url) {
+        externalId = `careeronestop:${url}`
+      } else {
+        // Fallback to hash of title+company for deduplication
+        externalId = `careeronestop:${title}::${company || 'unknown'}`
+      }
 
       return {
         source_slug: 'careeronestop',
-        external_id: `careeronestop:${url || title}`,
+        external_id: externalId,
 
         title,
         company,
         location,
-        employment_type: null,
+        employment_type: row.EmploymentType ?? null,
         remote_type: inferRemoteTypeFromLocation(location),
 
         posted_date: posted,
         created_at: nowIso,
         external_url: url,
 
-        salary_min: null,
-        salary_max: null,
+        salary_min: parseNumber(row.MinSalary ?? row.SalaryMin),
+        salary_max: parseNumber(row.MaxSalary ?? row.SalaryMax),
         competitiveness_level: null,
 
         description,
@@ -882,6 +899,83 @@ export const ReedUKSource: JobSource = {
 }
 
 // ---------------------------------------------------------------------------
+// TheirStack (tech job aggregator with technographic data)
+// ---------------------------------------------------------------------------
+
+export const TheirStackSource: JobSource = {
+  slug: 'theirstack',
+  displayName: 'TheirStack',
+  fetchUrl: 'https://api.theirstack.com/v1/jobs/search',
+  type: 'aggregator',
+  region: 'global',
+
+  normalize: (raw) => {
+    const anyRaw = raw as any
+    const rows = asArray<any>(anyRaw?.data ?? anyRaw)
+    if (!rows.length) {
+      console.log(
+        'TheirStack: no rows in response, top-level keys:',
+        anyRaw && typeof anyRaw === 'object' ? Object.keys(anyRaw) : 'non-object'
+      )
+      return []
+    }
+
+    const nowIso = new Date().toISOString()
+
+    return rows.map((row: any): NormalizedJob => {
+      const id = row.id != null ? String(row.id) : ''
+      const title = row.title ?? ''
+      const company = row.company ?? row.company_name ?? null
+      const location = row.location ?? null
+      const url = row.url ?? row.apply_url ?? null
+
+      // TheirStack has explicit remote flag
+      let remote_type: RemoteType = null
+      if (row.remote === true) {
+        remote_type = 'remote'
+      } else if (row.hybrid === true) {
+        remote_type = 'hybrid'
+      } else if (typeof row.remote === 'string') {
+        remote_type = inferRemoteTypeFromLocation(row.remote)
+      } else {
+        remote_type = inferRemoteTypeFromLocation(location)
+      }
+
+      // Parse posted date
+      const posted = safeDate(row.posted_at ?? row.date_posted ?? row.created_at)
+
+      // Map employment type
+      const employmentType = row.employment_type ?? row.job_type ?? null
+
+      // Map seniority from level field
+      const level = row.seniority_level ?? row.level ?? null
+
+      return {
+        source_slug: 'theirstack',
+        external_id: `theirstack:${id || url || title}`,
+
+        title,
+        company,
+        location,
+        employment_type: employmentType || level,
+        remote_type,
+
+        posted_date: posted,
+        created_at: nowIso,
+        external_url: url,
+
+        salary_min: parseNumber(row.salary_min),
+        salary_max: parseNumber(row.salary_max),
+        competitiveness_level: null,
+
+        description: row.body ?? row.description ?? null,
+        data_raw: row,
+      }
+    })
+  },
+}
+
+// ---------------------------------------------------------------------------
 // Combined export for ingest_jobs
 // ---------------------------------------------------------------------------
 
@@ -892,10 +986,12 @@ export const ALL_SOURCES: JobSource[] = [
   FindworkSource,
   AdzunaUSSource,
   USAJobsSource,
-  // CareerOneStopSource, // temporarily disabled while auth is blocked
+  CareerOneStopSource,
   JobicySource,
   ArbeitnowSource,
   JoobleSource,
   TheMuseSource,
   ReedUKSource,
+  TheirStackSource,
 ]
+

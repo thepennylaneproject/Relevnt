@@ -67,6 +67,15 @@ const SOURCE_PAGINATION: Record<string, PaginationConfig> = {
   jooble: { pageParam: 'page', pageSizeParam: 'ResultOnPage', pageSize: 50, maxPagesPerRun: 2 },
   themuse: { pageParam: 'page', pageSizeParam: 'per_page', pageSize: 50, maxPagesPerRun: 3 },
   reed_uk: { pageParam: 'resultsToSkip', pageSizeParam: 'resultsToTake', pageSize: 50, maxPagesPerRun: 2 },
+  // TheirStack uses POST with limit in body
+  theirstack: { pageParam: 'page', pageSizeParam: 'limit', pageSize: 100, maxPagesPerRun: 1 },
+  // CareerOneStop uses path params with startRecord for pagination
+  careeronestop: {
+    pageParam: 'startRecord',
+    pageSizeParam: 'pageSize',
+    pageSize: 50,
+    maxPagesPerRun: parseInt(process.env.CAREERONESTOP_MAX_PAGES_PER_RUN || '3', 10),
+  },
 }
 
 // Helper to build the fetch URL for a given source, supporting Adzuna etc.
@@ -131,27 +140,40 @@ function buildSourceUrl(
 
   if (source.slug === 'careeronestop') {
     const userId = process.env.CAREERONESTOP_USER_ID
+    const token = process.env.CAREERONESTOP_TOKEN
 
-    if (!userId) {
-      console.error('ingest_jobs: missing CAREERONESTOP_USER_ID')
+    if (!userId || !token) {
+      console.error('ingest_jobs: missing CAREERONESTOP_USER_ID or CAREERONESTOP_TOKEN')
       return null
     }
 
-    // Default search parameters
-    const keyword = 'marketing'  // or maybe '' for all
-    const location = 'US'        // maybe '0' or '' for national
-    const radius = '500'
-    const sortColumns = 'acquisitiondate'
-    const sortOrder = 'DESC'
-    const startRecord = '0'
-    const pageSize = '50'
-    const days = '30'
+    // Check if source is enabled via env var
+    const enabled = process.env.ENABLE_SOURCE_CAREERONESTOP !== 'false'
+    if (!enabled) {
+      console.log('ingest_jobs: CareerOneStop disabled via ENABLE_SOURCE_CAREERONESTOP')
+      return null
+    }
 
-    const baseUrl = `${source.fetchUrl}/v2/jobsearch/${userId}/${encodeURIComponent(
+    // CareerOneStop v2 API URL format:
+    // /v2/jobsearch/{userId}/{keyword}/{location}/{radius}/{sortColumns}/{sortOrder}/{startRecord}/{pageSize}/{days}
+    const config = SOURCE_PAGINATION[source.slug] || {}
+    const page = cursor?.page ?? 1
+    const pageSize = config.pageSize ?? 50
+    const startRecord = (page - 1) * pageSize
+
+    // Search parameters
+    const keyword = '0' // '0' = all jobs
+    const location = 'US' // Nationwide
+    const radius = '0' // Not used for nationwide
+    const sortColumns = 'DatePosted' // Sort by post date for freshness
+    const sortOrder = 'DESC'
+    const days = '30' // Last 30 days
+
+    const baseUrl = `https://api.careeronestop.org/v2/jobsearch/${userId}/${encodeURIComponent(
       keyword
     )}/${encodeURIComponent(location)}/${radius}/${sortColumns}/${sortOrder}/${startRecord}/${pageSize}/${days}`
 
-    return applyCursorToUrl(baseUrl, source, cursor)
+    return baseUrl
   }
 
   // Jooble uses POST with API key in the URL path
@@ -242,18 +264,16 @@ function buildHeaders(source?: JobSource): Record<string, string> {
   }
 
   if (source?.slug === 'careeronestop') {
-    const apiKey = process.env.CAREERONESTOP_API_KEY
-    if (!apiKey) {
-      console.error('ingest_jobs: missing CAREERONESTOP_API_KEY')
+    const token = process.env.CAREERONESTOP_TOKEN
+    if (!token) {
+      console.error('ingest_jobs: missing CAREERONESTOP_TOKEN')
       return {
         'User-Agent': 'relevnt-job-ingest/1.0',
         Accept: 'application/json',
       }
     }
-    console.log('CareerOneStop API key present:', !!process.env.CAREERONESTOP_API_KEY);
-    console.log('CareerOneStop userId:', process.env.CAREERONESTOP_USER_ID);
     return {
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: `Bearer ${token}`,
       'User-Agent': 'relevnt-job-ingest/1.0',
       Accept: 'application/json',
     }
@@ -313,6 +333,23 @@ function buildHeaders(source?: JobSource): Record<string, string> {
     }
   }
 
+  // TheirStack uses Bearer token auth
+  if (source?.slug === 'theirstack') {
+    const apiKey = process.env.THEIRSTACK_API_KEY
+    if (!apiKey) {
+      return {
+        'User-Agent': 'relevnt-job-ingest/1.0',
+        Accept: 'application/json',
+      }
+    }
+    return {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      'User-Agent': 'relevnt-job-ingest/1.0',
+      Accept: 'application/json',
+    }
+  }
+
   return {
     'User-Agent': 'relevnt-job-ingest/1.0',
     Accept: 'application/json',
@@ -357,6 +394,39 @@ async function fetchJson(
         return null
       })
 
+      return data
+    }
+
+    // TheirStack requires POST with search parameters in body
+    if (source?.slug === 'theirstack') {
+      const maxResults = parseInt(process.env.THEIRSTACK_MAX_RESULTS_PER_RUN || '300', 10)
+
+      const body = JSON.stringify({
+        limit: maxResults,
+        order_by: [{ desc: true, field: 'date_posted' }],
+        // Include tech jobs broadly - the pipeline will filter
+      })
+
+      console.log(`ingest_jobs: TheirStack POST body:`, body)
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers,
+        body,
+      })
+
+      if (!res.ok) {
+        const errorText = await res.text().catch(() => 'unknown error')
+        console.error(`ingest_jobs: TheirStack fetch failed`, res.status, res.statusText, errorText)
+        return null
+      }
+
+      const data = await res.json().catch((err) => {
+        console.error(`ingest_jobs: failed to parse JSON for TheirStack`, err)
+        return null
+      })
+
+      console.log(`ingest_jobs: TheirStack response keys:`, data ? Object.keys(data) : 'null')
       return data
     }
 

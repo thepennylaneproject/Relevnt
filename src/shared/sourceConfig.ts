@@ -221,6 +221,36 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
         trackFreshnessRatio: false,
         notes: 'Developer-focused aggregator with decent quality.',
     },
+
+    // =========================================================================
+    // CareerOneStop - US government-backed job search aggregator
+    // =========================================================================
+    careeronestop: {
+        slug: 'careeronestop',
+        mode: 'wide-capped',
+        enabled: true, // Controlled by ENABLE_SOURCE_CAREERONESTOP env var in ingest
+        maxAgeDays: 30,
+        maxPagesPerRun: 3, // Overridden by CAREERONESTOP_MAX_PAGES_PER_RUN env var
+        resetPaginationEachRun: true,
+        trustLevel: 'medium',
+        trackFreshnessRatio: true,
+        notes: 'US government-backed job aggregator. Stable and reliable with nationwide coverage.',
+    },
+
+    // =========================================================================
+    // TheirStack - Tech job aggregator with technographic data
+    // =========================================================================
+    theirstack: {
+        slug: 'theirstack',
+        mode: 'fresh-only',
+        enabled: true, // Controlled by ENABLE_SOURCE_THEIRSTACK env var in ingest
+        maxAgeDays: 30,
+        maxPagesPerRun: 1, // Single request, uses limit param
+        resetPaginationEachRun: true,
+        trustLevel: 'medium',
+        trackFreshnessRatio: true,
+        notes: 'Tech job aggregator with technographic data. Uses POST body for search params.',
+    },
 };
 
 /**
