@@ -475,10 +475,13 @@ async function fetchJson(
     // TheirStack requires POST with search parameters in body
     if (source?.slug === 'theirstack') {
       const maxResults = parseInt(process.env.THEIRSTACK_MAX_RESULTS_PER_RUN || '300', 10)
+      const config = SOURCE_PAGINATION[source.slug] || {}
+      const maxAgeDays = config.maxAgeDays || 30
 
       const body = JSON.stringify({
         limit: maxResults,
         order_by: [{ desc: true, field: 'date_posted' }],
+        posted_at_max_age_days: maxAgeDays, // Required by TheirStack API
         // Include tech jobs broadly - the pipeline will filter
       })
 
