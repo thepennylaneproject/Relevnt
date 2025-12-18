@@ -286,6 +286,21 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
     },
 
     // =========================================================================
+    // Fantastic Jobs - 10M+ jobs per month, hourly updates
+    // =========================================================================
+    fantastic: {
+        slug: 'fantastic',
+        mode: 'wide-capped',
+        enabled: true,
+        maxAgeDays: 30,
+        maxPagesPerRun: 5,
+        resetPaginationEachRun: false,
+        trustLevel: 'medium',
+        trackFreshnessRatio: true,
+        notes: 'Fantastic Jobs aggregator. 10M+ jobs/month with hourly updates. AI-enriched job data with 60+ fields.',
+    },
+
+    // =========================================================================
     // RSS/Atom Feeds - Generic RSS job feed support
     // =========================================================================
     rss: {

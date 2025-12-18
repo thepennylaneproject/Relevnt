@@ -87,6 +87,7 @@ const SOURCE_PAGINATION: Record<string, PaginationConfig> = {
   // Jooble uses POST with body params, not URL params
   jooble: { pageParam: 'page', pageSizeParam: 'ResultOnPage', pageSize: 50, maxPagesPerRun: 2 },
   themuse: { pageParam: 'page', pageSizeParam: 'per_page', pageSize: 50, maxPagesPerRun: 3 },
+  fantastic: { pageParam: 'page', pageSizeParam: 'limit', pageSize: 100, maxPagesPerRun: 5 },
   reed_uk: { pageParam: 'resultsToSkip', pageSizeParam: 'resultsToTake', pageSize: 50, maxPagesPerRun: 2 },
   // TheirStack uses POST with limit in body
   theirstack: { pageParam: 'page', pageSizeParam: 'limit', pageSize: 100, maxPagesPerRun: 1 },
@@ -276,6 +277,20 @@ function buildSourceUrl(
     return `${source.fetchUrl}?${params.toString()}`
   }
 
+  // Fantastic Jobs uses page and limit query params
+  if (source.slug === 'fantastic') {
+    const config = SOURCE_PAGINATION[source.slug] || {}
+    const page = cursor?.page ?? 1
+    const pageSize = config.pageSize ?? 100
+
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(pageSize),
+      remote: 'true', // Prefer remote jobs
+    })
+    return `${source.fetchUrl}?${params.toString()}`
+  }
+
   // Reed UK uses Basic auth with API key, pagination via resultsToSkip
   if (source.slug === 'reed_uk') {
     const apiKey = process.env.REED_API_KEY
@@ -366,6 +381,24 @@ function buildHeaders(source?: JobSource): Record<string, string> {
 
     return {
       Authorization: `Token ${apiKey}`,
+      'User-Agent': 'relevnt-job-ingest/1.0',
+      Accept: 'application/json',
+    }
+  }
+
+  // Fantastic Jobs uses Bearer token authentication
+  if (source?.slug === 'fantastic') {
+    const apiKey = process.env.FANTASTIC_JOBS_API_KEY
+    if (!apiKey) {
+      console.error('ingest_jobs: missing FANTASTIC_JOBS_API_KEY')
+      return {
+        'User-Agent': 'relevnt-job-ingest/1.0',
+        Accept: 'application/json',
+      }
+    }
+
+    return {
+      Authorization: `Bearer ${apiKey}`,
       'User-Agent': 'relevnt-job-ingest/1.0',
       Accept: 'application/json',
     }

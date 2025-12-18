@@ -1338,6 +1338,79 @@ export const LeverSource: JobSource = {
 }
 
 // ---------------------------------------------------------------------------
+// Fantastic Jobs - 10M+ jobs per month, hourly updates
+// ---------------------------------------------------------------------------
+
+export const FantasticJobsSource: JobSource = {
+  slug: 'fantastic',
+  displayName: 'Fantastic Jobs',
+  fetchUrl: 'https://fantastic.jobs/api/jobs',
+  type: 'aggregator',
+  region: 'global',
+
+  normalize: (raw) => {
+    const rawAny = raw as any
+    const jobs = asArray<any>(rawAny?.jobs ?? rawAny?.results ?? rawAny)
+    if (!jobs.length) return []
+
+    const nowIso = new Date().toISOString()
+
+    return jobs
+      .map((job): NormalizedJob | null => {
+        if (!job || !job.id) return null
+
+        const title = job.title ?? ''
+        if (!title) return null
+
+        // Parse salary range if available
+        let salary_min: number | null = null
+        let salary_max: number | null = null
+        if (job.salary) {
+          // Salary might be a string like "$150,000 - $200,000"
+          const salaryStr = String(job.salary).replace(/[$,]/g, '')
+          const salaryParts = salaryStr.split('-').map((s: string) => parseNumber(s.trim()))
+          if (salaryParts[0] !== null) salary_min = salaryParts[0]
+          if (salaryParts[1] !== null) salary_max = salaryParts[1]
+        }
+
+        // Determine remote type from remote field or location
+        let remote_type: RemoteType = null
+        if (typeof job.remote === 'boolean') {
+          remote_type = job.remote ? 'remote' : null
+        } else if (job.location) {
+          remote_type = inferRemoteTypeFromLocation(job.location)
+        }
+
+        const externalUrl = job.url ?? job.link ?? null
+        const posted = safeDate(job.posted_date ?? job.date_posted ?? job.created_at)
+
+        return {
+          source_slug: 'fantastic',
+          external_id: String(job.id),
+
+          title,
+          company: job.company ?? null,
+          location: job.location ?? null,
+          employment_type: job.job_type ?? job.employment_type ?? null,
+          remote_type,
+
+          posted_date: posted,
+          created_at: nowIso,
+          external_url: externalUrl,
+
+          salary_min,
+          salary_max,
+          competitiveness_level: null,
+
+          description: job.description ?? null,
+          data_raw: job,
+        }
+      })
+      .filter((job): job is NormalizedJob => Boolean(job))
+  },
+}
+
+// ---------------------------------------------------------------------------
 // Combined export for ingest_jobs
 // ---------------------------------------------------------------------------
 
@@ -1355,6 +1428,7 @@ export const ALL_SOURCES: JobSource[] = [
   TheMuseSource,
   ReedUKSource,
   TheirStackSource,
+  FantasticJobsSource,
   GreenhouseSource,
   LeverSource,
   RSSSource,
