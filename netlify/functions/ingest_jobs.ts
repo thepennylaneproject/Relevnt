@@ -32,6 +32,7 @@ import {
 } from '../../src/shared/companiesRegistry'
 import { fetchCompaniesInParallel, fetchFromMultiplePlatforms } from './utils/concurrent-fetcher'
 import { fetchAndParseRSSFeed } from './utils/rssParser'
+import { enrichJobURL } from './utils/jobURLEnricher'
 
 export type IngestResult = {
   source: string;
@@ -815,7 +816,7 @@ async function fetchFromAllCompaniesInParallel(
   lever: any[];
   greenhouse: any[];
 }> {
-  const allJobs = { lever: [], greenhouse: [] };
+  const allJobs: { lever: any[]; greenhouse: any[] } = { lever: [], greenhouse: [] };
 
   for (const platform of platforms) {
     try {
@@ -964,8 +965,34 @@ async function upsertJobs(jobs: NormalizedJob[]) {
 
   const supabase = createAdminClient()
 
+  // Enrich job URLs with direct company links (bypass aggregators)
+  let urlEnrichmentCount = 0
+  const urlEnrichedJobs: NormalizedJob[] = []
+
+  for (const job of uniqueJobs) {
+    try {
+      const enrichment = await enrichJobURL(job)
+      if (enrichment.enriched_url && enrichment.enriched_url !== job.external_url) {
+        urlEnrichmentCount++
+        urlEnrichedJobs.push({
+          ...job,
+          external_url: enrichment.enriched_url,
+        })
+      } else {
+        urlEnrichedJobs.push(job)
+      }
+    } catch (err) {
+      console.warn(`ingest_jobs: URL enrichment error for job ${job.external_id}`, err)
+      urlEnrichedJobs.push(job)
+    }
+  }
+
+  if (urlEnrichmentCount > 0) {
+    console.log(`ingest_jobs: enriched ${urlEnrichmentCount} job URLs with direct company links`)
+  }
+
   // Enrich jobs with ATS metadata
-  const enrichedJobs = uniqueJobs.map((j) => {
+  const enrichedJobs = urlEnrichedJobs.map((j) => {
     const enrichment = enrichJob(j.title, j.description || '')
     return {
       source_slug: j.source_slug,

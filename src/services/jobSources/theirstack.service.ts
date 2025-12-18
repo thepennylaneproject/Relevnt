@@ -73,7 +73,7 @@ class TheirStackService {
   private apiKey: string;
   private baseUrl = 'https://api.theirstack.com/api/v1/jobs';
 
-  constructor(apiKey: string = process.env.REACT_APP_THEIRSTACK_API_KEY || '') {
+  constructor(apiKey: string = (typeof (globalThis as any).process !== 'undefined' && (globalThis as any).process?.env?.REACT_APP_THEIRSTACK_API_KEY) || '') {
     if (!apiKey) {
       throw new Error('TheirStack API key not found. Set REACT_APP_THEIRSTACK_API_KEY in .env');
     }

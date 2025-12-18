@@ -777,7 +777,7 @@ function SourcesTab() {
       if (error) throw error
       await fetchSources()
       setShowAddModal(false)
-      setNewSource({ name: '', slug: '', mode: 'api', api_url: '', website_url: '', update_frequency: 'daily', enabled: true })
+      setNewSource({ name: '', slug: '', mode: 'api', api_url: '', website_url: '', update_frequency: 'daily', trust_level: 'medium', max_age_days: '30', max_pages_per_run: '10', cooldown_minutes: '0', enabled: true })
     } catch (err) {
       console.error('Create error:', err)
       alert('Failed to create source')

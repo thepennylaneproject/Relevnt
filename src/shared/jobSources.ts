@@ -1069,6 +1069,18 @@ export const GreenhouseSource: JobSource = {
 }
 
 // ---------------------------------------------------------------------------
+          external_url,
+          posted_date,
+          created_at: nowIso,
+          salary_min,
+          salary_max,
+          description,
+          competitiveness_level: null,
+        }
+      })
+  },
+}
+
 // RSS/Atom Feeds (generic RSS job feed support)
 // ---------------------------------------------------------------------------
 
@@ -1082,7 +1094,7 @@ interface RSSFeedSource {
 
 // Helper to parse RSS sources from environment
 function getRSSSources(): RSSFeedSource[] {
-  const json = process.env.RSS_FEEDS_JSON
+  const json = typeof (globalThis as any).process !== 'undefined' && (globalThis as any).process?.env?.RSS_FEEDS_JSON ? (globalThis as any).process.env.RSS_FEEDS_JSON : undefined
   if (!json) return []
   try {
     const parsed = JSON.parse(json)
@@ -1248,7 +1260,7 @@ interface LeverCompanySource {
 
 // Helper to parse Lever sources from environment
 function getLeverSources(): LeverCompanySource[] {
-  const json = process.env.LEVER_SOURCES_JSON
+  const json = typeof (globalThis as any).process !== 'undefined' && (globalThis as any).process?.env?.LEVER_SOURCES_JSON ? (globalThis as any).process.env.LEVER_SOURCES_JSON : undefined
   if (!json) return []
   try {
     const parsed = JSON.parse(json)
@@ -1335,21 +1347,16 @@ export const LeverSource: JobSource = {
         return {
           source_slug: 'lever',
           external_id: posting.id,
-
           title: posting.text,
           company: null, // Company comes from the URL/config, not the posting
           location,
           employment_type,
           remote_type,
-
           posted_date,
           created_at: nowIso,
           external_url,
-
           salary_min,
           salary_max,
-          competitiveness_level: null,
-
           description,
           data_raw: posting,
         }
@@ -1425,6 +1432,7 @@ export const FantasticJobsSource: JobSource = {
 
           description: job.description ?? null,
           data_raw: job,
+          competitiveness_level: null,
         }
       })
       .filter((job): job is NormalizedJob => Boolean(job))

@@ -97,11 +97,7 @@ export function parseRSSFeed(feedXml: string | Buffer): ParsedRSSFeed {
       unpairedTags: ['br', 'hr', 'img', 'link', 'meta'],
       attributeNamePrefix: '@_',
       textNodeName: '#text',
-      cdataTagName: '__cdata',
-      cdataPositionChar: '\\\\',
-      parseTrueNumberOnly: false,
       trimValues: true,
-      trimText: true,
     })
 
     const parsed = parser.parse(xmlStr)

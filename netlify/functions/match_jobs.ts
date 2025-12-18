@@ -679,14 +679,14 @@ export const handler: Handler = async (event) => {
 
     const jobs = jobsData as EnhancedJobRow[]
 
-    // Check if we should use the new scoring engine
-    // Enable new engine via query param: ?engine=v2
-    const useNewEngine = event.queryStringParameters?.engine === 'v2'
+    // Use new ATS-aligned scoring engine (v2) by default
+    // Allow override with ?engine=legacy for backward compatibility
+    const useLegacyEngine = event.queryStringParameters?.engine === 'legacy'
 
     let results: MatchResult[]
 
-    if (useNewEngine) {
-      // Use new ATS-aligned scoring engine
+    if (!useLegacyEngine) {
+      // Use new ATS-aligned scoring engine (default)
       try {
         const userProfile = await aggregateUserProfile(supabase, userId, null)
         const jobMap = new Map(jobs.map(j => [j.id, j]))
@@ -699,7 +699,7 @@ export const handler: Handler = async (event) => {
         results = jobs.map((job) => scoreJobAgainstProfile(job as unknown as JobRow, enrichedProfile))
       }
     } else {
-      // Use legacy scoring engine
+      // Use legacy scoring engine (fallback only)
       results = jobs.map((job) => scoreJobAgainstProfile(job as unknown as JobRow, enrichedProfile))
     }
 
