@@ -163,30 +163,24 @@ curl -s --max-time 5 "https://www.github.com/about/careers" | head -10
 curl -v --max-time 5 "https://jobs.github.com" 2>&1 | grep -i "403\|403\|200"
 ```
 
-### ✅ Sources That DEFINITELY Work
+## Test Results (Local Environment)
 
-1. **GitHub API** - ✅ FULLY ACCESSIBLE
-   - `api.github.com` is whitelisted
-   - We tested and confirmed full access
-   - Can search for job repositories (340k+ "jobs" repositories)
-   - Examples found:
-     - `remoteintech/remote-jobs` (39k+ stars, curated remote jobs list)
-     - Many other job listing repositories with structured data
-   - **Estimated**: +2,000-5,000 high-quality remote jobs via GitHub job repos
-   - **Method**: Query GitHub API for job repositories, parse JSON files from repos
+| Host | Result | Status |
+|------|--------|--------|
+| `github.com` | HTTP 200 | ✅ ACCESSIBLE |
+| `microsoft.com` | HTTP 200 | ✅ ACCESSIBLE |
+| `api.github.com` | HTTP 200 | ✅ ACCESSIBLE |
+| `usajobs.gov` | HTTP 403 Forbidden | ❌ BLOCKED (active blocking) |
+| `remoteok.com` | HTTP 403 Forbidden | ❌ BLOCKED (proxy) |
+| `api.adzuna.com` | HTTP 403 Forbidden | ❌ BLOCKED (proxy) |
+| `stackoverflow.com` | HTTP 403 Forbidden | ❌ BLOCKED (proxy) |
 
-2. **Microsoft** - ✅ ACCESSIBLE
-   - `microsoft.com` returns HTTP 200
-   - But career page endpoints need verification
-   - **Estimated**: +1,000-2,000 jobs if we can scrape their site
+### Key Findings
 
-3. **Existing Working Sources**
-   - Need to verify if these are whitelisted:
-     - USAJOBS (government, likely whitelisted)
-     - CareerOneStop (government, likely whitelisted)
-     - Jooble (need to test)
-     - Greenhouse (need to test)
-     - Lever (need to test)
+1. **GitHub API** - Fully accessible, no restrictions
+2. **Microsoft.com** - Fully accessible
+3. **USAJOBS.gov** - Intentionally blocks programmatic access (returns 403)
+4. **Paid APIs** - All blocked by proxy (RemoteOK, Adzuna, StackOverflow)
 
 ---
 
