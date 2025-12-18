@@ -21,16 +21,26 @@ export interface DetectedATS {
 /**
  * Pattern matching for ATS detection from URLs
  */
-function detectATSFromURL(url: string): Partial<DetectedATS> | null {
-  if (!url) return null
+/**
+ * Pattern matching for ATS detection from URLs or HTML content
+ */
+export function detectATSFromContent(content: string): Partial<DetectedATS> | null {
+  if (!content) return null
 
-  const urlLower = url.toLowerCase()
+  const contentLower = content.toLowerCase()
 
-  // Lever patterns
-  if (urlLower.includes('lever.co')) {
-    const leverSlugMatch = urlLower.match(/api\.lever\.co\/v0\/postings\/([a-z0-9-]+)/) ||
-                           urlLower.match(/jobs\.lever\.co.*\/([a-z0-9-]+)/) ||
-                           urlLower.match(/([a-z0-9-]+)\.lever\.co/)
+  // 1. Lever Detection
+  // Check for Lever subdomains, API scripts, or data attributes
+  if (
+    contentLower.includes('lever.co') ||
+    contentLower.includes('data-lever-job-id') ||
+    contentLower.includes('data-lever-post-id')
+  ) {
+    const leverSlugMatch =
+      contentLower.match(/api\.lever\.co\/v0\/postings\/([a-z0-9-]+)/) ||
+      contentLower.match(/jobs\.lever\.co\/([a-z0-9-]+)/) ||
+      contentLower.match(/([a-z0-9-]+)\.lever\.co/) ||
+      content.match(/data-lever-slug=["']([^"']+)["']/)
 
     if (leverSlugMatch?.[1]) {
       return {
@@ -42,10 +52,19 @@ function detectATSFromURL(url: string): Partial<DetectedATS> | null {
     }
   }
 
-  // Greenhouse patterns
-  if (urlLower.includes('greenhouse')) {
-    const greenhouseMatch = urlLower.match(/boards\.greenhouse\.io.*board_token["\s=:]+([a-z0-9]+)/) ||
-                            urlLower.match(/([a-z0-9]+)\.greenhouse\.io/)
+  // 2. Greenhouse Detection
+  // Check for Greenhouse board tokens, scripts, or iframes
+  if (
+    contentLower.includes('greenhouse.io') ||
+    contentLower.includes('grnhse.io') ||
+    contentLower.includes('gh-board-token')
+  ) {
+    const greenhouseMatch =
+      contentLower.match(/boards\.greenhouse\.io\/([a-z0-9]+)/) ||
+      contentLower.match(/boards\.greenhouse\.io.*board_token["\s=:]+([a-z0-9]+)/) ||
+      contentLower.match(/([a-z0-9]+)\.greenhouse\.io/) ||
+      content.match(/gh-board-token=["']([^"']+)["']/) ||
+      content.match(/grnh_board_token\s*=\s*["']([^"']+)["']/)
 
     if (greenhouseMatch?.[1]) {
       return {
@@ -55,10 +74,19 @@ function detectATSFromURL(url: string): Partial<DetectedATS> | null {
         confidence: 0.95,
       }
     }
+
+    // Check for Greenhouse JS inclusion without explicit token in URL
+    if (contentLower.includes('grnh.js') || contentLower.includes('greenhouse.io/embed')) {
+      return {
+        type: 'greenhouse',
+        confidence: 0.7,
+        detectionMethod: 'url_pattern'
+      }
+    }
   }
 
-  // Workday patterns
-  if (urlLower.includes('workday.com')) {
+  // 3. Workday patterns
+  if (contentLower.includes('workday.com') || contentLower.includes('myworkdayjobs.com')) {
     return {
       type: 'workday',
       detectionMethod: 'url_pattern',
@@ -135,7 +163,7 @@ export async function detectATS(
 
     // Method 1: Direct URL pattern matching
     if (externalUrl) {
-      const detected = detectATSFromURL(externalUrl)
+      const detected = detectATSFromContent(externalUrl)
       if (detected && detected.type !== 'unknown') {
         const result: DetectedATS = {
           type: detected.type as ATSType,
@@ -155,34 +183,26 @@ export async function detectATS(
       for (const careersUrl of careersUrls) {
         try {
           const response = await fetch(careersUrl, {
-            method: 'HEAD',
+            method: 'GET', // Use GET instead of HEAD to check content
             timeout: 5000,
             headers: { 'User-Agent': 'Relevnt-JobFinder/1.0' },
           })
 
           if (response.ok) {
-            // Found a valid careers page, try to get HTML to detect ATS
-            const htmlResponse = await fetch(careersUrl, {
-              timeout: 10000,
-              headers: { 'User-Agent': 'Relevnt-JobFinder/1.0' },
-            })
+            const html = await response.text()
+            const atsFromHtml = detectATSFromContent(html)
 
-            if (htmlResponse.ok) {
-              const html = await htmlResponse.text()
-              const atsFromHtml = detectATSFromURL(html)
-
-              if (atsFromHtml && atsFromHtml.type !== 'unknown') {
-                const result: DetectedATS = {
-                  type: atsFromHtml.type as ATSType,
-                  slug: atsFromHtml.slug,
-                  token: atsFromHtml.token,
-                  careersUrl,
-                  confidence: 0.85,
-                  detectionMethod: 'domain_inference',
-                }
-                cache.set(company, cacheKey, result)
-                return result
+            if (atsFromHtml && atsFromHtml.type !== 'unknown') {
+              const result: DetectedATS = {
+                type: atsFromHtml.type as ATSType,
+                slug: atsFromHtml.slug,
+                token: atsFromHtml.token,
+                careersUrl,
+                confidence: 0.85,
+                detectionMethod: 'domain_inference',
               }
+              cache.set(company, cacheKey, result)
+              return result
             }
           }
         } catch (e) {

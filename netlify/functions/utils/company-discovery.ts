@@ -245,11 +245,88 @@ export async function discoverFromAngelList(): Promise<DiscoveredCompany[]> {
 }
 
 /**
+ * GitHub-based Discovery (Startup lists)
+ */
+export async function discoverFromGitHubLists(): Promise<DiscoveredCompany[]> {
+  try {
+    const companies: DiscoveredCompany[] = [];
+
+    // Example: A curated list of startups or tech companies
+    const sources = [
+      {
+        url: 'https://raw.githubusercontent.com/derhuerst/vbb-companies/master/companies.json', // Sample tech list
+        parser: (data: any) => data.map((c: any) => ({
+          name: c.name,
+          domain: c.website ? new URL(c.website).hostname : undefined,
+          source: 'github_tech_list',
+          confidence: 0.7
+        }))
+      }
+    ];
+
+    for (const source of sources) {
+      try {
+        const response = await fetch(source.url, {
+          headers: { 'User-Agent': 'relevnt-discovery/1.0' }
+        });
+        if (!response.ok) continue;
+        const data = await response.json();
+        const discovered = source.parser(data).filter((c: any) => c.name && c.domain);
+        companies.push(...discovered);
+      } catch (e) {
+        console.error(`Failed to fetch GitHub source ${source.url}:`, e);
+      }
+    }
+
+    return companies;
+  } catch (err) {
+    console.error('GitHub discovery failed:', err);
+    return [];
+  }
+}
+
+/**
+ * Advanced crawler: Follow "Careers" or "Jobs" links from homepage
+ */
+export async function crawlCareersPage(domain: string): Promise<string | null> {
+  try {
+    const response = await fetch(`https://${domain}`, {
+      headers: { 'User-Agent': 'relevnt-discovery/1.0' },
+    });
+
+    if (!response.ok) return null;
+
+    const html = await response.text();
+
+    // Look for careers/jobs links
+    // <a href="...">Careers</a>, <a href="...">Jobs</a>, etc.
+    const linkMatch = html.match(/href=["']([^"']*(?:careers|jobs|hiring)[^"']*)["'][^>]*>(?:Careers|Jobs|Hiring|Work with us)/i);
+
+    if (linkMatch?.[1]) {
+      let url = linkMatch[1];
+      if (url.startsWith('/')) {
+        url = `https://${domain}${url}`;
+      } else if (!url.startsWith('http')) {
+        url = `https://${domain}/${url}`;
+      }
+      return url;
+    }
+
+    return null;
+  } catch (err) {
+    console.warn(`Crawl failed for ${domain}:`, err);
+    return null;
+  }
+}
+
+/**
  * Detect platforms from company careers page
  */
 export async function detectPlatformsFromCareersPage(
   company: { name: string; domain: string }
 ): Promise<PlatformDetectionResult | null> {
+  const { detectATSFromContent } = await import('./atsDetector');
+
   try {
     const urls = [
       `https://${company.domain}/careers`,
@@ -258,35 +335,30 @@ export async function detectPlatformsFromCareersPage(
       `https://jobs.${company.domain}`,
     ];
 
+    // Try finding careers page via crawling if direct guesses fail
+    const crawledUrl = await crawlCareersPage(company.domain);
+    if (crawledUrl && !urls.includes(crawledUrl)) {
+      urls.push(crawledUrl);
+    }
+
     for (const url of urls) {
       try {
         const response = await fetch(url, {
           headers: { 'User-Agent': 'relevnt-discovery/1.0' },
-
         });
 
         if (!response.ok) continue;
 
         const html = await response.text();
+        const ats = detectATSFromContent(html);
 
-        // Detect Lever
-        const leverSlugMatch = html.match(
-          /api\.lever\.co\/v0\/postings\/([a-z0-9-]+)/i
-        );
-        const leverJobsMatch = html.match(/jobs\.lever\.co.*\/([a-z0-9-]+)/i);
-        const leverSlug = leverSlugMatch?.[1] || leverJobsMatch?.[1];
-
-        // Detect Greenhouse
-        const greenhouseMatch = html.match(/boards\.greenhouse\.io.*board_token["\s=:]+([a-z0-9]+)/i);
-        const greenhouseToken = greenhouseMatch?.[1];
-
-        if (leverSlug || greenhouseToken) {
+        if (ats && ats.type !== 'unknown') {
           return {
             company_id: `company-${company.domain}`,
             company_name: company.name,
             domain: company.domain,
-            lever_slug: leverSlug,
-            greenhouse_board_token: greenhouseToken,
+            lever_slug: ats.slug,
+            greenhouse_board_token: ats.token,
             detected_at: new Date().toISOString(),
             detection_method: 'html_parse',
           };
@@ -355,6 +427,11 @@ export async function runCompanyDiscovery(): Promise<DiscoveredCompany[]> {
     {
       name: 'AngelList',
       fetch: discoverFromAngelList,
+      enabled: true,
+    },
+    {
+      name: 'GitHub Lists',
+      fetch: discoverFromGitHubLists,
       enabled: true,
     },
   ];
