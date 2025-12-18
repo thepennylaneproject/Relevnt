@@ -1432,7 +1432,195 @@ export const FantasticJobsSource: JobSource = {
 
           description: job.description ?? null,
           data_raw: job,
+        }
+      })
+      .filter((job): job is NormalizedJob => Boolean(job))
+  },
+}
+
+// ---------------------------------------------------------------------------
+// JobDataFeeds - 1-5K jobs per month aggregator
+// ---------------------------------------------------------------------------
+
+export const JobDataFeedsSource: JobSource = {
+  slug: 'jobdatafeeds',
+  displayName: 'JobDataFeeds',
+  fetchUrl: 'https://jobdataapi.com/api/jobs/',
+  type: 'aggregator',
+  region: 'global',
+
+  normalize: (raw) => {
+    const rawAny = raw as any
+    const jobs = asArray<any>(rawAny?.results ?? rawAny)
+    if (!jobs.length) return []
+
+    const nowIso = new Date().toISOString()
+
+    return jobs
+      .map((job): NormalizedJob | null => {
+        if (!job || !job.id) return null
+
+        const title = job.title ?? ''
+        if (!title) return null
+
+        const location = job.location ?? null
+        const remote_type = inferRemoteTypeFromLocation(location)
+
+        // JobDataFeeds provides salary_min and salary_max directly
+        const salary_min = parseNumber(job.salary_min)
+        const salary_max = parseNumber(job.salary_max)
+
+        const externalUrl = job.application_url ?? job.url ?? null
+        const posted = safeDate(job.date_posted)
+
+        return {
+          source_slug: 'jobdatafeeds',
+          external_id: String(job.id),
+
+          title,
+          company: job.company?.name ?? null,
+          location,
+          employment_type: job.employment_type ?? job.experience_level ?? null,
+          remote_type,
+
+          posted_date: posted,
+          created_at: nowIso,
+          external_url: externalUrl,
+
+          salary_min,
+          salary_max,
           competitiveness_level: null,
+
+          description: job.description ?? null,
+          data_raw: job,
+        }
+      })
+      .filter((job): job is NormalizedJob => Boolean(job))
+  },
+}
+
+// ---------------------------------------------------------------------------
+// CareerJet - 500-2K jobs per month aggregator
+// ---------------------------------------------------------------------------
+
+export const CareerJetSource: JobSource = {
+  slug: 'careerjet',
+  displayName: 'CareerJet',
+  fetchUrl: 'https://search.api.careerjet.net/v4/query',
+  type: 'aggregator',
+  region: 'global',
+
+  normalize: (raw) => {
+    const rawAny = raw as any
+    const jobs = asArray<any>(rawAny?.jobs ?? rawAny?.results ?? rawAny)
+    if (!jobs.length) return []
+
+    const nowIso = new Date().toISOString()
+
+    return jobs
+      .map((job): NormalizedJob | null => {
+        if (!job || !job.url) return null
+
+        const title = job.title ?? ''
+        if (!title) return null
+
+        const location = job.locations ?? job.location ?? null
+        const remote_type = inferRemoteTypeFromLocation(location)
+
+        // Parse salary range from string if available
+        let salary_min: number | null = null
+        let salary_max: number | null = null
+        if (job.salary_min) salary_min = parseNumber(job.salary_min)
+        if (job.salary_max) salary_max = parseNumber(job.salary_max)
+
+        const externalUrl = job.url
+        const posted = safeDate(job.date)
+
+        return {
+          source_slug: 'careerjet',
+          external_id: job.url,
+
+          title,
+          company: job.company ?? null,
+          location,
+          employment_type: null,
+          remote_type,
+
+          posted_date: posted,
+          created_at: nowIso,
+          external_url: externalUrl,
+
+          salary_min,
+          salary_max,
+          competitiveness_level: null,
+
+          description: job.description ?? null,
+          data_raw: job,
+        }
+      })
+      .filter((job): job is NormalizedJob => Boolean(job))
+  },
+}
+
+// ---------------------------------------------------------------------------
+// WhatJobs - 500-1K jobs per month aggregator
+// ---------------------------------------------------------------------------
+
+export const WhatJobsSource: JobSource = {
+  slug: 'whatjobs',
+  displayName: 'WhatJobs',
+  fetchUrl: 'https://api.whatjobs.com/api/v1/feed/json',
+  type: 'aggregator',
+  region: 'global',
+
+  normalize: (raw) => {
+    const rawAny = raw as any
+    const jobs = asArray<any>(rawAny?.data ?? rawAny?.jobs ?? rawAny?.results ?? rawAny)
+    if (!jobs.length) return []
+
+    const nowIso = new Date().toISOString()
+
+    return jobs
+      .map((job): NormalizedJob | null => {
+        if (!job || !job.title) return null
+
+        const title = job.title ?? ''
+        const location = job.location ?? null
+        const remote_type = inferRemoteTypeFromLocation(location)
+
+        // Parse salary range from string if available (e.g., "50000-70000")
+        let salary_min: number | null = null
+        let salary_max: number | null = null
+        if (job.salary) {
+          const salaryStr = String(job.salary).replace(/[^0-9\-]/g, '')
+          const salaryParts = salaryStr.split('-').map((s: string) => parseNumber(s.trim()))
+          if (salaryParts[0] !== null) salary_min = salaryParts[0]
+          if (salaryParts[1] !== null) salary_max = salaryParts[1]
+        }
+
+        const externalUrl = job.url ?? job.link ?? job.application_url ?? null
+        const posted = safeDate(job.datePosted ?? job.posted_date)
+
+        return {
+          source_slug: 'whatjobs',
+          external_id: job.id ?? String(Math.random()),
+
+          title,
+          company: job.company ?? null,
+          location,
+          employment_type: null,
+          remote_type,
+
+          posted_date: posted,
+          created_at: nowIso,
+          external_url: externalUrl,
+
+          salary_min,
+          salary_max,
+          competitiveness_level: null,
+
+          description: job.description ?? job.requirements ?? null,
+          data_raw: job,
         }
       })
       .filter((job): job is NormalizedJob => Boolean(job))
@@ -1458,6 +1646,9 @@ export const ALL_SOURCES: JobSource[] = [
   ReedUKSource,
   TheirStackSource,
   FantasticJobsSource,
+  JobDataFeedsSource,
+  CareerJetSource,
+  WhatJobsSource,
   GreenhouseSource,
   LeverSource,
   RSSSource,

@@ -301,6 +301,51 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
     },
 
     // =========================================================================
+    // JobDataFeeds - 1-5K jobs per month aggregator
+    // =========================================================================
+    jobdatafeeds: {
+        slug: 'jobdatafeeds',
+        mode: 'wide-capped',
+        enabled: true,
+        maxAgeDays: 30,
+        maxPagesPerRun: 3,
+        resetPaginationEachRun: false,
+        trustLevel: 'medium',
+        trackFreshnessRatio: false,
+        notes: 'JobDataFeeds aggregator with normalized job data and salary information.',
+    },
+
+    // =========================================================================
+    // CareerJet - 500-2K jobs per month aggregator
+    // =========================================================================
+    careerjet: {
+        slug: 'careerjet',
+        mode: 'wide-capped',
+        enabled: true,
+        maxAgeDays: 30,
+        maxPagesPerRun: 3,
+        resetPaginationEachRun: false,
+        trustLevel: 'medium',
+        trackFreshnessRatio: true,
+        notes: 'CareerJet affiliate job aggregator. Multiple regions and job categories.',
+    },
+
+    // =========================================================================
+    // WhatJobs - 500-1K jobs per month aggregator
+    // =========================================================================
+    whatjobs: {
+        slug: 'whatjobs',
+        mode: 'wide-capped',
+        enabled: true,
+        maxAgeDays: 30,
+        maxPagesPerRun: 3,
+        resetPaginationEachRun: false,
+        trustLevel: 'medium',
+        trackFreshnessRatio: false,
+        notes: 'WhatJobs API feed with diverse job postings.',
+    },
+
+    // =========================================================================
     // RSS/Atom Feeds - Generic RSS job feed support
     // =========================================================================
     rss: {

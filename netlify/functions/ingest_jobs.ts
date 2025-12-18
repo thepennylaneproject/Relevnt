@@ -89,6 +89,9 @@ const SOURCE_PAGINATION: Record<string, PaginationConfig> = {
   jooble: { pageParam: 'page', pageSizeParam: 'ResultOnPage', pageSize: 50, maxPagesPerRun: 2 },
   themuse: { pageParam: 'page', pageSizeParam: 'per_page', pageSize: 50, maxPagesPerRun: 3 },
   fantastic: { pageParam: 'page', pageSizeParam: 'limit', pageSize: 100, maxPagesPerRun: 5 },
+  jobdatafeeds: { pageParam: 'page', pageSizeParam: 'page_size', pageSize: 100, maxPagesPerRun: 3 },
+  careerjet: { pageParam: 'page', pageSizeParam: 'pagesize', pageSize: 50, maxPagesPerRun: 3 },
+  whatjobs: { pageParam: 'page', pageSizeParam: 'limit', pageSize: 50, maxPagesPerRun: 3 },
   reed_uk: { pageParam: 'resultsToSkip', pageSizeParam: 'resultsToTake', pageSize: 50, maxPagesPerRun: 2 },
   // TheirStack uses POST with limit in body
   theirstack: { pageParam: 'page', pageSizeParam: 'limit', pageSize: 100, maxPagesPerRun: 1 },
@@ -292,6 +295,51 @@ function buildSourceUrl(
     return `${source.fetchUrl}?${params.toString()}`
   }
 
+  // JobDataFeeds uses standard page/page_size pagination
+  if (source.slug === 'jobdatafeeds') {
+    const config = SOURCE_PAGINATION[source.slug] || {}
+    const page = cursor?.page ?? 1
+    const pageSize = config.pageSize ?? 100
+
+    const params = new URLSearchParams({
+      page: String(page),
+      page_size: String(pageSize),
+      title: 'all',  // Search for all jobs
+    })
+    return `${source.fetchUrl}?${params.toString()}`
+  }
+
+  // CareerJet uses page/pagesize with required parameters
+  if (source.slug === 'careerjet') {
+    const config = SOURCE_PAGINATION[source.slug] || {}
+    const page = cursor?.page ?? 1
+    const pageSize = config.pageSize ?? 50
+
+    const params = new URLSearchParams({
+      affid: process.env.CAREERJET_AFFILIATE_ID || 'partner',  // Affiliate ID
+      keywords: 'jobs',  // Generic search
+      page: String(page),
+      pagesize: String(pageSize),
+      user_ip: '0.0.0.0',  // Required but not used for backend
+      user_agent: 'relevnt-job-ingest/1.0',  // Required but not used for backend
+      url: 'https://relevnt.io',  // Required but not used for backend
+    })
+    return `${source.fetchUrl}?${params.toString()}`
+  }
+
+  // WhatJobs uses page/limit pagination
+  if (source.slug === 'whatjobs') {
+    const config = SOURCE_PAGINATION[source.slug] || {}
+    const page = cursor?.page ?? 1
+    const pageSize = config.pageSize ?? 50
+
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(pageSize),
+    })
+    return `${source.fetchUrl}?${params.toString()}`
+  }
+
   // Reed UK uses Basic auth with API key, pagination via resultsToSkip
   if (source.slug === 'reed_uk') {
     const apiKey = process.env.REED_API_KEY
@@ -400,6 +448,59 @@ function buildHeaders(source?: JobSource): Record<string, string> {
 
     return {
       Authorization: `Bearer ${apiKey}`,
+      'User-Agent': 'relevnt-job-ingest/1.0',
+      Accept: 'application/json',
+    }
+  }
+
+  // JobDataFeeds uses Api-Key header authentication
+  if (source?.slug === 'jobdatafeeds') {
+    const apiKey = process.env.JOBDATAFEEDS_API_KEY
+    if (!apiKey) {
+      console.error('ingest_jobs: missing JOBDATAFEEDS_API_KEY')
+      return {
+        'User-Agent': 'relevnt-job-ingest/1.0',
+        Accept: 'application/json',
+      }
+    }
+
+    return {
+      Authorization: `Api-Key ${apiKey}`,
+      'User-Agent': 'relevnt-job-ingest/1.0',
+      Accept: 'application/json',
+    }
+  }
+
+  // CareerJet uses Basic auth (affiliate ID in params, API key optional)
+  if (source?.slug === 'careerjet') {
+    const apiKey = process.env.CAREERJET_API_KEY
+    const basicHeaders: Record<string, string> = {
+      'User-Agent': 'relevnt-job-ingest/1.0',
+      Accept: 'application/json',
+    }
+
+    if (apiKey) {
+      // Optional: can use Basic auth if API key is provided
+      const credentials = Buffer.from(`${apiKey}:`).toString('base64')
+      basicHeaders['Authorization'] = `Basic ${credentials}`
+    }
+
+    return basicHeaders
+  }
+
+  // WhatJobs uses x-api-token header authentication
+  if (source?.slug === 'whatjobs') {
+    const apiKey = process.env.WHATJOBS_API_KEY
+    if (!apiKey) {
+      console.error('ingest_jobs: missing WHATJOBS_API_KEY')
+      return {
+        'User-Agent': 'relevnt-job-ingest/1.0',
+        Accept: 'application/json',
+      }
+    }
+
+    return {
+      'x-api-token': apiKey,
       'User-Agent': 'relevnt-job-ingest/1.0',
       Accept: 'application/json',
     }
