@@ -1045,6 +1045,30 @@ export const GreenhouseSource: JobSource = {
         return {
           source_slug: 'greenhouse',
           external_id: `greenhouse:${id}`,
+
+          title,
+          company,
+          location,
+          employment_type,
+          remote_type,
+
+          posted_date,
+          created_at: nowIso,
+          external_url,
+
+          salary_min,
+          salary_max,
+          competitiveness_level: null,
+
+          description,
+          data_raw: row,
+        }
+      })
+      .filter((job): job is NormalizedJob => Boolean(job))
+  },
+}
+
+// ---------------------------------------------------------------------------
 // RSS/Atom Feeds (generic RSS job feed support)
 // ---------------------------------------------------------------------------
 
@@ -1327,9 +1351,6 @@ export const LeverSource: JobSource = {
           competitiveness_level: null,
 
           description,
-          data_raw: row,
-        }
-      })
           data_raw: posting,
         }
       })

@@ -100,6 +100,16 @@ const SOURCE_PAGINATION: Record<string, PaginationConfig> = {
   },
   // Greenhouse doesn't use pagination; fetches all jobs in single request per board
   greenhouse: { pageParam: 'page', pageSizeParam: 'limit', pageSize: 1000, maxPagesPerRun: 1 },
+  // Lever doesn't use pagination - it uses company-based fetching
+  lever: {
+    pageParam: undefined, // Not used for Lever
+    maxPagesPerRun: 1,
+  },
+  // RSS doesn't use pagination - it fetches all configured feeds per run
+  rss: {
+    pageParam: undefined, // Not used for RSS
+    maxPagesPerRun: 1,
+  },
 }
 
 // Parse Greenhouse boards from env var
@@ -137,16 +147,6 @@ function parseGreenhouseBoards(): GreenhouseBoard[] {
     console.error('ingest_jobs: failed to parse GREENHOUSE_BOARDS_JSON', err)
     return []
   }
-  // Lever doesn't use pagination - it uses company-based fetching
-  lever: {
-    pageParam: undefined, // Not used for Lever
-    maxPagesPerRun: 1,
-  },
-  // RSS doesn't use pagination - it fetches all configured feeds per run
-  rss: {
-    pageParam: undefined, // Not used for RSS
-    maxPagesPerRun: 1,
-  },
 }
 
 // Helper to build the fetch URL for a given source, supporting Adzuna etc.

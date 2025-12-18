@@ -688,6 +688,9 @@ describe('Greenhouse normalize', () => {
         expect(result).toHaveLength(1)
         expect(result[0].location).toBeNull()
         expect(result[0].remote_type).toBeNull()
+    })
+})
+
 // =====================================================
 // Lever normalize
 // =====================================================
