@@ -209,10 +209,11 @@ function buildSourceUrl(
   }
 
   if (source.slug === 'careeronestop') {
+    const userId = process.env.CAREERONESTOP_USER_ID
     const apiKey = process.env.CAREERONESTOP_API_KEY
 
-    if (!apiKey) {
-      console.error('ingest_jobs: missing CAREERONESTOP_API_KEY')
+    if (!userId || !apiKey) {
+      console.error('ingest_jobs: missing CAREERONESTOP_USER_ID or CAREERONESTOP_API_KEY')
       return null
     }
 
@@ -225,7 +226,6 @@ function buildSourceUrl(
 
     // CareerOneStop v2 API URL format:
     // /v2/jobsearch/{userId}/{keyword}/{location}/{radius}/{sortColumns}/{sortOrder}/{startRecord}/{pageSize}/{days}
-    // The API key serves as the userId in the URL path
     const config = SOURCE_PAGINATION[source.slug] || {}
     const page = cursor?.page ?? 1
     const pageSize = config.pageSize ?? 50
@@ -239,7 +239,7 @@ function buildSourceUrl(
     const sortOrder = 'DESC'
     const days = '30' // Last 30 days
 
-    const baseUrl = `https://api.careeronestop.org/v2/jobsearch/${apiKey}/${encodeURIComponent(
+    const baseUrl = `https://api.careeronestop.org/v2/jobsearch/${userId}/${encodeURIComponent(
       keyword
     )}/${encodeURIComponent(location)}/${radius}/${sortColumns}/${sortOrder}/${startRecord}/${pageSize}/${days}`
 
