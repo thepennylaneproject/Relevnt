@@ -1,4 +1,5 @@
 // netlify/functions/ingest_jobs.ts
+import greenhouseBoardsData from '../../src/data/jobSources/greenhouse_boards.json'
 /*
 SQL (Supabase) to create the ingestion state table for per-source cursors:
 create table if not exists job_ingestion_state (
@@ -53,6 +54,7 @@ type PaginationConfig = {
   pageSize?: number
   sinceParam?: string
   maxPagesPerRun?: number
+  maxAgeDays?: number
 }
 
 // Greenhouse board configuration
@@ -115,39 +117,37 @@ const SOURCE_PAGINATION: Record<string, PaginationConfig> = {
 
 // Parse Greenhouse boards from env var
 function parseGreenhouseBoards(): GreenhouseBoard[] {
-  const boardsJson = process.env.GREENHOUSE_BOARDS_JSON
-  if (!boardsJson) {
-    console.log('ingest_jobs: GREENHOUSE_BOARDS_JSON not set, skipping Greenhouse boards')
-    return []
-  }
+  const boards: GreenhouseBoard[] = [...(greenhouseBoardsData as GreenhouseBoard[])]
+  const envJson = process.env.GREENHOUSE_BOARDS_JSON
 
-  try {
-    const boards = JSON.parse(boardsJson)
-    if (!Array.isArray(boards)) {
-      console.warn('ingest_jobs: GREENHOUSE_BOARDS_JSON must be a JSON array')
-      return []
-    }
-
-    // Validate each board has required fields
-    const validBoards = boards.filter((board) => {
-      if (!board.companyName || !board.boardToken) {
-        console.warn(
-          'ingest_jobs: Greenhouse board missing companyName or boardToken:',
-          board
-        )
-        return false
+  if (envJson) {
+    try {
+      const parsed = JSON.parse(envJson)
+      if (Array.isArray(parsed)) {
+        boards.push(...parsed)
       }
-      return true
-    })
-
-    console.log(
-      `ingest_jobs: loaded ${validBoards.length} Greenhouse boards from GREENHOUSE_BOARDS_JSON`
-    )
-    return validBoards
-  } catch (err) {
-    console.error('ingest_jobs: failed to parse GREENHOUSE_BOARDS_JSON', err)
-    return []
+    } catch (e) {
+      console.error('ingest_jobs: Failed to parse GREENHOUSE_BOARDS_JSON:', e)
+    }
   }
+
+  // Validate each board has required fields
+  const validBoards = boards.filter((board) => {
+    if (!board.companyName || !board.boardToken) {
+      console.warn(
+        'ingest_jobs: Greenhouse board missing companyName or boardToken:',
+        board
+      )
+      return false
+    }
+    return true
+  })
+
+  if (validBoards.length > 0) {
+    console.log(`ingest_jobs: loaded ${validBoards.length} Greenhouse boards`)
+  }
+
+  return validBoards
 }
 
 // Helper to build the fetch URL for a given source, supporting Adzuna etc.

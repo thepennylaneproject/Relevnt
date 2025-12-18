@@ -11,6 +11,7 @@
  *   ...
  * ]
  */
+import greenhouseCompaniesData from '../../data/jobSources/greenhouse_companies.json'
 
 import type { NormalizedJob } from '../../shared/jobSources'
 
@@ -42,23 +43,21 @@ interface GreenhouseJobsResponse {
  * Parse GREENHOUSE_COMPANIES_JSON environment variable
  */
 export function getGreenhouseCompanies(): GreenhouseCompany[] {
+  const companies: GreenhouseCompany[] = [...(greenhouseCompaniesData as GreenhouseCompany[])]
   const envVar = process.env.GREENHOUSE_COMPANIES_JSON
-  if (!envVar) {
-    console.warn('GREENHOUSE_COMPANIES_JSON not set, using empty list')
-    return []
+
+  if (envVar) {
+    try {
+      const parsed = JSON.parse(envVar)
+      if (Array.isArray(parsed)) {
+        companies.push(...parsed)
+      }
+    } catch (e) {
+      console.error('Failed to parse GREENHOUSE_COMPANIES_JSON:', e)
+    }
   }
 
-  try {
-    const parsed = JSON.parse(envVar)
-    if (!Array.isArray(parsed)) {
-      console.error('GREENHOUSE_COMPANIES_JSON must be an array')
-      return []
-    }
-    return parsed.filter((company: any) => company.name && company.url)
-  } catch (err) {
-    console.error('Failed to parse GREENHOUSE_COMPANIES_JSON:', err)
-    return []
-  }
+  return companies.filter((company) => company && company.name && company.url)
 }
 
 /**

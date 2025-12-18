@@ -1,4 +1,6 @@
 // src/shared/jobSources.ts
+import leverSourcesData from '../data/jobSources/lever_sources.json'
+import rssFeedsData from '../data/jobSources/rss_feeds.json'
 
 export type RemoteType = 'remote' | 'onsite' | 'hybrid' | null
 
@@ -1083,22 +1085,27 @@ interface RSSFeedSource {
 
 // Helper to parse RSS sources from environment
 function getRSSSources(): RSSFeedSource[] {
-  const json = typeof (globalThis as any).process !== 'undefined' && (globalThis as any).process?.env?.RSS_FEEDS_JSON ? (globalThis as any).process.env.RSS_FEEDS_JSON : undefined
-  if (!json) return []
-  try {
-    const parsed = JSON.parse(json)
-    if (!Array.isArray(parsed)) return []
-    return parsed.filter(
-      (item: any) =>
-        item &&
-        typeof item === 'object' &&
-        item.name &&
-        item.feedUrl
-    )
-  } catch (e) {
-    console.error('Failed to parse RSS_FEEDS_JSON:', e)
-    return []
+  const sources: RSSFeedSource[] = [...(rssFeedsData as RSSFeedSource[])]
+  const envJson = typeof (globalThis as any).process !== 'undefined' && (globalThis as any).process?.env?.RSS_FEEDS_JSON ? (globalThis as any).process.env.RSS_FEEDS_JSON : undefined
+
+  if (envJson) {
+    try {
+      const parsed = JSON.parse(envJson)
+      if (Array.isArray(parsed)) {
+        sources.push(...parsed)
+      }
+    } catch (e) {
+      console.error('Failed to parse RSS_FEEDS_JSON:', e)
+    }
   }
+
+  return sources.filter(
+    (item: any) =>
+      item &&
+      typeof item === 'object' &&
+      item.name &&
+      item.feedUrl
+  )
 }
 
 export const RSSSource: JobSource = {
@@ -1249,21 +1256,26 @@ interface LeverCompanySource {
 
 // Helper to parse Lever sources from environment
 function getLeverSources(): LeverCompanySource[] {
-  const json = typeof (globalThis as any).process !== 'undefined' && (globalThis as any).process?.env?.LEVER_SOURCES_JSON ? (globalThis as any).process.env.LEVER_SOURCES_JSON : undefined
-  if (!json) return []
-  try {
-    const parsed = JSON.parse(json)
-    if (!Array.isArray(parsed)) return []
-    return parsed.filter(
-      (item: any) =>
-        item &&
-        typeof item === 'object' &&
-        (item.companyName || item.leverSlug || item.leverApiUrl)
-    )
-  } catch (e) {
-    console.error('Failed to parse LEVER_SOURCES_JSON:', e)
-    return []
+  const sources: LeverCompanySource[] = [...(leverSourcesData as LeverCompanySource[])]
+  const envJson = typeof (globalThis as any).process !== 'undefined' && (globalThis as any).process?.env?.LEVER_SOURCES_JSON ? (globalThis as any).process.env.LEVER_SOURCES_JSON : undefined
+
+  if (envJson) {
+    try {
+      const parsed = JSON.parse(envJson)
+      if (Array.isArray(parsed)) {
+        sources.push(...parsed)
+      }
+    } catch (e) {
+      console.error('Failed to parse LEVER_SOURCES_JSON:', e)
+    }
   }
+
+  return sources.filter(
+    (item: any) =>
+      item &&
+      typeof item === 'object' &&
+      (item.companyName || item.leverSlug || item.leverApiUrl)
+  )
 }
 
 // Helper to build Lever API URL for a company

@@ -12,6 +12,7 @@
  *   ...
  * ]
  */
+import leverCompaniesData from '../../data/jobSources/lever_companies.json'
 
 import type { NormalizedJob } from '../../shared/jobSources'
 
@@ -43,23 +44,21 @@ interface LeverJobsResponse {
  * Parse LEVER_COMPANIES_JSON environment variable
  */
 export function getLeverCompanies(): LeverCompany[] {
+  const companies: LeverCompany[] = [...(leverCompaniesData as LeverCompany[])]
   const envVar = process.env.LEVER_COMPANIES_JSON
-  if (!envVar) {
-    console.warn('LEVER_COMPANIES_JSON not set, using empty list')
-    return []
+
+  if (envVar) {
+    try {
+      const parsed = JSON.parse(envVar)
+      if (Array.isArray(parsed)) {
+        companies.push(...parsed)
+      }
+    } catch (e) {
+      console.error('Failed to parse LEVER_COMPANIES_JSON:', e)
+    }
   }
 
-  try {
-    const parsed = JSON.parse(envVar)
-    if (!Array.isArray(parsed)) {
-      console.error('LEVER_COMPANIES_JSON must be an array')
-      return []
-    }
-    return parsed.filter((company: any) => company.name && company.url)
-  } catch (err) {
-    console.error('Failed to parse LEVER_COMPANIES_JSON:', err)
-    return []
-  }
+  return companies.filter((company) => company && company.name && company.url)
 }
 
 /**
