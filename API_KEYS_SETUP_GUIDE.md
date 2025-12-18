@@ -60,11 +60,11 @@ REED_API_KEY=<your-key>
 FINDWORK_API_KEY=<your-key>
 ```
 
-### CareerOneStop (Gov jobs - Needs clarity)
+### CareerOneStop (Gov jobs - Fixed)
 
 ```
 CAREERONESTOP_USER_ID=<your-user-id>
-CAREERONESTOP_TOKEN=<your-token>  # OR clarify if this is needed
+CAREERONESTOP_API_KEY=<your-bearer-token>
 ```
 
 ---

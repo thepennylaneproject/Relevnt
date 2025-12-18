@@ -13,13 +13,12 @@
 - **Fix**: Added `posted_at_max_age_days` to POST body in `ingest_jobs.ts` (line ~290)
 - **Status**: Ready to deploy, just needs API key in environment
 
-### ✅ Commit 79e0c87: CareerOneStop Authentication Fix
-- **Problem**: HTTP 401 Unauthorized - using wrong credential format
-- **Fix**: Changed from dual credentials (CAREERONESTOP_USER_ID + CAREERONESTOP_TOKEN) to single credential (CAREERONESTOP_API_KEY)
-  - Line 212: Use single `CAREERONESTOP_API_KEY` variable
-  - Line 242: Construct URL with `${apiKey}`
-  - Line 342-351: Use same key as Bearer token
-- **Status**: Ready to deploy, just needs API key in environment
+### ✅ Commit f44a2e6: CareerOneStop Authentication Fix (Corrected)
+- **Problem**: HTTP 401 Unauthorized - missing proper credential separation
+- **Fix**: Updated to correctly use TWO separate credentials:
+  - `CAREERONESTOP_USER_ID` - Goes in the API URL path (line 212, 242)
+  - `CAREERONESTOP_API_KEY` - Goes in Authorization Bearer token header (line 342, 351)
+- **Status**: Ready to deploy, needs both USER_ID and API_KEY in environment
 
 ---
 
@@ -30,7 +29,7 @@
 2. Go to **Site Settings** → **Environment** (or **Build & Deploy** → **Environment**)
 3. Click **Edit Variables** or **Add new variable**
 
-### Step 2: Add These 9 Environment Variables
+### Step 2: Add These 10 Environment Variables
 
 ```
 # 7 Already-Working Sources (just need API keys)
@@ -42,8 +41,9 @@ USAJOBS_USER_AGENT=MyJobApp/1.0 (Contact: your-email@example.com)
 THE_MUSE_API_KEY=<your-key>
 REMOTIVE_API_KEY=<your-key>
 
-# 1 Fixed Source (needs API key)
-CAREERONESTOP_API_KEY=<your-key>
+# 1 Fixed Source (needs 2 credentials: User ID + API Key)
+CAREERONESTOP_USER_ID=<your-user-id>
+CAREERONESTOP_API_KEY=<your-bearer-token>
 
 # 1 Recently Fixed Source (needs API key)
 THEIRSTACK_API_KEY=<your-key>
