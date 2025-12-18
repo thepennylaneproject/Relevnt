@@ -34,50 +34,56 @@ export interface PlatformDetectionResult {
 
 /**
  * Y Combinator Directory Discovery
+ * Uses multiple reliable community-maintained sources
  */
 export async function discoverFromYCombinator(): Promise<DiscoveredCompany[]> {
   try {
     const companies: DiscoveredCompany[] = [];
 
-    // YC companies by batch (can paginate through different years)
-    const batches = ['S24', 'F23', 'S23', 'F22', 'S22'];
+    // Reliable community sources for YC data
+    const sources = [
+      {
+        url: 'https://raw.githubusercontent.com/mittsh/yclist/master/list.json',
+        parser: (data: any) => data
+          .filter((c: any) => c.status === 'Active')
+          .map((c: any) => ({
+            name: c.name,
+            domain: c.hostname || (c.url ? new URL(c.url).hostname : undefined),
+            website: c.url,
+            description: c.description,
+            source: 'yc_list_master',
+            confidence: 0.9
+          }))
+      },
+      {
+        url: 'https://yc-oss.github.io/api/companies/hiring.json',
+        parser: (data: any) => data.map((c: any) => ({
+          name: c.name,
+          domain: c.domain,
+          website: c.website,
+          description: c.description,
+          industry: c.industry,
+          source: 'yc_oss_hiring',
+          confidence: 0.95
+        }))
+      }
+    ];
 
-    for (const batch of batches) {
+    for (const source of sources) {
       try {
-        // Public YC API endpoint
-        const url = `https://api.ycombinator.com/companies?batch=${batch}`;
-        const response = await fetch(url, {
-          headers: { 'User-Agent': 'relevnt-discovery/1.0' },
-
+        const response = await fetch(source.url, {
+          headers: { 'User-Agent': 'relevnt-discovery/1.0' }
         });
-
         if (!response.ok) continue;
-
-        const data = (await response.json()) as any;
-        const batchCompanies = Array.isArray(data) ? data : data.companies || [];
-
-        for (const company of batchCompanies) {
-          if (!company.name || !company.domain) continue;
-
-          companies.push({
-            name: company.name,
-            domain: company.domain || company.website,
-            website: company.website,
-            description: company.description,
-            industry: company.industry,
-            funding_stage: company.stage || 'seed', // YC companies are early stage
-            employee_count: company.team_size,
-            founded_year: company.founded_year,
-            source: `yc_${batch}`,
-            confidence: 0.95, // High confidence for YC data
-          });
-        }
+        const data = await response.json();
+        const discovered = source.parser(data).filter((c: any) => c.name && c.domain);
+        companies.push(...discovered);
       } catch (e) {
-        console.error(`Failed to fetch YC batch ${batch}:`, e);
+        console.error(`Failed to fetch YC source ${source.url}:`, e);
       }
     }
 
-    console.log(`Discovered ${companies.length} companies from Y Combinator`);
+    console.log(`Discovered ${companies.length} companies from Y Combinator sources`);
     return companies;
   } catch (err) {
     console.error('YC discovery failed:', err);
@@ -191,57 +197,12 @@ export async function discoverFromCrunchbase(options?: {
 }
 
 /**
- * AngelList (Wellfound) Discovery
+ * AngelList Discovery (Wellfound)
+ * Note: Public API is mostly restricted now, keeping as placeholder or for manual small runs
  */
 export async function discoverFromAngelList(): Promise<DiscoveredCompany[]> {
-  try {
-    const companies: DiscoveredCompany[] = [];
-
-    // AngelList public API (limited, for startup discovery)
-    const tags = ['hiring', 'growth', 'remote', 'funded'];
-
-    for (const tag of tags) {
-      try {
-        const response = await fetch(
-          `https://api.angel.co/1/tags/${encodeURIComponent(tag)}/startups`,
-          {
-            headers: { 'User-Agent': 'relevnt-discovery/1.0' },
-
-          }
-        );
-
-        if (!response.ok) continue;
-
-        const data = (await response.json()) as any;
-        const startups = data.startups || [];
-
-        for (const startup of startups) {
-          if (!startup.name || !startup.company_url) continue;
-
-          const domain = new URL(startup.company_url).hostname;
-
-          companies.push({
-            name: startup.name,
-            domain,
-            website: startup.company_url,
-            description: startup.tagline,
-            industry: startup.tag_list?.join(', '),
-            employee_count: startup.team_size,
-            source: `angellist_${tag}`,
-            confidence: 0.8,
-          });
-        }
-      } catch (e) {
-        console.error(`Failed to fetch AngelList tag ${tag}:`, e);
-      }
-    }
-
-    console.log(`Discovered ${companies.length} companies from AngelList`);
-    return companies;
-  } catch (err) {
-    console.error('AngelList discovery failed:', err);
-    return [];
-  }
+  // Skipping active discovery for AngelList due to API restrictions
+  return [];
 }
 
 /**
@@ -251,15 +212,25 @@ export async function discoverFromGitHubLists(): Promise<DiscoveredCompany[]> {
   try {
     const companies: DiscoveredCompany[] = [];
 
-    // Example: A curated list of startups or tech companies
+    // List of curated company/startup datasets on GitHub
     const sources = [
       {
-        url: 'https://raw.githubusercontent.com/derhuerst/vbb-companies/master/companies.json', // Sample tech list
+        url: 'https://raw.githubusercontent.com/derhuerst/vbb-companies/master/companies.json',
         parser: (data: any) => data.map((c: any) => ({
           name: c.name,
           domain: c.website ? new URL(c.website).hostname : undefined,
-          source: 'github_tech_list',
+          source: 'github_vbb_list',
           confidence: 0.7
+        }))
+      },
+      {
+        url: 'https://raw.githubusercontent.com/yc-oss/open-source-companies/main/companies.json',
+        parser: (data: any) => data.map((c: any) => ({
+          name: c.name,
+          domain: c.domain,
+          website: c.website,
+          source: 'github_yc_oss',
+          confidence: 0.8
         }))
       }
     ];
@@ -427,7 +398,7 @@ export async function runCompanyDiscovery(): Promise<DiscoveredCompany[]> {
     {
       name: 'AngelList',
       fetch: discoverFromAngelList,
-      enabled: true,
+      enabled: false, // Disabled due to API restrictions
     },
     {
       name: 'GitHub Lists',

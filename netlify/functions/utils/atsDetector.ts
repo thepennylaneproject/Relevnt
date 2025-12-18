@@ -150,7 +150,8 @@ export async function detectATS(
 ): Promise<DetectedATS | null> {
   try {
     const cache = getATSCache()
-    const cacheKey = (domain || (company ? extractDomainFromCompany(company) : null) || undefined) as string | undefined
+    const extracted = company ? extractDomainFromCompany(company) : null
+    const cacheKey = (domain || extracted || undefined) as string | undefined
 
     // Check cache first
     if (cache.has(company, cacheKey)) {

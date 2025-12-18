@@ -2,14 +2,8 @@
  * Local Discovery Runner
  * 
  * Simple script to run the discovery process manually.
- * Usage: npx ts-node scripts/run-discovery-local.ts
+ * Usage: npx tsx --env-file=.env.local scripts/run-discovery-local.ts
  */
-
-import * as dotenv from 'dotenv';
-import path from 'path';
-
-// Load environment variables from .env.local
-dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 import { runDiscoveryDaemon } from '../netlify/functions/discover_companies';
 

@@ -1069,17 +1069,6 @@ export const GreenhouseSource: JobSource = {
 }
 
 // ---------------------------------------------------------------------------
-          external_url,
-          posted_date,
-          created_at: nowIso,
-          salary_min,
-          salary_max,
-          description,
-          competitiveness_level: null,
-        }
-      })
-  },
-}
 
 // RSS/Atom Feeds (generic RSS job feed support)
 // ---------------------------------------------------------------------------
@@ -1357,6 +1346,7 @@ export const LeverSource: JobSource = {
           external_url,
           salary_min,
           salary_max,
+          competitiveness_level: null,
           description,
           data_raw: posting,
         }
@@ -1401,38 +1391,22 @@ export const FantasticJobsSource: JobSource = {
           if (salaryParts[1] !== null) salary_max = salaryParts[1]
         }
 
-        // Determine remote type from remote field or location
-        let remote_type: RemoteType = null
-        if (typeof job.remote === 'boolean') {
-          remote_type = job.remote ? 'remote' : null
-        } else if (job.location) {
-          remote_type = inferRemoteTypeFromLocation(job.location)
-        }
-
-        const externalUrl = job.url ?? job.link ?? null
-        const posted = safeDate(job.posted_date ?? job.date_posted ?? job.created_at)
-
         return {
           source_slug: 'fantastic',
           external_id: String(job.id),
-
-          title,
+          title: job.title,
           company: job.company ?? null,
           location: job.location ?? null,
-          employment_type: job.job_type ?? job.employment_type ?? null,
-          remote_type,
-
-          posted_date: posted,
+          employment_type: job.employment_type ?? null,
+          remote_type: job.remote ? 'remote' : (job.location?.toLowerCase().includes('remote') ? 'remote' : null),
+          posted_date: safeDate(job.posted_at || job.created_at),
           created_at: nowIso,
-          external_url: externalUrl,
-
+          external_url: job.url || job.apply_url || null,
           salary_min,
           salary_max,
           competitiveness_level: null,
-
-          description: job.description ?? null,
+          description: job.description || null,
           data_raw: job,
-          competitiveness_level: null,
         }
       })
       .filter((job): job is NormalizedJob => Boolean(job))

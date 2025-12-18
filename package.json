@@ -41,6 +41,7 @@
     "jsdom": "^27.2.0",
     "netlify-cli": "^23.12.3",
     "supabase": "^2.58.5",
+    "tsx": "^4.21.0",
     "typescript": "^5.2.2",
     "vite": "^5.0.0",
     "vitest": "^1.0.0"
