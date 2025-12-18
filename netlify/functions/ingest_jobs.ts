@@ -88,6 +88,7 @@ const SOURCE_PAGINATION: Record<string, PaginationConfig> = {
   // Jooble uses POST with body params, not URL params
   jooble: { pageParam: 'page', pageSizeParam: 'ResultOnPage', pageSize: 50, maxPagesPerRun: 2 },
   themuse: { pageParam: 'page', pageSizeParam: 'per_page', pageSize: 50, maxPagesPerRun: 3 },
+  fantastic: { pageParam: 'page', pageSizeParam: 'limit', pageSize: 100, maxPagesPerRun: 5 },
   reed_uk: { pageParam: 'resultsToSkip', pageSizeParam: 'resultsToTake', pageSize: 50, maxPagesPerRun: 2 },
   // TheirStack uses POST with limit in body
   theirstack: { pageParam: 'page', pageSizeParam: 'limit', pageSize: 100, maxPagesPerRun: 1 },
@@ -211,10 +212,10 @@ function buildSourceUrl(
 
   if (source.slug === 'careeronestop') {
     const userId = process.env.CAREERONESTOP_USER_ID
-    const token = process.env.CAREERONESTOP_TOKEN
+    const apiKey = process.env.CAREERONESTOP_API_KEY
 
-    if (!userId || !token) {
-      console.error('ingest_jobs: missing CAREERONESTOP_USER_ID or CAREERONESTOP_TOKEN')
+    if (!userId || !apiKey) {
+      console.error('ingest_jobs: missing CAREERONESTOP_USER_ID or CAREERONESTOP_API_KEY')
       return null
     }
 
@@ -274,6 +275,20 @@ function buildSourceUrl(
     if (apiKey) {
       params.set('api_key', apiKey)
     }
+    return `${source.fetchUrl}?${params.toString()}`
+  }
+
+  // Fantastic Jobs uses page and limit query params
+  if (source.slug === 'fantastic') {
+    const config = SOURCE_PAGINATION[source.slug] || {}
+    const page = cursor?.page ?? 1
+    const pageSize = config.pageSize ?? 100
+
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(pageSize),
+      remote: 'true', // Prefer remote jobs
+    })
     return `${source.fetchUrl}?${params.toString()}`
   }
 
@@ -340,16 +355,16 @@ function buildHeaders(source?: JobSource): Record<string, string> {
   }
 
   if (source?.slug === 'careeronestop') {
-    const token = process.env.CAREERONESTOP_TOKEN
-    if (!token) {
-      console.error('ingest_jobs: missing CAREERONESTOP_TOKEN')
+    const apiKey = process.env.CAREERONESTOP_API_KEY
+    if (!apiKey) {
+      console.error('ingest_jobs: missing CAREERONESTOP_API_KEY')
       return {
         'User-Agent': 'relevnt-job-ingest/1.0',
         Accept: 'application/json',
       }
     }
     return {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${apiKey}`,
       'User-Agent': 'relevnt-job-ingest/1.0',
       Accept: 'application/json',
     }
@@ -367,6 +382,24 @@ function buildHeaders(source?: JobSource): Record<string, string> {
 
     return {
       Authorization: `Token ${apiKey}`,
+      'User-Agent': 'relevnt-job-ingest/1.0',
+      Accept: 'application/json',
+    }
+  }
+
+  // Fantastic Jobs uses Bearer token authentication
+  if (source?.slug === 'fantastic') {
+    const apiKey = process.env.FANTASTIC_JOBS_API_KEY
+    if (!apiKey) {
+      console.error('ingest_jobs: missing FANTASTIC_JOBS_API_KEY')
+      return {
+        'User-Agent': 'relevnt-job-ingest/1.0',
+        Accept: 'application/json',
+      }
+    }
+
+    return {
+      Authorization: `Bearer ${apiKey}`,
       'User-Agent': 'relevnt-job-ingest/1.0',
       Accept: 'application/json',
     }
@@ -476,10 +509,13 @@ async function fetchJson(
     // TheirStack requires POST with search parameters in body
     if (source?.slug === 'theirstack') {
       const maxResults = parseInt(process.env.THEIRSTACK_MAX_RESULTS_PER_RUN || '300', 10)
+      const config = SOURCE_PAGINATION[source.slug] || {}
+      const maxAgeDays = config.maxAgeDays || 30
 
       const body = JSON.stringify({
         limit: maxResults,
         order_by: [{ desc: true, field: 'date_posted' }],
+        posted_at_max_age_days: maxAgeDays, // Required by TheirStack API
         // Include tech jobs broadly - the pipeline will filter
       })
 
