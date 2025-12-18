@@ -12,7 +12,7 @@
  * ]
  */
 
-import type { NormalizedJob } from '../jobSources'
+import type { NormalizedJob } from '../../shared/jobSources'
 
 interface GreenhouseCompany {
   name: string
@@ -75,8 +75,7 @@ async function fetchGreenhouseJobsForCompany(company: GreenhouseCompany): Promis
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; JobAggregator/1.0)',
         'Accept': 'application/json',
-      },
-      timeout: 10000, // 10 second timeout per company
+      }
     })
 
     if (!response.ok) {

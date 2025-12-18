@@ -150,7 +150,7 @@ export async function detectATS(
 ): Promise<DetectedATS | null> {
   try {
     const cache = getATSCache()
-    const cacheKey = domain || extractDomainFromCompany(company)
+    const cacheKey = (domain || (company ? extractDomainFromCompany(company) : null) || undefined) as string | undefined
 
     // Check cache first
     if (cache.has(company, cacheKey)) {
@@ -184,7 +184,6 @@ export async function detectATS(
         try {
           const response = await fetch(careersUrl, {
             method: 'GET', // Use GET instead of HEAD to check content
-            timeout: 5000,
             headers: { 'User-Agent': 'Relevnt-JobFinder/1.0' },
           })
 
