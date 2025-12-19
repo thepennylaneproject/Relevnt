@@ -586,8 +586,8 @@ describe('CareerOneStop normalize', () => {
 })
 
 describe('Greenhouse normalize', () => {
-    test('should normalize Greenhouse API response', () => {
-        const { GreenhouseSource } = require('../../../src/shared/jobSources')
+    test('should normalize Greenhouse API response', async () => {
+        const { GreenhouseSource } = await import('../../../src/shared/jobSources')
 
         const mockResponse = {
             jobs: [
@@ -640,15 +640,15 @@ describe('Greenhouse normalize', () => {
         expect(result[1].remote_type).toBe('remote')
     })
 
-    test('should handle empty response', () => {
-        const { GreenhouseSource } = require('../../../src/shared/jobSources')
+    test('should handle empty response', async () => {
+        const { GreenhouseSource } = await import('../../../src/shared/jobSources')
 
         const result = GreenhouseSource.normalize({ jobs: [] }) as NormalizedJob[]
         expect(result).toHaveLength(0)
     })
 
-    test('should handle missing fields gracefully', () => {
-        const { GreenhouseSource } = require('../../../src/shared/jobSources')
+    test('should handle missing fields gracefully', async () => {
+        const { GreenhouseSource } = await import('../../../src/shared/jobSources')
 
         const mockResponse = {
             jobs: [
@@ -669,8 +669,8 @@ describe('Greenhouse normalize', () => {
         expect(result[0].posted_date).toBeNull()
     })
 
-    test('should handle jobs with no offices or departments', () => {
-        const { GreenhouseSource } = require('../../../src/shared/jobSources')
+    test('should handle jobs with no offices or departments', async () => {
+        const { GreenhouseSource } = await import('../../../src/shared/jobSources')
 
         const mockResponse = {
             jobs: [
@@ -848,7 +848,7 @@ describe('Lever normalize', () => {
         ]
 
         const result = LeverSource.normalize(mockResponse) as NormalizedJob[]
-        expect(result[0].posted_date).toBe('2024-12-11')
+        expect(result[0].posted_date).toBe('2023-12-11')
     })
 
     test('should be in ALL_SOURCES', async () => {

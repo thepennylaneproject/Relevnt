@@ -33,7 +33,7 @@ import {
 } from '../../src/shared/companiesRegistry'
 import { fetchCompaniesInParallel, fetchFromMultiplePlatforms } from './utils/concurrent-fetcher'
 import { fetchAndParseRSSFeed } from './utils/rssParser'
-import { enrichJobURL } from './utils/jobURLEnricher'
+import { enrichJobURL, enrichJobURLs } from './utils/jobURLEnricher'
 
 export type IngestResult = {
   source: string;
@@ -66,15 +66,16 @@ export interface GreenhouseBoard {
 
 const DEFAULT_PAGE_SIZE = 50
 const DEFAULT_MAX_PAGES_PER_RUN = 3
-const DEFAULT_GREENHOUSE_MAX_BOARDS_PER_RUN = 20
+const DEFAULT_GREENHOUSE_MAX_BOARDS_PER_RUN = 50
 const DEFAULT_GREENHOUSE_MAX_JOBS_PER_BOARD = 200
+const DEFAULT_LEVER_MAX_COMPANIES_PER_RUN = 50
 
 const SOURCE_PAGINATION: Record<string, PaginationConfig> = {
   remoteok: { pageParam: 'page', pageSizeParam: 'limit', pageSize: 50 },
   remotive: { pageParam: 'page', pageSizeParam: 'limit', pageSize: 50, sinceParam: 'since' },
   himalayas: { pageParam: 'page', pageSizeParam: 'limit', pageSize: 50 },
   adzuna_us: {
-    pageParam: 'page',
+    // pageParam: 'page', // Adzuna uses page in the path, not query param, avoid redundant param
     pageSizeParam: 'results_per_page',
     pageSize: 50,
     maxPagesPerRun: 1, // keep Adzuna calls bounded since auth limits are stricter
@@ -85,12 +86,19 @@ const SOURCE_PAGINATION: Record<string, PaginationConfig> = {
     pageSize: 50,
     maxPagesPerRun: 3,
   },
-  jobicy: { pageParam: 'page', pageSizeParam: 'count', pageSize: 50 },
+  jobicy: {
+    // pageParam: undefined, // Jobicy v2 is strict about query params, avoid sending page=1
+    pageSizeParam: 'count',
+    pageSize: 50
+  },
   arbeitnow: { pageParam: 'page', pageSizeParam: 'limit', pageSize: 50 },
   // Jooble uses POST with body params, not URL params
   jooble: { pageParam: 'page', pageSizeParam: 'ResultOnPage', pageSize: 50, maxPagesPerRun: 2 },
   themuse: { pageParam: 'page', pageSizeParam: 'per_page', pageSize: 50, maxPagesPerRun: 3 },
   fantastic: { pageParam: 'page', pageSizeParam: 'limit', pageSize: 100, maxPagesPerRun: 5 },
+  jobdatafeeds: { pageParam: 'page', pageSizeParam: 'page_size', pageSize: 100, maxPagesPerRun: 3 },
+  careerjet: { pageParam: 'page', pageSizeParam: 'pagesize', pageSize: 50, maxPagesPerRun: 3 },
+  whatjobs: { pageParam: 'page', pageSizeParam: 'limit', pageSize: 50, maxPagesPerRun: 3 },
   reed_uk: { pageParam: 'resultsToSkip', pageSizeParam: 'resultsToTake', pageSize: 50, maxPagesPerRun: 2 },
   // TheirStack uses POST with limit in body
   theirstack: { pageParam: 'page', pageSizeParam: 'limit', pageSize: 100, maxPagesPerRun: 1 },
@@ -207,13 +215,14 @@ function buildSourceUrl(
       sort_by: 'date',
     })
 
-    return applyCursorToUrl(`${base}?${params.toString()}`, source, cursor)
+    const page = cursor?.page ?? 1
+    // Adzuna requires page in the path: /search/1
+    return `${base}/${page}?${params.toString()}`
   }
 
   if (source.slug === 'careeronestop') {
     const userId = process.env.CAREERONESTOP_USER_ID
     const apiKey = process.env.CAREERONESTOP_API_KEY
-
     if (!userId || !apiKey) {
       console.error('ingest_jobs: missing CAREERONESTOP_USER_ID or CAREERONESTOP_API_KEY')
       return null
@@ -288,6 +297,51 @@ function buildSourceUrl(
       page: String(page),
       limit: String(pageSize),
       remote: 'true', // Prefer remote jobs
+    })
+    return `${source.fetchUrl}?${params.toString()}`
+  }
+
+  // JobDataFeeds uses standard page/page_size pagination
+  if (source.slug === 'jobdatafeeds') {
+    const config = SOURCE_PAGINATION[source.slug] || {}
+    const page = cursor?.page ?? 1
+    const pageSize = config.pageSize ?? 100
+
+    const params = new URLSearchParams({
+      page: String(page),
+      page_size: String(pageSize),
+      title: 'all',  // Search for all jobs
+    })
+    return `${source.fetchUrl}?${params.toString()}`
+  }
+
+  // CareerJet uses page/pagesize with required parameters
+  if (source.slug === 'careerjet') {
+    const config = SOURCE_PAGINATION[source.slug] || {}
+    const page = cursor?.page ?? 1
+    const pageSize = config.pageSize ?? 50
+
+    const params = new URLSearchParams({
+      affid: process.env.CAREERJET_AFFILIATE_ID || 'partner',  // Affiliate ID
+      keywords: 'jobs',  // Generic search
+      page: String(page),
+      pagesize: String(pageSize),
+      user_ip: '0.0.0.0',  // Required but not used for backend
+      user_agent: 'relevnt-job-ingest/1.0',  // Required but not used for backend
+      url: 'https://relevnt.io',  // Required but not used for backend
+    })
+    return `${source.fetchUrl}?${params.toString()}`
+  }
+
+  // WhatJobs uses page/limit pagination
+  if (source.slug === 'whatjobs') {
+    const config = SOURCE_PAGINATION[source.slug] || {}
+    const page = cursor?.page ?? 1
+    const pageSize = config.pageSize ?? 50
+
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(pageSize),
     })
     return `${source.fetchUrl}?${params.toString()}`
   }
@@ -387,6 +441,42 @@ function buildHeaders(source?: JobSource): Record<string, string> {
     }
   }
 
+  // JobDataFeeds uses Bearer token authentication
+  if (source?.slug === 'jobdatafeeds') {
+    const apiKey = process.env.JOBDATAFEEDS_API_KEY
+    if (!apiKey) {
+      console.error('ingest_jobs: missing JOBDATAFEEDS_API_KEY')
+      return {
+        'User-Agent': 'relevnt-job-ingest/1.0',
+        Accept: 'application/json',
+      }
+    }
+
+    return {
+      Authorization: `Bearer ${apiKey}`,
+      'User-Agent': 'relevnt-job-ingest/1.0',
+      Accept: 'application/json',
+    }
+  }
+
+  // WhatJobs uses a custom x-api-key header
+  if (source?.slug === 'whatjobs') {
+    const apiKey = process.env.WHATJOBS_API_KEY
+    if (!apiKey) {
+      console.error('ingest_jobs: missing WHATJOBS_API_KEY')
+      return {
+        'User-Agent': 'relevnt-job-ingest/1.0',
+        Accept: 'application/json',
+      }
+    }
+
+    return {
+      'x-api-key': apiKey,
+      'User-Agent': 'relevnt-job-ingest/1.0',
+      Accept: 'application/json',
+    }
+  }
+
   // Fantastic Jobs uses Bearer token authentication
   if (source?.slug === 'fantastic') {
     const apiKey = process.env.FANTASTIC_JOBS_API_KEY
@@ -459,8 +549,16 @@ function buildHeaders(source?: JobSource): Record<string, string> {
     }
   }
 
+  // RemoteOK is sensitive to scrapers
+  if (source?.slug === 'remoteok') {
+    return {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      Accept: 'application/json',
+    }
+  }
+
   return {
-    'User-Agent': 'relevnt-job-ingest/1.0',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     Accept: 'application/json',
   }
 }
@@ -508,7 +606,7 @@ async function fetchJson(
 
     // TheirStack requires POST with search parameters in body
     if (source?.slug === 'theirstack') {
-      const maxResults = parseInt(process.env.THEIRSTACK_MAX_RESULTS_PER_RUN || '300', 10)
+      const maxResults = parseInt(process.env.THEIRSTACK_MAX_RESULTS_PER_RUN || '25', 10)
       const config = SOURCE_PAGINATION[source.slug] || {}
       const maxAgeDays = config.maxAgeDays || 30
 
@@ -579,8 +677,8 @@ async function getCompaniesFromRegistry(
   try {
     const maxCompanies = parseInt(
       platform === 'lever'
-        ? process.env.LEVER_MAX_COMPANIES_PER_RUN || '20'
-        : process.env.GREENHOUSE_MAX_BOARDS_PER_RUN || '20',
+        ? process.env.LEVER_MAX_COMPANIES_PER_RUN || String(DEFAULT_LEVER_MAX_COMPANIES_PER_RUN)
+        : process.env.GREENHOUSE_MAX_BOARDS_PER_RUN || String(DEFAULT_GREENHOUSE_MAX_BOARDS_PER_RUN),
       10
     );
 
@@ -965,27 +1063,23 @@ async function upsertJobs(jobs: NormalizedJob[]) {
 
   const supabase = createAdminClient()
 
-  // Enrich job URLs with direct company links (bypass aggregators)
+  // Enrich job URLs with direct company links (batch approach for speed)
   let urlEnrichmentCount = 0
-  const urlEnrichedJobs: NormalizedJob[] = []
 
-  for (const job of uniqueJobs) {
-    try {
-      const enrichment = await enrichJobURL(job)
-      if (enrichment.enriched_url && enrichment.enriched_url !== job.external_url) {
-        urlEnrichmentCount++
-        urlEnrichedJobs.push({
-          ...job,
-          external_url: enrichment.enriched_url,
-        })
-      } else {
-        urlEnrichedJobs.push(job)
+  // Use batch enrichment with concurrency 5 to avoid overloading
+  const enrichmentResults = await enrichJobURLs(uniqueJobs, undefined, 5)
+
+  const urlEnrichedJobs = uniqueJobs.map((job, index) => {
+    const enrichment = enrichmentResults[index]
+    if (enrichment?.enriched_url && enrichment.enriched_url !== job.external_url) {
+      urlEnrichmentCount++
+      return {
+        ...job,
+        external_url: enrichment.enriched_url,
       }
-    } catch (err) {
-      console.warn(`ingest_jobs: URL enrichment error for job ${job.external_id}`, err)
-      urlEnrichedJobs.push(job)
     }
-  }
+    return job
+  })
 
   if (urlEnrichmentCount > 0) {
     console.log(`ingest_jobs: enriched ${urlEnrichmentCount} job URLs with direct company links`)
@@ -1799,29 +1893,46 @@ export async function runIngestion(
   const results: IngestResult[] = []
   let failedSourceCount = 0
 
-  for (const source of sourcesToRun) {
-    try {
-      // Use special handler for Greenhouse since it manages multiple boards
-      const result = source.slug === 'greenhouse'
-        ? await ingestGreenhouseBoards(source, runId || undefined)
-        : await ingest(source, runId || undefined)
-      results.push(result)
-      if (result.status === 'failed') {
+  // Run sources in parallel with limited concurrency to avoid timeouts
+  // We use Promise.allSettled so one failure doesn't stop the entire run
+  const CONCURRENCY_LIMIT = 3
+  const chunks = []
+  for (let i = 0; i < sourcesToRun.length; i += CONCURRENCY_LIMIT) {
+    chunks.push(sourcesToRun.slice(i, i + CONCURRENCY_LIMIT))
+  }
+
+  for (const chunk of chunks) {
+    const chunkResults = await Promise.allSettled(
+      chunk.map(async (source) => {
+        // Use special handler for Greenhouse since it manages multiple boards
+        return source.slug === 'greenhouse'
+          ? await ingestGreenhouseBoards(source, runId || undefined)
+          : await ingest(source, runId || undefined)
+      })
+    )
+
+    chunkResults.forEach((settled, index) => {
+      const source = chunk[index]
+      if (settled.status === 'fulfilled') {
+        const result = settled.value
+        results.push(result)
+        if (result.status === 'failed') {
+          failedSourceCount++
+        }
+      } else {
+        console.error(`ingest_jobs: fatal error while ingesting ${source.slug}`, settled.reason)
+        results.push({
+          source: source.slug,
+          count: 0,
+          normalized: 0,
+          duplicates: 0,
+          staleFiltered: 0,
+          status: 'failed',
+          error: settled.reason instanceof Error ? settled.reason.message : String(settled.reason),
+        })
         failedSourceCount++
       }
-    } catch (err) {
-      console.error(`ingest_jobs: fatal error while ingesting ${source.slug}`, err)
-      results.push({
-        source: source.slug,
-        count: 0,
-        normalized: 0,
-        duplicates: 0,
-        staleFiltered: 0,
-        status: 'failed',
-        error: err instanceof Error ? err.message : String(err),
-      })
-      failedSourceCount++
-    }
+    })
   }
 
   const summary = results.reduce<Record<string, number>>((acc, r) => {

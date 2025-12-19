@@ -38,6 +38,25 @@ describe('Company Discovery & ATS Detection', () => {
             expect(result).not.toBeNull()
             expect(result?.type).toBe('workday')
         })
+
+        test('should detect Lever from bare lever.co URL', () => {
+            const result = detectATSFromContent('Check out https://lever.co/acme-inc for jobs')
+            expect(result?.type).toBe('lever')
+            expect(result?.slug).toBe('acme-inc')
+        })
+
+        test('should detect Greenhouse from grnhse.io', () => {
+            const result = detectATSFromContent('https://grnhse.io/acmetoken')
+            expect(result?.type).toBe('greenhouse')
+            expect(result?.token).toBe('acmetoken')
+        })
+
+        test('should detect Greenhouse from direct job board JS', () => {
+            const content = '<script src="https://greenhouse.io/embed/job_board/js?for=acmetoken"></script>'
+            const result = detectATSFromContent(content)
+            expect(result?.type).toBe('greenhouse')
+            expect(result?.token).toBe('acmetoken')
+        })
     })
 
     describe('crawlCareersPage', () => {
@@ -82,7 +101,7 @@ describe('Company Discovery & ATS Detection', () => {
                 { name: 'Startup Inc', website: 'https://startup.io' }
             ]
 
-            vi.mocked(fetch).mockResolvedValueOnce({
+            vi.mocked(fetch).mockResolvedValue({
                 ok: true,
                 json: () => Promise.resolve(mockData)
             } as Response)

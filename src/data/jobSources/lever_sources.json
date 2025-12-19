@@ -1,1 +1,650 @@
-[]
+[
+  {
+    "companyName": "Superside",
+    "leverSlug": "superside"
+  },
+  {
+    "companyName": "Topline Pro",
+    "leverSlug": "toplinepro"
+  },
+  {
+    "companyName": "Two Dots",
+    "leverSlug": "twodots"
+  },
+  {
+    "companyName": "MaverickX",
+    "leverSlug": "maverickx"
+  },
+  {
+    "companyName": "Articulate",
+    "leverSlug": "articulate"
+  },
+  {
+    "companyName": "Abacus",
+    "leverSlug": "emburse"
+  },
+  {
+    "companyName": "BuildZoom",
+    "leverSlug": "buildzoom"
+  },
+  {
+    "companyName": "CareMessage",
+    "leverSlug": "caremessage"
+  },
+  {
+    "companyName": "EasyPost",
+    "leverSlug": "easypost-2"
+  },
+  {
+    "companyName": "Plivo",
+    "leverSlug": "plivo"
+  },
+  {
+    "companyName": "PollEverywhere",
+    "leverSlug": "polleverywhere"
+  },
+  {
+    "companyName": "Quartzy",
+    "leverSlug": "quartzy"
+  },
+  {
+    "companyName": "Zinc",
+    "leverSlug": "cdn"
+  },
+  {
+    "companyName": "The Muse",
+    "leverSlug": "themuse"
+  },
+  {
+    "companyName": "Rescale",
+    "leverSlug": "rescale"
+  },
+  {
+    "companyName": "SlidePay",
+    "leverSlug": "angel"
+  },
+  {
+    "companyName": "Fond",
+    "leverSlug": "fond"
+  },
+  {
+    "companyName": "Apollo",
+    "leverSlug": "apollographql"
+  },
+  {
+    "companyName": "Quartzy",
+    "leverSlug": "quartzy"
+  },
+  {
+    "companyName": "Clerky",
+    "leverSlug": "clerky"
+  },
+  {
+    "companyName": "DevCycle",
+    "leverSlug": "devcycle"
+  },
+  {
+    "companyName": "Rigetti Computing",
+    "leverSlug": "rigetti"
+  },
+  {
+    "companyName": "Rainforest",
+    "leverSlug": "rainforest"
+  },
+  {
+    "companyName": "Zentail",
+    "leverSlug": "zentail"
+  },
+  {
+    "companyName": "Lever",
+    "leverSlug": "lever"
+  },
+  {
+    "companyName": "BackerKit",
+    "leverSlug": "backerkit"
+  },
+  {
+    "companyName": "Mattermark",
+    "leverSlug": "mattermark"
+  },
+  {
+    "companyName": "BuildZoom",
+    "leverSlug": "buildzoom"
+  },
+  {
+    "companyName": "One Codex",
+    "leverSlug": "onecodex"
+  },
+  {
+    "companyName": "NimbleRx",
+    "leverSlug": "nimblerx"
+  },
+  {
+    "companyName": "Mashgin",
+    "leverSlug": "mashgin"
+  },
+  {
+    "companyName": "Teleport",
+    "leverSlug": "teleport"
+  },
+  {
+    "companyName": "ROSS Intelligence",
+    "leverSlug": "rossintelligence"
+  },
+  {
+    "companyName": "Scope AR",
+    "leverSlug": "scopear"
+  },
+  {
+    "companyName": "Reach",
+    "leverSlug": "reachpower"
+  },
+  {
+    "companyName": "Tesorio",
+    "leverSlug": "tesorio"
+  },
+  {
+    "companyName": "Verge Genomics",
+    "leverSlug": "vergegenomics"
+  },
+  {
+    "companyName": "Circle Medical",
+    "leverSlug": "circlemedical"
+  },
+  {
+    "companyName": "PickTrace",
+    "leverSlug": "picktrace"
+  },
+  {
+    "companyName": "Cofactor Genomics",
+    "leverSlug": "cofactor-genomics"
+  },
+  {
+    "companyName": "Tovala",
+    "leverSlug": "tovala"
+  },
+  {
+    "companyName": "Copia",
+    "leverSlug": "copia"
+  },
+  {
+    "companyName": "Netomi",
+    "leverSlug": "netomi"
+  },
+  {
+    "companyName": "Thunkable",
+    "leverSlug": "thunkable"
+  },
+  {
+    "companyName": "Emburse",
+    "leverSlug": "emburse"
+  },
+  {
+    "companyName": "Zenysis",
+    "leverSlug": "zenysis"
+  },
+  {
+    "companyName": "WorkRamp",
+    "leverSlug": "workramp"
+  },
+  {
+    "companyName": "Raptor Maps",
+    "leverSlug": "raptormaps"
+  },
+  {
+    "companyName": "Hush",
+    "leverSlug": "hush"
+  },
+  {
+    "companyName": "Instrumentl",
+    "leverSlug": "instrumentl"
+  },
+  {
+    "companyName": "Multiply Labs",
+    "leverSlug": "multiplylabs"
+  },
+  {
+    "companyName": "Squire Technologies",
+    "leverSlug": "getsquire"
+  },
+  {
+    "companyName": "The Athletic",
+    "leverSlug": "theathletic"
+  },
+  {
+    "companyName": "Meesho",
+    "leverSlug": "meesho"
+  },
+  {
+    "companyName": "Snappr",
+    "leverSlug": "snappr"
+  },
+  {
+    "companyName": "Firsthand",
+    "leverSlug": "firsthand"
+  },
+  {
+    "companyName": "Collectly",
+    "leverSlug": "collectlyinc"
+  },
+  {
+    "companyName": "Skyways",
+    "leverSlug": "skyways"
+  },
+  {
+    "companyName": "VergeSense",
+    "leverSlug": "vergesense"
+  },
+  {
+    "companyName": "Bloom Institute of Technology",
+    "leverSlug": "bloomtech"
+  },
+  {
+    "companyName": "Ribbon Health",
+    "leverSlug": "h1"
+  },
+  {
+    "companyName": "Prelim",
+    "leverSlug": "prelim"
+  },
+  {
+    "companyName": "Pyka",
+    "leverSlug": "pyka"
+  },
+  {
+    "companyName": "Modern Fertility",
+    "leverSlug": "ro"
+  },
+  {
+    "companyName": "Candidate.ly",
+    "leverSlug": "candidate"
+  },
+  {
+    "companyName": "Torch",
+    "leverSlug": "torch"
+  },
+  {
+    "companyName": "Bear Flag Robotics",
+    "leverSlug": "bearflagrobotics"
+  },
+  {
+    "companyName": "Evry Health",
+    "leverSlug": "evry-health"
+  },
+  {
+    "companyName": "Plexus",
+    "leverSlug": "plexus"
+  },
+  {
+    "companyName": "Volley",
+    "leverSlug": "volleythat"
+  },
+  {
+    "companyName": "Anjuna",
+    "leverSlug": "anjuna"
+  },
+  {
+    "companyName": "CaptivateIQ",
+    "leverSlug": "captivateiq"
+  },
+  {
+    "companyName": "Super",
+    "leverSlug": "super"
+  },
+  {
+    "companyName": "C16 Biosciences",
+    "leverSlug": "c16bio"
+  },
+  {
+    "companyName": "Titan",
+    "leverSlug": "titan"
+  },
+  {
+    "companyName": "JITX",
+    "leverSlug": "jitxinc"
+  },
+  {
+    "companyName": "Radix Labs",
+    "leverSlug": "radix"
+  },
+  {
+    "companyName": "Duffel",
+    "leverSlug": "duffel"
+  },
+  {
+    "companyName": "Mytos",
+    "leverSlug": "mytos"
+  },
+  {
+    "companyName": "Canary Technologies",
+    "leverSlug": "canarytechnologies"
+  },
+  {
+    "companyName": "Fintual",
+    "leverSlug": "fintual"
+  },
+  {
+    "companyName": "Culdesac",
+    "leverSlug": "culdesac"
+  },
+  {
+    "companyName": "Pachama",
+    "leverSlug": "pachama"
+  },
+  {
+    "companyName": "Sapling.ai",
+    "leverSlug": "sapling"
+  },
+  {
+    "companyName": "Termius",
+    "leverSlug": "termius"
+  },
+  {
+    "companyName": "Volta Labs, Inc.",
+    "leverSlug": "voltalabs"
+  },
+  {
+    "companyName": "Zippi",
+    "leverSlug": "zippi"
+  },
+  {
+    "companyName": "AXDRAFT",
+    "leverSlug": "onit"
+  },
+  {
+    "companyName": "Memfault",
+    "leverSlug": "memfault"
+  },
+  {
+    "companyName": "Shiru",
+    "leverSlug": "shiru"
+  },
+  {
+    "companyName": "Pillar",
+    "leverSlug": "pillar"
+  },
+  {
+    "companyName": "Intersect Labs",
+    "leverSlug": "intersect"
+  },
+  {
+    "companyName": "Curri",
+    "leverSlug": "curri"
+  },
+  {
+    "companyName": "Teleo",
+    "leverSlug": "teleo"
+  },
+  {
+    "companyName": "FamPay",
+    "leverSlug": "fampay"
+  },
+  {
+    "companyName": "Ramen VR",
+    "leverSlug": "ramenvr"
+  },
+  {
+    "companyName": "Porter",
+    "leverSlug": "porter"
+  },
+  {
+    "companyName": "Handoff",
+    "leverSlug": "handoff"
+  },
+  {
+    "companyName": "H1",
+    "leverSlug": "h1"
+  },
+  {
+    "companyName": "Eternal",
+    "leverSlug": "eternal"
+  },
+  {
+    "companyName": "TrueNorth",
+    "leverSlug": "truenorth"
+  },
+  {
+    "companyName": "Quill",
+    "leverSlug": "quill"
+  },
+  {
+    "companyName": "Riot",
+    "leverSlug": "tryriot"
+  },
+  {
+    "companyName": "Recurrency",
+    "leverSlug": "recurrency"
+  },
+  {
+    "companyName": "PostEra",
+    "leverSlug": "postera"
+  },
+  {
+    "companyName": "STARK BANK",
+    "leverSlug": "starkbank"
+  },
+  {
+    "companyName": "Living Carbon",
+    "leverSlug": "livingcarbon"
+  },
+  {
+    "companyName": "Prelay",
+    "leverSlug": "prelay"
+  },
+  {
+    "companyName": "Increase",
+    "leverSlug": "increase"
+  },
+  {
+    "companyName": "Synapticure",
+    "leverSlug": "synapticure"
+  },
+  {
+    "companyName": "doola",
+    "leverSlug": "doola"
+  },
+  {
+    "companyName": "Osmind",
+    "leverSlug": "osmind"
+  },
+  {
+    "companyName": "Skio",
+    "leverSlug": "skio"
+  },
+  {
+    "companyName": "Formal",
+    "leverSlug": "joinformal"
+  },
+  {
+    "companyName": "Warmly,",
+    "leverSlug": "warmly"
+  },
+  {
+    "companyName": "Finch",
+    "leverSlug": "finch"
+  },
+  {
+    "companyName": "Verifiable",
+    "leverSlug": "verifiable"
+  },
+  {
+    "companyName": "Albedo",
+    "leverSlug": "albedo"
+  },
+  {
+    "companyName": "Humaans",
+    "leverSlug": "humaans"
+  },
+  {
+    "companyName": "Gerald Technologies, Inc",
+    "leverSlug": "joingerald"
+  },
+  {
+    "companyName": "SpruceID",
+    "leverSlug": "sprucesystems"
+  },
+  {
+    "companyName": "Smartcuts",
+    "leverSlug": "smartcuts"
+  },
+  {
+    "companyName": "Encord",
+    "leverSlug": "cordtechnologies"
+  },
+  {
+    "companyName": "Gridware",
+    "leverSlug": "gridware"
+  },
+  {
+    "companyName": "Camber",
+    "leverSlug": "camber"
+  },
+  {
+    "companyName": "Popl",
+    "leverSlug": "popl"
+  },
+  {
+    "companyName": "Trela",
+    "leverSlug": "trela"
+  },
+  {
+    "companyName": "Tractian",
+    "leverSlug": "tractian"
+  },
+  {
+    "companyName": "Dyte",
+    "leverSlug": "dyte-io"
+  },
+  {
+    "companyName": "Tackle",
+    "leverSlug": "tackle"
+  },
+  {
+    "companyName": "Epsilon3",
+    "leverSlug": "epsilon3"
+  },
+  {
+    "companyName": "TAG",
+    "leverSlug": "tag"
+  },
+  {
+    "companyName": "Jupe",
+    "leverSlug": "jupe"
+  },
+  {
+    "companyName": "Mable",
+    "leverSlug": "mable"
+  },
+  {
+    "companyName": "Aleph",
+    "leverSlug": "aleph"
+  },
+  {
+    "companyName": "Pillar",
+    "leverSlug": "pillar"
+  },
+  {
+    "companyName": "Zuma",
+    "leverSlug": "getzuma"
+  },
+  {
+    "companyName": "Toku",
+    "leverSlug": "toku"
+  },
+  {
+    "companyName": "PolicyFly",
+    "leverSlug": "policyfly"
+  },
+  {
+    "companyName": "Fleetzero",
+    "leverSlug": "fleetzero"
+  },
+  {
+    "companyName": "Strong Compute",
+    "leverSlug": "strongcompute"
+  },
+  {
+    "companyName": "Tendo",
+    "leverSlug": "tendo"
+  },
+  {
+    "companyName": "Cofactr",
+    "leverSlug": "cofactr"
+  },
+  {
+    "companyName": "Unify",
+    "leverSlug": "unify"
+  },
+  {
+    "companyName": "Maya Labs",
+    "leverSlug": "maya"
+  },
+  {
+    "companyName": "Layup",
+    "leverSlug": "layup"
+  },
+  {
+    "companyName": "Nango",
+    "leverSlug": "nango"
+  },
+  {
+    "companyName": "Suger",
+    "leverSlug": "suger"
+  },
+  {
+    "companyName": "Rainmaker",
+    "leverSlug": "rainmaker"
+  },
+  {
+    "companyName": "Conduit",
+    "leverSlug": "conduit"
+  },
+  {
+    "companyName": "Prosper",
+    "leverSlug": "prosper"
+  },
+  {
+    "companyName": "Cargo",
+    "leverSlug": "getlago"
+  },
+  {
+    "companyName": "Newton",
+    "leverSlug": "newton"
+  },
+  {
+    "companyName": "Conduit",
+    "leverSlug": "conduit"
+  },
+  {
+    "companyName": "Capitol AI",
+    "leverSlug": "capitol-ai"
+  },
+  {
+    "companyName": "Unusual",
+    "leverSlug": "unusual"
+  },
+  {
+    "companyName": "Revi",
+    "leverSlug": "revi"
+  },
+  {
+    "companyName": "Distro",
+    "leverSlug": "distro"
+  },
+  {
+    "companyName": "Pharos",
+    "leverSlug": "pharos"
+  },
+  {
+    "companyName": "Autonomous Technologies Group",
+    "leverSlug": "autonomous"
+  },
+  {
+    "companyName": "Blue",
+    "leverSlug": "blue"
+  },
+  {
+    "companyName": "Poll Everywhere",
+    "leverSlug": "polleverywhere"
+  }
+]

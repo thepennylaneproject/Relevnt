@@ -27,7 +27,6 @@
   functions = "netlify/functions"
 
 [build.environment]
-  SUPABASE_SERVICE_ROLE_KEY = "your_service_role_key"
 # ðŸŽ“ Build Process:
 # 1. Netlify runs: npm install
 # 2. Then runs: npm run build (your command)
@@ -56,6 +55,10 @@
 # Daily Analytics Summary - runs daily at 2am UTC
 [functions.daily_summaries]
   schedule = "0 2 * * *"  # Daily at 2am UTC
+
+# Discovery Daemon - runs weekly on Sundays
+[functions.discover_companies]
+  schedule = "@weekly"
 
 # ðŸŽ“ Why esbuild?
 # - Super fast bundler for serverless functions

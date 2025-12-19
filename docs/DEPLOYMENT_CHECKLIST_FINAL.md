@@ -163,7 +163,7 @@ const body = JSON.stringify({
 ```typescript
 // BEFORE:
 const userId = process.env.CAREERONESTOP_USER_ID
-const token = process.env.CAREERONESTOP_TOKEN
+const apiKey = process.env.CAREERONESTOP_API_KEY
 // URL: .../${userId}/...
 // Header: Authorization: Bearer ${token}
 

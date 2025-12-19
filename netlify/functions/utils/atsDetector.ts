@@ -34,20 +34,26 @@ export function detectATSFromContent(content: string): Partial<DetectedATS> | nu
   if (
     contentLower.includes('lever.co') ||
     contentLower.includes('data-lever-job-id') ||
-    contentLower.includes('data-lever-post-id')
+    contentLower.includes('data-lever-post-id') ||
+    contentLower.includes('lever-job-id')
   ) {
     const leverSlugMatch =
       contentLower.match(/api\.lever\.co\/v0\/postings\/([a-z0-9-]+)/) ||
       contentLower.match(/jobs\.lever\.co\/([a-z0-9-]+)/) ||
       contentLower.match(/([a-z0-9-]+)\.lever\.co/) ||
-      content.match(/data-lever-slug=["']([^"']+)["']/)
+      content.match(/data-lever-slug=["']([^"']+)["']/) ||
+      contentLower.match(/lever\.co\/([a-z0-9-]+)/)
 
     if (leverSlugMatch?.[1]) {
-      return {
-        type: 'lever',
-        slug: leverSlugMatch[1],
-        detectionMethod: 'url_pattern',
-        confidence: 0.95,
+      // Avoid catching 'api' or 'jobs' as slugs
+      const slug = leverSlugMatch[1]
+      if (slug !== 'api' && slug !== 'jobs' && slug !== 'v0') {
+        return {
+          type: 'lever',
+          slug: slug,
+          detectionMethod: 'url_pattern',
+          confidence: 0.95,
+        }
       }
     }
   }
@@ -57,26 +63,37 @@ export function detectATSFromContent(content: string): Partial<DetectedATS> | nu
   if (
     contentLower.includes('greenhouse.io') ||
     contentLower.includes('grnhse.io') ||
-    contentLower.includes('gh-board-token')
+    contentLower.includes('gh-board-token') ||
+    contentLower.includes('gh_src') ||
+    contentLower.includes('grnhse')
   ) {
     const greenhouseMatch =
       contentLower.match(/boards\.greenhouse\.io\/([a-z0-9]+)/) ||
       contentLower.match(/boards\.greenhouse\.io.*board_token["\s=:]+([a-z0-9]+)/) ||
       contentLower.match(/([a-z0-9]+)\.greenhouse\.io/) ||
       content.match(/gh-board-token=["']([^"']+)["']/) ||
-      content.match(/grnh_board_token\s*=\s*["']([^"']+)["']/)
+      content.match(/grnh_board_token\s*=\s*["']([^"']+)["']/) ||
+      contentLower.match(/greenhouse\.io\/embed\/job_board\/js\?for=([a-z0-9]+)/) ||
+      contentLower.match(/grnhse\.io\/([a-z0-9]+)/)
 
     if (greenhouseMatch?.[1]) {
-      return {
-        type: 'greenhouse',
-        token: greenhouseMatch[1],
-        detectionMethod: 'url_pattern',
-        confidence: 0.95,
+      const token = greenhouseMatch[1]
+      if (token !== 'boards' && token !== 'embed') {
+        return {
+          type: 'greenhouse',
+          token: token,
+          detectionMethod: 'url_pattern',
+          confidence: 0.95,
+        }
       }
     }
 
     // Check for Greenhouse JS inclusion without explicit token in URL
-    if (contentLower.includes('grnh.js') || contentLower.includes('greenhouse.io/embed')) {
+    if (
+      contentLower.includes('grnh.js') ||
+      contentLower.includes('greenhouse.io/embed') ||
+      contentLower.includes('gh-board-token')
+    ) {
       return {
         type: 'greenhouse',
         confidence: 0.7,
@@ -108,35 +125,75 @@ function buildCareerPageURLs(domain: string): string[] {
   return [
     `https://${cleanDomain}/careers`,
     `https://${cleanDomain}/jobs`,
+    `https://${cleanDomain}/hiring`,
+    `https://${cleanDomain}/join`,
+    `https://${cleanDomain}/about/careers`,
+    `https://${cleanDomain}/about/jobs`,
+    `https://${cleanDomain}/company/careers`,
+    `https://${cleanDomain}/company/jobs`,
     `https://careers.${cleanDomain}`,
     `https://jobs.${cleanDomain}`,
     `https://career.${cleanDomain}`,
     `https://work.${cleanDomain}`,
+    `https://join.${cleanDomain}`,
   ]
 }
 
-/**
- * Extract domain from company name or URL
- */
 function extractDomainFromCompany(company: string): string | null {
   if (!company) return null
 
-  // If it looks like a URL already
-  if (company.includes('.')) {
-    return company.split('/')[0]
+  // If it looks like a URL already (e.g., "acme.com")
+  if (company.includes('.') && !company.includes(' ')) {
+    return company.split('/')[0].split('?')[0].toLowerCase()
   }
 
-  // Convert company name to domain
-  // "Acme Inc" → "acme.com" (heuristic)
+  // Convert company name to slug
+  // "Acme Inc" -> "acme"
   const slug = company
     .toLowerCase()
-    .replace(/\s+inc\.?$/, '') // Remove Inc suffix
-    .replace(/\s+llc\.?$/, '')  // Remove LLC suffix
-    .replace(/\s+corp\.?$/, '')  // Remove Corp suffix
-    .replace(/\s+/g, '')         // Remove spaces
+    .replace(/\b(inc|llc|corp|corporation|ltd|limited|technologies|solutions|group|labs|software|international|systems|holding)\.?\b/g, '') // Remove common suffixes
+    .replace(/[^a-z0-9 ]+/g, '') // Remove symbols but keep spaces for now
+    .trim()
+    .replace(/\s+/g, '-') // Replace spaces with hyphens for slugs
 
-  return `${slug}.com`
+  return slug || null
 }
+
+/**
+ * Probabilistically probe known board hosts with company slug
+ */
+async function probeDirectBoards(slug: string): Promise<Partial<DetectedATS> | null> {
+  if (!slug || slug.length < 2) return null
+
+  const greenhouseUrl = `https://api.greenhouse.io/v1/boards/${slug}/jobs`
+  const leverUrl = `https://api.lever.co/v0/postings/${slug}?limit=1`
+
+  // Use a proper User-Agent to avoid being blocked by WAFs during probing
+  const headers = {
+    'User-Agent': BROWSER_USER_AGENT,
+    'Accept': 'application/json'
+  }
+
+  // Try Greenhouse
+  try {
+    const ghRes = await fetch(greenhouseUrl, { method: 'HEAD', headers })
+    if (ghRes.ok) {
+      return { type: 'greenhouse', token: slug, confidence: 0.9, detectionMethod: 'url_pattern' }
+    }
+  } catch (e) { }
+
+  // Try Lever
+  try {
+    const lvRes = await fetch(leverUrl, { method: 'HEAD', headers })
+    if (lvRes.ok) {
+      return { type: 'lever', slug: slug, confidence: 0.9, detectionMethod: 'url_pattern' }
+    }
+  } catch (e) { }
+
+  return null
+}
+
+const BROWSER_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 
 /**
  * Detect ATS from external URL
@@ -146,7 +203,8 @@ function extractDomainFromCompany(company: string): string | null {
 export async function detectATS(
   externalUrl: string | null,
   company: string | null,
-  domain?: string
+  domain?: string,
+  crawledUrl?: string | null
 ): Promise<DetectedATS | null> {
   try {
     const cache = getATSCache()
@@ -162,7 +220,22 @@ export async function detectATS(
 
     cache.recordMiss()
 
-    // Method 1: Direct URL pattern matching
+    // 0. Prioritize Crawled URL (Methods 1-3 but focused on the crawled target)
+    if (crawledUrl) {
+      const detected = detectATSFromContent(crawledUrl)
+      if (detected && detected.type !== 'unknown') {
+        const result: DetectedATS = {
+          type: detected.type as ATSType,
+          slug: detected.slug,
+          token: detected.token,
+          careersUrl: crawledUrl,
+          confidence: 0.95,
+          detectionMethod: 'domain_inference',
+        }
+        cache.set(company, cacheKey, result)
+        return result
+      }
+    }
     if (externalUrl) {
       const detected = detectATSFromContent(externalUrl)
       if (detected && detected.type !== 'unknown') {
@@ -178,14 +251,48 @@ export async function detectATS(
       }
     }
 
-    // Method 2: Try to find careers page and detect from there
+    // Method 2: Try direct board probing with slug variations
+    const domainPart = cacheKey ? cacheKey.split('.')[0] : null
+    const companySlug = company ? extractDomainFromCompany(company) : null
+
+    const slugsToTry = new Set<string>()
+    if (domainPart) slugsToTry.add(domainPart)
+    if (companySlug) {
+      slugsToTry.add(companySlug)
+      // Also try stripping hyphens for Greenhouse tokens which often omit them
+      if (companySlug.includes('-')) {
+        slugsToTry.add(companySlug.replace(/-/g, ''))
+      }
+    }
+
+    for (const slug of slugsToTry) {
+      const directDetected = await probeDirectBoards(slug)
+      if (directDetected) {
+        const result: DetectedATS = {
+          type: directDetected.type as ATSType,
+          slug: directDetected.slug,
+          token: directDetected.token,
+          confidence: directDetected.confidence || 0.9,
+          detectionMethod: 'url_pattern',
+        }
+        cache.set(company, cacheKey, result)
+        return result
+      }
+    }
+
+    // Method 3: Try to find careers page and detect from there
     const careersUrls = buildCareerPageURLs(cacheKey || '')
     if (careersUrls.length > 0) {
       for (const careersUrl of careersUrls) {
         try {
           const response = await fetch(careersUrl, {
-            method: 'GET', // Use GET instead of HEAD to check content
-            headers: { 'User-Agent': 'Relevnt-JobFinder/1.0' },
+            method: 'GET',
+            headers: {
+              'User-Agent': BROWSER_USER_AGENT,
+              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+              'Accept-Language': 'en-US,en;q=0.9'
+            },
+            redirect: 'follow'
           })
 
           if (response.ok) {
@@ -211,12 +318,12 @@ export async function detectATS(
       }
     }
 
-    // Cache negative result
-    cache.set(company, cacheKey, null)
-    return null
+    // Cache negative result for 7 days (604800000 ms)
+    cache.set(company, cacheKey, null, 604800000);
+    return null;
   } catch (error) {
-    console.warn('ATS detection error:', error)
-    return null
+    console.warn('ATS detection error:', error);
+    return null;
   }
 }
 

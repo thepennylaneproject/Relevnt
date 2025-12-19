@@ -33,7 +33,7 @@
 **Fixed Issue #2: CareerOneStop Authentication Error**
 - **Commit**: 79e0c87
 - **Problem**: API was returning HTTP 401 Unauthorized
-- **Root Cause**: Trying to use separate CAREERONESTOP_USER_ID and CAREERONESTOP_TOKEN variables when API key serves both purposes
+- **Root Cause**: Trying to use separate CAREERONESTOP_USER_ID and CAREERONESTOP_API_KEY variables when API key serves both purposes
 - **Fix**: Changed code to use single CAREERONESTOP_API_KEY variable in both URL and Authorization header
 - **Files**: `netlify/functions/ingest_jobs.ts:212,242,342-351`
 - **Status**: ✅ Fixed and tested

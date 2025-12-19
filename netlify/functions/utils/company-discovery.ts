@@ -18,6 +18,7 @@ export interface DiscoveredCompany {
   funding_stage?: string
   employee_count?: number
   founded_year?: number
+  growth_score?: number
   source: string
   confidence: number // 0-1
 }
@@ -28,6 +29,7 @@ export interface PlatformDetectionResult {
   domain: string
   lever_slug?: string
   greenhouse_board_token?: string
+  growth_score?: number
   detected_at: string
   detection_method: 'html_parse' | 'api_query' | 'manual'
 }
@@ -56,30 +58,55 @@ export async function discoverFromYCombinator(): Promise<DiscoveredCompany[]> {
           }))
       },
       {
-        url: 'https://yc-oss.github.io/api/companies/hiring.json',
-        parser: (data: any) => data.map((c: any) => ({
-          name: c.name,
-          domain: c.domain,
-          website: c.website,
-          description: c.description,
-          industry: c.industry,
-          source: 'yc_oss_hiring',
-          confidence: 0.95
-        }))
+        url: 'https://yc-oss.github.io/api/companies/all.json',
+        parser: (data: any) => data.map((c: any) => {
+          let domain = c.domain;
+          if (!domain && c.website) {
+            try {
+              domain = new URL(c.website).hostname;
+            } catch (e) { }
+          }
+          return {
+            name: c.name,
+            domain: domain,
+            website: c.website,
+            description: c.long_description || c.one_liner,
+            industry: c.industry,
+            source: 'yc_oss_all',
+            confidence: 0.95
+          };
+        })
       }
     ];
 
     for (const source of sources) {
-      try {
-        const response = await fetch(source.url, {
-          headers: { 'User-Agent': 'relevnt-discovery/1.0' }
-        });
-        if (!response.ok) continue;
-        const data = await response.json();
-        const discovered = source.parser(data).filter((c: any) => c.name && c.domain);
-        companies.push(...discovered);
-      } catch (e) {
-        console.error(`Failed to fetch YC source ${source.url}:`, e);
+      let retries = 2;
+      let success = false;
+
+      while (retries >= 0 && !success) {
+        try {
+          // Add a timeout to avoid hanging the discovery process
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+          const response = await fetch(source.url, {
+            headers: { 'User-Agent': 'Mozilla/5.0 (compatible; RelevntDiscovery/1.0)' },
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+
+          if (!response.ok) {
+            retries--;
+            continue;
+          }
+          const data = await response.json();
+          const discovered = source.parser(data).filter((c: any) => c.name && c.domain);
+          companies.push(...discovered);
+          success = true;
+        } catch (e) {
+          retries--;
+          if (retries < 0) console.error(`Failed to fetch YC source ${source.url}:`, e);
+        }
       }
     }
 
@@ -169,6 +196,9 @@ export async function discoverFromCrunchbase(options?: {
         for (const entity of results) {
           if (!entity.name || !entity.domain_name) continue;
 
+          // Map funding stage to initial growth score
+          const growthScore = stage.includes('series_c') ? 60 : stage.includes('series_b') ? 40 : 20;
+
           companies.push({
             name: entity.name,
             domain: entity.domain_name,
@@ -179,6 +209,7 @@ export async function discoverFromCrunchbase(options?: {
             funding_stage: stage,
             employee_count: parseEmployeeCount(entity.num_employees_enum),
             founded_year: extractYear(entity.founded_date),
+            growth_score: growthScore, // Corrected: passing the calculated score
             source: `crunchbase_${stage}`,
             confidence: 0.9,
           });
@@ -232,6 +263,20 @@ export async function discoverFromGitHubLists(): Promise<DiscoveredCompany[]> {
           source: 'github_yc_oss',
           confidence: 0.8
         }))
+      },
+      {
+        url: 'https://raw.githubusercontent.com/andreasbm/awesome-it-companies/master/companies.json',
+        parser: (data: any) => {
+          // This list has a different structure: { "companies": [ ... ] }
+          const list = data.companies || [];
+          return list.map((c: any) => ({
+            name: c.name,
+            domain: c.website ? new URL(c.website).hostname : undefined,
+            website: c.website,
+            source: 'github_awesome_it',
+            confidence: 0.7
+          }));
+        }
       }
     ];
 
@@ -242,7 +287,7 @@ export async function discoverFromGitHubLists(): Promise<DiscoveredCompany[]> {
         });
         if (!response.ok) continue;
         const data = await response.json();
-        const discovered = source.parser(data).filter((c: any) => c.name && c.domain);
+        const discovered = source.parser(data).filter((c: any) => c.name && (c.domain || c.website));
         companies.push(...discovered);
       } catch (e) {
         console.error(`Failed to fetch GitHub source ${source.url}:`, e);
@@ -251,7 +296,77 @@ export async function discoverFromGitHubLists(): Promise<DiscoveredCompany[]> {
 
     return companies;
   } catch (err) {
-    console.error('GitHub discovery failed:', err);
+    console.error('Error in discoverFromGitHubLists:', err);
+    return [];
+  }
+}
+
+/**
+ * Harvest known ATS board tokens/slugs from local registries
+ * This is the "Inverted Pipeline" approach: known ATS -> Company
+ */
+export async function harvestFromRegistries(): Promise<PlatformDetectionResult[]> {
+  try {
+    const results: PlatformDetectionResult[] = [];
+
+    // Use fs/promises to be safe about ESM execution context
+    const { readFile } = await import('fs/promises');
+    const { join } = await import('path');
+    const greenhousePath = join(process.cwd(), 'src/data/jobSources/greenhouse_boards.json');
+    const leverPath = join(process.cwd(), 'src/data/jobSources/lever_sources.json');
+
+    let greenhouseBoards = [];
+    let leverSources = [];
+
+    try {
+      const ghContent = await readFile(greenhousePath, 'utf-8');
+      greenhouseBoards = JSON.parse(ghContent);
+    } catch (e) {
+      console.warn(`Could not load greenhouse_boards.json: ${e instanceof Error ? e.message : String(e)}`);
+    }
+
+    try {
+      const lvContent = await readFile(leverPath, 'utf-8');
+      leverSources = JSON.parse(lvContent);
+    } catch (e) {
+      console.warn(`Could not load lever_sources.json: ${e instanceof Error ? e.message : String(e)}`);
+    }
+
+    const now = new Date().toISOString();
+
+    if (Array.isArray(greenhouseBoards)) {
+      for (const board of greenhouseBoards) {
+        if (board.boardToken) {
+          results.push({
+            company_id: `reg-gh-${board.boardToken}`,
+            company_name: board.companyName || board.boardToken,
+            domain: board.boardToken + '.com', // Heuristic: many tokens match domain
+            greenhouse_board_token: board.boardToken,
+            detected_at: now,
+            detection_method: 'manual'
+          });
+        }
+      }
+    }
+
+    if (Array.isArray(leverSources)) {
+      for (const source of leverSources) {
+        if (source.leverSlug) {
+          results.push({
+            company_id: `reg-lv-${source.leverSlug}`,
+            company_name: source.companyName || source.leverSlug,
+            domain: source.leverSlug + '.com', // Heuristic
+            lever_slug: source.leverSlug,
+            detected_at: now,
+            detection_method: 'manual'
+          });
+        }
+      }
+    }
+
+    return results;
+  } catch (err) {
+    console.error('Error harvesting from registries:', err);
     return [];
   }
 }
@@ -294,7 +409,7 @@ export async function crawlCareersPage(domain: string): Promise<string | null> {
  * Detect platforms from company careers page
  */
 export async function detectPlatformsFromCareersPage(
-  company: { name: string; domain: string }
+  company: { name: string; domain: string; growth_score?: number }
 ): Promise<PlatformDetectionResult | null> {
   const { detectATSFromContent } = await import('./atsDetector');
 
@@ -302,41 +417,31 @@ export async function detectPlatformsFromCareersPage(
     const urls = [
       `https://${company.domain}/careers`,
       `https://${company.domain}/jobs`,
+      `https://${company.domain}/hiring`,
+      `https://${company.domain}/join`,
       `https://careers.${company.domain}`,
       `https://jobs.${company.domain}`,
     ];
 
     // Try finding careers page via crawling if direct guesses fail
     const crawledUrl = await crawlCareersPage(company.domain);
-    if (crawledUrl && !urls.includes(crawledUrl)) {
-      urls.push(crawledUrl);
-    }
 
-    for (const url of urls) {
-      try {
-        const response = await fetch(url, {
-          headers: { 'User-Agent': 'relevnt-discovery/1.0' },
-        });
+    const { detectATS } = await import('./atsDetector');
 
-        if (!response.ok) continue;
-
-        const html = await response.text();
-        const ats = detectATSFromContent(html);
-
-        if (ats && ats.type !== 'unknown') {
-          return {
-            company_id: `company-${company.domain}`,
-            company_name: company.name,
-            domain: company.domain,
-            lever_slug: ats.slug,
-            greenhouse_board_token: ats.token,
-            detected_at: new Date().toISOString(),
-            detection_method: 'html_parse',
-          };
-        }
-      } catch (e) {
-        // Continue to next URL
-      }
+    // First try the robust detection that includes direct probing
+    // NOW: prioritize the crawledUrl if we found one
+    const bestDetected = await detectATS(null, company.name, company.domain, crawledUrl);
+    if (bestDetected) {
+      return {
+        company_id: `company-${company.domain}`,
+        company_name: company.name,
+        domain: company.domain,
+        lever_slug: bestDetected.slug,
+        greenhouse_board_token: bestDetected.token,
+        growth_score: company.growth_score,
+        detected_at: new Date().toISOString(),
+        detection_method: bestDetected.detectionMethod === 'url_pattern' ? 'api_query' : 'html_parse',
+      };
     }
 
     return null;
@@ -443,7 +548,7 @@ export async function runCompanyDiscovery(): Promise<DiscoveredCompany[]> {
  */
 export async function detectPlatformsInBatch(
   companies: DiscoveredCompany[],
-  concurrency: number = 5
+  concurrency: number = 10
 ): Promise<PlatformDetectionResult[]> {
   const results: PlatformDetectionResult[] = [];
   const queue = [...companies];
@@ -458,6 +563,7 @@ export async function detectPlatformsInBatch(
         detectPlatformsFromCareersPage({
           name: company.name,
           domain: company.domain,
+          growth_score: (company as any).growth_score,
         })
           .then((result) => {
             if (result) {

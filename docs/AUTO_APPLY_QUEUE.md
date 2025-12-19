@@ -135,9 +135,9 @@ Automatically enforced:
 2. **Environment Variables**
    ```bash
    # .env
-   SUPABASE_URL=your_supabase_url
-   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-   ADMIN_SECRET=your_admin_secret
+   SUPABASE_URL=https://your-project.supabase.co
+   SUPABASE_SERVICE_ROLE_KEY=your_actual_service_role_key
+   ADMIN_SECRET=your_actual_admin_secret
    ```
 
 3. **Install Dependencies**

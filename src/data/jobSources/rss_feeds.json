@@ -1,1 +1,83 @@
-[]
+[
+    {
+        "url": "https://stackoverflow.com/jobs/feed",
+        "company": "Stack Overflow Jobs",
+        "location_default": null,
+        "trust_level": "high"
+    },
+    {
+        "url": "https://weworkremotely.com/feed",
+        "company": "We Work Remotely",
+        "location_default": "Remote",
+        "trust_level": "high"
+    },
+    {
+        "url": "https://dev.to/api/articles?tag=jobs",
+        "company": "Dev.to Jobs",
+        "location_default": null,
+        "trust_level": "medium"
+    },
+    {
+        "url": "https://dribbble.com/jobs/feed",
+        "company": "Dribbble Jobs",
+        "location_default": null,
+        "trust_level": "medium"
+    },
+    {
+        "url": "https://www.problogger.com/feed/",
+        "company": "ProBlogger",
+        "location_default": "Remote",
+        "trust_level": "medium"
+    },
+    {
+        "url": "https://www.authenticjobs.com/feed/",
+        "company": "Authentic Jobs",
+        "location_default": null,
+        "trust_level": "medium"
+    },
+    {
+        "url": "https://www.hubspot.com/company/careers",
+        "company": "HubSpot Careers",
+        "location_default": null,
+        "trust_level": "high"
+    },
+    {
+        "url": "https://jobs.linkedin.com/feed?keywords=jobs",
+        "company": "LinkedIn Jobs Feed",
+        "location_default": null,
+        "trust_level": "medium"
+    },
+    {
+        "url": "https://www.indeed.com/rss?q=jobs&l=",
+        "company": "Indeed RSS",
+        "location_default": null,
+        "trust_level": "medium"
+    },
+    {
+        "url": "https://www.craigslist.org/about/best/feed",
+        "company": "Craigslist Meta Feed",
+        "location_default": null,
+        "trust_level": "low"
+    },
+    {
+        "url": "https://blog.hubspot.com/feed",
+        "company": "HubSpot",
+        "keywords": "marketing,content,social media",
+        "trust_level": "high"
+    },
+    {
+        "url": "https://www.contentmarketinginstitute.com/feed/",
+        "company": "Content Marketing Institute",
+        "trust_level": "medium"
+    },
+    {
+        "url": "https://blog.buffer.com/feed/",
+        "company": "Buffer",
+        "trust_level": "medium"
+    },
+    {
+        "url": "https://blog.hootsuite.com/feed/",
+        "company": "Hootsuite",
+        "trust_level": "medium"
+    }
+]
