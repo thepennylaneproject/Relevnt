@@ -8,6 +8,10 @@
 import type { Handler } from '@netlify/functions'
 import { createAdminClient } from './utils/supabase'
 
+export const config = {
+    schedule: "0 2 * * *"  // Daily at 2am UTC
+}
+
 export const handler: Handler = async () => {
     const startedAt = Date.now()
 
