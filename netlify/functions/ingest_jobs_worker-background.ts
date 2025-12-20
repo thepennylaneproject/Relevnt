@@ -5,8 +5,7 @@
  * Called by jobs_cron.ts or admin_ingest_trigger.ts
  * Has 15-minute timeout thanks to -background suffix.
  * 
- * IMPORTANT: The -background suffix ONLY works for HTTP-triggered functions,
- * NOT for scheduled functions. That's why we split into trigger + worker.
+ * Validates X-Internal-Secret header for security.
  */
 import type { Config } from '@netlify/functions'
 import { runIngestion } from './ingest_jobs'
@@ -14,6 +13,18 @@ import { runIngestion } from './ingest_jobs'
 export default async (req: Request) => {
     const startedAt = Date.now()
     console.log('ingest_jobs_worker-background: starting')
+
+    // Validate internal secret
+    const internalSecret = process.env.INTERNAL_FUNCTION_SECRET || 'default-internal-secret'
+    const providedSecret = req.headers.get('X-Internal-Secret')
+
+    if (providedSecret !== internalSecret) {
+        console.warn('ingest_jobs_worker-background: unauthorized request')
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+            status: 403,
+            headers: { 'Content-Type': 'application/json' }
+        })
+    }
 
     try {
         const body = await req.json().catch(() => ({}))

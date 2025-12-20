@@ -3,20 +3,24 @@
  * Scheduled Job Ingestion Trigger
  * 
  * Runs hourly to trigger the background ingestion worker.
- * This function is lightweight (<30s) and just triggers the actual worker.
+ * Uses a shared secret for authentication to avoid 403.
  */
 import type { Config } from '@netlify/functions'
 
-export default async (req: Request) => {
+export default async () => {
     const baseUrl = process.env.URL || 'https://relevnt-fresh.netlify.app'
+    const internalSecret = process.env.INTERNAL_FUNCTION_SECRET || 'default-internal-secret'
 
     console.log('jobs_cron: triggering background ingestion worker')
 
     try {
-        // Trigger the background worker which has 15-min timeout
+        // Trigger the background worker with auth header
         const response = await fetch(`${baseUrl}/.netlify/functions/ingest_jobs_worker-background`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Internal-Secret': internalSecret
+            },
             body: JSON.stringify({ triggeredBy: 'schedule' })
         })
 
