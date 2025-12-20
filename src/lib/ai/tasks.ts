@@ -110,5 +110,37 @@ export const TASK_SPECS: Record<AITaskName, AITaskSpec> = {
     batchable: false,
     safety: 'high',
   },
+  linkedin_profile_analysis: {
+    requires_json: true,
+    max_tokens_hint: 8_000,
+    preferred_quality_default: 'high',
+    cache_ttl_seconds: 60 * 60,
+    batchable: false,
+    safety: 'medium',
+  },
+  portfolio_analysis: {
+    requires_json: true,
+    max_tokens_hint: 10_000,
+    preferred_quality_default: 'high',
+    cache_ttl_seconds: 60 * 60,
+    batchable: false,
+    safety: 'medium',
+  },
+  interview_prepare: {
+    requires_json: true,
+    max_tokens_hint: 6_000,
+    preferred_quality_default: 'high',
+    cache_ttl_seconds: 60 * 30,
+    batchable: false,
+    safety: 'medium',
+  },
+  interview_evaluate: {
+    requires_json: true,
+    max_tokens_hint: 4_000,
+    preferred_quality_default: 'high',
+    cache_ttl_seconds: 1, // Don't cache evaluations to allow retries with different answers
+    batchable: false,
+    safety: 'medium',
+  },
 }
 import type { AITaskName, AITaskSpec } from './types'

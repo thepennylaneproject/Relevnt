@@ -1,0 +1,295 @@
+
+.linkedin-optimizer {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  font-family: 'Outfit', 'Inter', sans-serif;
+  color: var(--color-graphite-dark, #333);
+}
+
+.linkedin-optimizer__header {
+  margin-bottom: 40px;
+  text-align: left;
+}
+
+.linkedin-optimizer__title-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.linkedin-optimizer__title-row h1 {
+  font-size: 32px;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: var(--color-gold, #C7A56A);
+  text-transform: uppercase;
+}
+
+.linkedin-optimizer__subtitle {
+  font-size: 18px;
+  color: var(--color-graphite-light, #666);
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+.linkedin-optimizer__input-section {
+  background: var(--color-ivory-light, #FDFCFB);
+  border: 1px solid var(--color-taupe-light, #E8E2D9);
+  padding: 30px;
+  border-radius: 4px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+}
+
+.linkedin-optimizer__input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.linkedin-optimizer__input-group label {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-graphite-light, #888);
+}
+
+.linkedin-optimizer__input-group input {
+  padding: 16px;
+  background: white;
+  border: 1px solid var(--color-taupe-light, #E8E2D9);
+  border-radius: 4px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.linkedin-optimizer__input-group input:focus {
+  border-color: var(--color-gold, #C7A56A);
+}
+
+.linkedin-optimizer__button {
+  padding: 16px 32px;
+  background: var(--color-graphite-dark, #333);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 8px;
+}
+
+.linkedin-optimizer__button:hover:not(:disabled) {
+  background: black;
+  transform: translateY(-1px);
+}
+
+.linkedin-optimizer__button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.linkedin-optimizer__error {
+  margin-top: 16px;
+  color: #c53030;
+  font-size: 14px;
+}
+
+.linkedin-optimizer__analysis-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px;
+  text-align: center;
+  gap: 20px;
+}
+
+.pulse-loader {
+  width: 40px;
+  height: 40px;
+  background-color: var(--color-gold, #C7A56A);
+  border-radius: 100%;
+  animation: sk-pulse 1.2s infinite ease-in-out;
+}
+
+@keyframes sk-pulse {
+  0% { transform: scale(0); }
+  100% { transform: scale(1.0); opacity: 0; }
+}
+
+.linkedin-optimizer__scores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.score-card {
+  background: white;
+  border: 1px solid var(--color-taupe-light, #E8E2D9);
+  padding: 24px;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.2s;
+}
+
+.score-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.score-card__number {
+  font-size: 48px;
+  font-weight: 300;
+  margin-bottom: 8px;
+}
+
+.score-card__label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  color: var(--color-graphite-light, #888);
+  margin-bottom: 16px;
+}
+
+.score-card__bar {
+  width: 100%;
+  height: 4px;
+  background: var(--color-taupe-light, #F0EDE9);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.score-card__fill {
+  height: 100%;
+  border-radius: 2px;
+}
+
+.score--high .score-card__number { color: #2f855a; }
+.score--high .score-card__fill { background: #48bb78; }
+
+.score--mid .score-card__number { color: #b7791f; }
+.score--mid .score-card__fill { background: #ecc94b; }
+
+.score--low .score-card__number { color: #c53030; }
+.score--low .score-card__fill { background: #f56565; }
+
+.linkedin-optimizer__suggestions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+}
+
+@media (max-width: 850px) {
+  .linkedin-optimizer__suggestions-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.linkedin-optimizer__main-suggestions h2,
+.linkedin-optimizer__optimized-content h2 {
+  font-size: 18px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 20px;
+  color: var(--color-graphite-dark, #333);
+}
+
+.suggestions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.suggestion-item {
+  background: var(--color-ivory-light, #FDFCFB);
+  border-left: 3px solid var(--color-gold, #C7A56A);
+  padding: 20px;
+  border-radius: 0 4px 4px 0;
+  border: 1px solid var(--color-taupe-light, #E8E2D9);
+  border-left-width: 4px;
+}
+
+.suggestion-item__header {
+  margin-bottom: 8px;
+}
+
+.suggestion-item__section {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--color-gold, #C7A56A);
+}
+
+.suggestion-item__improvement {
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+.suggestion-item__reason {
+  font-size: 14px;
+  color: var(--color-graphite-light, #666);
+  line-height: 1.5;
+}
+
+.optimized-block {
+  margin-bottom: 30px;
+}
+
+.optimized-box {
+  background: white;
+  border: 1px solid var(--color-taupe-light, #E8E2D9);
+  padding: 24px;
+  border-radius: 4px;
+  position: relative;
+  font-style: italic;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--color-graphite-dark, #444);
+}
+
+.optimized-box--multiline {
+  white-space: pre-wrap;
+}
+
+.copy-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 4px 12px;
+  font-size: 10px;
+  background: var(--color-taupe-light, #E8E2D9);
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  text-transform: uppercase;
+  font-weight: 700;
+  transition: all 0.2s;
+}
+
+.copy-button:hover {
+  background: var(--color-gold, #C7A56A);
+  color: white;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

@@ -91,6 +91,9 @@ export interface EnhancedJobRow {
     education_level: EducationLevel | string | null
     industry: string | null
     company_size: CompanySize | string | null
+    probability_estimate?: number | null
+    growth_score?: number | null
+    hiring_momentum?: number | null
 }
 
 // ============================================================================

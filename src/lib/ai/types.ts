@@ -33,6 +33,10 @@ export type AITaskName =
   | 'legacy_structured'
   | 'legacy_text'
   | 'application_question_answer'
+  | 'linkedin_profile_analysis'
+  | 'portfolio_analysis'
+  | 'interview_prepare'
+  | 'interview_evaluate'
 
 export interface AIRunInput<T = unknown> {
   task: AITaskName

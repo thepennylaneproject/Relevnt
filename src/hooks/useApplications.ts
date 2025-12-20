@@ -1,14 +1,26 @@
+
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
 
 export type ApplicationStatus =
   | 'applied'
+  | 'interviewing'
   | 'in-progress'
   | 'rejected'
   | 'offer'
   | 'accepted'
   | 'withdrawn'
+
+export interface ApplicationEvent {
+  id: string
+  application_id: string
+  event_type: string
+  title: string
+  description?: string | null
+  created_at: string
+  event_date?: string | null
+}
 
 export interface Application {
   id: string
@@ -38,13 +50,7 @@ export interface Application {
   created_at: string
   updated_at: string
 
-  cover_letter_draft?: string | null
-  cover_letter_final?: string | null
-  ats_optimization_applied?: boolean | null
-  qa_answers?: any
-  estimated_probability?: number | null
-  ranking_explanation?: string | null
-  ai_suggestions?: any
+  events?: ApplicationEvent[]
 
   job?: {
     id: string
@@ -68,7 +74,7 @@ export interface UseApplicationsReturn {
   error: string | null
   refetch: () => Promise<void>
   updateStatus: (applicationId: string, status: ApplicationStatus) => Promise<void>
-  addNote: (applicationId: string, note: string) => Promise<void>
+  addEvent: (applicationId: string, type: string, title: string, description?: string) => Promise<void>
   createApplication: (jobId: string | null, data: Partial<Application>) => Promise<void>
   deleteApplication: (applicationId: string) => Promise<void>
   statusCounts: Record<ApplicationStatus, number>
@@ -84,6 +90,7 @@ export function useApplications(options: UseApplicationsOptions = {}): UseApplic
   const [error, setError] = useState<string | null>(null)
   const [statusCounts, setStatusCounts] = useState<Record<ApplicationStatus, number>>({
     applied: 0,
+    interviewing: 0,
     'in-progress': 0,
     rejected: 0,
     offer: 0,
@@ -107,10 +114,8 @@ export function useApplications(options: UseApplicationsOptions = {}): UseApplic
 
       let query = supabase
         .from('applications')
-        // If the jobs relationship name is slightly different in Supabase,
-        // you can adjust this select string later.
         .select(
-          '*, jobs(id, title, company, location, salary_min, salary_max)',
+          '*, jobs(id, title, company, location, salary_min, salary_max), application_events(*)',
           { count: 'exact' }
         )
         .eq('user_id', userId)
@@ -127,41 +132,26 @@ export function useApplications(options: UseApplicationsOptions = {}): UseApplic
         query = query.range(offset, offset + limit - 1)
       }
 
-      query = query.order('created_at', { ascending: false })
+      query = query.order('updated_at', { ascending: false })
 
       const { data, error: fetchError, count } = await query
 
       if (fetchError) throw fetchError
 
       const transformed: Application[] = (data || []).map((app: any) => ({
-        id: app.id,
-        user_id: app.user_id,
-        job_id: app.job_id,
-        resume_id: app.resume_id,
-        company: app.company,
-        position: app.position,
-        location: app.location,
+        ...app,
         status: app.status as ApplicationStatus | null,
-        cover_letter: app.cover_letter,
-        notes: app.notes,
-        salary_expectation: app.salary_expectation,
-        recruiter_name: app.recruiter_name,
-        recruiter_email: app.recruiter_email,
-        recruiter_phone: app.recruiter_phone,
-        applied_date: app.applied_date,
-        follow_up_date: app.follow_up_date,
-        interview_date: app.interview_date,
-        offer_date: app.offer_date,
-        response_deadline: app.response_deadline,
-        created_at: app.created_at,
-        updated_at: app.updated_at,
-        cover_letter_draft: app.cover_letter_draft,
-        cover_letter_final: app.cover_letter_final,
-        ats_optimization_applied: app.ats_optimization_applied,
-        qa_answers: app.qa_answers,
-        estimated_probability: app.estimated_probability,
-        ranking_explanation: app.ranking_explanation,
-        ai_suggestions: app.ai_suggestions,
+        events: (app.application_events || []).sort((a: any, b: any) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        ).map((e: any) => ({
+          id: e.id,
+          application_id: e.application_id,
+          event_type: e.event_type,
+          title: e.title,
+          description: e.description,
+          created_at: e.created_at,
+          event_date: e.event_date
+        })),
         job: app.jobs
           ? {
             id: app.jobs.id,
@@ -179,6 +169,7 @@ export function useApplications(options: UseApplicationsOptions = {}): UseApplic
 
       const counts: Record<ApplicationStatus, number> = {
         applied: 0,
+        interviewing: 0,
         'in-progress': 0,
         rejected: 0,
         offer: 0,
@@ -195,10 +186,8 @@ export function useApplications(options: UseApplicationsOptions = {}): UseApplic
 
       setStatusCounts(counts)
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Failed to fetch applications'
       console.error('Error fetching applications:', err)
-      setError(message)
+      setError('Failed to fetch applications')
     } finally {
       setLoading(false)
     }
@@ -208,14 +197,36 @@ export function useApplications(options: UseApplicationsOptions = {}): UseApplic
     fetchApplications()
   }, [fetchApplications])
 
+  const addEvent = useCallback(async (applicationId: string, type: string, title: string, description?: string) => {
+    if (!user) return
+
+    const { error: eventError } = await supabase
+      .from('application_events')
+      .insert({
+        application_id: applicationId,
+        user_id: user.id,
+        event_type: type,
+        title: title,
+        description: description || null,
+        event_date: new Date().toISOString()
+      })
+
+    if (eventError) {
+      console.error('Error adding event:', eventError)
+      throw eventError
+    }
+
+    await fetchApplications()
+  }, [user, fetchApplications])
+
   const updateStatus = useCallback(
-    async (applicationId: string, status: ApplicationStatus) => {
+    async (applicationId: string, newStatus: ApplicationStatus) => {
       if (!user) return
 
       const { error: updateError } = await supabase
         .from('applications')
         .update({
-          status,
+          status: newStatus,
           updated_at: new Date().toISOString(),
         })
         .eq('id', applicationId)
@@ -226,42 +237,9 @@ export function useApplications(options: UseApplicationsOptions = {}): UseApplic
         throw updateError
       }
 
-      setApplications((prev) =>
-        prev.map((app) =>
-          app.id === applicationId ? { ...app, status } : app,
-        ),
-      )
-
-      await fetchApplications()
+      await addEvent(applicationId, 'status_change', `Status to ${newStatus}`)
     },
-    [user, fetchApplications],
-  )
-
-  const addNote = useCallback(
-    async (applicationId: string, note: string) => {
-      if (!user) return
-
-      const { error: updateError } = await supabase
-        .from('applications')
-        .update({
-          notes: note,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', applicationId)
-        .eq('user_id', user.id)
-
-      if (updateError) {
-        console.error('Error adding note:', updateError)
-        throw updateError
-      }
-
-      setApplications((prev) =>
-        prev.map((app) =>
-          app.id === applicationId ? { ...app, notes: note } : app,
-        ),
-      )
-    },
-    [user],
+    [user, addEvent],
   )
 
   const createApplication = useCallback(
@@ -291,18 +269,24 @@ export function useApplications(options: UseApplicationsOptions = {}): UseApplic
         response_deadline: data.response_deadline ?? null,
       }
 
-      const { error: createError } = await supabase
+      const { data: newApp, error: createError } = await supabase
         .from('applications')
         .insert(payload)
+        .select('id')
+        .single()
 
       if (createError) {
         console.error('Error creating application:', createError)
         throw createError
       }
 
+      if (newApp) {
+        await addEvent(newApp.id, 'status_change', `Initial: ${payload.status}`)
+      }
+
       await fetchApplications()
     },
-    [user, fetchApplications],
+    [user, fetchApplications, addEvent],
   )
 
   const deleteApplication = useCallback(
@@ -320,7 +304,6 @@ export function useApplications(options: UseApplicationsOptions = {}): UseApplic
         throw deleteError
       }
 
-      setApplications((prev) => prev.filter((app) => app.id !== applicationId))
       await fetchApplications()
     },
     [user, fetchApplications],
@@ -332,7 +315,7 @@ export function useApplications(options: UseApplicationsOptions = {}): UseApplic
     error,
     refetch: fetchApplications,
     updateStatus,
-    addNote,
+    addEvent,
     createApplication,
     deleteApplication,
     statusCounts,

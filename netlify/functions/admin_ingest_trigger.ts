@@ -2,11 +2,13 @@
 /**
  * Admin endpoint to manually trigger job ingestion
  * Protected by ADMIN_SECRET environment variable
+ * 
+ * Now triggers the background worker instead of running ingestion directly,
+ * to avoid timeout issues with long-running ingestion.
  */
 
 import type { Handler } from '@netlify/functions'
 import { createResponse, handleCORS } from './utils/supabase'
-import { runIngestion } from './ingest_jobs'
 
 const ADMIN_SECRET = process.env.ADMIN_SECRET || 'dev-admin-secret'
 
@@ -35,18 +37,31 @@ export const handler: Handler = async (event) => {
         const body = event.body ? JSON.parse(event.body) : {}
         const { sources } = body
 
-        // If sources array is provided, run only those sources
-        // Otherwise run all sources
+        // Determine source slug if single source requested
         const sourceSlug = sources && sources.length === 1 ? sources[0] : null
 
-        console.log('admin_ingest_trigger: starting ingestion', { sourceSlug, sources })
+        console.log('admin_ingest_trigger: triggering background worker', { sourceSlug, sources })
 
-        const results = await runIngestion(sourceSlug, 'admin')
+        // Trigger the background worker instead of running directly
+        // This avoids timeout issues since background functions have 15-min limit
+        const baseUrl = process.env.URL || 'https://relevnt-fresh.netlify.app'
+        const workerResponse = await fetch(`${baseUrl}/.netlify/functions/ingest_jobs_worker-background`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                triggeredBy: 'admin',
+                source: sourceSlug,
+            })
+        })
 
-        return createResponse(200, {
+        console.log('admin_ingest_trigger: worker triggered', { status: workerResponse.status })
+
+        // Background functions return 202 Accepted immediately
+        return createResponse(202, {
             success: true,
-            results,
-            message: `Ingestion triggered for ${sourceSlug || 'all sources'}`,
+            message: `Background ingestion triggered for ${sourceSlug || 'all sources'}`,
+            workerStatus: workerResponse.status,
+            note: 'Ingestion is running in the background. Check logs for progress.',
         })
     } catch (err) {
         console.error('admin_ingest_trigger: failed', err)

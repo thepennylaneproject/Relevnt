@@ -2,6 +2,7 @@ import React from 'react'
 import { useLocation, Link } from 'react-router-dom'
 import { Icon, IconName } from '../ui/Icon'
 import { copy } from '../../lib/copy'
+import NotificationCenter from './NotificationCenter'
 
 // Map navigation items to our custom hand-drawn icons
 const NAV_ITEMS: Array<{ path: string; label: string; icon: IconName }> = [
@@ -13,6 +14,9 @@ const NAV_ITEMS: Array<{ path: string; label: string; icon: IconName }> = [
   { path: '/learn', label: copy.nav.learn, icon: 'book' },
   { path: '/personas', label: copy.nav.personas, icon: 'lighthouse' },
   { path: '/voice', label: copy.nav.voice, icon: 'microphone' },
+  { path: '/linkedin-optimizer', label: 'LinkedIn Optimizer', icon: 'stars' },
+  { path: '/portfolio-optimizer', label: 'Portfolio Optimizer', icon: 'lighthouse' },
+  { path: '/interview-prep', label: 'Interview Prep', icon: 'microphone' },
   { path: '/settings', label: copy.nav.settings, icon: 'pocket-watch' },
 ]
 
@@ -24,6 +28,9 @@ const DOODLES: Record<string, string> = {
   '/learn': '/doodles/sidebar-wanderer.svg',
   '/personas': '/doodles/sidebar-lighthouse.svg',
   '/voice': '/doodles/sidebar-notes.svg',
+  '/linkedin-optimizer': '/doodles/sidebar-constellation.svg',
+  '/portfolio-optimizer': '/doodles/sidebar-lighthouse.svg',
+  '/interview-prep': '/doodles/sidebar-notes.svg',
   '/settings': '/doodles/sidebar-phoenix.svg',
 }
 
@@ -37,6 +44,10 @@ export default function SidebarMarginNav() {
     <aside className="margin-nav">
       <div className="margin-nav__doodle">
         <img src={doodle} alt="" />
+      </div>
+
+      <div className="margin-nav__notifications">
+        <NotificationCenter />
       </div>
 
       <nav className="margin-nav__nav">
@@ -66,4 +77,3 @@ export default function SidebarMarginNav() {
     </aside>
   )
 }
-

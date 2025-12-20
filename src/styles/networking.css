@@ -1,0 +1,91 @@
+/* src/styles/networking.css */
+
+.networking-page {
+    padding-bottom: 4rem;
+}
+
+.contact-card {
+    padding: 1.25rem;
+    background: var(--surface-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.contact-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.status-pill--identified {
+    background: var(--surface-accent);
+    color: var(--text-secondary);
+}
+
+.status-pill--requested {
+    background: rgba(var(--color-accent-rgb), 0.1);
+    color: var(--color-accent);
+}
+
+.status-pill--connected {
+    background: rgba(var(--color-success-rgb), 0.1);
+    color: var(--color-success);
+}
+
+.status-pill--replied {
+    background: rgba(var(--color-accent-rgb), 0.2);
+    color: var(--color-accent);
+    font-weight: 600;
+}
+
+.status-pill--met {
+    background: var(--surface-accent);
+    border: 1px solid var(--color-accent);
+    color: var(--text);
+}
+
+.template-item {
+    transition: border-color 0.2s ease;
+}
+
+.template-item:hover {
+    border-color: var(--color-accent);
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.modal-content {
+    width: 100%;
+    max-width: 480px;
+    padding: 2rem;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-2xl);
+}
+
+.rl-input {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--surface-accent);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    color: var(--text);
+    font-size: 0.875rem;
+}
+
+.rl-input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 2px rgba(var(--color-accent-rgb), 0.1);
+}

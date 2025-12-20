@@ -107,6 +107,7 @@ export default function JobsPage() {
             'salary_max',
             'competitiveness_level',
             'match_score',
+            'probability_estimate',
           ].join(', ')
         )
         .eq('is_active', true)
@@ -208,7 +209,31 @@ export default function JobsPage() {
         return
       }
 
-      setJobs(data)
+      const jobsList = data as JobRow[]
+
+      // Enrich with company metrics
+      const companyNames = Array.from(new Set(jobsList.map(j => j.company).filter(Boolean))) as string[]
+      const { data: companiesData } = await (supabase as any)
+        .from('companies')
+        .select('name, growth_score, job_creation_velocity')
+        .in('name', companyNames)
+
+      const companyMap = new Map((companiesData || []).map((c: any) => [c.name, c]))
+      const enrichedJobs = jobsList.map(j => {
+        if (j.company) {
+          const c = companyMap.get(j.company)
+          if (c) {
+            return {
+              ...j,
+              growth_score: c.growth_score,
+              hiring_momentum: c.job_creation_velocity
+            }
+          }
+        }
+        return j
+      })
+
+      setJobs(enrichedJobs)
     } catch (err) {
       console.error('Unexpected error loading jobs', err)
       setJobsError('Something went wrong while loading jobs.')
@@ -650,6 +675,14 @@ export default function JobsPage() {
                       </div>
                       {matchScore !== null && (
                         <span className="pill pill--accent">Match {matchScore}%</span>
+                      )}
+                      {job.probability_estimate !== undefined && job.probability_estimate !== null && (
+                        <span className="pill pill--indigo">
+                          Success: {Math.round(job.probability_estimate * 100)}%
+                        </span>
+                      )}
+                      {job.growth_score !== undefined && job.growth_score !== null && job.growth_score > 70 && (
+                        <span className="pill pill--success">🚀 High Growth</span>
                       )}
                     </header>
 

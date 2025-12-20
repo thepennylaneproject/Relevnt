@@ -1,0 +1,346 @@
+.portfolio-optimizer {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    font-family: 'Outfit', 'Inter', sans-serif;
+    color: #1a1a1a;
+    background-color: #fff;
+}
+
+.portfolio-optimizer__header {
+    margin-bottom: 40px;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 24px;
+}
+
+.portfolio-optimizer__title-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
+.portfolio-optimizer__title-row h1 {
+    font-size: 28px;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    margin: 0;
+    color: #1a1a1a;
+    text-transform: uppercase;
+}
+
+.portfolio-optimizer__subtitle {
+    font-size: 16px;
+    color: #666;
+    max-width: 600px;
+    line-height: 1.5;
+}
+
+.portfolio-optimizer__input-section {
+    background: #fbfbfb;
+    border: 1px solid #eee;
+    padding: 32px;
+    border-radius: 8px;
+    margin-bottom: 40px;
+}
+
+.portfolio-optimizer__input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.portfolio-optimizer__input-group label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #999;
+}
+
+.portfolio-optimizer__input-group input {
+    padding: 14px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.portfolio-optimizer__input-group input:focus {
+    border-color: #1a1a1a;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+}
+
+.portfolio-optimizer__button {
+    padding: 14px 28px;
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 8px;
+}
+
+.portfolio-optimizer__button:hover:not(:disabled) {
+    background: #333;
+}
+
+.portfolio-optimizer__button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.portfolio-optimizer__error {
+    margin-top: 16px;
+    color: #d32f2f;
+    font-size: 13px;
+}
+
+.portfolio-optimizer__analysis-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 60px;
+    text-align: center;
+}
+
+.wave-loader {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 20px;
+}
+
+.wave-loader span {
+    width: 8px;
+    height: 8px;
+    background: #1a1a1a;
+    border-radius: 50%;
+    animation: wave 1.2s infinite ease-in-out;
+}
+
+.wave-loader span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.wave-loader span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes wave {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.portfolio-optimizer__main-stats {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+.overall-score-large,
+.seniority-badge {
+    flex: 1;
+    background: #fff;
+    border: 1px solid #1a1a1a;
+    padding: 24px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.overall-score-large .label,
+.seniority-badge .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    color: #999;
+    margin-bottom: 8px;
+}
+
+.overall-score-large .value {
+    font-size: 56px;
+    font-weight: 300;
+    line-height: 1;
+}
+
+.seniority-badge .value {
+    font-size: 24px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.portfolio-optimizer__scores {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 40px;
+}
+
+@media (max-width: 600px) {
+    .portfolio-optimizer__scores {
+        grid-template-columns: 1fr;
+    }
+
+    .portfolio-optimizer__main-stats {
+        flex-direction: column;
+    }
+}
+
+.metric-box {
+    border: 1px solid #eee;
+    padding: 20px;
+    border-radius: 8px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.metric-box__data {
+    flex: 1;
+}
+
+.metric-label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #666;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.metric-progress-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.metric-progress-bar {
+    height: 4px;
+    background: #1a1a1a;
+    border-radius: 2px;
+}
+
+.metric-value {
+    font-size: 14px;
+    font-weight: 700;
+    min-width: 24px;
+}
+
+.portfolio-optimizer__suggestions h2 {
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 24px;
+}
+
+.portfolio-suggestions-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.portfolio-suggestion-card {
+    border: 1px solid #eee;
+    padding: 24px;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.portfolio-suggestion-card.impact--high {
+    border-top: 4px solid #1a1a1a;
+}
+
+.portfolio-suggestion-card.impact--medium {
+    border-top: 4px solid #999;
+}
+
+.portfolio-suggestion-card.impact--low {
+    border-top: 4px solid #eee;
+}
+
+.portfolio-suggestion-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.portfolio-suggestion-card .category {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    background: #f0f0f0;
+    padding: 2px 6px;
+    border-radius: 2px;
+}
+
+.portfolio-suggestion-card .impact-tag {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #999;
+}
+
+.portfolio-suggestion-card .improvement {
+    font-size: 15px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.portfolio-optimizer__tagline {
+    margin-top: 60px;
+    padding: 40px;
+    background: #1a1a1a;
+    color: #fff;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.portfolio-optimizer__tagline h2 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 20px;
+    color: #999;
+}
+
+.tagline-box {
+    font-size: 28px;
+    font-weight: 300;
+    font-style: italic;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

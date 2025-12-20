@@ -190,6 +190,7 @@ function convertNewMatchToLegacy(result: NewMatchResult, jobs: Map<string, Enhan
       education_level: job.education_level,
       industry: job.industry,
       company_size: job.company_size,
+      probability_estimate: job.probability_estimate,
     } as JobRow,
     score: result.total_score,
     reasons: result.top_reasons,
@@ -654,7 +655,8 @@ export const handler: Handler = async (event) => {
         preferred_skills,
         education_level,
         industry,
-        company_size
+        company_size,
+        probability_estimate
       `
       )
       .eq('is_active', true)
@@ -678,6 +680,28 @@ export const handler: Handler = async (event) => {
     }
 
     const jobs = jobsData as EnhancedJobRow[]
+
+    // 2b) Load company metrics for enrichment
+    const companyNames = Array.from(new Set(jobs.map(j => j.company).filter(Boolean))) as string[]
+    const { data: companiesData } = await supabase
+      .from('companies')
+      .select('name, growth_score, job_creation_velocity')
+      .in('name', companyNames)
+
+    const companyMap = new Map(
+      (companiesData || []).map(c => [c.name, c])
+    )
+
+    // Enrich jobs with company metrics
+    jobs.forEach(j => {
+      if (j.company) {
+        const c = companyMap.get(j.company)
+        if (c) {
+          j.growth_score = c.growth_score
+          j.hiring_momentum = c.job_creation_velocity
+        }
+      }
+    })
 
     // Use new ATS-aligned scoring engine (v2) by default
     // Allow override with ?engine=legacy for backward compatibility

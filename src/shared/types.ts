@@ -1,4 +1,3 @@
-// src/shared/types.ts
 
 // Seniority levels for experience matching
 export type SeniorityLevel = 'junior' | 'mid' | 'senior' | 'lead' | 'director' | 'executive'
@@ -35,6 +34,9 @@ export type JobRow = {
   education_level: EducationLevel | string | null
   industry: string | null
   company_size: CompanySize | string | null
+  probability_estimate?: number | null
+  growth_score?: number | null
+  hiring_momentum?: number | null
 }
 
 export type MatchResult = {
@@ -155,7 +157,6 @@ export type ProfessionalProfile = {
   updated_at?: string
 }
 
-// src/shared/types.ts
 export type NormalizedJob = {
   id: string                // internal id from jobs table
   source_slug: string       // 'remoteok', 'remotive', 'adzuna', etc
@@ -171,6 +172,99 @@ export type NormalizedJob = {
   salary_max: number | null
   description: string | null
   competitiveness_level: string | null
+  probability_estimate?: number | null
 }
 
 export type Profile = Record<string, unknown>
+
+export interface LinkedInProfileRow {
+  id: string
+  user_id: string
+  linkedin_url: string
+  profile_data: any
+  analysis_results: LinkedInAnalysis | null
+  created_at: string
+  updated_at: string
+}
+
+export interface LinkedInAnalysis {
+  headline_score: number
+  summary_score: number
+  experience_score: number
+  overall_score: number
+  suggestions: {
+    section: string
+    improvement: string
+    reason: string
+  }[]
+  optimized_headline?: string
+  optimized_summary?: string
+}
+
+export interface PortfolioAnalysisRow {
+  id: string
+  user_id: string
+  portfolio_url: string
+  analysis_results: PortfolioAnalysis | null
+  created_at: string
+  updated_at: string
+}
+
+export interface PortfolioAnalysis {
+  visual_score: number
+  usability_score: number
+  content_score: number
+  overall_score: number
+  suggestions: {
+    category: string
+    improvement: string
+    impact: 'high' | 'medium' | 'low'
+  }[]
+  perceived_seniority: string
+  suggested_tagline?: string
+}
+
+export interface InterviewQuestion {
+  id: string
+  text: string
+  type: 'behavioral' | 'technical' | 'situational'
+  sample_answer?: string
+  talking_points?: string[]
+}
+
+export interface InterviewPrepRow {
+  id: string
+  user_id: string
+  application_id?: string
+  position: string
+  company: string
+  interview_date?: string
+  interview_type?: string
+  questions: InterviewQuestion[]
+  ai_feedback?: any
+  created_at: string
+  updated_at: string
+}
+
+export interface InterviewSessionRow {
+  id: string
+  user_id: string
+  job_id?: string
+  interview_prep_id?: string
+  question: string
+  user_answer: string
+  feedback: string | null
+  score: number | null
+  created_at: string
+}
+
+export interface Notification {
+  id: string
+  user_id: string
+  title: string
+  message: string
+  type: 'info' | 'success' | 'warning' | 'job_alert'
+  link?: string
+  is_read: boolean
+  created_at: string
+}

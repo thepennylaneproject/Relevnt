@@ -13,6 +13,9 @@ type JobLike = {
   salary_max?: number | null
   remote_type?: string | null
   competitiveness_level?: string | null
+  probability_estimate?: number | null
+  growth_score?: number | null
+  hiring_momentum?: number | null
 }
 
 export function RelevntFeedPanel() {
@@ -231,6 +234,16 @@ export function RelevntFeedPanel() {
                   {job.competitiveness_level && (
                     <span className="feed-tag">
                       Market: {job.competitiveness_level}
+                    </span>
+                  )}
+                  {job.probability_estimate !== undefined && job.probability_estimate !== null && (
+                    <span className="feed-tag feed-tag--special">
+                      Success: {Math.round(job.probability_estimate * 100)}%
+                    </span>
+                  )}
+                  {job.growth_score !== undefined && job.growth_score !== null && job.growth_score > 70 && (
+                    <span className="feed-tag feed-tag--growth">
+                      🚀 High Growth
                     </span>
                   )}
                 </div>
