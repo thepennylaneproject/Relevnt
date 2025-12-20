@@ -107,7 +107,7 @@ const SOURCE_PAGINATION: Record<string, PaginationConfig> = {
     pageParam: 'startRecord',
     pageSizeParam: 'pageSize',
     pageSize: 50,
-    maxPagesPerRun: parseInt(process.env.CAREERONESTOP_MAX_PAGES_PER_RUN || '3', 10),
+    maxPagesPerRun: 3,
   },
   // Greenhouse doesn't use pagination; fetches all jobs in single request per board
   greenhouse: { pageParam: 'page', pageSizeParam: 'limit', pageSize: 1000, maxPagesPerRun: 1 },
@@ -126,18 +126,9 @@ const SOURCE_PAGINATION: Record<string, PaginationConfig> = {
 // Parse Greenhouse boards from env var
 function parseGreenhouseBoards(): GreenhouseBoard[] {
   const boards: GreenhouseBoard[] = [...(greenhouseBoardsData as GreenhouseBoard[])]
-  const envJson = process.env.GREENHOUSE_BOARDS_JSON
 
-  if (envJson) {
-    try {
-      const parsed = JSON.parse(envJson)
-      if (Array.isArray(parsed)) {
-        boards.push(...parsed)
-      }
-    } catch (e) {
-      console.error('ingest_jobs: Failed to parse GREENHOUSE_BOARDS_JSON:', e)
-    }
-  }
+  // Note: GREENHOUSE_BOARDS_JSON env var support removed to stay under 4KB limit.
+  // Add new boards to src/data/jobSources/greenhouse_boards.json instead.
 
   // Validate each board has required fields
   const validBoards = boards.filter((board) => {

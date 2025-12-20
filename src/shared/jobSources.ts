@@ -1092,18 +1092,9 @@ interface RSSFeedSource {
 // Helper to parse RSS sources from environment
 function getRSSSources(): RSSFeedSource[] {
   const rawSources = [...(rssFeedsData as any[])]
-  const envJson = typeof (globalThis as any).process !== 'undefined' && (globalThis as any).process?.env?.RSS_FEEDS_JSON ? (globalThis as any).process.env.RSS_FEEDS_JSON : undefined
 
-  if (envJson) {
-    try {
-      const parsed = JSON.parse(envJson)
-      if (Array.isArray(parsed)) {
-        rawSources.push(...parsed)
-      }
-    } catch (e) {
-      console.error('Failed to parse RSS_FEEDS_JSON:', e)
-    }
-  }
+  // Note: RSS_FEEDS_JSON env var support removed to stay under 4KB limit.
+  // Add new feeds to src/data/jobSources/rss_feeds.json instead.
 
   return rawSources.map((item): RSSFeedSource => {
     // Map alternative names to standard RSSFeedSource structure
@@ -1278,18 +1269,9 @@ interface LeverCompanySource {
 // Helper to parse Lever sources from environment
 function getLeverSources(): LeverCompanySource[] {
   const sources: LeverCompanySource[] = [...(leverSourcesData as LeverCompanySource[])]
-  const envJson = typeof (globalThis as any).process !== 'undefined' && (globalThis as any).process?.env?.LEVER_SOURCES_JSON ? (globalThis as any).process.env.LEVER_SOURCES_JSON : undefined
 
-  if (envJson) {
-    try {
-      const parsed = JSON.parse(envJson)
-      if (Array.isArray(parsed)) {
-        sources.push(...parsed)
-      }
-    } catch (e) {
-      console.error('Failed to parse LEVER_SOURCES_JSON:', e)
-    }
-  }
+  // Note: LEVER_SOURCES_JSON env var support removed to stay under 4KB limit.
+  // Add new sources to src/data/jobSources/lever_sources.json instead.
 
   return sources.filter(
     (item: any) =>
