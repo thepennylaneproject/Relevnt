@@ -39,12 +39,27 @@ export default async (req: Request) => {
             summary
         })
 
-        // Background functions don't return meaningful responses to clients
-        // (client gets 202 immediately), but we log for debugging
+        return new Response(JSON.stringify({
+            success: true,
+            durationMs: Date.now() - startedAt,
+            sources: results.length,
+            totalInserted: results.reduce((sum, r) => sum + r.count, 0),
+            summary
+        }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+        })
     } catch (err) {
         console.error('ingest_jobs_worker-background: failed', {
             durationMs: Date.now() - startedAt,
             error: err instanceof Error ? err.message : String(err)
+        })
+        return new Response(JSON.stringify({
+            success: false,
+            error: err instanceof Error ? err.message : String(err)
+        }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' }
         })
     }
 }
