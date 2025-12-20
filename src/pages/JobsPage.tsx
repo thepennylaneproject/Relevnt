@@ -221,7 +221,7 @@ export default function JobsPage() {
       const companyMap = new Map((companiesData || []).map((c: any) => [c.name, c]))
       const enrichedJobs = jobsList.map(j => {
         if (j.company) {
-          const c = companyMap.get(j.company)
+          const c = companyMap.get(j.company) as { growth_score?: number; job_creation_velocity?: number } | undefined
           if (c) {
             return {
               ...j,

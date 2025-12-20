@@ -45,9 +45,10 @@ export function useNetworking() {
         if (!user?.id) return
         setLoading(true)
         try {
+            // Cast to any to bypass strict Supabase typing (tables exist but types not regenerated)
             const [contactRes, templateRes] = await Promise.all([
-                supabase.from('networking_contacts').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
-                supabase.from('outreach_templates').select('*').eq('user_id', user.id)
+                (supabase as any).from('networking_contacts').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+                (supabase as any).from('outreach_templates').select('*').eq('user_id', user.id)
             ])
 
             if (contactRes.error) throw contactRes.error
@@ -68,7 +69,7 @@ export function useNetworking() {
 
     const addContact = async (contact: Partial<Contact>) => {
         if (!user?.id) return
-        const { data, error } = await supabase
+        const { data, error } = await (supabase as any)
             .from('networking_contacts')
             .insert({ ...contact, user_id: user.id })
             .select()
@@ -80,7 +81,7 @@ export function useNetworking() {
     }
 
     const updateContactStatus = async (id: string, status: ContactStatus) => {
-        const { error } = await supabase
+        const { error } = await (supabase as any)
             .from('networking_contacts')
             .update({ status, updated_at: new Date().toISOString() })
             .eq('id', id)
@@ -91,7 +92,7 @@ export function useNetworking() {
 
     const logOutreach = async (contactId: string, method: string, content: string) => {
         if (!user?.id) return
-        const { data, error } = await supabase
+        const { data, error } = await (supabase as any)
             .from('outreach_logs')
             .insert({
                 contact_id: contactId,
@@ -108,7 +109,7 @@ export function useNetworking() {
 
     const addTemplate = async (template: Partial<OutreachTemplate>) => {
         if (!user?.id) return
-        const { data, error } = await supabase
+        const { data, error } = await (supabase as any)
             .from('outreach_templates')
             .insert({ ...template, user_id: user.id })
             .select()

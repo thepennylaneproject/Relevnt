@@ -14,7 +14,8 @@ export function useNotifications() {
         if (!user?.id) return
 
         try {
-            const { data, error } = await supabase
+            // Cast to any to bypass strict Supabase typing (table exists but types not regenerated)
+            const { data, error } = await (supabase as any)
                 .from('notifications')
                 .select('*')
                 .eq('user_id', user.id)
@@ -24,7 +25,7 @@ export function useNotifications() {
             if (error) throw error
             if (data) {
                 setNotifications(data as Notification[])
-                setUnreadCount(data.filter(n => !n.is_read).length)
+                setUnreadCount(data.filter((n: any) => !n.is_read).length)
             }
         } catch (err) {
             console.error('Error fetching notifications:', err)
@@ -35,7 +36,7 @@ export function useNotifications() {
 
     const markAsRead = async (notificationId: string) => {
         try {
-            const { error } = await supabase
+            const { error } = await (supabase as any)
                 .from('notifications')
                 .update({ is_read: true })
                 .eq('id', notificationId)
@@ -54,7 +55,7 @@ export function useNotifications() {
     const markAllAsRead = async () => {
         if (!user?.id) return
         try {
-            const { error } = await supabase
+            const { error } = await (supabase as any)
                 .from('notifications')
                 .update({ is_read: true })
                 .eq('user_id', user.id)
