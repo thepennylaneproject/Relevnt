@@ -38,8 +38,9 @@ CREATE TABLE IF NOT EXISTS user_search_interests (
 );
 
 -- Unique index that handles NULL location
+-- Functional index requires extra parentheses around the expression
 CREATE UNIQUE INDEX IF NOT EXISTS idx_user_search_interests_unique 
-  ON user_search_interests (keywords, COALESCE(location, ''));
+  ON user_search_interests (keywords, (COALESCE(location, '')));
 
 CREATE INDEX IF NOT EXISTS idx_user_search_interests_weight 
   ON user_search_interests (weight DESC, user_count DESC);
