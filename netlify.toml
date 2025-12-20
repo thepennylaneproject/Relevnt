@@ -53,6 +53,18 @@
 # - Automatically includes dependencies
 # - Smaller bundle sizes = faster cold starts
 
+# Jobs ingestion cron - runs hourly
+[functions."jobs_cron"]
+  schedule = "@hourly"
+
+# Daily analytics summaries - runs daily at 2am UTC  
+[functions."daily_summaries"]
+  schedule = "0 2 * * *"
+
+# Job alerts - runs daily at 9am UTC
+[functions."job_alerts"]
+  schedule = "0 9 * * *"
+
 
 
 
