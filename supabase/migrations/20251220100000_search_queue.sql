@@ -34,9 +34,12 @@ CREATE TABLE IF NOT EXISTS user_search_interests (
   weight FLOAT DEFAULT 1.0,
   last_seeded_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(keywords, COALESCE(location, ''))
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Unique index that handles NULL location
+CREATE UNIQUE INDEX IF NOT EXISTS idx_user_search_interests_unique 
+  ON user_search_interests (keywords, COALESCE(location, ''));
 
 CREATE INDEX IF NOT EXISTS idx_user_search_interests_weight 
   ON user_search_interests (weight DESC, user_count DESC);
