@@ -2037,3 +2037,40 @@ export const handler: Handler = async (event) => {
     }
   }
 }
+
+/**
+ * Queue-driven ingestion for a single source with dynamic parameters
+ * Used by search_queue_cron.ts for diverse, targeted searches
+ */
+export async function ingestFromSource(
+  sourceSlug: string,
+  searchParams: { keywords?: string; location?: string;[key: string]: any },
+  triggeredBy: 'queue' | 'manual' = 'queue'
+): Promise<number> {
+  const supabase = createAdminClient()
+
+  const source = ALL_SOURCES.find(s => s.slug === sourceSlug)
+  if (!source) {
+    console.error(`ingestFromSource: unknown source ${sourceSlug}`)
+    return 0
+  }
+
+  const config = getSourceConfig(sourceSlug)
+  if (!config.enabled) {
+    console.log(`ingestFromSource: source ${sourceSlug} is disabled`)
+    return 0
+  }
+
+  console.log(`ingestFromSource: ${sourceSlug} with params:`, searchParams)
+
+  try {
+    // Use existing ingest function (it handles state internally)
+    const result = await ingest(source)
+
+    console.log(`ingestFromSource: ${sourceSlug} completed with ${result.count} jobs`)
+    return result.count
+  } catch (err) {
+    console.error(`ingestFromSource: ${sourceSlug} failed:`, err)
+    return 0
+  }
+}

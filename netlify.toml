@@ -65,6 +65,10 @@
 [functions."job_alerts"]
   schedule = "0 9 * * *"
 
+# Search queue processor - runs every 15 minutes for diverse, fresh job ingestion
+[functions."search_queue_cron"]
+  schedule = "*/15 * * * *"
+
 
 
 
