@@ -315,20 +315,20 @@ function buildSourceUrl(
     return `${source.fetchUrl}?${params.toString()}`
   }
 
-  // CareerJet uses page/pagesize with required parameters
+  // CareerJet v4 API - uses Basic Auth and specific parameters
   if (source.slug === 'careerjet') {
     const config = SOURCE_PAGINATION[source.slug] || {}
     const page = cursor?.page ?? 1
     const pageSize = config.pageSize ?? 50
 
     const params = new URLSearchParams({
-      affid: process.env.CAREERJET_AFFILIATE_ID || 'partner',  // Affiliate ID
-      keywords: 'jobs',  // Generic search
+      locale_code: 'en_US',
+      keywords: 'software developer',
+      sort: 'date',
       page: String(page),
-      pagesize: String(pageSize),
-      user_ip: '0.0.0.0',  // Required but not used for backend
-      user_agent: 'relevnt-job-ingest/1.0',  // Required but not used for backend
-      url: 'https://relevnt.io',  // Required but not used for backend
+      page_size: String(pageSize),
+      user_ip: '0.0.0.0',
+      user_agent: 'relevnt-job-ingest/1.0',
     })
     return `${source.fetchUrl}?${params.toString()}`
   }
@@ -519,6 +519,24 @@ function buildHeaders(source?: JobSource): Record<string, string> {
   if (source?.slug === 'jooble') {
     return {
       'Content-Type': 'application/json',
+      'User-Agent': 'relevnt-job-ingest/1.0',
+      Accept: 'application/json',
+    }
+  }
+
+  // CareerJet v4 API uses Basic Auth (API key as username, empty password)
+  if (source?.slug === 'careerjet') {
+    const apiKey = process.env.CAREERJET_API_KEY
+    if (!apiKey) {
+      console.error('ingest_jobs: missing CAREERJET_API_KEY')
+      return {
+        'User-Agent': 'relevnt-job-ingest/1.0',
+        Accept: 'application/json',
+      }
+    }
+    const credentials = Buffer.from(`${apiKey}:`).toString('base64')
+    return {
+      Authorization: `Basic ${credentials}`,
       'User-Agent': 'relevnt-job-ingest/1.0',
       Accept: 'application/json',
     }
