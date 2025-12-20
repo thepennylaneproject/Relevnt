@@ -76,15 +76,19 @@ ALTER TABLE user_search_interests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE source_rate_limits ENABLE ROW LEVEL SECURITY;
 
 -- Service role can do everything (for cron jobs)
+DROP POLICY IF EXISTS "service_role_search_queue" ON search_queue;
 CREATE POLICY "service_role_search_queue" ON search_queue
   FOR ALL USING (auth.role() = 'service_role');
 
+DROP POLICY IF EXISTS "service_role_user_search_interests" ON user_search_interests;
 CREATE POLICY "service_role_user_search_interests" ON user_search_interests
   FOR ALL USING (auth.role() = 'service_role');
 
+DROP POLICY IF EXISTS "service_role_source_rate_limits" ON source_rate_limits;
 CREATE POLICY "service_role_source_rate_limits" ON source_rate_limits
   FOR ALL USING (auth.role() = 'service_role');
 
 -- Anon can read rate limits (for debugging)
+DROP POLICY IF EXISTS "anon_read_rate_limits" ON source_rate_limits;
 CREATE POLICY "anon_read_rate_limits" ON source_rate_limits
   FOR SELECT USING (true);
