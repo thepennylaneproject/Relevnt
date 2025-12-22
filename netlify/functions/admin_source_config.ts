@@ -137,10 +137,107 @@ export const handler: Handler = async (event) => {
         })
       }
 
+      case 'toggle': {
+        // Toggle source enabled/disabled status in database
+        const slug = event.queryStringParameters?.slug
+        if (!slug) {
+          return createResponse(400, {
+            success: false,
+            error: 'Missing slug parameter',
+          })
+        }
+
+        const supabase = createAdminClient()
+
+        // Get current status
+        const { data: current, error: getError } = await supabase
+          .from('job_sources')
+          .select('enabled')
+          .eq('slug', slug)
+          .single()
+
+        if (getError || !current) {
+          return createResponse(404, {
+            success: false,
+            error: `Source not found: ${slug}`,
+          })
+        }
+
+        // Toggle enabled status
+        const newStatus = !current.enabled
+        const { error: updateError } = await supabase
+          .from('job_sources')
+          .update({ enabled: newStatus })
+          .eq('slug', slug)
+
+        if (updateError) {
+          throw updateError
+        }
+
+        return createResponse(200, {
+          success: true,
+          data: {
+            slug,
+            previousEnabled: current.enabled,
+            newEnabled: newStatus,
+            message: `Source '${slug}' is now ${newStatus ? 'ENABLED' : 'DISABLED'}`,
+          },
+        })
+      }
+
+      case 'set-enabled': {
+        // Set source enabled status explicitly (true/false) in database
+        const slug = event.queryStringParameters?.slug
+        const enabled = event.queryStringParameters?.enabled?.toLowerCase() === 'true'
+
+        if (!slug) {
+          return createResponse(400, {
+            success: false,
+            error: 'Missing slug parameter',
+          })
+        }
+
+        const supabase = createAdminClient()
+
+        // Get current status
+        const { data: current, error: getError } = await supabase
+          .from('job_sources')
+          .select('enabled')
+          .eq('slug', slug)
+          .single()
+
+        if (getError || !current) {
+          return createResponse(404, {
+            success: false,
+            error: `Source not found: ${slug}`,
+          })
+        }
+
+        // Update enabled status
+        const { error: updateError } = await supabase
+          .from('job_sources')
+          .update({ enabled })
+          .eq('slug', slug)
+
+        if (updateError) {
+          throw updateError
+        }
+
+        return createResponse(200, {
+          success: true,
+          data: {
+            slug,
+            previousEnabled: current.enabled,
+            newEnabled: enabled,
+            message: `Source '${slug}' is now ${enabled ? 'ENABLED' : 'DISABLED'}`,
+          },
+        })
+      }
+
       default:
         return createResponse(400, {
           success: false,
-          error: `Unknown action: ${action}. Valid actions: status, validate, export, export-single`,
+          error: `Unknown action: ${action}. Valid actions: status, validate, export, export-single, toggle, set-enabled`,
         })
     }
   } catch (err) {
