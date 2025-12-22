@@ -65,6 +65,10 @@
 [functions."search_queue_cron"]
   schedule = "*/15 * * * *"
 
+# Full job ingestion sweep - runs every 6 hours (background)
+[functions."ingest_jobs_worker-background"]
+  schedule = "0 */6 * * *"
+
 
 
 

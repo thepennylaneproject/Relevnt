@@ -158,7 +158,7 @@ export function PersonaTab({ onAutoSaveStatusChange }: PersonaTabProps) {
                                     borderRadius: 'var(--radius-lg)',
                                 }}
                                 onClick={() => {
-                                    showToast(`Creating a "${option.label}" persona...`, 'info')
+                                    showToast(`Configuring your "${option.label}" persona...`, 'info')
                                     navigate('/personas')
                                 }}
                             >
@@ -166,6 +166,16 @@ export function PersonaTab({ onAutoSaveStatusChange }: PersonaTabProps) {
                                 <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{option.description}</span>
                             </button>
                         ))}
+                    </div>
+
+                    <div style={{ marginTop: 12, display: 'flex', justifyContent: 'center' }}>
+                         <button 
+                            onClick={() => navigate('/personas')}
+                            className="ghost-button text-xs"
+                         >
+                            Manage all personas
+                            <Icon name="paper-airplane" size="sm" />
+                         </button>
                     </div>
                 </div>
             </article>

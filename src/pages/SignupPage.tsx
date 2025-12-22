@@ -23,6 +23,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../components/ui/Toast';
 import { copy } from '../config/i18n.config';
 import { Container } from '../components/shared/Container';
 import { Icon } from '../components/ui/Icon';
@@ -47,6 +48,7 @@ interface SignupError {
 export function SignupPage(): JSX.Element {
   const navigate = useNavigate();
   const { signUpWithEmail } = useAuth();
+  const { showToast } = useToast();
 
   // ============================================================
   // STATE
@@ -152,15 +154,18 @@ export function SignupPage(): JSX.Element {
 
     try {
       setLoading(true);
+      setError(null);
       await signUpWithEmail(formData.email, formData.password, {
         firstName: formData.firstName,
         lastName: formData.lastName,
         tier: isEduEmail ? 'pro' : 'starter', // Auto-tier .edu users
       });
+      showToast('Account created! Welcome to Relevnt.', 'success');
       navigate('/dashboard');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Signup failed';
       setError({ message: errorMessage });
+      showToast(errorMessage, 'error');
     } finally {
       setLoading(false);
     }

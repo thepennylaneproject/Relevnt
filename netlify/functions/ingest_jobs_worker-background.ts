@@ -23,7 +23,8 @@ export const handler: Handler = async (
     event: HandlerEvent,
     context: HandlerContext
 ) => {
-    console.log('ingest_jobs_worker-background: started')
+    const workerId = Math.random().toString(36).substring(7)
+    console.log(`[Worker:${workerId}] Starting background ingestion worker`)
 
     try {
         // Parse the request body

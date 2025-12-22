@@ -265,6 +265,19 @@ export const copy = {
   },
 
   // ============================================
+  // PERSONAS
+  // ============================================
+  personas: {
+    pageTitle: "Persona Management",
+    pageSubtitle: "Optimize your narrative for different roles and industries.",
+    emptyState: "You haven't created any personas yet. Use personas to target different career paths.",
+    createFirst: "Create your first persona",
+    newPersona: "New Persona",
+    editPersona: "Edit Persona",
+    confirmDelete: "Are you sure you want to delete this persona?",
+  },
+
+  // ============================================
   // NAVIGATION
   // ============================================
   nav: {

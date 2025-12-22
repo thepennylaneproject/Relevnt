@@ -17,6 +17,7 @@ import { QuickActionsPanel } from '../components/dashboard/QuickActionsPanel'
 import { OpportunityAlerts } from '../components/dashboard/OpportunityAlerts'
 import { SkillsTrajectoryCard } from '../components/dashboard/SkillsTrajectoryCard'
 import { ApplicationPerformanceInsights } from '../components/dashboard/ApplicationPerformanceInsights'
+import { WhatIsNew } from '../components/dashboard/WhatIsNew'
 import '../styles/dashboard-clarity.css'
 
 export default function DashboardPage(): JSX.Element {
@@ -257,6 +258,8 @@ export default function DashboardPage(): JSX.Element {
                   </li>
                 </ul>
               </section>
+
+              <WhatIsNew />
             </aside>
           </div>
         </div>

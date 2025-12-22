@@ -26,6 +26,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../components/ui/Toast';
 import { copy } from '../config/i18n.config';
 import { PageBackground } from '../components/shared/PageBackground';
 
@@ -45,6 +46,7 @@ interface LoginError {
 export function LoginPage(): JSX.Element {
   const navigate = useNavigate();
   const { signInWithEmail } = useAuth();
+  const { showToast } = useToast();
 
   // ============================================================
   // STATE
@@ -99,12 +101,15 @@ export function LoginPage(): JSX.Element {
 
     try {
       setLoading(true);
+      setError(null);
       await signInWithEmail(formData.email, formData.password);
       // Navigation happens automatically via auth context
+      showToast('Welcome back to Relevnt!', 'success');
       navigate('/dashboard');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Login failed';
       setError({ message: errorMessage });
+      showToast(errorMessage, 'error');
     } finally {
       setLoading(false);
     }

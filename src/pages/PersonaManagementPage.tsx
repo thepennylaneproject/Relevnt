@@ -4,7 +4,7 @@ import { PersonaEditor } from '../components/personas/PersonaEditor'
 import PageBackground from '../components/shared/PageBackground'
 import { Container } from '../components/shared/Container'
 import { Icon } from '../components/ui/Icon'
-import { copy } from '../lib/copy'
+import { copy } from '../config/i18n.config'
 import type { UserPersona } from '../types/v2-personas'
 
 export default function PersonaManagementPage() {

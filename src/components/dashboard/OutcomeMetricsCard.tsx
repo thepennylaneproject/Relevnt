@@ -25,6 +25,7 @@ export function OutcomeMetricsCard({ className = '' }: OutcomeMetricsCardProps) 
         avgDaysToInterview,
         activePipeline,
         isImproving,
+        isDemoData,
         loading 
     } = useOutcomeMetrics()
     
@@ -51,7 +52,9 @@ export function OutcomeMetricsCard({ className = '' }: OutcomeMetricsCardProps) 
             </div>
             
             <p className="outcome-subtitle">
-                What really matters: are companies responding?
+                {isDemoData 
+                    ? "Target benchmarks for your industry (Showing Market Averages)" 
+                    : "What really matters: are companies responding?"}
             </p>
             
             <div className="metrics-grid">

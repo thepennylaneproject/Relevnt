@@ -34,6 +34,7 @@ export interface OutcomeMetrics {
     // Trend indicators
     recentResponseRate: number  // Last 10 applications
     isImproving: boolean
+    isDemoData?: boolean
 }
 
 export function useOutcomeMetrics(): OutcomeMetrics & { loading: boolean } {
@@ -47,14 +48,16 @@ export function useOutcomeMetrics(): OutcomeMetrics & { loading: boolean } {
                 totalInterviews: 0,
                 totalOffers: 0,
                 totalRejections: 0,
-                responseRate: 0,
-                interviewRate: 0,
-                offerRate: 0,
-                avgDaysToResponse: null,
-                avgDaysToInterview: null,
+                // Provide "Demo Benchmarks" if empty
+                responseRate: 12, // 12% is market average
+                interviewRate: 5,
+                offerRate: 1,
+                avgDaysToResponse: 7,
+                avgDaysToInterview: 14,
                 activePipeline: 0,
                 recentResponseRate: 0,
                 isImproving: false,
+                isDemoData: true // Flag to show "Market Averages" in UI
             }
         }
         

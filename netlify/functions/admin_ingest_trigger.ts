@@ -44,7 +44,12 @@ export const handler: Handler = async (event) => {
 
         // Trigger the background worker instead of running directly
         // This avoids timeout issues since background functions have 15-min limit
-        const baseUrl = process.env.URL || 'https://relevnt-fresh.netlify.app'
+        const host = event.headers.host || 'relevnt-fresh.netlify.app'
+        const protocol = host.includes('localhost') ? 'http' : 'https'
+        const baseUrl = `${protocol}://${host}`
+        
+        console.log(`admin_ingest_trigger: calling worker at ${baseUrl}`)
+
         const workerResponse = await fetch(`${baseUrl}/.netlify/functions/ingest_jobs_worker-background`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

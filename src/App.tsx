@@ -17,6 +17,7 @@ import AdminDashboard from './pages/AdminDashboard'
 import SettingsHub from './pages/SettingsHub'
 import ResumeWorkspacePage from './pages/ResumeWorkspacePage'
 import ProfileAnalyzer from './pages/ProfileAnalyzer'
+import PersonaManagementPage from './pages/PersonaManagementPage'
 
 import InterviewPrepCenter from './pages/InterviewPrepCenter'
 import InterviewPracticer from './pages/InterviewPracticer'
@@ -140,7 +141,7 @@ function AppInner() {
             />
             <Route
               path="/personas"
-              element={isAuthed ? <Navigate to="/settings#persona" replace /> : <Navigate to="/login" replace />}
+              element={isAuthed ? <PersonaManagementPage /> : <Navigate to="/login" replace />}
             />
 
             <Route

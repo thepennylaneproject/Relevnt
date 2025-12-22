@@ -1456,7 +1456,7 @@ async function ingest(source: JobSource, runId?: string): Promise<IngestResult> 
 
   // Check cooldown
   if (state.last_run_at && shouldSkipDueToCooldown(source.slug, new Date(state.last_run_at))) {
-    console.log(`ingest_jobs: skipping ${source.slug} due to cooldown`)
+    console.log(`[Ingest: ${source.slug}] Skipping due to cooldown`)
     return {
       source: source.slug,
       count: 0,
@@ -1504,7 +1504,7 @@ async function ingest(source: JobSource, runId?: string): Promise<IngestResult> 
   }
 
   console.log(
-    `ingest_jobs: starting ingest for ${source.slug} with cursor`,
+    `[Ingest: ${source.slug}] Starting with cursor`,
     JSON.stringify({ page, since, maxPages, mode: sourceConfig.mode, maxAgeDays: sourceConfig.maxAgeDays })
   )
 
@@ -1861,9 +1861,18 @@ export async function runIngestion(
 
   // Filter sources: if a specific slug is requested, use it; otherwise use all enabled sources
   let sourcesToRun: JobSource[]
+  const isSyncRequest = triggeredBy === 'manual' || triggeredBy === 'admin'
+
   if (requestedSlug) {
     sourcesToRun = ALL_SOURCES.filter((s) => s.slug === requestedSlug)
   } else {
+    // If no slug requested but triggered via sync (manual/admin), we reject if it's too many
+    // This forces the use of background workers for full syncs
+    if (isSyncRequest) {
+      console.warn('ingest_jobs: blocking multi-source sync request to prevent 499 timeout. Use background worker.')
+      throw new Error('Multi-source sync via HTTP is disabled to prevent timeouts. Trigger a specific source or use the background worker.')
+    }
+
     // Filter to only enabled sources based on sourceConfig
     sourcesToRun = ALL_SOURCES.filter((s) => {
       const config = getSourceConfig(s.slug)
@@ -1899,49 +1908,44 @@ export async function runIngestion(
   }
 
   const runId = run?.id || null
+  const startTime = Date.now()
+  const MAX_DURATION = 14 * 60 * 1000 // 14 minutes (just under Netlify's 15-min limit)
   const results: IngestResult[] = []
   let failedSourceCount = 0
 
-  // Run sources in parallel with limited concurrency to avoid timeouts
-  // We use Promise.allSettled so one failure doesn't stop the entire run
-  const CONCURRENCY_LIMIT = 3
-  const chunks = []
-  for (let i = 0; i < sourcesToRun.length; i += CONCURRENCY_LIMIT) {
-    chunks.push(sourcesToRun.slice(i, i + CONCURRENCY_LIMIT))
-  }
+  // Run sources sequentially to avoid overloading the Supabase connection pool or hitting rate limits
+  // In personal career concierge use cases, stability > speed.
+  for (const source of sourcesToRun) {
+    // Check if we are approaching the Netlify timeout limit
+    if (Date.now() - startTime > MAX_DURATION) {
+      console.warn(`[Ingest] Approaching 15-minute limit. Stopping gracefully. Remaining sources: ${sourcesToRun.slice(sourcesToRun.indexOf(source)).map(s => s.slug).join(', ')}`)
+      break
+    }
 
-  for (const chunk of chunks) {
-    const chunkResults = await Promise.allSettled(
-      chunk.map(async (source) => {
-        // Use special handler for Greenhouse since it manages multiple boards
-        return source.slug === 'greenhouse'
-          ? await ingestGreenhouseBoards(source, runId || undefined)
-          : await ingest(source, runId || undefined)
-      })
-    )
-
-    chunkResults.forEach((settled, index) => {
-      const source = chunk[index]
-      if (settled.status === 'fulfilled') {
-        const result = settled.value
-        results.push(result)
-        if (result.status === 'failed') {
-          failedSourceCount++
-        }
-      } else {
-        console.error(`ingest_jobs: fatal error while ingesting ${source.slug}`, settled.reason)
-        results.push({
-          source: source.slug,
-          count: 0,
-          normalized: 0,
-          duplicates: 0,
-          staleFiltered: 0,
-          status: 'failed',
-          error: settled.reason instanceof Error ? settled.reason.message : String(settled.reason),
-        })
+    try {
+      console.log(`[Ingest: ${source.slug}] Starting...`)
+      const result = source.slug === 'greenhouse'
+        ? await ingestGreenhouseBoards(source, runId || undefined)
+        : await ingest(source, runId || undefined)
+      
+      results.push(result)
+      if (result.status === 'failed') {
         failedSourceCount++
       }
-    })
+      console.log(`[Ingest: ${source.slug}] Finished. Count: ${result.count}`)
+    } catch (err) {
+      console.error(`[Ingest: ${source.slug}] Fatal error:`, err)
+      results.push({
+        source: source.slug,
+        count: 0,
+        normalized: 0,
+        duplicates: 0,
+        staleFiltered: 0,
+        status: 'failed',
+        error: err instanceof Error ? err.message : String(err),
+      })
+      failedSourceCount++
+    }
   }
 
   const summary = results.reduce<Record<string, number>>((acc, r) => {
