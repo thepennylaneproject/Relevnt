@@ -5,13 +5,16 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { Icon } from '../components/ui/Icon'
 import { Container } from '../components/shared/Container'
-import type { InterviewPrepRow } from '../shared/types'
+import { useToast } from '../components/ui/Toast'
+import type { InterviewPrepRow, InterviewPracticeSession } from '../shared/types'
 import '../styles/interview-prep.css'
 
 export default function InterviewPrepCenter() {
     const { user } = useAuth()
+    const { showToast } = useToast()
     const navigate = useNavigate()
     const [preps, setPreps] = useState<InterviewPrepRow[]>([])
+    const [sessions, setSessions] = useState<InterviewPracticeSession[]>([])
     const [loading, setLoading] = useState(true)
     const [isCreating, setIsCreating] = useState(false)
 
@@ -21,24 +24,36 @@ export default function InterviewPrepCenter() {
     const [jobDescription, setJobDescription] = useState('')
 
     useEffect(() => {
-        if (user) fetchPreps()
+        if (user) fetchData()
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user])
 
-    const fetchPreps = async () => {
+    const fetchData = async () => {
         if (!user?.id) return
         setLoading(true)
         try {
-            const { data, error } = await supabase
+            // 1. Fetch Prep Templates
+            const { data: prepData, error: prepError } = await supabase
                 .from('interview_prep')
                 .select('*')
                 .eq('user_id', user.id)
                 .order('created_at', { ascending: false })
 
-            if (error) throw error
-            if (data) setPreps(data as any[])
+            if (prepError) throw prepError
+            setPreps(prepData as any[])
+
+            // 2. Fetch Practice History
+            const { data: sessionData, error: sessionError } = await supabase
+                .from('interview_practice_sessions')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false })
+
+            if (sessionError) throw sessionError
+            setSessions(sessionData as any[])
+
         } catch (err) {
-            console.error('Failed to fetch interview preps', err)
+            console.error('Failed to fetch interview data', err)
         } finally {
             setLoading(false)
         }
@@ -66,7 +81,7 @@ export default function InterviewPrepCenter() {
             navigate(`/interview-practice/${result.data.prep.id}`)
         } catch (err) {
             console.error(err)
-            alert('Error creating interview prep. Please try again.')
+            showToast('Error creating interview prep. Please try again.', 'error')
         } finally {
             setIsCreating(false)
         }
@@ -127,17 +142,16 @@ export default function InterviewPrepCenter() {
                         </article>
                     </section>
 
-                    <section className="prep-center__history">
-                        <div className="history-header">
-                            <h3>Recent Sessions</h3>
+                    <section className="prep-center__templates">
+                        <div className="section-header">
+                            <h3>Your Prep Templates</h3>
                         </div>
 
                         {loading ? (
-                            <div className="loading-state">Loading your sessions...</div>
+                            <div className="loading-state">Loading templates...</div>
                         ) : preps.length === 0 ? (
                             <div className="empty-state">
-                                <Icon name="compass" size="lg" />
-                                <p>Your previous prep sessions will appear here.</p>
+                                <p>Generate a template to start practicing.</p>
                             </div>
                         ) : (
                             <div className="prep-list">
@@ -157,6 +171,53 @@ export default function InterviewPrepCenter() {
                         )}
                     </section>
                 </div>
+
+                <section className="prep-center__history">
+                    <div className="section-header">
+                        <h3>Practice History</h3>
+                    </div>
+
+                    {loading ? (
+                        <div className="loading-state">Loading history...</div>
+                    ) : sessions.length === 0 ? (
+                        <div className="empty-state">
+                            <Icon name="pocket-watch" size="lg" />
+                            <p>Your practice runs will appear here.</p>
+                        </div>
+                    ) : (
+                        <div className="history-grid">
+                            {sessions.map(session => {
+                                const prepTemplate = preps.find(p => p.id === session.interview_prep_id)
+                                const avgScore = session.practice_data.length > 0
+                                    ? Math.round(session.practice_data.reduce((acc, curr) => acc + curr.score, 0) / session.practice_data.length)
+                                    : 0
+
+                                return (
+                                    <article key={session.id} className="session-card surface-card">
+                                        <div className="session-card__header">
+                                            <div className="session-info">
+                                                <h4>{prepTemplate?.position || 'Interview Practice'}</h4>
+                                                <p>{prepTemplate?.company || 'Mock session'}</p>
+                                            </div>
+                                            <div className="session-score">
+                                                <span className="score-val">{avgScore}</span>
+                                                <span className="score-label">Avg. Score</span>
+                                            </div>
+                                        </div>
+                                        <div className="session-card__footer">
+                                            <span className="session-date">
+                                                {new Date(session.created_at).toLocaleDateString()}
+                                            </span>
+                                            <span className="session-stats">
+                                                {session.practice_data.length} / {session.questions?.length || 0} Answered
+                                            </span>
+                                        </div>
+                                    </article>
+                                )
+                            })}
+                        </div>
+                    )}
+                </section>
             </Container>
         </div>
     )

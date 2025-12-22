@@ -4,6 +4,8 @@ import { RelevntThemeProvider } from './contexts/RelevntThemeProvider'
 import { useAuth } from './contexts/AuthContext'
 
 import { AppLayout } from './components/layout/AppLayout'
+import { ErrorBoundary } from './components/ui/ErrorBoundary'
+import { WelcomeModal } from './components/ui/WelcomeModal'
 
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
@@ -13,16 +15,11 @@ import JobsPage from './pages/JobsPage'
 import ApplicationsPage from './pages/ApplicationsPage'
 import AdminDashboard from './pages/AdminDashboard'
 import SettingsHub from './pages/SettingsHub'
-import AutoApplySettingsPage from './pages/AutoApplySettingPage'
-import AutoApplyQueuePage from './pages/AutoApplyQueuePage'
-import LearnPage from './pages/LearnPage'
-import ResumeBuilderPage from './pages/ResumeBuilderPage'
 import ResumeWorkspacePage from './pages/ResumeWorkspacePage'
-import LinkedInOptimizer from './pages/LinkedInOptimizer'
-import PortfolioOptimizer from './pages/PortfolioOptimizer'
+import ProfileAnalyzer from './pages/ProfileAnalyzer'
+
 import InterviewPrepCenter from './pages/InterviewPrepCenter'
 import InterviewPracticer from './pages/InterviewPracticer'
-import NetworkingPage from './pages/NetworkingPage'
 import SidebarMarginNav from './components/chrome/SidebarMarginNav'
 import './styles/margin-nav.css'
 
@@ -53,6 +50,7 @@ function AppInner() {
     <BrowserRouter>
       <SidebarMarginNav />
       <div className="app-content">
+        <WelcomeModal />
         <AppLayout>
           <Routes>
             {/* Public */}
@@ -78,10 +76,7 @@ function AppInner() {
               path="/resumes"
               element={isAuthed ? <ResumeWorkspacePage /> : <Navigate to="/login" replace />}
             />
-            <Route
-              path="/resumes/builder"
-              element={isAuthed ? <ResumeBuilderPage /> : <Navigate to="/login" replace />}
-            />
+
             <Route
               path="/jobs"
               element={isAuthed ? <JobsPage /> : <Navigate to="/login" replace />}
@@ -92,28 +87,29 @@ function AppInner() {
             />
             <Route
               path="/auto-apply"
-              element={isAuthed ? <AutoApplySettingsPage /> : <Navigate to="/login" replace />}
+              element={isAuthed ? <Navigate to="/settings#auto-apply" replace /> : <Navigate to="/login" replace />}
             />
             <Route
-              path="/auto-apply/queue"
-              element={isAuthed ? <AutoApplyQueuePage /> : <Navigate to="/login" replace />}
+              path="/profile-analyzer"
+              element={isAuthed ? <ProfileAnalyzer /> : <Navigate to="/login" replace />}
             />
             <Route
               path="/linkedin-optimizer"
-              element={isAuthed ? <LinkedInOptimizer /> : <Navigate to="/login" replace />}
+              element={<Navigate to="/profile-analyzer" replace />}
             />
             <Route
               path="/portfolio-optimizer"
-              element={isAuthed ? <PortfolioOptimizer /> : <Navigate to="/login" replace />}
+              element={<Navigate to="/profile-analyzer" replace />}
             />
             <Route
               path="/interview-prep"
               element={isAuthed ? <InterviewPrepCenter /> : <Navigate to="/login" replace />}
             />
             <Route
-              path="/networking"
-              element={isAuthed ? <NetworkingPage /> : <Navigate to="/login" replace />}
+              path="/interview-practice/:id"
+              element={isAuthed ? <InterviewPracticer /> : <Navigate to="/login" replace />}
             />
+
 
             {/* Unified Settings Hub */}
             <Route
@@ -148,10 +144,6 @@ function AppInner() {
             />
 
             <Route
-              path="/learn"
-              element={isAuthed ? <LearnPage /> : <Navigate to="/login" replace />}
-            />
-            <Route
               path="/admin"
               element={isAuthed ? <AdminDashboard /> : <Navigate to="/login" replace />}
             />
@@ -164,9 +156,11 @@ function AppInner() {
 
 function App() {
   return (
-    <RelevntThemeProvider>
-      <AppInner />
-    </RelevntThemeProvider>
+    <ErrorBoundary>
+      <RelevntThemeProvider>
+        <AppInner />
+      </RelevntThemeProvider>
+    </ErrorBoundary>
   )
 }
 

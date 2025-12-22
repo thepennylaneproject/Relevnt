@@ -31,8 +31,10 @@
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    "src/retired"
   ],
+
   "references": [
     {
       "path": "./tsconfig.node.json"

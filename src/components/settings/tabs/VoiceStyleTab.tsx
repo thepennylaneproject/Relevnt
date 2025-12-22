@@ -3,6 +3,7 @@ import { supabase } from '../../../lib/supabase'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useSettingsAutoSave, type AutoSaveStatus } from '../../../hooks/useSettingsAutoSave'
 import { Icon } from '../../ui/Icon'
+import { useToast } from '../../ui/Toast'
 import { RangeSliderWithPresets } from '../RangeSliderWithPresets'
 
 interface VoiceStyleTabProps {
@@ -20,6 +21,7 @@ const VOICE_PRESETS: { id: VoicePreset; label: string; description: string }[] =
 
 export function VoiceStyleTab({ onAutoSaveStatusChange }: VoiceStyleTabProps) {
     const { user } = useAuth()
+    const { showToast } = useToast()
     const [loading, setLoading] = useState(true)
     const [preset, setPreset] = useState<VoicePreset>('warm')
     const [formality, setFormality] = useState(50)
@@ -212,8 +214,7 @@ export function VoiceStyleTab({ onAutoSaveStatusChange }: VoiceStyleTabProps) {
                             type="button"
                             className="ghost-button button-sm"
                             onClick={() => {
-                                // TODO: AI analysis of resume
-                                console.log('Match my resume tone')
+                                showToast('Resume tone analysis coming soon! For now, try the voice presets above.', 'info')
                             }}
                         >
                             <Icon name="scroll" size="sm" hideAccent />

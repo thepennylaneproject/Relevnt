@@ -5,13 +5,14 @@ import PageBackground from '../components/shared/PageBackground'
 import { Container } from '../components/shared/Container'
 import ResumeBuilderPage from './ResumeBuilderPage'
 import ResumeListPage from './ResumeListPage'
+import CoverLetterListPage from './CoverLetterListPage'
 
-type View = 'builder' | 'library'
+type View = 'builder' | 'library' | 'letters'
 
 export default function ResumeWorkspacePage(): JSX.Element {
   const [searchParams, setSearchParams] = useSearchParams()
   const viewParam = searchParams.get('view')
-  const view: View = viewParam === 'library' ? 'library' : 'builder'
+  const view: View = viewParam === 'letters' ? 'letters' : viewParam === 'library' ? 'library' : 'builder'
 
   const toggle = (next: View) => {
     const updated = new URLSearchParams(searchParams)
@@ -27,6 +28,7 @@ export default function ResumeWorkspacePage(): JSX.Element {
     () => [
       { id: 'builder' as View, label: 'Builder', icon: 'scroll' },
       { id: 'library' as View, label: 'Library', icon: 'folder' },
+      { id: 'letters' as View, label: 'Cover Letters', icon: 'scroll' },
     ],
     []
   )
@@ -69,7 +71,13 @@ export default function ResumeWorkspacePage(): JSX.Element {
         </section>
       </Container>
 
-      {view === 'builder' ? <ResumeBuilderPage embedded /> : <ResumeListPage embedded />}
+      {view === 'builder' ? (
+        <ResumeBuilderPage embedded />
+      ) : view === 'library' ? (
+        <ResumeListPage embedded />
+      ) : (
+        <CoverLetterListPage embedded />
+      )}
     </PageBackground>
   )
 }

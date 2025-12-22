@@ -1,7 +1,11 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import useMatchJobs from '../hooks/useMatchJobs'
 import { usePersonas } from '../hooks/usePersonas'
+import { useJobInteractions } from '../hooks/useJobInteractions'
+import { useNetworkingCompanies, checkCompanyMatch } from '../hooks/useNetworkLookup'
+import { NetworkingOverlay } from './networking/NetworkingOverlay'
 import type { MatchJobsResult } from '../hooks/useMatchJobs'
+import type { MatchFactors } from '../lib/matchJobs'
 
 type JobLike = {
   id?: string
@@ -22,13 +26,26 @@ export function RelevntFeedPanel() {
   const { activePersona, loading: personasLoading } = usePersonas()
   const { matches, loading: feedLoading, error: feedError, runMatchJobs } =
     useMatchJobs()
+  const { trackInteraction } = useJobInteractions()
+  const { companies: networkingCompanies, companyCounts } = useNetworkingCompanies()
 
-  const [minScore, setMinScore] = useState(50)
   const [minSalary, setMinSalary] = useState(0)
   const [remoteOnly, setRemoteOnly] = useState(false)
+  const [dismissedJobIds, setDismissedJobIds] = useState<Set<string>>(new Set())
 
   const [selectedMatch, setSelectedMatch] = useState<MatchJobsResult | null>(null)
   const [showWhyModal, setShowWhyModal] = useState(false)
+
+  // Handle dismissing a job
+  const handleDismissJob = useCallback((jobId: string, matchScore: number, matchFactors?: MatchFactors) => {
+    setDismissedJobIds(prev => new Set(prev).add(jobId))
+    trackInteraction(jobId, 'dismiss', matchScore, matchFactors || null, activePersona?.id || null)
+  }, [trackInteraction, activePersona?.id])
+
+  // Handle saving a job (track the interaction)
+  const handleSaveJob = useCallback((jobId: string, matchScore: number, matchFactors?: MatchFactors) => {
+    trackInteraction(jobId, 'save', matchScore, matchFactors || null, activePersona?.id || null)
+  }, [trackInteraction, activePersona?.id])
 
   // run matching whenever active persona changes
   useEffect(() => {
@@ -46,9 +63,11 @@ export function RelevntFeedPanel() {
     }
   }, [activePersona, runMatchJobs])
 
+  // Filter matches - but NO score cutoff. We show all jobs and flag weak matches.
   const filteredMatches = useMemo(() => {
     return matches.filter((m: MatchJobsResult) => {
-      if (m.score < minScore) return false
+      // Filter out dismissed jobs
+      if (dismissedJobIds.has(m.job_id)) return false
 
       const job: JobLike = (m.job as JobLike) || {}
 
@@ -69,7 +88,7 @@ export function RelevntFeedPanel() {
 
       return true
     })
-  }, [matches, minScore, minSalary, remoteOnly])
+  }, [matches, minSalary, remoteOnly, dismissedJobIds])
 
   const totalMatches = matches.length
   const visibleMatches = filteredMatches.length
@@ -94,25 +113,8 @@ export function RelevntFeedPanel() {
           </div>
         </div>
 
-        {/* feed filters */}
+        {/* feed filters - removed minScore filter, showing all jobs */}
         <div className="surface-card feed-filters">
-          <div className="field">
-            <label className="section-label">
-              Minimum match score
-            </label>
-            <input
-              type="number"
-              min={0}
-              max={100}
-              value={minScore}
-              onChange={(e) => {
-                const val = Number(e.target.value || 0)
-                setMinScore(val < 0 ? 0 : val > 100 ? 100 : val)
-              }}
-              className="input-pill text-right"
-            />
-          </div>
-
           <div className="field">
             <label className="section-label">
               Minimum salary (USD)
@@ -132,6 +134,8 @@ export function RelevntFeedPanel() {
               className="input-pill text-right"
             />
           </div>
+
+
 
           <div className="feed-remote-filter">
             <input
@@ -210,9 +214,16 @@ export function RelevntFeedPanel() {
                   <div className="feed-job-title">
                     {job.title}
                   </div>
-                  <div className="feed-match-pill">
-                    Match {Math.round(m.score)}
-                  </div>
+                  {/* Flag weak matches (below 50) with different style */}
+                  {m.score < 50 ? (
+                    <div className="feed-match-pill feed-match-pill--weak">
+                      Weak Match {Math.round(m.score)}
+                    </div>
+                  ) : (
+                    <div className="feed-match-pill">
+                      Match {Math.round(m.score)}
+                    </div>
+                  )}
                 </div>
 
                 <div className="feed-job-meta muted text-xs">
@@ -226,6 +237,17 @@ export function RelevntFeedPanel() {
                 </div>
 
                 <div className="feed-tag-row">
+                  {/* Networking connection badge */}
+                  {job.company && (
+                    (() => {
+                      const count = checkCompanyMatch(job.company, networkingCompanies, companyCounts);
+                      return count > 0 ? (
+                        <span className="feed-tag feed-tag--networking" title={`You have ${count} connection${count > 1 ? 's' : ''} at this company`}>
+                          🔗 {count} {count === 1 ? 'Connection' : 'Connections'}
+                        </span>
+                      ) : null;
+                    })()
+                  )}
                   {isRemote && (
                     <span className="feed-tag">
                       Remote friendly
@@ -276,6 +298,14 @@ export function RelevntFeedPanel() {
                     }}
                   >
                     Why this match
+                  </button>
+                  <button
+                    type="button"
+                    className="ghost-button button-sm feed-dismiss-btn"
+                    onClick={() => handleDismissJob(m.job_id, m.score)}
+                    title="Not interested"
+                  >
+                    ✕ Dismiss
                   </button>
                 </div>
               </article>
@@ -335,6 +365,15 @@ export function RelevntFeedPanel() {
                 </div>
               )}
             </div>
+
+            {(() => {
+              const job = (selectedMatch.job as JobLike) || {}
+              return job.company ? (
+                <div className="feed-modal-section">
+                  <NetworkingOverlay company={job.company} />
+                </div>
+              ) : null
+            })()}
 
             <div className="feed-modal-section">
               <div className="section-label">Job snapshot</div>

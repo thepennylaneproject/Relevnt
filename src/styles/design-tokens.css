@@ -25,39 +25,39 @@
      COLOR TOKENS
      ───────────────────────────────────────────────────────────────────────── */
 
-  /* Core Surfaces */
-  --color-bg: #F8F4ED;
-  /* Warm ivory paper */
-  --color-bg-alt: #F3EDE4;
+  /* Core Surfaces - Starter Palette */
+  --color-bg: #F3F4E6;
+  /* Cool ivory paper */
+  --color-bg-alt: #E8E9DB;
   /* Slightly darker ivory for cards */
-  --color-surface: #F3EDE4;
-  /* Cards match bg-alt, no more white */
+  --color-surface: #E8E9DB;
+  /* Cards match bg-alt */
   --color-surface-hover: rgba(255, 255, 255, 0.5);
 
-  /* Text */
-  --color-ink: #1A1A1A;
-  /* Primary text - soft black */
-  --color-ink-secondary: #4A4A4A;
+  /* Text - Starter Palette */
+  --color-ink: #0F1214;
+  /* Primary text - deep charcoal */
+  --color-ink-secondary: #3A3D40;
   /* Secondary text */
-  --color-ink-tertiary: #7A7A7A;
+  --color-ink-tertiary: #6A6D70;
   /* Muted text, placeholders */
-  --color-ink-inverse: #F8F4ED;
+  --color-ink-inverse: #F3F4E6;
   /* Text on dark backgrounds */
 
   /* Illustration & Lines */
-  --color-graphite: #333333;
-  /* Hand-drawn line work */
-  --color-graphite-light: #666666;
+  --color-graphite: #0F1214;
+  /* Line work */
+  --color-graphite-light: #6A6D70;
   /* Softer lines for empty states */
-  --color-graphite-faint: #CCCCCC;
-  /* Very soft lines, borders */
+  --color-graphite-faint: #D2D7CB;
+  /* Very soft lines, borders - muted from palette */
 
-  /* The Sacred Gold */
-  --color-accent: #C7A56A;
-  /* Champagne gold - NEVER CHANGE IN DARK MODE */
-  --color-accent-hover: #D4B57A;
+  /* The Accent Color - Teal (updated from gold) */
+  --color-accent: #4E808D;
+  /* Sophisticated teal - primary accent */
+  --color-accent-hover: #5A9299;
   /* Slightly lighter on hover */
-  --color-accent-glow: rgba(199, 165, 106, 0.2);
+  --color-accent-glow: rgba(78, 128, 141, 0.2);
   /* Soft glow effect */
 
   /* Semantic Colors */
@@ -75,8 +75,8 @@
   --color-info-bg: rgba(92, 122, 143, 0.1);
 
   /* Interactive States */
-  --color-focus-ring: rgba(199, 165, 106, 0.5);
-  --color-selection: rgba(199, 165, 106, 0.2);
+  --color-focus-ring: rgba(78, 128, 141, 0.5);
+  --color-selection: rgba(78, 128, 141, 0.2);
 
   /* ─────────────────────────────────────────────────────────────────────────
      BORDERS & SHADOWS
@@ -107,6 +107,14 @@
   --space-16: 64px;
   --space-20: 80px;
   --space-24: 96px;
+
+  /* Semantic Layout Spacing */
+  --layout-gap-hero: var(--space-8);
+  /* Between Hero and first content block */
+  --layout-gap-section: var(--space-6);
+  /* Between distinct content sections */
+  --layout-gap-elements: var(--space-4);
+  /* Between related elements (e.g. cards) */
 
   /* ─────────────────────────────────────────────────────────────────────────
      TYPOGRAPHY
@@ -194,36 +202,36 @@
 :root.dark,
 .dark,
 [data-theme="dark"] {
-  /* Core Surfaces - Warm charcoal, NOT pure black */
-  --color-bg: #11100E;
-  /* Warm charcoal */
-  --color-bg-alt: #1A1917;
-  /* Slightly lighter charcoal */
-  --color-surface: #1A1917;
+  /* Core Surfaces - Starter Dark Palette */
+  --color-bg: #0F1214;
+  /* Deep charcoal */
+  --color-bg-alt: #161A1D;
+  /* Slightly lighter charcoal - muted from palette */
+  --color-surface: #161A1D;
   /* Elevated surfaces */
   --color-surface-hover: rgba(255, 255, 255, 0.05);
 
-  /* Text - Ivory becomes ink */
-  --color-ink: #F8F4ED;
-  /* Primary text - warm ivory */
-  --color-ink-secondary: #C4C0B8;
+  /* Text - Starter Dark */
+  --color-ink: #F3F4E6;
+  /* Primary text - cool ivory */
+  --color-ink-secondary: #C8C9BB;
   /* Secondary text */
-  --color-ink-tertiary: #8A8680;
+  --color-ink-tertiary: #8A8B7D;
   /* Muted text */
-  --color-ink-inverse: #1A1A1A;
+  --color-ink-inverse: #0F1214;
   /* Text on light backgrounds */
 
-  /* Illustration & Lines - Graphite becomes chalk */
-  --color-graphite: #E8E2D7;
-  /* Chalk-like lines */
-  --color-graphite-light: #A8A29E;
-  /* Softer chalk */
-  --color-graphite-faint: #3D3A36;
+  /* Illustration & Lines */
+  --color-graphite: #F3F4E6;
+  /* Light lines */
+  --color-graphite-light: #8A8B7D;
+  /* Softer lines */
+  --color-graphite-faint: #2A2E31;
   /* Very subtle borders */
 
-  /* The Sacred Gold - UNCHANGED */
-  /* --color-accent stays #C7A56A */
-  /* Gold is sacred. */
+  /* The Accent Color - Teal stays consistent in dark mode */
+  /* --color-accent stays #4E808D */
+  /* Teal works beautifully in both modes */
 
   /* Semantic Colors - Slightly adjusted for dark backgrounds */
   --color-success: #6BA37A;
@@ -239,7 +247,7 @@
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
-  --shadow-glow: 0 0 30px rgba(199, 165, 106, 0.15);
+  --shadow-glow: 0 0 30px rgba(78, 128, 141, 0.15);
 }
 
 /* System preference detection */
@@ -267,7 +275,7 @@
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
     --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
     --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
-    --shadow-glow: 0 0 30px rgba(199, 165, 106, 0.15);
+    --shadow-glow: 0 0 30px rgba(78, 128, 141, 0.15);
   }
 }
 

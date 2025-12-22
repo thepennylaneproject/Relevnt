@@ -9,9 +9,10 @@ import { CareerTargetsTab } from '../components/settings/tabs/CareerTargetsTab'
 import { ProfileTab } from '../components/settings/tabs/ProfileTab'
 import { VoiceStyleTab } from '../components/settings/tabs/VoiceStyleTab'
 import { SystemAutomationTab } from '../components/settings/tabs/SystemAutomationTab'
+import { AutoApplyTab } from '../components/settings/tabs/AutoApplyTab'
 import type { AutoSaveStatus } from '../hooks/useSettingsAutoSave'
 
-const VALID_TABS: SettingsTab[] = ['persona', 'career', 'profile', 'voice', 'system']
+const VALID_TABS: SettingsTab[] = ['persona', 'career', 'profile', 'voice', 'system', 'auto-apply']
 
 function getTabFromHash(hash: string): SettingsTab {
     const tab = hash.replace('#', '') as SettingsTab
@@ -54,6 +55,8 @@ export default function SettingsHub(): JSX.Element {
                 return <VoiceStyleTab onAutoSaveStatusChange={handleAutoSaveStatusChange} />
             case 'system':
                 return <SystemAutomationTab onAutoSaveStatusChange={handleAutoSaveStatusChange} />
+            case 'auto-apply':
+                return <AutoApplyTab onAutoSaveStatusChange={handleAutoSaveStatusChange} />
             default:
                 return null
         }
@@ -79,6 +82,10 @@ export default function SettingsHub(): JSX.Element {
         system: {
             title: 'System & Automation',
             subtitle: 'How hands-on do you want to be?',
+        },
+        'auto-apply': {
+            title: 'Auto-Apply',
+            subtitle: 'Set guardrails for when Relevnt can apply on your behalf.',
         },
     }
 

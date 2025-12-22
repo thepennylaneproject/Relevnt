@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title>Contacts · MessageCircle</title>
+  <desc>A message bubble indicating conversation.</desc>
+  <defs>
+    <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4E808D" />
+      <stop offset="100%" stop-color="#74AAB4" />
+    </linearGradient>
+  </defs>
+  <rect width="96" height="96" rx="16" ry="16" fill="#0F1214"/>
+  
+  <path d="M28 34 a18 18 0 1 0 0.1 0" fill="#0F1214" stroke="#161A1D" stroke-width="3"/>
+  <path d="M28 68 l6 -10" stroke="#161A1D" stroke-width="3" stroke-linecap="round"/>
+  <rect x="26" y="40" width="20" height="6" rx="3" fill="#161A1D"/>
+  <rect x="26" y="50" width="28" height="6" rx="3" fill="#161A1D"/>
+  <circle cx="62" cy="40" r="10" fill="url(#grad-dark)"/>
+
+</svg>

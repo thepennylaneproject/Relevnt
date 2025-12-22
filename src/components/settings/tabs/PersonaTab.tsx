@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { usePersonas } from '../../../hooks/usePersonas'
 import { useSettingsAutoSave, type AutoSaveStatus } from '../../../hooks/useSettingsAutoSave'
 import { Icon } from '../../ui/Icon'
+import { useToast } from '../../ui/Toast'
 import type { UserPersona } from '../../../types/v2-personas'
 
 interface PersonaTabProps {
@@ -16,6 +18,8 @@ const SEARCH_MODE_OPTIONS = [
 ] as const
 
 export function PersonaTab({ onAutoSaveStatusChange }: PersonaTabProps) {
+    const navigate = useNavigate()
+    const { showToast } = useToast()
     const { personas, activePersona, setActivePersona, loading, error } = usePersonas()
 
     const { status, triggerSave } = useSettingsAutoSave(
@@ -154,8 +158,8 @@ export function PersonaTab({ onAutoSaveStatusChange }: PersonaTabProps) {
                                     borderRadius: 'var(--radius-lg)',
                                 }}
                                 onClick={() => {
-                                    // TODO: Open persona creation flow with this search intent
-                                    console.log('Create persona with intent:', option.id)
+                                    showToast(`Creating a "${option.label}" persona...`, 'info')
+                                    navigate('/personas')
                                 }}
                             >
                                 <span style={{ fontSize: 14, fontWeight: 600 }}>{option.label}</span>

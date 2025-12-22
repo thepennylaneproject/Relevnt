@@ -230,6 +230,22 @@ export interface CoverLetterResponse {
   success: boolean;
   data: {
     coverLetter: string;
+    strategy?: string;
+    matchingPoints?: string[];
+  };
+  error?: string;
+}
+
+/**
+ * Career narrative generation - craft a compelling story
+ */
+export interface CareerNarrativeResponse {
+  success: boolean;
+  data: {
+    origin: string;
+    pivot: string;
+    value: string;
+    future: string;
   };
   error?: string;
 }
@@ -247,6 +263,44 @@ export interface InterviewPrepResponse {
     questions: string[];
     tips: string[];
     commonAnswers: Record<string, string>;
+  };
+  error?: string;
+}
+
+/**
+ * Salary negotiation assistance
+ */
+export interface SalaryNegotiationResponse {
+  success: boolean;
+  data: {
+    targetRange: string;
+    strategy: string;
+    responses: string[];
+  };
+  error?: string;
+}
+
+/**
+ * Post-rejection coaching
+ */
+export interface RejectionCoachingResponse {
+  success: boolean;
+  data: {
+    analysis: string;
+    missingSkills: string[];
+    nextSteps: string[];
+  };
+  error?: string;
+}
+
+/**
+ * Networking outreach draft
+ */
+export interface NetworkingDraftResponse {
+  success: boolean;
+  data: {
+    draft: string;
+    strategy?: string;
   };
   error?: string;
 }
@@ -355,6 +409,10 @@ export type AITaskResponse =
   | GenerateBulletsResponse
   | RewriteTextResponse
   | SuggestSkillsResponse
+  | CareerNarrativeResponse
+  | SalaryNegotiationResponse
+  | RejectionCoachingResponse
+  | NetworkingDraftResponse
 
 /**
  * Task name to response type mapping
@@ -377,6 +435,10 @@ export const TASK_RESPONSE_TYPES = {
   'generate-bullets': {} as GenerateBulletsResponse,
   'rewrite-text': {} as RewriteTextResponse,
   'suggest-skills': {} as SuggestSkillsResponse,
+  'generate-career-narrative': {} as CareerNarrativeResponse,
+  'salary-negotiation': {} as SalaryNegotiationResponse,
+  'rejection-coaching': {} as RejectionCoachingResponse,
+  'networking-draft': {} as NetworkingDraftResponse,
 } as const
 
 /**
@@ -407,6 +469,7 @@ export const TIER_LIMITS = {
     'generate-bullets': 5,
     'rewrite-text': 5,
     'suggest-skills': 5,
+    'generate-career-narrative': 2,
   },
   pro: {
     'extract-resume': 50,
@@ -423,6 +486,7 @@ export const TIER_LIMITS = {
     'generate-bullets': 50,
     'rewrite-text': 50,
     'suggest-skills': 50,
+    'generate-career-narrative': 20,
   },
   premium: {
     'extract-resume': Infinity,
@@ -439,6 +503,9 @@ export const TIER_LIMITS = {
     'generate-bullets': Infinity,
     'rewrite-text': Infinity,
     'suggest-skills': Infinity,
+    'generate-career-narrative': Infinity,
+    'salary-negotiation': Infinity,
+    'rejection-coaching': Infinity,
   },
 } as const;
 

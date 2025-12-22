@@ -1,0 +1,20 @@
+{
+  "light": {
+    "label": "Starter Light",
+    "bg": "#F3F4E6",
+    "ink": "#0F1214",
+    "muted": "#D2D7CB",
+    "accent_primary": "#4E808D",
+    "accent_secondary": "#4E808D",
+    "accent_alt": "#D2D7CB"
+  },
+  "dark": {
+    "label": "Starter Dark",
+    "bg": "#0F1214",
+    "ink": "#F3F4E6",
+    "muted": "#161A1D",
+    "accent_primary": "#4E808D",
+    "accent_secondary": "#74AAB4",
+    "accent_alt": "#161A1D"
+  }
+}

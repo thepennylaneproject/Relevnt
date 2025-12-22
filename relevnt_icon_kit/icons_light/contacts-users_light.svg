@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title>Contacts · Users</title>
+  <desc>Two user silhouettes connected.</desc>
+  <defs>
+    <linearGradient id="grad-light" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4E808D" />
+      <stop offset="100%" stop-color="#4E808D" />
+    </linearGradient>
+  </defs>
+  <rect width="96" height="96" rx="16" ry="16" fill="#F3F4E6"/>
+  
+  <circle cx="36" cy="42" r="9" fill="#4E808D" opacity="0.9"/>
+  <circle cx="56" cy="42" r="9" fill="#4E808D" opacity="0.9"/>
+  <path d="M24 64 C24 54, 32 52, 36 52 C40 52, 48 54, 48 64" fill="#F3F4E6" stroke="#D2D7CB" stroke-width="3"/>
+  <path d="M44 64 C44 54, 52 52, 56 52 C60 52, 68 54, 68 64" fill="#F3F4E6" stroke="#D2D7CB" stroke-width="3"/>
+  <path d="M36 52 L56 52" stroke="#4E808D" stroke-width="3" stroke-linecap="round"/>
+
+</svg>

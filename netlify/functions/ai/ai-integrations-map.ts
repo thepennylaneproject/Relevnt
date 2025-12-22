@@ -148,21 +148,29 @@ export const AI_INTEGRATIONS = {
     fallbackChain: ['anthropic-sonnet4', 'openai-gpt4o', 'google-gemini'],
     estimatedCost: { starter: 0.01, pro: 0.015, premium: 0.02 },
   },
+  'generate-career-narrative': {
+    name: 'Career Narrative Generation',
+    description: 'Craft a compelling career narrative',
+    category: 'writing',
+    providers: { starter: 'google-gemini', pro: 'anthropic-sonnet4', premium: 'openai-gpt4o' },
+    fallbackChain: ['anthropic-sonnet4', 'openai-gpt4o', 'google-gemini'],
+    estimatedCost: { starter: 0.02, pro: 0.03, premium: 0.04 },
+  },
 };
 
 export const TIER_LIMITS = {
   starter: {
-    allowedTasks: ['extract-resume', 'job-extraction', 'job-ranking', 'cover-letter-gen', 'qa-helper', 'analyze-resume', 'generate-bullets', 'rewrite-text', 'suggest-skills'],
+    allowedTasks: ['extract-resume', 'job-extraction', 'job-ranking', 'cover-letter-gen', 'qa-helper', 'analyze-resume', 'generate-bullets', 'rewrite-text', 'suggest-skills', 'generate-career-narrative'],
     monthlyLimit: 50,
     maxTokens: 1000,
   },
   pro: {
-    allowedTasks: ['extract-resume', 'job-extraction', 'job-ranking', 'cover-letter-gen', 'optimize-resume', 'qa-helper', 'skill-gap-analysis', 'job-matching', 'interview-questions', 'analyze-resume', 'generate-bullets', 'rewrite-text', 'suggest-skills'],
+    allowedTasks: ['extract-resume', 'job-extraction', 'job-ranking', 'cover-letter-gen', 'optimize-resume', 'qa-helper', 'skill-gap-analysis', 'job-matching', 'interview-questions', 'analyze-resume', 'generate-bullets', 'rewrite-text', 'suggest-skills', 'generate-career-narrative'],
     monthlyLimit: 500,
     maxTokens: 4000,
   },
   premium: {
-    allowedTasks: ['extract-resume', 'job-extraction', 'job-ranking', 'cover-letter-gen', 'optimize-resume', 'qa-helper', 'skill-gap-analysis', 'interview-questions', 'interview-scoring', 'job-matching', 'posting-finder', 'success-probability', 'analyze-resume', 'generate-bullets', 'rewrite-text', 'suggest-skills'],
+    allowedTasks: ['extract-resume', 'job-extraction', 'job-ranking', 'cover-letter-gen', 'optimize-resume', 'qa-helper', 'skill-gap-analysis', 'interview-questions', 'interview-scoring', 'job-matching', 'posting-finder', 'success-probability', 'analyze-resume', 'generate-bullets', 'rewrite-text', 'suggest-skills', 'generate-career-narrative'],
     monthlyLimit: 5000,
     maxTokens: 16000,
   },

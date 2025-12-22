@@ -17,6 +17,7 @@
  */
 
 import { useState } from 'react'
+import { Icon } from '../ui/Icon'
 import type { MatchedJob } from '../../lib/matchJobs'
 
 // =============================================================================
@@ -83,7 +84,9 @@ export function JobFeed({
         return (
             <div className={`job-feed job-feed--error ${className}`} style={styles.container}>
                 <div style={styles.errorBox}>
-                    <span style={styles.errorIcon}>⚠️</span>
+                    <div style={styles.errorIcon}>
+                        <Icon name="alert-triangle" size="md" hideAccent />
+                    </div>
                     <div>
                         <div style={styles.errorTitle}>Failed to load jobs</div>
                         <div style={styles.errorMessage}>{error}</div>
@@ -101,7 +104,9 @@ export function JobFeed({
         return (
             <div className={`job-feed job-feed--empty ${className}`} style={styles.container}>
                 <div style={styles.emptyState}>
-                    <div style={styles.emptyIcon}>📭</div>
+                    <div style={styles.emptyIcon}>
+                        <Icon name="mailbox" size="lg" />
+                    </div>
                     <div style={styles.emptyTitle}>No matches found</div>
                     <div style={styles.emptyMessage}>
                         Try adjusting your persona preferences or relevance weights to see more jobs.
@@ -155,17 +160,20 @@ export function JobFeed({
                         <div style={styles.jobDetails}>
                             {match.job.remote_type && (
                                 <span style={styles.badge}>
-                                    📍 {match.job.remote_type}
+                                    <Icon name="compass" size="sm" hideAccent />
+                                    {match.job.remote_type}
                                 </span>
                             )}
                             {match.job.employment_type && (
                                 <span style={styles.badge}>
-                                    💼 {match.job.employment_type}
+                                    <Icon name="briefcase" size="sm" hideAccent />
+                                    {match.job.employment_type}
                                 </span>
                             )}
                             {(match.job.salary_min || match.job.salary_max) && (
                                 <span style={styles.badge}>
-                                    💰 ${formatSalary(match.job.salary_min, match.job.salary_max)}
+                                    <Icon name="dollar" size="sm" hideAccent />
+                                    {formatSalary(match.job.salary_min, match.job.salary_max)}
                                 </span>
                             )}
                         </div>
@@ -184,7 +192,10 @@ export function JobFeed({
                             }}
                             style={styles.expandButton}
                         >
-                            {expandedJobId === match.job_id ? '▼' : '▶'} View score breakdown
+                            <div style={styles.expandChevron}>
+                                <Icon name={expandedJobId === match.job_id ? 'chevron-down' : 'chevron-right'} size="sm" hideAccent />
+                            </div>
+                            View score breakdown
                         </button>
 
                         {expandedJobId === match.job_id && (
@@ -388,6 +399,9 @@ const styles: Record<string, React.CSSProperties> = {
     },
 
     badge: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '4px',
         padding: '4px 10px',
         backgroundColor: 'var(--surface-tertiary, #2a2a2a)',
         borderRadius: '4px',
@@ -403,6 +417,9 @@ const styles: Record<string, React.CSSProperties> = {
     },
 
     expandButton: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '4px',
         backgroundColor: 'transparent',
         border: 'none',
         color: 'var(--accent-primary, #d4af37)',
@@ -411,6 +428,12 @@ const styles: Record<string, React.CSSProperties> = {
         padding: '4px 0',
         marginBottom: '8px',
         fontWeight: 500,
+    },
+
+    expandChevron: {
+        display: 'flex',
+        alignItems: 'center',
+        width: '12px',
     },
 
     factorsBreakdown: {
@@ -509,7 +532,9 @@ const styles: Record<string, React.CSSProperties> = {
     },
 
     errorIcon: {
-        fontSize: '24px',
+        display: 'flex',
+        alignItems: 'center',
+        color: 'var(--color-error, #ef4444)',
     },
 
     errorTitle: {
@@ -531,8 +556,10 @@ const styles: Record<string, React.CSSProperties> = {
     },
 
     emptyIcon: {
-        fontSize: '48px',
         marginBottom: '16px',
+        display: 'flex',
+        justifyContent: 'center',
+        color: 'var(--text-muted)',
     },
 
     emptyTitle: {

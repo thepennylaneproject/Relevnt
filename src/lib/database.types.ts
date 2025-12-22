@@ -1463,6 +1463,70 @@ export type Database = {
           },
         ]
       }
+      interview_practice_sessions: {
+        Row: {
+          created_at: string
+          id: string
+          interview_prep_id: string | null
+          application_id: string | null
+          job_id: string | null
+          practice_data: Json
+          status: string
+          updated_at: string
+          user_id: string
+          questions: Json
+          overall_feedback: Json | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          interview_prep_id?: string | null
+          application_id?: string | null
+          job_id?: string | null
+          practice_data?: Json
+          status?: string
+          updated_at?: string
+          user_id: string
+          questions?: Json
+          overall_feedback?: Json | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          interview_prep_id?: string | null
+          application_id?: string | null
+          job_id?: string | null
+          practice_data?: Json
+          status?: string
+          updated_at?: string
+          user_id?: string
+          questions?: Json
+          overall_feedback?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_practice_sessions_interview_prep_id_fkey"
+            columns: ["interview_prep_id"]
+            isOneToOne: false
+            referencedRelation: "interview_prep"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interview_practice_sessions_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interview_practice_sessions_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          }
+        ]
+      },
       interview_sessions: {
         Row: {
           created_at: string | null

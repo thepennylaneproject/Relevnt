@@ -1,10 +1,13 @@
-
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
 import type { Notification } from '../shared/types'
 
-export function useNotifications() {
+interface UseNotificationsOptions {
+    filterLevel?: 'all' | 'important' | 'critical'
+}
+
+export function useNotifications({ filterLevel = 'all' }: UseNotificationsOptions = {}) {
     const { user } = useAuth()
     const [notifications, setNotifications] = useState<Notification[]>([])
     const [loading, setLoading] = useState(true)
@@ -20,12 +23,11 @@ export function useNotifications() {
                 .select('*')
                 .eq('user_id', user.id)
                 .order('created_at', { ascending: false })
-                .limit(20)
+                .limit(50) // Increased limit
 
             if (error) throw error
             if (data) {
                 setNotifications(data as Notification[])
-                setUnreadCount(data.filter((n: any) => !n.is_read).length)
             }
         } catch (err) {
             console.error('Error fetching notifications:', err)
@@ -46,7 +48,6 @@ export function useNotifications() {
             setNotifications(prev =>
                 prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
             )
-            setUnreadCount(prev => Math.max(0, prev - 1))
         } catch (err) {
             console.error('Error marking notification as read:', err)
         }
@@ -64,11 +65,31 @@ export function useNotifications() {
             if (error) throw error
 
             setNotifications(prev => prev.map(n => ({ ...n, is_read: true })))
-            setUnreadCount(0)
         } catch (err) {
             console.error('Error marking all notifications as read:', err)
         }
     }
+
+    // Filter notifications based on level
+    const filteredNotifications = useMemo(() => {
+        if (filterLevel === 'all') return notifications
+
+        const importantTypes = ['success', 'warning', 'job_alert']
+        const criticalTypes = ['warning', 'job_alert']
+
+        if (filterLevel === 'important') {
+            return notifications.filter(n => importantTypes.includes(n.type))
+        }
+        if (filterLevel === 'critical') {
+            return notifications.filter(n => criticalTypes.includes(n.type))
+        }
+        return notifications
+    }, [notifications, filterLevel])
+
+    // Compute unread count based on FILTERED list (to reduce stress in gentle mode)
+    const effectiveUnreadCount = useMemo(() => {
+        return filteredNotifications.filter(n => !n.is_read).length
+    }, [filteredNotifications])
 
     useEffect(() => {
         fetchNotifications()
@@ -85,7 +106,6 @@ export function useNotifications() {
                 }, (payload) => {
                     const newNotif = payload.new as Notification
                     setNotifications(prev => [newNotif, ...prev])
-                    setUnreadCount(prev => prev + 1)
                 })
                 .subscribe()
 
@@ -97,9 +117,10 @@ export function useNotifications() {
     }, [user?.id])
 
     return {
-        notifications,
+        notifications: filteredNotifications,
+        allNotifications: notifications, // access to raw list if needed
         loading,
-        unreadCount,
+        unreadCount: effectiveUnreadCount,
         markAsRead,
         markAllAsRead,
         refresh: fetchNotifications

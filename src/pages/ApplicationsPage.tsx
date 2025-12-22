@@ -1,17 +1,26 @@
 
 import React, { useState } from 'react'
-import { Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { Plus } from 'lucide-react'
 import PageBackground from '../components/shared/PageBackground'
 import { Container } from '../components/shared/Container'
 import { Icon } from '../components/ui/Icon'
+import { PageHero } from '../components/ui/PageHero'
 import { EmptyState } from '../components/ui/EmptyState'
+import { ConfirmDialog } from '../components/ui/ConfirmDialog'
+import { useToast } from '../components/ui/Toast'
 import { copy } from '../lib/copy'
 import {
   useApplications,
   type ApplicationStatus,
 } from '../hooks/useApplications'
 import { ApplicationQuestionHelper } from '../components/Applications/ApplicationQuestionHelper'
+import { NegotiationCoach } from '../components/Applications/NegotiationCoach'
+import { RejectionCoaching } from '../components/Applications/RejectionCoaching'
+import { CoverLetterGenerator } from '../components/Applications/CoverLetterGenerator'
+import { AddApplicationModal } from '../components/Applications/AddApplicationModal'
+import { NetworkingConnectionPrompt } from '../components/intelligence/NetworkingConnectionPrompt'
+import { useNetworkingDraft } from '../hooks/useNetworkingDraft'
 import { formatRelativeTime } from '../lib/utils/time'
 
 const STATUS_TABS: (ApplicationStatus | 'all')[] = [
@@ -65,10 +74,16 @@ const renderStatusIcon = (status: ApplicationStatus | null | undefined) => {
 }
 
 export default function ApplicationsPage() {
+  const { showToast } = useToast()
   const [selectedStatus, setSelectedStatus] = useState<ApplicationStatus | undefined>(
     undefined,
   )
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [expandedTab, setExpandedTab] = useState<'timeline' | 'negotiate' | 'coaching' | 'letter'>('timeline')
+  const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; position: string } | null>(null)
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [networkingDrafts, setNetworkingDrafts] = useState<Record<string, { draft: string; strategy: string }>>({})
+  const { generateDraft, loading: generatingDraft } = useNetworkingDraft()
 
   const {
     applications,
@@ -115,7 +130,19 @@ export default function ApplicationsPage() {
   }
 
   const handleAddApplication = () => {
-    // Hook up to creation flow
+    setIsAddModalOpen(true)
+  }
+
+  const handleDeleteClick = (id: string, position: string) => {
+    setDeleteConfirm({ id, position })
+  }
+
+  const confirmDeleteApplication = () => {
+    if (deleteConfirm) {
+      deleteApplication(deleteConfirm.id)
+      showToast('Application deleted', 'success')
+      setDeleteConfirm(null)
+    }
   }
 
   const formatUpdated = (app: any) => {
@@ -127,44 +154,28 @@ export default function ApplicationsPage() {
     <PageBackground>
       <Container maxWidth="xl" padding="md">
         <div className="apps-page">
-          <section className="hero-shell">
-            <div className="hero-header">
-              <div className="dashboard-hero-icon">
-                <Icon name="paper-airplane" size="md" />
+          <PageHero
+            category="track"
+            headline={copy.applications.pageSubtitle}
+            subtitle="Keep cada role, status, and timeline in one place. Future You has the receipts."
+            actions={[{
+              label: 'Log a new application',
+              onClick: handleAddApplication,
+              variant: 'primary',
+              icon: <Plus size={16} aria-hidden="true" />,
+            }]}
+          >
+            {typeof totalApplications === 'number' && typeof activeApplications === 'number' && (
+              <div className="hero-actions-metrics" style={{ marginTop: 12 }}>
+                <span className="hero-metric-pill">
+                  <span className="font-semibold">{totalApplications}</span> Total
+                </span>
+                <span className="hero-metric-pill">
+                  <span className="font-semibold">{activeApplications}</span> Active
+                </span>
               </div>
-              <div className="hero-header-main">
-                <p className="text-xs muted">{copy.applications.pageTitle}</p>
-                <h1 className="font-display">{copy.applications.pageSubtitle}</h1>
-                <p className="muted">
-                  Keep cada role, status, and timeline in one place. Future You has the receipts.
-                </p>
-              </div>
-            </div>
-
-            <div className="hero-actions-accent">
-              <div className="hero-actions-primary">
-                <button
-                  type="button"
-                  className="primary-button"
-                  onClick={handleAddApplication}
-                >
-                  <Plus size={16} aria-hidden="true" />
-                  Log a new application
-                </button>
-              </div>
-
-              {typeof totalApplications === 'number' && typeof activeApplications === 'number' && (
-                <div className="hero-actions-metrics">
-                  <span className="hero-metric-pill">
-                    <span className="font-semibold">{totalApplications}</span> Total
-                  </span>
-                  <span className="hero-metric-pill">
-                    <span className="font-semibold">{activeApplications}</span> Active
-                  </span>
-                </div>
-              )}
-            </div>
-          </section>
+            )}
+          </PageHero>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
             <div className="lg:col-span-2 space-y-6">
@@ -235,6 +246,60 @@ export default function ApplicationsPage() {
                           </div>
                         </header>
 
+                        <NetworkingConnectionPrompt 
+                          company={app.company} 
+                          variant="inline"
+                          className="mt-2"
+                          onGenerateMessage={async (contact) => {
+                            const result = await generateDraft(
+                              contact.name,
+                              contact.role || '',
+                              app.company || '',
+                              app.position || ''
+                            );
+                            if (result?.success && result.data) {
+                              setNetworkingDrafts(prev => ({
+                                ...prev,
+                                [contact.id]: result.data!
+                              }));
+                            }
+                          }}
+                        />
+
+                        {Object.entries(networkingDrafts).map(([contactId, data]: [string, { draft: string; strategy: string }]) => {
+                          // Only show if it matches a contact for this company
+                          // This is simplified but works for now
+                          return (
+                            <div key={contactId} className="mt-3 p-3 bg-accent/5 border border-accent/20 rounded-lg animate-in fade-in slide-in-from-top-1">
+                              <div className="flex justify-between items-center mb-2">
+                                <span className="text-[10px] font-bold uppercase text-accent">Drafted Outreach</span>
+                                <button 
+                                  onClick={() => setNetworkingDrafts(prev => {
+                                    const next = { ...prev };
+                                    delete next[contactId];
+                                    return next;
+                                  })}
+                                  className="text-[10px] muted hover:text-foreground"
+                                >
+                                  Clear
+                                </button>
+                              </div>
+                              <p className="text-xs whitespace-pre-wrap italic">"{data.draft}"</p>
+                              <div className="mt-2 flex gap-2">
+                                <button 
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(data.draft);
+                                    showToast('Draft copied to clipboard!', 'success');
+                                  }}
+                                  className="ghost-button button-xs"
+                                >
+                                  Copy
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+
                         <div className="flex items-center gap-4 py-2 border-b border-subtle">
                           <div className="status-field flex-1">
                             <label className="muted text-[10px] uppercase font-bold" htmlFor={`status-${app.id}`}>
@@ -261,32 +326,77 @@ export default function ApplicationsPage() {
                           <button
                             type="button"
                             className="ghost-button button-sm mt-4"
-                            onClick={() => setExpandedId(expandedId === app.id ? null : app.id)}
+                            onClick={() => {
+                              if (expandedId === app.id) {
+                                setExpandedId(null)
+                              } else {
+                                setExpandedId(app.id)
+                                setExpandedTab('timeline')
+                              }
+                            }}
                           >
-                            {expandedId === app.id ? 'Hide Timeline' : 'View Timeline'}
-                            <Icon name={'compass'} size="sm" />
+                            {expandedId === app.id ? 'Collapse' : 'Details'}
+                            <Icon name={expandedId === app.id ? 'anchor' : 'scroll'} size="sm" hideAccent />
                           </button>
                         </div>
 
                         {expandedId === app.id && (
-                          <div className="app-timeline mt-4 animate-in slide-in-from-top-2">
-                            <h4 className="text-[10px] uppercase font-bold muted mb-2">History</h4>
-                            <div className="space-y-3">
-                              {(app.events || []).map(event => (
-                                <div key={event.id} className="timeline-event flex gap-3 text-xs">
-                                  <div className="timeline-dot" />
-                                  <div className="flex-1">
-                                    <div className="flex justify-between">
-                                      <span className="font-semibold">{event.title}</span>
-                                      <span className="muted">{formatRelativeTime(event.created_at)}</span>
-                                    </div>
-                                  </div>
-                                </div>
-                              ))}
-                              {(app.events || []).length === 0 && (
-                                <p className="muted text-center py-4 italic">No timeline events yet.</p>
+                          <div className="mt-4 animate-in slide-in-from-top-2">
+                            <div className="flex gap-2 mb-4 border-b border-subtle pb-2">
+                              <button
+                                className={`ghost-button button-xs ${expandedTab === 'timeline' ? 'is-active' : ''}`}
+                                onClick={() => setExpandedTab('timeline')}
+                              >
+                                Timeline
+                              </button>
+                              {app.status === 'offer' && (
+                                <button
+                                  className={`ghost-button button-xs ${expandedTab === 'negotiate' ? 'is-active' : ''}`}
+                                  onClick={() => setExpandedTab('negotiate')}
+                                >
+                                  Negotiation Coach
+                                </button>
                               )}
+                              {app.status === 'rejected' && (
+                                <button
+                                  className={`ghost-button button-xs ${expandedTab === 'coaching' ? 'is-active' : ''}`}
+                                  onClick={() => setExpandedTab('coaching')}
+                                >
+                                  De-brief
+                                </button>
+                              )}
+                              <button
+                                className={`ghost-button button-xs ${expandedTab === 'letter' ? 'is-active' : ''}`}
+                                onClick={() => setExpandedTab('letter')}
+                              >
+                                Cover Letter
+                              </button>
                             </div>
+
+                            {expandedTab === 'timeline' && (
+                              <div className="app-timeline">
+                                <h4 className="text-[10px] uppercase font-bold muted mb-2">History</h4>
+                                <div className="space-y-3">
+                                  {(app.events || []).map(event => (
+                                    <div key={event.id} className="timeline-event flex gap-3 text-xs">
+                                      <div className="timeline-dot" />
+                                      <div className="flex-1">
+                                        <div className="flex justify-between">
+                                          <span className="font-semibold">{event.title}</span>
+                                          <span className="muted">{formatRelativeTime(event.created_at)}</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                  {(app.events || []).length === 0 && (
+                                    <p className="muted text-center py-4 italic">No timeline events yet.</p>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                            {expandedTab === 'negotiate' && <NegotiationCoach application={app} />}
+                            {expandedTab === 'coaching' && <RejectionCoaching application={app} />}
+                            {expandedTab === 'letter' && <CoverLetterGenerator application={app} />}
                           </div>
                         )}
 
@@ -295,7 +405,7 @@ export default function ApplicationsPage() {
                           <button
                             type="button"
                             className="ghost-button button-xs text-danger"
-                            onClick={() => deleteApplication(app.id)}
+                            onClick={() => handleDeleteClick(app.id, app.position)}
                           >
                             Delete
                           </button>
@@ -347,6 +457,23 @@ export default function ApplicationsPage() {
               background: var(--color-accent);
           }
       `}</style>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={!!deleteConfirm}
+        title="Delete Application"
+        message={`Are you sure you want to delete your application for "${deleteConfirm?.position || 'this role'}"? This cannot be undone.`}
+        confirmLabel="Delete"
+        cancelLabel="Keep it"
+        variant="danger"
+        onConfirm={confirmDeleteApplication}
+        onCancel={() => setDeleteConfirm(null)}
+      />
+
+      <AddApplicationModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+      />
     </PageBackground>
   )
 }

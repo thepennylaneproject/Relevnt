@@ -19,6 +19,7 @@ import { useState, useRef, useEffect } from 'react'
 import { usePersonas } from '../../hooks/usePersonas'
 import { useResumes } from '../../hooks/useResumes'
 import { useAuth } from '../../contexts/AuthContext'
+import { Icon } from '../ui/Icon'
 import type { UserPersona } from '../../types/v2-personas'
 
 // =============================================================================
@@ -103,7 +104,7 @@ export function PersonaSwitcher({
         return (
             <div className={`persona-switcher persona-switcher--loading ${className}`} style={styles.container}>
                 <div style={styles.loadingButton}>
-                    <span style={styles.loadingDot}>●</span>
+                    <div style={styles.loadingCircle} />
                     <span style={styles.loadingText}>Loading...</span>
                 </div>
             </div>
@@ -149,11 +150,15 @@ export function PersonaSwitcher({
                 aria-haspopup="listbox"
                 aria-expanded={isOpen}
             >
-                <span style={styles.personaIcon}>👤</span>
+                <div style={styles.personaIcon}>
+                    <Icon name="user" size="sm" hideAccent />
+                </div>
                 <span style={styles.personaName}>
                     {switching ? 'Switching...' : activePersona?.name || 'Select Persona'}
                 </span>
-                <span style={styles.chevron}>{isOpen ? '▲' : '▼'}</span>
+                <div style={styles.chevron}>
+                    <Icon name={isOpen ? 'chevron-up' : 'chevron-down'} size="sm" hideAccent />
+                </div>
             </button>
 
             {/* Dropdown Menu */}
@@ -173,13 +178,16 @@ export function PersonaSwitcher({
                             <div style={styles.itemContent}>
                                 <span style={styles.itemName}>{persona.name}</span>
                                 {getResumeName(persona.resume_id) && (
-                                    <span style={styles.resumeSubtitle}>
-                                        📄 {getResumeName(persona.resume_id)}
-                                    </span>
+                                    <div style={styles.resumeSubtitle}>
+                                        <Icon name="scroll" size="sm" hideAccent />
+                                        <span>{getResumeName(persona.resume_id)}</span>
+                                    </div>
                                 )}
                             </div>
                             {persona.id === activePersona?.id && (
-                                <span style={styles.checkmark}>✓</span>
+                                <div style={styles.checkmark}>
+                                    <Icon name="check" size="sm" />
+                                </div>
                             )}
                         </button>
                     ))}
@@ -223,10 +231,10 @@ const styles: Record<string, React.CSSProperties> = {
         alignItems: 'center',
         gap: '8px',
         padding: '8px 16px',
-        backgroundColor: 'var(--surface-secondary, #1a1a1a)',
-        border: '1px solid var(--border-subtle, #333)',
+        backgroundColor: 'var(--surface)',
+        border: '1px solid var(--border)',
         borderRadius: '8px',
-        color: 'var(--text-primary, #fff)',
+        color: 'var(--text)',
         fontSize: '14px',
         fontWeight: 500,
         cursor: 'pointer',
@@ -250,7 +258,9 @@ const styles: Record<string, React.CSSProperties> = {
     },
 
     personaIcon: {
-        fontSize: '16px',
+        display: 'flex',
+        alignItems: 'center',
+        color: 'var(--text-muted)',
     },
 
     personaName: {
@@ -262,8 +272,10 @@ const styles: Record<string, React.CSSProperties> = {
     },
 
     chevron: {
-        fontSize: '10px',
+        display: 'flex',
+        alignItems: 'center',
         opacity: 0.6,
+        width: '16px',
     },
 
     dropdown: {
@@ -273,10 +285,10 @@ const styles: Record<string, React.CSSProperties> = {
         right: 0,
         minWidth: '200px',
         maxWidth: '100vw',
-        backgroundColor: 'var(--surface-secondary, #1a1a1a)',
-        border: '1px solid var(--border-subtle, #333)',
+        backgroundColor: 'var(--surface)',
+        border: '1px solid var(--border)',
         borderRadius: '8px',
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
         zIndex: 100,
         overflow: 'hidden',
     },
@@ -289,7 +301,7 @@ const styles: Record<string, React.CSSProperties> = {
         padding: '10px 16px',
         backgroundColor: 'transparent',
         border: 'none',
-        color: 'var(--text-primary, #fff)',
+        color: 'var(--text)',
         fontSize: '14px',
         textAlign: 'left',
         cursor: 'pointer',
@@ -297,8 +309,8 @@ const styles: Record<string, React.CSSProperties> = {
     },
 
     activeItem: {
-        backgroundColor: 'var(--surface-tertiary, #252525)',
-        color: 'var(--accent-primary, #d4af37)',
+        backgroundColor: 'var(--surface-soft)',
+        color: 'var(--accent)',
     },
 
     itemContent: {
@@ -317,21 +329,25 @@ const styles: Record<string, React.CSSProperties> = {
     },
 
     resumeSubtitle: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '4px',
         fontSize: '12px',
-        color: 'var(--text-tertiary, #666)',
+        color: 'var(--text-muted)',
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',
     },
 
     checkmark: {
-        color: 'var(--accent-primary, #d4af37)',
-        fontWeight: 600,
+        display: 'flex',
+        alignItems: 'center',
+        color: 'var(--accent)',
     },
 
     divider: {
         height: '1px',
-        backgroundColor: 'var(--border-subtle, #333)',
+        backgroundColor: 'var(--border)',
         margin: '4px 0',
     },
 
@@ -343,7 +359,7 @@ const styles: Record<string, React.CSSProperties> = {
         padding: '10px 16px',
         backgroundColor: 'transparent',
         border: 'none',
-        color: 'var(--accent-primary, #d4af37)',
+        color: 'var(--accent)',
         fontSize: '14px',
         textAlign: 'left',
         cursor: 'pointer',
@@ -360,14 +376,18 @@ const styles: Record<string, React.CSSProperties> = {
         alignItems: 'center',
         gap: '8px',
         padding: '8px 16px',
-        backgroundColor: 'var(--surface-secondary, #1a1a1a)',
-        border: '1px solid var(--border-subtle, #333)',
+        backgroundColor: 'var(--surface)',
+        border: '1px solid var(--border)',
         borderRadius: '8px',
-        color: 'var(--text-secondary, #888)',
+        color: 'var(--text-muted)',
         fontSize: '14px',
     },
 
-    loadingDot: {
+    loadingCircle: {
+        width: '8px',
+        height: '8px',
+        borderRadius: '50%',
+        backgroundColor: 'var(--accent)',
         animation: 'pulse 1s infinite',
     },
 
@@ -380,17 +400,17 @@ const styles: Record<string, React.CSSProperties> = {
         alignItems: 'center',
         gap: '8px',
         padding: '8px 16px',
-        backgroundColor: 'var(--accent-primary, #d4af37)',
+        backgroundColor: 'var(--accent)',
         border: 'none',
         borderRadius: '8px',
-        color: '#000',
+        color: 'var(--text)',
         fontSize: '14px',
         fontWeight: 500,
         cursor: 'pointer',
     },
 
     emptyText: {
-        color: 'var(--text-secondary, #888)',
+        color: 'var(--text-muted)',
         fontSize: '14px',
         fontStyle: 'italic',
     },

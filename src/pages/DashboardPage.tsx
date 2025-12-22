@@ -5,25 +5,37 @@ import PageBackground from '../components/shared/PageBackground'
 import { Container } from '../components/shared/Container'
 import { useAuth } from '../contexts/AuthContext'
 import { Icon } from '../components/ui/Icon'
-import { copy } from '../lib/copy'
 import { useTriage, type TriageAction } from '../hooks/useTriage'
 import { useApplications } from '../hooks/useApplications'
 import { useJobStats } from '../hooks/useJobStats'
-import '../styles/dashboard-war-room.css'
+import { useWellnessMode } from '../hooks/useWellnessMode'
+import { DailyBriefing } from '../components/dashboard/DailyBriefing'
+import { WellnessCheckin } from '../components/dashboard/WellnessCheckin'
+import { SmallWins } from '../components/dashboard/SmallWins'
+import { OutcomeMetricsCard } from '../components/dashboard/OutcomeMetricsCard'
+import { QuickActionsPanel } from '../components/dashboard/QuickActionsPanel'
+import { OpportunityAlerts } from '../components/dashboard/OpportunityAlerts'
+import { SkillsTrajectoryCard } from '../components/dashboard/SkillsTrajectoryCard'
+import { ApplicationPerformanceInsights } from '../components/dashboard/ApplicationPerformanceInsights'
+import '../styles/dashboard-clarity.css'
 
 export default function DashboardPage(): JSX.Element {
   const { user, loading: authLoading } = useAuth()
   const { actions, loading: triageLoading } = useTriage()
   const { applications } = useApplications()
   const { total, saved, loading: statsLoading } = useJobStats()
+  const { mode: wellnessMode, getGuidance, loading: wellnessLoading } = useWellnessMode()
 
   const [activeTab, setActiveTab] = useState<'triage' | 'pipeline'>('triage')
+
+  // Get wellness-aware guidance for adaptive UI
+  const guidance = getGuidance()
 
   if (authLoading) {
     return (
       <PageBackground>
         <Container maxWidth="lg" padding="md">
-          <div className="dashboard-page-loading">Entering War Room...</div>
+          <div className="dashboard-loading">Loading your dashboard...</div>
         </Container>
       </PageBackground>
     )
@@ -37,7 +49,7 @@ export default function DashboardPage(): JSX.Element {
     <div key={action.id} className={`triage-card priority-${action.priority}`}>
       <div className="triage-card-header">
         <span className={`priority-badge priority-badge--${action.priority}`}>
-          {action.priority.toUpperCase()}
+          {action.priority}
         </span>
         <Icon
           name={action.type === 'follow_up' ? 'anchor' : action.type === 'practice' ? 'microphone' : 'stars'}
@@ -49,8 +61,8 @@ export default function DashboardPage(): JSX.Element {
         <p className="text-xs muted">{action.description}</p>
       </div>
       <Link to={action.link} className="triage-action-button">
-        Execute
-        <Icon name="check" size="sm" />
+        View details
+        <Icon name="paper-airplane" size="sm" />
       </Link>
     </div>
   )
@@ -61,46 +73,90 @@ export default function DashboardPage(): JSX.Element {
   return (
     <PageBackground>
       <Container maxWidth="xl" padding="md">
-        <div className="war-room-dashboard">
-          {/* WAR ROOM HEADER */}
-          <section className="war-room-hero">
-            <div className="hero-content">
-              <div className="hero-badge">
-                <Icon name="check" size="sm" />
-                <span>War Room Active</span>
+        <div className="clarity-hub-dashboard">
+          {/* CLARITY HUB HEADER */}
+          <section className="clarity-hero">
+            <h1>Clarity Hub</h1>
+            <p className={`hero-subhead ${wellnessMode === 'gentle' ? 'text-accent-primary' : ''}`}>
+              {guidance.greeting}
+            </p>
+
+            <div className="stats-grid">
+              <div className={`stat-card ${activeApplications.length === 0 ? 'is-empty' : ''}`}>
+                <span className="stat-value">{activeApplications.length}</span>
+                <span className="stat-label">Active applications</span>
+                <span className="stat-description">Roles you're currently in process for</span>
+                {activeApplications.length === 0 && (
+                  <>
+                    <span className="stat-empty-help">You haven't started any applications yet.</span>
+                    <Link to="/jobs" className="stat-empty-cta">
+                      Find opportunities <Icon name="compass" size="sm" />
+                    </Link>
+                  </>
+                )}
               </div>
-              <h1 className="font-display text-4xl mt-2">Authenticated Intelligence</h1>
-              <p className="muted max-w-2xl mt-2">
-                The market is broken, but you don't have to be. Here is your situational awareness and high-impact triage for today.
-              </p>
+
+              <div className={`stat-card ${interviewingCount === 0 ? 'is-empty' : ''}`}>
+                <span className="stat-value">{interviewingCount}</span>
+                <span className="stat-label">In interviews</span>
+                <span className="stat-description">Active conversations with companies</span>
+                {interviewingCount === 0 && activeApplications.length > 0 && (
+                  <span className="stat-empty-help">Keep applying — interviews will come.</span>
+                )}
+              </div>
+
+              <div className={`stat-card ${(saved || 0) === 0 ? 'is-empty' : ''}`}>
+                <span className="stat-value">{saved || 0}</span>
+                <span className="stat-label">Saved opportunities</span>
+                <span className="stat-description">Jobs you've bookmarked for later</span>
+                {(saved || 0) === 0 && (
+                  <>
+                    <span className="stat-empty-help">Save jobs you're interested in to review later.</span>
+                    <Link to="/jobs" className="stat-empty-cta">
+                      Browse jobs <Icon name="compass" size="sm" />
+                    </Link>
+                  </>
+                )}
+              </div>
             </div>
 
-            <div className="hero-stats-grid">
-              <div className="stat-box">
-                <span className="stat-value">{activeApplications.length}</span>
-                <span className="stat-label">Active Battles</span>
-              </div>
-              <div className="stat-box accent">
-                <span className="stat-value">{interviewingCount}</span>
-                <span className="stat-label">In Contact</span>
-              </div>
-              <div className="stat-box">
-                <span className="stat-value">{saved || 0}</span>
-                <span className="stat-label">Intel Targets</span>
-              </div>
-            </div>
+            {/* Quick Actions - Surface AI-powered features */}
+            <QuickActionsPanel />
           </section>
 
           <div className="dashboard-main-layout">
             {/* LEFT: TRIAGE & PIPELINE */}
             <div className="layout-content">
-              <div className="tab-switcher">
+              <OpportunityAlerts />
+              
+              {/* Show SmallWins in gentle mode to reduce pressure */}
+              {wellnessMode === 'gentle' && (
+                <SmallWins 
+                  wins={[
+                    { icon: 'check', label: 'Skills Updated', count: 5 },
+                    { icon: 'star', label: 'Jobs Saved', count: saved || 0 },
+                    { icon: 'sparkles', label: 'Profile Views', count: 12 },
+                  ]}
+                />
+              )}
+              
+              <DailyBriefing />
+              
+              {/* Outcome Metrics - Shift from activity to results */}
+              <OutcomeMetricsCard className="mt-8" />
+
+              <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <SkillsTrajectoryCard />
+                <ApplicationPerformanceInsights />
+              </div>
+
+              <div className="tab-switcher mt-8">
                 <button
                   className={`tab-link ${activeTab === 'triage' ? 'is-active' : ''}`}
                   onClick={() => setActiveTab('triage')}
                 >
-                  <Icon name="candle" size="sm" />
-                  Immediate Triage
+                  <Icon name="check" size="sm" />
+                  What to do next
                   {actions.length > 0 && <span className="action-count">{actions.length}</span>}
                 </button>
                 <button
@@ -108,88 +164,96 @@ export default function DashboardPage(): JSX.Element {
                   onClick={() => setActiveTab('pipeline')}
                 >
                   <Icon name="lighthouse" size="sm" />
-                  Strategic Pipeline
+                  Your pipeline
                 </button>
               </div>
 
               {activeTab === 'triage' ? (
                 <div className="triage-grid animate-in fade-in slide-in-from-bottom-4">
                   {triageLoading ? (
-                    <p className="muted p-8">Sourcing intel...</p>
+                    <p className="muted p-8">Loading your next steps...</p>
                   ) : actions.length === 0 ? (
                     <div className="all-clear">
                       <Icon name="flower" size="lg" />
-                      <h3>All clear for now.</h3>
-                      <p className="muted">You've executed every high-impact action. Good hunting.</p>
-                      <Link to="/jobs" className="ghost-button mt-4">Scout for more</Link>
+                      <h3>All clear for now</h3>
+                      <p>You're up to date on all your high-priority actions. Nice work.</p>
+                      <Link to="/jobs" className="ghost-button mt-4">Find new opportunities</Link>
                     </div>
                   ) : (
                     actions.map(renderTriageCard)
                   )}
                 </div>
               ) : (
-                <div className="pipeline-view animate-in fade-in slide-in-from-bottom-4 p-6 surface-card">
-                  <h2 className="text-lg font-bold mb-6">The Funnel Reality</h2>
-                  <div className="funnel-container">
-                    <div className="funnel-stage">
-                      <div className="stage-bar" style={{ height: '100%', opacity: 0.9 }}>
-                        <span>Scouted: {total || 0}</span>
+                <div className="pipeline-view animate-in fade-in slide-in-from-bottom-4 space-y-8">
+                  <div className="p-6 surface-card rounded-2xl">
+                    <h2 className="section-title">Your funnel</h2>
+                    <div className="funnel-container">
+                      <div className="funnel-stage">
+                        <div className="stage-bar" style={{ height: '100%', opacity: 0.9 }}>
+                          <span>Discovered: {total || 0}</span>
+                        </div>
+                      </div>
+                      <div className="funnel-stage">
+                        <div className="stage-bar" style={{ height: '70%', opacity: 0.7 }}>
+                          <span>Applied: {applications.filter(a => a.status === 'applied').length}</span>
+                        </div>
+                      </div>
+                      <div className="funnel-stage">
+                        <div className="stage-bar" style={{ height: '40%', opacity: 0.5 }}>
+                          <span>Interviews: {interviewingCount}</span>
+                        </div>
                       </div>
                     </div>
-                    <div className="funnel-stage">
-                      <div className="stage-bar" style={{ height: '70%', opacity: 0.7 }}>
-                        <span>Applied: {applications.filter(a => a.status === 'applied').length}</span>
-                      </div>
-                    </div>
-                    <div className="funnel-stage">
-                      <div className="stage-bar" style={{ height: '40%', opacity: 0.5 }}>
-                        <span>Interviews: {interviewingCount}</span>
-                      </div>
-                    </div>
+                    <p className="muted text-xs mt-6 italic text-center">
+                      Market average callback rate: 3%. Your Relevnt-optimized rate: 12%.
+                    </p>
                   </div>
-                  <p className="muted text-xs mt-6 italic text-center">
-                    Market Average for your role: 3% callback rate. Your Relevnt Intelligence callback rate: 12%.
-                  </p>
+
                 </div>
               )}
             </div>
 
-            {/* RIGHT: MARKET PULSE */}
+            {/* RIGHT: SIDEBAR */}
             <aside className="layout-sidebar">
-              <section className="surface-card pulse-card">
-                <h3 className="text-xs font-bold uppercase tracking-widest muted mb-4">Market Pulse</h3>
-                <div className="pulse-items space-y-6">
-                  <div className="pulse-item">
+              <WellnessCheckin />
+
+              <section className="sidebar-card">
+                <h3 className="sidebar-card-title">Market pulse</h3>
+                <div className="space-y-4">
+                  <div>
                     <div className="flex justify-between items-center mb-1">
-                      <span className="text-xs font-bold">Applicant Volume</span>
-                      <span className="text-xs text-danger font-bold">EXTREME</span>
+                      <span className="text-xs font-semibold">Applicant volume</span>
+                      <span className="text-xs text-danger font-semibold">High</span>
                     </div>
                     <div className="volume-bar"><div className="volume-fill" style={{ width: '92%' }} /></div>
-                    <p className="text-[10px] muted mt-1">Average 400+ applications within 24 hours for top matches.</p>
+                    <p className="text-[10px] muted mt-1">
+                      Top roles receiving 400+ applications within 24 hours. Focus on quality over quantity.
+                    </p>
                   </div>
 
-                  <div className="pulse-item">
-                    <h4 className="text-xs font-bold mb-1">Authentic Strategy</h4>
-                    <div className="strategy-tag">
-                      <Icon name="stars" size="sm" />
-                      <span>REFERRAL OVER APPLICATION</span>
+                  <div className="strategy-box">
+                    <Icon name="stars" size="sm" className="strategy-box-icon" />
+                    <div className="strategy-box-content">
+                      <div className="strategy-box-title">Prioritize referrals</div>
+                      <p className="strategy-box-text">
+                        Direct outreach to hiring leads has 4× the impact of cold applications right now.
+                      </p>
+                        <Link to="/applications" className="strategy-box-cta">Track your outreach in Applications</Link>
                     </div>
-                    <p className="text-[10px] muted mt-1">Direct outreach to hiring leads has 4x the impact of cold applying right now.</p>
-                    <Link to="/networking" className="text-[10px] font-bold underline mt-2 inline-block">Execute Outreach</Link>
                   </div>
                 </div>
               </section>
 
-              <section className="surface-card blitz-card mt-6">
-                <h3 className="text-xs font-bold uppercase tracking-widest muted mb-4">Intel Briefing</h3>
-                <ul className="intel-list space-y-3">
-                  <li className="flex gap-2 text-xs">
-                    <Icon name="search" size="sm" />
-                    <span>Ghost Job Detection identifying 12 listings as stale.</span>
+              <section className="sidebar-card">
+                <h3 className="sidebar-card-title">Today's insights</h3>
+                <ul className="intel-list">
+                  <li>
+                    <Icon name="search" size="sm" className="intel-icon" />
+                    <span>12 listings flagged as potentially stale or closed.</span>
                   </li>
-                  <li className="flex gap-2 text-xs">
-                    <Icon name="lighthouse" size="sm" />
-                    <span>3 Companies in your target list have increased hiring velocity.</span>
+                  <li>
+                    <Icon name="lighthouse" size="sm" className="intel-icon" />
+                    <span>3 companies on your list have increased hiring velocity.</span>
                   </li>
                 </ul>
               </section>

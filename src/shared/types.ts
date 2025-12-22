@@ -258,6 +258,26 @@ export interface InterviewSessionRow {
   created_at: string
 }
 
+export interface InterviewPracticeSession {
+  id: string
+  user_id: string
+  interview_prep_id?: string
+  application_id?: string
+  job_id?: string
+  status: 'active' | 'completed' | 'cancelled'
+  questions: InterviewQuestion[]
+  practice_data: {
+    question: string
+    response: string
+    feedback: any
+    score: number
+    timestamp: string
+  }[]
+  overall_feedback?: any
+  created_at: string
+  updated_at: string
+}
+
 export interface Notification {
   id: string
   user_id: string
@@ -267,4 +287,11 @@ export interface Notification {
   link?: string
   is_read: boolean
   created_at: string
+  metadata?: {
+    score?: number
+    isHighestEver?: boolean
+    isFresh?: boolean
+    company?: string
+    matchReasons?: string[]
+  }
 }

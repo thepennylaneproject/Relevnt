@@ -43,7 +43,13 @@ export type IconName =
   | 'check'
   | 'search'
   | 'alert-triangle'
-  | 'plus';
+  | 'plus'
+  | 'chevron-down'
+  | 'chevron-up'
+  | 'chevron-right'
+  | 'user'
+  | 'dollar'
+  | 'mailbox';
 
 export type IconSize = 'sm' | 'md' | 'lg' | 'xl' | 'hero';
 
@@ -358,6 +364,59 @@ const iconDefinitions: Record<IconName, IconDefinition> = {
     ],
     dotPosition: { cx: 32, cy: 32 },
   },
+
+  'chevron-down': {
+    paths: [
+      'M16 24l16 16 16-16',
+    ],
+    dotPosition: { cx: 32, cy: 32 },
+  },
+
+  'chevron-up': {
+    paths: [
+      'M16 40l16-16 16 16',
+    ],
+    dotPosition: { cx: 32, cy: 32 },
+  },
+
+  'chevron-right': {
+    paths: [
+      'M24 16l16 16-16 16',
+    ],
+    dotPosition: { cx: 32, cy: 32 },
+  },
+
+  user: {
+    paths: [
+      // Head
+      'M32 28a10 10 0 1 0 0-20 10 10 0 0 0 0 20z',
+      // Shoulders
+      'M12 52c0-10 8-12 20-12s20 2 20 12',
+    ],
+    dotPosition: { cx: 32, cy: 18 },
+  },
+
+  dollar: {
+    paths: [
+      'M24 16h16a8 8 0 0 1 0 16H32a8 8 0 0 0 0 16h16', // S shape
+      'M32 8v48', // Vertical line
+    ],
+    dotPosition: { cx: 32, cy: 32 },
+  },
+
+  mailbox: {
+    paths: [
+      // Post
+      'M32 48v12',
+      // Box
+      'M16 24h32v24H16z',
+      // Opening
+      'M16 24a16 16 0 0 1 32 0',
+      // Flag
+      'M48 36l8-8',
+    ],
+    dotPosition: { cx: 40, cy: 28 },
+  },
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -411,7 +470,7 @@ export const Icon: React.FC<IconProps> = ({
           cx={dotPosition.cx}
           cy={dotPosition.cy}
           r={dotSize}
-          fill="#C7A56A"
+          fill="#4E808D"
           className="accent-dot"
         />
       )}

@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Relevnt Sprite Inspector</title>
+<style>
+  :root{ --bg:#0f1217; --surface:#151a22; --text:#e8eef8; --muted:#a8b0bf; --accent:#cbb68a; --border:#2a3140; }
+  html, body { height:100%; background:var(--bg); color:var(--text); margin:0; font: 14px/1.45 Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; }
+  .wrap{ max-width:1000px; margin:0 auto; padding:24px; }
+  h1{ font-size:22px; margin:0 0 12px 0; }
+  p.lead{ color:var(--muted); margin-top:0; }
+  .row{ display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
+  input[type="text"]{ width:100%; max-width:720px; padding:10px 12px; border-radius:10px; border:1px solid var(--border); background:#0f1217; color:var(--text); }
+  button{ padding:10px 14px; border-radius:10px; border:1px solid var(--border); background:var(--surface); color:var(--text); cursor:pointer; }
+  button.primary{ background:var(--accent); color:#0e1217; border-color:transparent; }
+  .status{ margin-top:12px; color:var(--muted); }
+  .grid{ display:grid; grid-template-columns: repeat(6, minmax(0,1fr)); gap:12px; margin-top:16px; }
+  @media (max-width:900px){ .grid{ grid-template-columns: repeat(3, minmax(0,1fr)); } }
+  .card{ background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px; display:flex; gap:10px; align-items:center; }
+  .card svg{ width:24px; height:24px; stroke: currentColor; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+  code{ background:#0f1217; border:1px solid var(--border); padding:2px 6px; border-radius:8px; }
+  .toolbar{ display:flex; gap:8px; margin-top:10px; }
+  .hidden-host { display:none; }
+  .success { color:#7dd3a7; }
+  .error { color:#ff9aa2; }
+  .muted { color: var(--muted); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Relevnt Sprite Inspector</h1>
+    <p class="lead">Fetches your Cloudinary sprite, injects it, prints IDs to the console, and previews icons. No build setup required.</p>
+
+    <div class="row">
+      <input id="spriteUrl" type="text" value="https://res.cloudinary.com/sarah-sahl/image/upload/v1759824421/sprite-light-cloudinary_mtavv7.svg" />
+      <button id="loadBtn" class="primary">Load Sprite</button>
+      <button id="copyBtn">Copy IDs</button>
+    </div>
+    <div id="status" class="status muted">Not loaded</div>
+
+    <div id="host" class="hidden-host" aria-hidden="true"></div>
+
+    <div id="results" class="grid"></div>
+  </div>
+
+<script>
+const elUrl = document.getElementById('spriteUrl');
+const elStatus = document.getElementById('status');
+const elHost = document.getElementById('host');
+const elResults = document.getElementById('results');
+const btnLoad = document.getElementById('loadBtn');
+const btnCopy = document.getElementById('copyBtn');
+
+let ids = [];
+
+async function loadSprite() {
+  const url = elUrl.value.trim();
+  elStatus.textContent = 'Loading…';
+  ids = [];
+  elResults.innerHTML = '';
+  elHost.innerHTML = '';
+
+  try {
+    const res = await fetch(url, { mode: 'cors' });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const svg = await res.text();
+    elHost.innerHTML = svg;
+
+    const re = /<symbol[^>]*id=["']([^"']+)["']/g;
+    let m; 
+    while ((m = re.exec(svg)) !== null) { ids.push(m[1]); }
+
+    console.clear();
+    console.log('Sprite URL:', url);
+    console.log('Found', ids.length, 'symbols:');
+    console.log(ids);
+
+    const frag = document.createDocumentFragment();
+    ids.forEach(id => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <svg aria-hidden="true"><use href="#${id}"></use></svg>
+        <div><div><code>${id}</code></div></div>`;
+      frag.appendChild(card);
+    });
+    elResults.appendChild(frag);
+
+    elStatus.innerHTML = `<span class="success">Loaded</span>: found <strong>${ids.length}</strong> symbols. Open the console for the array.`;
+  } catch (err) {
+    console.error('Sprite load failed:', err);
+    elStatus.innerHTML = `<span class="error">Failed</span>: ${String(err)}`;
+  }
+}
+
+async function copyIds() {
+  if(!ids.length) return;
+  try {
+    await navigator.clipboard.writeText(JSON.stringify(ids, null, 2));
+    elStatus.innerHTML = `<span class="success">Copied</span>: ${ids.length} IDs to clipboard.`;
+  } catch (err) {
+    elStatus.innerHTML = `<span class="error">Copy failed</span>: ${String(err)}`;
+  }
+}
+
+btnLoad.addEventListener('click', loadSprite);
+btnCopy.addEventListener('click', copyIds);
+loadSprite();
+</script>
+</body>
+</html>

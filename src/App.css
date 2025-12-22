@@ -112,6 +112,13 @@
   white-space: nowrap;
 }
 
+/* Weak match (below 50) - muted appearance */
+.feed-match-pill--weak {
+  border-color: var(--border);
+  background: var(--surface-soft);
+  color: var(--text-muted);
+}
+
 /* Tag row */
 .feed-tag-row {
   display: flex;

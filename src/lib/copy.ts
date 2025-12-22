@@ -70,10 +70,34 @@ export const copy = {
   // ─────────────────────────────────────────────────────────────────────────
   jobs: {
     pageTitle: "Jobs",
-    pageSubtitle: "Let Relevnt bring matches to you, or browse the full stream and hunt manually when you're in that mood.",
+    pageHeadline: "Let Relevnt bring the right roles to you.",
+    pageSubtitle: "Browse your ranked feed or explore the full stream when you're in that mood.",
+    transparencyLine: "These jobs are ranked based on your persona, résumé, and filters — no mystery scoring.",
     tabs: {
       feed: "Relevnt Feed",
       all: "All jobs",
+    },
+    feedContext: {
+      title: "Your personalized feed",
+      description: "Jobs ranked by AI using your preferences. Adjust weights below to fine-tune.",
+      noPersona: "Select a persona to see your personalized feed.",
+    },
+    tuner: {
+      title: "Tune your ranking",
+      description: "Tell us what to emphasize. We still consider everything — this just adjusts the balance.",
+      howItWorks: "How this ranking works",
+      presets: {
+        balanced: "Balanced",
+        skillsFirst: "Skills-first",
+        payFirst: "Pay-first",
+        remoteFirst: "Remote-friendly",
+      },
+      presetDescriptions: {
+        balanced: "A little bit of everything weighted equally.",
+        skillsFirst: "Roles that best match what you already know.",
+        payFirst: "Higher salary takes priority in the ranking.",
+        remoteFirst: "Remote-friendly roles float to the top.",
+      },
     },
     filters: {
       search: "Search title or company",
@@ -85,6 +109,14 @@ export const copy = {
       remoteOnly: "Remote friendly only",
       clearFilters: "Clear filters",
       refreshJobs: "Refresh jobs",
+      minMatchScore: "Match ≥",
+    },
+    emptyState: {
+      title: "No matches visible yet",
+      filtered: (visible: number, total: number) =>
+        `${visible} of ${total} matches visible with your filters. Try lowering the minimum score or salary to see more — you're not out of chances, just filtered tight.`,
+      adjustFilters: "Adjust filters",
+      editPersona: "Edit persona",
     },
     card: {
       save: "Save",

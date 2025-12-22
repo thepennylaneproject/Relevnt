@@ -84,9 +84,9 @@ export {
 } from './useRelevntColors';
 export { useProfileSettings, type ProfileSettings, type ThemePreference, type LayoutDensity } from './useProfileSettings';
 export { useSkillInsights } from './useSkillInsights';
-export { useSkillGaps, type SkillGap } from './useSkillGaps';
-export { useLearningPaths, type LearningPath } from './useLearningPaths';
-export { useLearningCourses, type LearningCourse } from './useLearningCourses';
+
+
+
 export * from './useAITask'
 export * from './useResumes'
 export * from './useExtractResume'

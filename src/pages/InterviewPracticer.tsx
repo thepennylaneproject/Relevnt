@@ -5,15 +5,20 @@ import { supabase } from '../lib/supabase'
 import { Icon } from '../components/ui/Icon'
 import { Container } from '../components/shared/Container'
 import { useAuth } from '../contexts/AuthContext'
-import type { InterviewPrepRow } from '../shared/types'
+import { useToast } from '../components/ui/Toast'
+import { useInterviewPrep } from '../hooks/useInterviewPrep'
+import type { InterviewPrepRow, InterviewQuestion } from '../shared/types'
 import '../styles/interview-prep.css'
 
 export default function InterviewPracticer() {
     const { id } = useParams<{ id: string }>()
     const { user } = useAuth()
+    const { showToast } = useToast()
     const navigate = useNavigate()
+    const { currentSession, startSession, recordAnswer, completeSession, loading: sessionLoading } = useInterviewPrep()
+
     const [prep, setPrep] = useState<InterviewPrepRow | null>(null)
-    const [loading, setLoading] = useState(true)
+    const [prepLoading, setPrepLoading] = useState(true)
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
 
     // Evaluation state
@@ -22,14 +27,15 @@ export default function InterviewPracticer() {
     const [evaluation, setEvaluation] = useState<any>(null)
 
     useEffect(() => {
-        if (id && user) fetchPrep()
+        if (id && user) fetchPrepAndStartSession()
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id, user])
 
-    const fetchPrep = async () => {
+    const fetchPrepAndStartSession = async () => {
         if (!id || !user?.id) return
-        setLoading(true)
+        setPrepLoading(true)
         try {
+            // 1. Fetch Prep Questions
             const { data, error } = await supabase
                 .from('interview_prep')
                 .select('*')
@@ -38,28 +44,39 @@ export default function InterviewPracticer() {
                 .single()
 
             if (error) throw error
-            if (data) setPrep(data as any)
+            if (data) {
+                setPrep(data as any)
+                // 2. Start a new session if one doesn't exist for this practice run
+                // For now, we always start a fresh session when entering from the center
+                await startSession(
+                    (data.questions as any) as InterviewQuestion[],
+                    data.id,
+                    undefined, // No job_id on this row
+                    data.application_id || undefined
+                )
+            }
         } catch (err) {
             console.error(err)
+            showToast('Failed to load interview prep.', 'error')
         } finally {
-            setLoading(false)
+            setPrepLoading(false)
         }
     }
 
     const handleEvaluate = async () => {
-        if (!userAnswer.trim() || !user?.id) return
+        if (!userAnswer.trim() || !user || !currentSession) return
         setIsEvaluating(true)
         setEvaluation(null)
 
         try {
-            const { data: { session } } = await supabase.auth.getSession()
+            const { data: { session: authSession } } = await supabase.auth.getSession()
             const question = prep?.questions[currentQuestionIndex]
 
             const response = await fetch('/.netlify/functions/interview_evaluate', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session?.access_token}`
+                    'Authorization': `Bearer ${authSession?.access_token}`
                 },
                 body: JSON.stringify({
                     question: question?.text,
@@ -73,10 +90,20 @@ export default function InterviewPracticer() {
             if (!response.ok) throw new Error('Evaluation failed')
 
             const result = await response.json()
-            setEvaluation(result.data.evaluation)
+            const evalData = result.data.evaluation
+            setEvaluation(evalData)
+
+            // Persistence: Record this answer in our session
+            await recordAnswer(
+                question?.text || '',
+                userAnswer,
+                evalData,
+                evalData.score
+            )
+
         } catch (err) {
             console.error(err)
-            alert('Error evaluating answer. Please try again.')
+            showToast('Error evaluating answer. Please try again.', 'error')
         } finally {
             setIsEvaluating(false)
         }
@@ -88,8 +115,14 @@ export default function InterviewPracticer() {
         setCurrentQuestionIndex(prev => prev + 1)
     }
 
-    if (loading) return <div className="loading-screen">Loading Prep Session...</div>
-    if (!prep) return <div className="error-screen">Session not found</div>
+    const handleFinish = async () => {
+        await completeSession()
+        navigate('/interview-prep')
+        showToast('Practice session saved successfully!', 'success')
+    }
+
+    if (prepLoading || sessionLoading) return <div className="loading-screen">Preparing Practice Environment...</div>
+    if (!prep || !currentSession) return <div className="error-screen">Session not found</div>
 
     const question = prep.questions[currentQuestionIndex]
     const isLast = currentQuestionIndex === prep.questions.length - 1
@@ -182,8 +215,8 @@ export default function InterviewPracticer() {
                                         Next Question <Icon name="paper-airplane" size="sm" />
                                     </button>
                                 ) : (
-                                    <button className="secondary-button" onClick={() => navigate('/interview-prep')}>
-                                        Finish Session
+                                    <button className="secondary-button" onClick={handleFinish}>
+                                        Finish & Save Session
                                     </button>
                                 )}
                             </div>

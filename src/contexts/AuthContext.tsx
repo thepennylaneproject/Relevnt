@@ -8,6 +8,7 @@ import type { User } from '../types';
 
 export interface AuthContextType {
   user: User | null;
+  session: Session | null;
   loading: boolean;
   error: string | null;
   signInWithEmail: (email: string, password: string) => Promise<void>;
@@ -27,7 +28,7 @@ export function isUserAdmin(profile: any) {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [, setSession] = useState<Session | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -120,6 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const value: AuthContextType = {
     user,
+    session,
     loading,
     error,
     signInWithEmail,

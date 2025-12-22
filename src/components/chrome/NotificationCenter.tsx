@@ -2,12 +2,17 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useNotifications } from '../../hooks/useNotifications'
+import { useWellnessMode } from '../../hooks/useWellnessMode'
 import { Icon } from '../ui/Icon'
 import { formatRelativeTime } from '../../lib/utils/time'
 import '../../styles/notification-center.css'
 
 export default function NotificationCenter() {
-    const { notifications, unreadCount, markAsRead, markAllAsRead, loading } = useNotifications()
+    const { getGuidance } = useWellnessMode()
+    const guidance = getGuidance()
+    const { notifications, unreadCount, markAsRead, markAllAsRead, loading } = useNotifications({
+        filterLevel: guidance.notificationLevel
+    })
     const [isOpen, setIsOpen] = useState(false)
     const navigate = useNavigate()
 

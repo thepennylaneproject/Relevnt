@@ -40,6 +40,12 @@ export const handler: Handler = async () => {
 
         console.log(`[JobAlerts] Scanning ${freshJobs.length} fresh jobs`)
 
+        // Map to EnhancedJobRow for scoring engine (add default keywords if missing)
+        const enhancedJobs = (freshJobs as any[]).map(job => ({
+            ...job,
+            keywords: job.keywords || [],
+        }))
+
         let notificationsCreated = 0
 
         // 3. Process each user
@@ -50,13 +56,28 @@ export const handler: Handler = async () => {
                 if (!profile) continue
 
                 // Score jobs
-                const matchResults = scoreJobBatch(freshJobs as unknown as JobRow[], profile, {
+                const matchResults = scoreJobBatch(enhancedJobs, profile, {
                     minScore: 80 // Only high-confidence matches
                 })
 
                 if (matchResults.length === 0) continue
 
+                // Get user's max score history to detect "Highest Ever"
+                const { data: maxScoreData } = await supabase
+                    .from('user_alert_history')
+                    .select('score')
+                    .eq('user_id', user.id)
+                    .order('score', { ascending: false })
+                    .limit(1)
+                    .maybeSingle()
+
+                const maxHistoricalScore = maxScoreData?.score || 0
+
                 for (const result of matchResults) {
+                    // Find the job object (result only has ID)
+                    const job = freshJobs.find(j => j.id === result.job_id)
+                    if (!job) continue
+
                     // Check if already alerted
                     const { data: existing, error: histError } = await supabase
                         .from('user_alert_history')
@@ -69,15 +90,38 @@ export const handler: Handler = async () => {
                     if (histError) continue
                     if (existing) continue // Already notified
 
-                    // Create Notification
+                    // Proactive Intelligence: Context
+                    const isHighestEver = result.total_score > maxHistoricalScore
+                    const isFresh = new Date(job.posted_date || job.created_at).getTime() > (Date.now() - 24 * 60 * 60 * 1000)
+
+                    // Craft Message
+                    let title = 'New High-Confidence Match'
+                    let message = `We found a great fit: ${job.title} at ${job.company || 'Unknown'}. Match score: ${Math.round(result.total_score)}%`
+
+                    if (isHighestEver) {
+                        title = '🎯 Highest Match Found!'
+                        message = `Incredible fit: ${job.title} matches ${Math.round(result.total_score)}% of your profile. This is your best match yet.`
+                    } else if (isFresh) {
+                        title = '⚡️ Fresh Opportunity'
+                        message = `${job.title} was just posted. Be among the first to apply.`
+                    }
+
+                    // Create Notification with Metadata
                     const { error: notifError } = await supabase
                         .from('notifications')
                         .insert({
                             user_id: user.id,
-                            title: 'New High-Confidence Match',
-                            message: `We found a great fit: ${result.job.title} at ${result.job.company || 'Unknown'}. Match score: ${Math.round(result.score)}%`,
+                            title,
+                            message,
                             type: 'job_alert',
-                            link: `/jobs?id=${result.job_id}`
+                            link: `/jobs?id=${result.job_id}`,
+                            metadata: {
+                                score: result.total_score,
+                                isHighestEver,
+                                isFresh,
+                                company: job.company,
+                                matchReasons: result.top_reasons.slice(0, 2)
+                            }
                         })
 
                     if (notifError) {
@@ -91,7 +135,12 @@ export const handler: Handler = async () => {
                         .insert({
                             user_id: user.id,
                             job_id: result.job_id,
-                            alert_type: 'high_match'
+                            alert_type: 'high_match',
+                            score: result.total_score,
+                            meta: {
+                                isHighestEver,
+                                isFresh
+                            }
                         })
 
                     notificationsCreated++

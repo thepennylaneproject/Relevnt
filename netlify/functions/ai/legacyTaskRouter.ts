@@ -141,11 +141,15 @@ const LEGACY_CONFIG: Record<string, LegacyTaskConfig> = {
     },
   },
   'generate-cover-letter': {
-    instructions: 'Generate a concise, tailored cover letter using the provided resume and job context.',
+    instructions: 'Analyze the resume and job description to identify the top 3 strengths that align with the job instructions. Write a convincing cover letter that emphasizes these strengths. Also return a "strategy" string explaining the angle taken (e.g. "Emphasized X and Y to address requirement Z") and "matchingPoints" array of key alignments.',
     requiresJson: true,
     schema: {
       success: 'boolean',
-      data: { coverLetter: 'string' },
+      data: {
+        coverLetter: 'string',
+        strategy: 'string',
+        matchingPoints: []
+      },
     },
     quality: 'high',
   },
@@ -238,6 +242,45 @@ const LEGACY_CONFIG: Record<string, LegacyTaskConfig> = {
         reasoning: 'string',
       },
     },
+  },
+  'generate-career-narrative': {
+    instructions: 'Craft a compelling 3-5 sentence career narrative based on the user profile and voice settings. Return versions for origin, pivot, value, and future formats.',
+    requiresJson: true,
+    schema: {
+      success: 'boolean',
+      data: {
+        origin: 'string',
+        pivot: 'string',
+        value: 'string',
+        future: 'string',
+      },
+    },
+    quality: 'high',
+  },
+  'rejection-coaching': {
+    instructions: 'Provide a supportive but analytical post-rejection briefing. Identify potentially missing skills from the job description and suggest 3 high-impact actions for the next 48 hours.',
+    requiresJson: true,
+    schema: {
+      success: 'boolean',
+      data: {
+        analysis: 'string',
+        missingSkills: [],
+        nextSteps: [],
+      },
+    },
+    quality: 'high',
+  },
+  'networking-draft': {
+    instructions: 'Draft a personalized outreach message to a networking contact regarding a specific job application. Consider the contact\'s role, the company, and the job title. Keep it professional, warm, and brief.',
+    requiresJson: true,
+    schema: {
+      success: 'boolean',
+      data: {
+        draft: 'string',
+        strategy: 'string',
+      },
+    },
+    quality: 'high',
   },
 }
 

@@ -139,3 +139,70 @@
     opacity: 0.8;
   }
 }
+
+/* ============================================================================
+   NAV GROUPS (accordion pattern for reduced cognitive load)
+   ============================================================================ */
+
+.nav-group {
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.nav-group__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-ink-tertiary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.nav-group__header:hover {
+  color: var(--color-ink-secondary);
+}
+
+.nav-group__label {
+  pointer-events: none;
+}
+
+.nav-group__chevron {
+  transition: transform 0.2s ease;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.nav-group__chevron.is-expanded {
+  transform: rotate(90deg);
+}
+
+.nav-group__items {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Settings at bottom needs extra top margin */
+.nav-group--settings {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-graphite-faint);
+}
+
+/* Improve contrast on active nav items */
+.margin-nav__item.active,
+.margin-nav__item.nav-item--active {
+  color: var(--color-ink);
+  background-color: var(--color-accent-glow);
+}

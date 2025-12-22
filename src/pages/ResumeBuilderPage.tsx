@@ -219,53 +219,56 @@ const ResumeBuilderPage: React.FC<ResumeBuilderPageProps> = ({ embedded = false 
           {/* ════════════════════════════════════════════════════════════════
               HEADER: Title + Actions
               ════════════════════════════════════════════════════════════════ */}
-          <header className="resume-builder-header">
-            <div className="resume-builder-title">
-              <div className="resume-builder-icon">
-                <Icon name="scroll" size="md" />
-              </div>
-              <div>
-                <h1 className="text-lg font-display">Resume Builder</h1>
-                <p className="text-xs muted">
-                  {hasContent ? 'Edit and optimize your resume' : 'Create a professional resume'}
-                </p>
-              </div>
-            </div>
-
-            <div className="resume-builder-actions">
-              {/* New / Upload buttons */}
-              <button
-                type="button"
-                onClick={() => setShowWizard(true)}
-                className="ghost-button button-sm"
-              >
-                <Icon name="stars" size="sm" />
-                New Resume
-              </button>
-
-              <ResumeUpload onUploadComplete={handleUploadComplete} />
-
-              {/* Export */}
-              {hasContent && <ResumeExport draft={draft} />}
-
-              {/* Save status */}
-              <div className="save-status">
-                <span className={`save-dot ${isDirty ? 'save-dot--dirty' : 'save-dot--saved'}`} />
-                <span className="text-xs muted">{saveStatusText}</span>
+          {!embedded && (
+            <header className="resume-builder-header">
+              <div className="resume-builder-title">
+                <div className="resume-builder-icon">
+                  <Icon name="scroll" size="md" />
+                </div>
+                <div>
+                  <h1 className="text-lg font-display">Resume Builder</h1>
+                  <p className="text-xs muted">
+                    {hasContent ? 'Edit and optimize your resume' : 'Create a professional resume'}
+                  </p>
+                </div>
               </div>
 
-              {isDirty && (
+              <div className="resume-builder-actions">
+                {/* New / Upload buttons */}
                 <button
                   type="button"
-                  onClick={manualSave}
-                  disabled={status === 'saving'}
-                  className="primary-button button-sm"
+                  onClick={() => setShowWizard(true)}
+                  className="ghost-button button-sm"
                 >
-                  Save
+                  <Icon name="stars" size="sm" />
+                  New Resume
                 </button>
-              )}
-            </div>
-          </header>
+
+                <ResumeUpload onUploadComplete={handleUploadComplete} />
+
+                {/* Export */}
+                {hasContent && <ResumeExport draft={draft} />}
+
+                {/* Save status */}
+                <div className="save-status">
+                  <span className={`save-dot ${isDirty ? 'save-dot--dirty' : 'save-dot--saved'} `} />
+                  <span className="text-xs muted">{saveStatusText}</span>
+                </div>
+
+                {isDirty && (
+                  <button
+                    type="button"
+                    onClick={manualSave}
+                    disabled={status === 'saving'}
+                    className="primary-button button-sm"
+                  >
+                    Save
+                  </button>
+                )}
+              </div>
+            </header>
+          )}
+
 
           {/* ════════════════════════════════════════════════════════════════
               SECTION NAV: Horizontal tabs for resume sections

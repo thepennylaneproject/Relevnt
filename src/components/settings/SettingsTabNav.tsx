@@ -1,7 +1,7 @@
 import React from 'react'
 import { Icon, type IconName } from '../ui/Icon'
 
-export type SettingsTab = 'persona' | 'career' | 'profile' | 'voice' | 'system'
+export type SettingsTab = 'persona' | 'career' | 'profile' | 'voice' | 'system' | 'auto-apply'
 
 interface TabConfig {
     id: SettingsTab
@@ -15,7 +15,9 @@ const TABS: TabConfig[] = [
     { id: 'profile', label: 'Profile', icon: 'scroll' },
     { id: 'voice', label: 'Voice & Style', icon: 'microphone' },
     { id: 'system', label: 'System', icon: 'pocket-watch' },
+    { id: 'auto-apply', label: 'Auto-Apply', icon: 'paper-airplane' },
 ]
+
 
 interface SettingsTabNavProps {
     activeTab: SettingsTab

@@ -1,0 +1,526 @@
+/* src/styles/dashboard-clarity.css */
+
+.clarity-hub-dashboard {
+    padding-bottom: 5rem;
+    color: var(--text);
+}
+
+/* Hero section - cleaner, single focus */
+.clarity-hero {
+    margin-top: 1rem;
+    margin-bottom: 2.5rem;
+}
+
+.clarity-hero h1 {
+    font-family: var(--font-display);
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+.clarity-hero .hero-subhead {
+    color: var(--text-muted);
+    font-size: 1rem;
+    margin-top: 0.5rem;
+    max-width: 36rem;
+}
+
+/* Stats grid - clear, consistent sizing */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.stat-card {
+    background: var(--surface-card);
+    border: 1px solid var(--border-subtle);
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease, border-color 0.2s;
+}
+
+.stat-card:hover {
+    border-color: var(--border-default);
+}
+
+.stat-card .stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    font-family: var(--font-display);
+    line-height: 1;
+}
+
+.stat-card .stat-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+}
+
+.stat-card .stat-description {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+
+/* Empty stat state - calm, not alarming */
+.stat-card.is-empty .stat-value {
+    color: var(--text-muted);
+}
+
+.stat-card .stat-empty-help {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.75rem;
+}
+
+.stat-card .stat-empty-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    margin-top: 0.5rem;
+    text-decoration: none;
+}
+
+.stat-card .stat-empty-cta:hover {
+    text-decoration: underline;
+}
+
+/* Main layout - increased spacing */
+.dashboard-main-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2.5rem;
+    margin-top: 2.5rem;
+}
+
+@media (max-width: 1024px) {
+    .dashboard-main-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Section titles - sentence case, H2 style */
+.section-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Tab switcher */
+.tab-switcher {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.tab-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    cursor: pointer;
+}
+
+.tab-link.is-active {
+    color: var(--color-accent);
+    border-bottom-color: var(--color-accent);
+}
+
+.action-count {
+    background: var(--color-accent);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 99px;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+/* Triage cards */
+.triage-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.triage-card {
+    background: var(--surface-card);
+    border: 1px solid var(--border-subtle);
+    padding: 1.25rem;
+    border-radius: var(--radius-xl);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.triage-card.priority-high {
+    border-left: 4px solid var(--color-danger);
+}
+
+.triage-card.priority-medium {
+    border-left: 4px solid var(--color-accent);
+}
+
+.priority-badge {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: capitalize;
+}
+
+.priority-badge--high {
+    background: rgba(var(--color-danger-rgb), 0.1);
+    color: var(--color-danger);
+}
+
+.priority-badge--medium {
+    background: rgba(var(--color-accent-rgb), 0.1);
+    color: var(--color-accent);
+}
+
+.triage-action-button {
+    background: var(--surface-accent);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.triage-action-button:hover {
+    background: var(--color-accent);
+    color: white;
+}
+
+/* All clear state - calm, supportive */
+.all-clear {
+    padding: 4rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    background: var(--surface-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xl);
+}
+
+.all-clear h3 {
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.all-clear p {
+    color: var(--text-muted);
+    max-width: 24rem;
+}
+
+/* Pipeline view */
+.pipeline-view {
+    min-height: 400px;
+}
+
+.funnel-container {
+    display: flex;
+    align-items: flex-end;
+    height: 200px;
+    gap: 2rem;
+    padding: 0 2rem;
+}
+
+.funnel-stage {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    height: 100%;
+}
+
+.stage-bar {
+    background: var(--color-accent);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--surface-card);
+    font-size: 0.75rem;
+    font-weight: 800;
+    min-height: 40px;
+}
+
+/* Sidebar cards - consistent styling */
+.sidebar-card {
+    background: var(--surface-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xl);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.sidebar-card:last-child {
+    margin-bottom: 0;
+}
+
+.sidebar-card-title {
+    font-size: 0.875rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+/* Mood selector - pill buttons with clear states */
+.mood-selector {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.mood-pill {
+    flex: 1;
+    padding: 0.75rem 0.5rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-subtle);
+    background: var(--surface-card);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    transition: all 0.2s ease;
+}
+
+.mood-pill:hover {
+    border-color: var(--border-default);
+    background: var(--surface-accent);
+}
+
+.mood-pill.is-selected {
+    border-color: var(--color-accent);
+    background: rgba(var(--color-accent-rgb), 0.08);
+    transform: scale(1.02);
+}
+
+.mood-pill .mood-emoji {
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.mood-pill .mood-label {
+    font-size: 0.625rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: capitalize;
+}
+
+.mood-tip {
+    background: rgba(var(--color-accent-rgb), 0.05);
+    border: 1px solid rgba(var(--color-accent-rgb), 0.1);
+    border-radius: var(--radius-md);
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    font-size: 0.75rem;
+    color: var(--text);
+}
+
+.mood-tip strong {
+    color: var(--color-accent);
+}
+
+/* Market pulse */
+.pulse-card {
+    border-color: var(--border-subtle);
+}
+
+.volume-bar {
+    height: 6px;
+    background: var(--surface-accent);
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.volume-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-accent), var(--color-danger));
+}
+
+.strategy-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: var(--surface-accent);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    margin-top: 1rem;
+}
+
+.strategy-box-icon {
+    color: var(--color-accent);
+    flex-shrink: 0;
+}
+
+.strategy-box-content {
+    flex: 1;
+}
+
+.strategy-box-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.strategy-box-text {
+    font-size: 0.6875rem;
+    color: var(--text-muted);
+}
+
+.strategy-box-cta {
+    display: inline-block;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    text-decoration: none;
+}
+
+.strategy-box-cta:hover {
+    text-decoration: underline;
+}
+
+/* Intel list */
+.intel-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.intel-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text);
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.intel-list li:last-child {
+    border-bottom: none;
+}
+
+.intel-list .intel-icon {
+    color: var(--color-accent);
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+}
+
+/* Loading and error states */
+.dashboard-loading {
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+}
+
+.briefing-error {
+    background: var(--surface-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.briefing-error p {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+.briefing-error button {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.briefing-item {
+    background: rgba(var(--color-accent-rgb), 0.02);
+}
+
+.daily-briefing-loading {
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.daily-briefing-empty {
+    background: var(--surface-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+}
+
+/* Wellness after check-in state */
+.wellness-complete {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.wellness-complete-icon {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: rgba(var(--color-success-rgb), 0.1);
+    color: var(--color-success);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wellness-quote {
+    font-size: 0.75rem;
+    font-style: italic;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-subtle);
+}

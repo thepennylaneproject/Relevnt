@@ -13,12 +13,16 @@ import { useAuth } from '../contexts/AuthContext'
 import PageBackground from '../components/shared/PageBackground'
 import { Container } from '../components/shared/Container'
 import { Icon } from '../components/ui/Icon'
+import { PageHero } from '../components/ui/PageHero'
 import { EmptyState } from '../components/ui/EmptyState'
 import { copy } from '../lib/copy'
 import type { JobRow } from '../shared/types'
 import { PersonaSwitcher } from '../components/personas/PersonaSwitcher'
 import { usePersonas } from '../hooks/usePersonas'
 import { RelevanceTuner } from '../components/personas/RelevanceTuner'
+import { PatternInsightsPanel } from '../components/intelligence/PatternInsightsPanel'
+import { AutoTuneSuggestions } from '../components/intelligence/AutoTuneSuggestions'
+import { useNetworkingCompanies, checkCompanyMatch } from '../hooks/useNetworkLookup'
 
 type JobSourceRow = {
   id: string
@@ -253,6 +257,9 @@ export default function JobsPage() {
     activePersona,
   ])
 
+  // Networking connections
+  const { companies: networkingCompanies, companyCounts } = useNetworkingCompanies()
+
   // saved jobs for current user
   const loadSavedJobs = useCallback(async () => {
     if (!user) {
@@ -417,11 +424,17 @@ export default function JobsPage() {
         </section>
 
         {/* Relevance Tuner */}
-        <RelevanceTuner onWeightsChange={(_weights) => {
-          // When weights change, the useMatchedJobs hook will automatically refetch
-          // For now, we'll rely on the state in the component itself
-          // Future: Could trigger an explicit refetch here
+        <RelevanceTuner onWeightsChange={() => {
+          // Weight changes are saved to DB by the hook
+          // The feed uses these weights, so refresh the page to apply
+          // Future: trigger refetch via context or state management
         }} />
+
+        {/* Auto-Tune Suggestions - Concierge mode */}
+        <AutoTuneSuggestions />
+
+        {/* Pattern Insights - surface behavioral patterns */}
+        <PatternInsightsPanel collapsed={true} />
 
         {/* Job Feed */}
         <div className="jobs-feed-container">
@@ -687,6 +700,16 @@ export default function JobsPage() {
                     </header>
 
                     <div className="tag-row">
+                      {job.company && (
+                        (() => {
+                          const count = checkCompanyMatch(job.company, networkingCompanies, companyCounts);
+                          return count > 0 ? (
+                            <span className="pill pill--networking" title={`You have ${count} connection${count > 1 ? 's' : ''} at this company`}>
+                              🔗 {count} {count === 1 ? 'Connection' : 'Connections'}
+                            </span>
+                          ) : null;
+                        })()
+                      )}
                       {isRemote && <span className="tag">Remote friendly</span>}
                       {job.employment_type && (
                         <span className="tag">
@@ -747,61 +770,54 @@ export default function JobsPage() {
     <PageBackground>
       <Container maxWidth="xl" padding="md">
         <div className="jobs-page">
-          <section className="hero-shell">
-            <div className="hero-header">
-              <div className="jobs-hero-icon">
-                <Icon name="briefcase" size="md" />
-              </div>
-              <div className="hero-header-main">
-                <p className="text-xs muted">
-                  {copy.jobs.pageTitle}
-                </p>
-                <h1 className="font-display">
-                  {copy.jobs.pageSubtitle}
-                </h1>
-                <p className="muted">
-                  Relevnt ranks roles by your skills, preferences, and salary floor so you can spend
-                  energy where it counts.
-                  {activePersona ? (
-                    <span>
-                      {' '}
-                      Viewing as <strong>{activePersona.name}</strong>.
+          {/* Hero Section */}
+          <PageHero
+            category="track"
+            headline={copy.jobs.pageHeadline}
+            subtitle={copy.jobs.pageSubtitle}
+          />
+
+          {/* Context Band: Persona + Tabs in one row */}
+          <section className="jobs-context-band">
+            <div className="jobs-context-band__persona">
+              <PersonaSwitcher />
+              {activePersona && (
+                <div className="jobs-persona-stats">
+                  {activePersona.preferences?.remote_preference === 'remote' && (
+                    <span className="persona-stat">Prefers remote</span>
+                  )}
+                  {activePersona.preferences?.min_salary && (
+                    <span className="persona-stat">
+                      Target: ${Math.round(activePersona.preferences.min_salary / 1000)}k+
                     </span>
-                  ) : null}
-                </p>
-              </div>
+                  )}
+                </div>
+              )}
             </div>
-
-            <div className="hero-actions-accent">
-              <div className="hero-actions-primary">
-                <PersonaSwitcher />
-              </div>
-            </div>
-
-            {/* <div className="hero-actions-accent">
-              <div className="hero-actions-primary">
-                <div className="jobs-tabs">...</div>
-            </div> */ }
-
-            <div className="jobs-tabs-container" style={{ marginTop: '24px' }}>
-              <div className="jobs-tabs">
-                <button
-                  type="button"
-                  className={`jobs-tab ${activeTab === 'feed' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('feed')}
-                >
-                  Relevnt Feed
-                </button>
-                <button
-                  type="button"
-                  className={`jobs-tab ${activeTab === 'browse' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('browse')}
-                >
-                  All jobs
-                </button>
-              </div>
+            <div className="jobs-tabs">
+              <button
+                type="button"
+                className={`jobs-tab ${activeTab === 'feed' ? 'active' : ''}`}
+                onClick={() => setActiveTab('feed')}
+              >
+                {copy.jobs.tabs.feed}
+              </button>
+              <button
+                type="button"
+                className={`jobs-tab ${activeTab === 'browse' ? 'active' : ''}`}
+                onClick={() => setActiveTab('browse')}
+              >
+                {copy.jobs.tabs.all}
+              </button>
             </div>
           </section>
+
+          {/* Transparency line for feed tab */}
+          {activeTab === 'feed' && activePersona && (
+            <p className="jobs-transparency-line">
+              {copy.jobs.transparencyLine}
+            </p>
+          )}
 
           {activeTab === 'feed' ? renderFeedTab() : renderBrowseTab()}
         </div>
@@ -809,3 +825,4 @@ export default function JobsPage() {
     </PageBackground>
   )
 }
+

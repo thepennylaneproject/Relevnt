@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
+import type { ResumeRow } from '../shared/types'
 
 export type ApplicationStatus =
   | 'applied'
@@ -27,6 +28,8 @@ export interface Application {
   user_id: string
   job_id?: string | null
   resume_id?: string | null
+  resume_snapshot?: any | null
+  rejection_analysis?: any | null
 
   company: string
   position: string
@@ -46,6 +49,12 @@ export interface Application {
   interview_date?: string | null
   offer_date?: string | null
   response_deadline?: string | null
+
+  offer_details?: any | null
+  negotiation_strategy?: string | null
+  negotiation_notes?: string | null
+  target_salary_min?: number | null
+  target_salary_max?: number | null
 
   created_at: string
   updated_at: string
@@ -77,6 +86,7 @@ export interface UseApplicationsReturn {
   addEvent: (applicationId: string, type: string, title: string, description?: string) => Promise<void>
   createApplication: (jobId: string | null, data: Partial<Application>) => Promise<void>
   deleteApplication: (applicationId: string) => Promise<void>
+  updateApplication: (applicationId: string, data: Partial<Application>) => Promise<void>
   statusCounts: Record<ApplicationStatus, number>
   totalCount: number
 }
@@ -258,6 +268,8 @@ export function useApplications(options: UseApplicationsOptions = {}): UseApplic
         applied_date: today,
         notes: data.notes ?? null,
         resume_id: data.resume_id ?? null,
+        resume_snapshot: data.resume_snapshot ?? null,
+        rejection_analysis: data.rejection_analysis ?? null,
         cover_letter: data.cover_letter ?? null,
         salary_expectation: data.salary_expectation ?? null,
         recruiter_name: data.recruiter_name ?? null,
@@ -293,7 +305,7 @@ export function useApplications(options: UseApplicationsOptions = {}): UseApplic
     async (applicationId: string) => {
       if (!user) return
 
-      const { error: deleteError } = await supabase
+      const { error: deleteError } = await (supabase as any)
         .from('applications')
         .delete()
         .eq('id', applicationId)
@@ -306,7 +318,30 @@ export function useApplications(options: UseApplicationsOptions = {}): UseApplic
 
       await fetchApplications()
     },
-    [user, fetchApplications],
+    [user, fetchApplications]
+  )
+
+  const updateApplication = useCallback(
+    async (applicationId: string, data: Partial<Application>) => {
+      if (!user) return
+
+      const { error: updateError } = await (supabase as any)
+        .from('applications')
+        .update({
+          ...data,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', applicationId)
+        .eq('user_id', user.id)
+
+      if (updateError) {
+        console.error('Error updating application:', updateError)
+        throw updateError
+      }
+
+      await fetchApplications()
+    },
+    [user, fetchApplications]
   )
 
   return {
@@ -318,6 +353,7 @@ export function useApplications(options: UseApplicationsOptions = {}): UseApplic
     addEvent,
     createApplication,
     deleteApplication,
+    updateApplication,
     statusCounts,
     totalCount,
   }
