@@ -109,8 +109,8 @@ const SOURCE_PAGINATION: Record<string, PaginationConfig> = {
     pageSize: 50,
     maxPagesPerRun: 3,
   },
-  // Greenhouse doesn't use pagination; fetches all jobs in single request per board
-  greenhouse: { pageParam: 'page', pageSizeParam: 'limit', pageSize: 1000, maxPagesPerRun: 1 },
+  // Greenhouse: follows RFC-5988 Link headers for pagination across all pages per board
+  greenhouse: { pageParam: 'page', pageSizeParam: 'limit', pageSize: 1000, maxPagesPerRun: 100 },
   // Lever doesn't use pagination - it uses company-based fetching
   lever: {
     pageParam: undefined, // Not used for Lever
@@ -1214,6 +1214,90 @@ function filterByFreshness(
 /**
  * Special ingest handler for Greenhouse that iterates through multiple configured boards
  */
+/**
+ * Fetch all jobs from a Greenhouse board, following pagination links
+ * Greenhouse uses RFC-5988 Link headers for pagination
+ */
+async function fetchGreenhouseAllPages(
+  boardUrl: string,
+  source: JobSource,
+  maxPages: number = 100
+): Promise<any[]> {
+  const allJobs: any[] = []
+  let currentUrl: string | null = boardUrl
+  let pageCount = 0
+
+  while (currentUrl && pageCount < maxPages) {
+    try {
+      pageCount++
+      console.log(`ingest_jobs: Greenhouse fetching page ${pageCount}: ${currentUrl}`)
+
+      const headers: Record<string, string> = buildHeaders(source)
+      const res = await fetch(currentUrl, {
+        method: 'GET',
+        headers,
+      })
+
+      if (!res.ok) {
+        console.error(
+          `ingest_jobs: Greenhouse page ${pageCount} failed:`,
+          res.status,
+          res.statusText
+        )
+        break
+      }
+
+      const pageData = await res.json().catch((err) => {
+        console.error(`ingest_jobs: Greenhouse failed to parse page ${pageCount}:`, err)
+        return null
+      })
+
+      if (!pageData) break
+
+      // Extract jobs from this page
+      if (Array.isArray(pageData.jobs)) {
+        allJobs.push(...pageData.jobs)
+        console.log(
+          `ingest_jobs: Greenhouse page ${pageCount} fetched ${pageData.jobs.length} jobs (total: ${allJobs.length})`
+        )
+      }
+
+      // Check for next page via Link header (RFC-5988)
+      const linkHeader = res.headers.get('link')
+      currentUrl = null
+
+      if (linkHeader) {
+        // Parse Link header: <url>; rel="next", <url>; rel="prev", etc.
+        const links = linkHeader.split(',').map((link) => link.trim())
+        for (const link of links) {
+          const match = link.match(/<([^>]+)>;\s*rel="([^"]+)"/)
+          if (match && match[2] === 'next') {
+            currentUrl = match[1]
+            break
+          }
+        }
+      }
+
+      if (!currentUrl) {
+        console.log(
+          `ingest_jobs: Greenhouse reached last page at page ${pageCount} (${allJobs.length} total jobs)`
+        )
+      }
+    } catch (err) {
+      console.error(`ingest_jobs: Greenhouse page ${pageCount} error:`, err)
+      break
+    }
+  }
+
+  if (pageCount >= maxPages) {
+    console.warn(
+      `ingest_jobs: Greenhouse hit max pages limit (${maxPages}). May have more jobs available.`
+    )
+  }
+
+  return allJobs
+}
+
 async function ingestGreenhouseBoards(
   source: JobSource,
   runId?: string
@@ -1288,11 +1372,15 @@ async function ingestGreenhouseBoards(
         // Build Greenhouse API URL for this board
         const boardUrl = `https://api.greenhouse.io/v1/boards/${board.boardToken}/jobs?content=true`
 
-        const raw = await fetchJson(boardUrl, source, { page: 1 })
-        if (!raw) {
+        // Fetch ALL pages from this board using Link header pagination
+        const allJobsFromPages = await fetchGreenhouseAllPages(boardUrl, source)
+        if (!allJobsFromPages || !allJobsFromPages.length) {
           console.warn(`ingest_jobs: no data from Greenhouse board ${board.companyName}`)
           continue
         }
+
+        // Create a synthetic response object that matches the expected structure
+        const raw = { jobs: allJobsFromPages }
 
         // Normalize the response
         let normalized: NormalizedJob[] = []
