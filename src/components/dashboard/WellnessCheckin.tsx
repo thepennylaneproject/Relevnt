@@ -87,7 +87,15 @@ export function WellnessCheckin() {
 
     return (
         <div className="sidebar-card">
-            <h3 className="sidebar-card-title">How are you feeling today?</h3>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 4 }}>
+                <h3 className="sidebar-card-title">How are you feeling today?</h3>
+                <div style={{ position: 'relative', group: 'hover' }}>
+                    <Icon name="question" size="sm" style={{ cursor: 'help', color: 'var(--text-secondary)' }} title="Your mood helps us adjust your dashboard pace and tone. Gentle mode reduces pressure when you need it." />
+                </div>
+            </div>
+            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: 12, lineHeight: 1.4 }}>
+                Your mood helps us adjust your dashboard. Gentle mode reduces pressure when needed.
+            </p>
 
             <div className="mood-selector">
                 {MOODS.map((m) => (
