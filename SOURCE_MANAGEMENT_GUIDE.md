@@ -11,7 +11,7 @@ The job ingestion system now supports:
 
 ## Current Status
 
-### Optimization: Parallel Batch Execution ✅
+### Optimization 1: Parallel Batch Execution ✅
 Sources now run in 4 batches to avoid timeouts:
 
 1. **Batch 1 - Premium Sources** (runs in parallel)
@@ -34,6 +34,20 @@ Sources now run in 4 batches to avoid timeouts:
    - All other enabled sources
 
 **Expected execution time:** ~80-120 seconds (down from 14+ minute timeout)
+
+### Optimization 2: Full Greenhouse Pagination ✅
+Greenhouse now fetches **ALL jobs from each board**, not just the first 1000:
+
+- **Previous:** Only fetched 1st page (limit 1000 jobs per board)
+- **Now:** Follows RFC-5988 Link headers to paginate through ALL pages
+- **Implementation:** `fetchGreenhouseAllPages()` function aggregates jobs before normalization
+- **Impact:** Dramatically increases job volume for better matching
+- **Example:** If a board has 5,000 jobs, all 5,000 are now captured (instead of just 1,000)
+
+**Configuration:**
+- `maxPagesPerRun: 100` - Can follow up to 100 pages per board
+- Per-page limit: 1000 jobs (Greenhouse default)
+- Detailed logging shows per-page progress
 
 ---
 
@@ -128,11 +142,13 @@ Watch the ingestion_runs table to see:
 - Action: Verify API key is set in Netlify environment variables
 - Next: Re-enable after API key verification
 
-### Recently Troubleshot
+### Recently Fixed / Enhanced
 
-**Greenhouse**
-- ✅ Verified working: 1,974 jobs (Dec 22, 08:50:30)
-- Mode: Premium, parallel execution
+**Greenhouse** ✅
+- ✅ NOW: Full pagination with RFC-5988 Link headers
+- ✅ Verified working: 1,974 jobs (Dec 22, 08:50:30) - now captures ALL pages
+- Mode: Premium, parallel execution with multi-page support
+- **What changed:** Now follows pagination links to get all jobs from boards with 1000+ listings
 
 **Lever**
 - ✅ Verified working: 76 jobs (Dec 22, 08:50:17)
