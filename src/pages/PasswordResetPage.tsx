@@ -20,10 +20,11 @@
  * ============================================================================
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container } from '../components/shared/Container';
 import { Icon } from '../components/ui/Icon';
+import { supabase } from '../lib/supabase';
 
 type ResetStep = 'email-entry' | 'password-reset' | 'success';
 
@@ -46,6 +47,22 @@ export function PasswordResetPage(): JSX.Element {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<ResetError | null>(null);
+
+  // ============================================================
+  // CHECK FOR RECOVERY SESSION (from email link)
+  // ============================================================
+
+  useEffect(() => {
+    const checkRecoverySession = async () => {
+      // If user clicked recovery link in email, they'll have a recovery session
+      const { data } = await supabase.auth.getSession();
+      if (data.session?.user && data.session.user.recovery_sent_at) {
+        // User has recovery session from email link
+        setStep('password-reset');
+      }
+    };
+    checkRecoverySession();
+  }, []);
 
   // ============================================================
   // VALIDATION & SUBMISSION
@@ -75,12 +92,24 @@ export function PasswordResetPage(): JSX.Element {
 
     try {
       setLoading(true);
-      // TODO: Call backend to send password reset email
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Send password reset email via Supabase
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/password-reset`,
+      });
+
+      if (resetError) throw resetError;
+
       setError(null);
-      setStep('password-reset');
+      // Show confirmation message and keep on email-entry step
+      // User will click link in email and get recovery session
+      setError(null);
+      setEmail('');
+      setError({
+        message: 'Check your email for a password reset link. Click the link to proceed.'
+      });
     } catch (err) {
-      setError({ message: 'Failed to send reset email. Please try again.' });
+      const errorMsg = err instanceof Error ? err.message : 'Failed to send reset email';
+      setError({ message: errorMsg });
     } finally {
       setLoading(false);
     }
@@ -108,13 +137,19 @@ export function PasswordResetPage(): JSX.Element {
 
     try {
       setLoading(true);
-      // TODO: Call backend to reset password
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Update password using Supabase auth
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (updateError) throw updateError;
+
       setError(null);
       setStep('success');
       setTimeout(() => navigate('/login'), 2500);
     } catch (err) {
-      setError({ message: 'Failed to reset password. Please try again.' });
+      const errorMsg = err instanceof Error ? err.message : 'Failed to reset password';
+      setError({ message: errorMsg });
     } finally {
       setLoading(false);
     }

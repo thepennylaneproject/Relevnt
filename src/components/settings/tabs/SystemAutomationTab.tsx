@@ -149,15 +149,20 @@ export function SystemAutomationTab({ onAutoSaveStatusChange }: SystemAutomation
                         </p>
                     </div>
 
-                    <RangeSliderWithPresets
-                        label="Match sensitivity"
-                        value={matchAggressiveness}
-                        min={0}
-                        max={100}
-                        onChange={handleAggressivenessChange}
-                        leftLabel="Selective"
-                        rightLabel="Broad"
-                    />
+                    <div style={{ display: 'grid', gap: 12 }}>
+                        <RangeSliderWithPresets
+                            label="Match sensitivity"
+                            value={matchAggressiveness}
+                            min={0}
+                            max={100}
+                            onChange={handleAggressivenessChange}
+                            leftLabel="Selective"
+                            rightLabel="Broad"
+                        />
+                        <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5, marginTop: -8 }}>
+                            <strong>Selective:</strong> Only show jobs with 80%+ match to your profile. <strong>Broad:</strong> Show more opportunities, even 50-79% matches. Balance quality and volume.
+                        </p>
+                    </div>
                 </div>
             </article>
 

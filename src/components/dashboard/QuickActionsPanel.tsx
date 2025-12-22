@@ -47,6 +47,14 @@ const QUICK_ACTIONS: QuickAction[] = [
         route: '/resumes/builder',
     },
     {
+        id: 'auto-apply',
+        title: 'Auto-Apply (Pro)',
+        description: 'Save 2–3 hours/week by automating applications',
+        icon: 'paper-airplane',
+        route: '/settings#auto-apply',
+        badge: 'new',
+    },
+    {
         id: 'offer-compare',
         title: 'Compare offers',
         description: 'Side-by-side analysis of compensation packages',

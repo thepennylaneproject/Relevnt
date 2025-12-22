@@ -69,7 +69,7 @@ export function AutoApplyTab({ onAutoSaveStatusChange }: AutoApplyTabProps) {
                         </label>
                     </div>
                     <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 8 }}>
-                        Relevnt submits only when rules and thresholds are met. You can pause anytime.
+                        Save 2–3 hours per week by automating applications to matching roles. You stay in control with guardrails and can pause anytime.
                     </p>
                 </article>
 
