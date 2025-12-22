@@ -1,7 +1,7 @@
 
 import type { Handler } from '@netlify/functions'
 import { createResponse, handleCORS, verifyToken, createAdminClient } from './utils/supabase'
-import { runAI } from './ai/run'
+import { routeLegacyTask } from './ai/legacyTaskRouter'
 import type { UserTier } from '../../src/lib/ai/types'
 
 async function getUserTier(userId: string): Promise<UserTier> {
@@ -43,7 +43,7 @@ export const handler: Handler = async (event) => {
 
         const tier = await getUserTier(userId)
 
-        // 1. Run AI Evaluation
+        // 1. Run AI Evaluation via Modular Router
         const aiInput = {
             question,
             userAnswer,
@@ -53,30 +53,18 @@ export const handler: Handler = async (event) => {
             }
         }
 
-        const aiResult = await runAI({
-            task: 'interview_evaluate',
-            input: aiInput,
+        const result = await routeLegacyTask('interview-evaluate', aiInput, {
             userId,
             tier,
-            jsonSchema: {
-                type: 'object',
-                properties: {
-                    score: { type: 'number', minimum: 1, maximum: 10 },
-                    feedback: { type: 'string' },
-                    strengths: { type: 'array', items: { type: 'string' } },
-                    areas_to_improve: { type: 'array', items: { type: 'string' } },
-                    suggested_better_answer: { type: 'string' }
-                },
-                required: ['score', 'feedback', 'strengths', 'areas_to_improve']
-            }
+            traceId: body.traceId
         })
 
-        if (!aiResult.ok) {
-            console.error('[Interview] AI Evaluation failed:', aiResult.error_message)
-            return createResponse(502, { error: 'Evaluation failed', details: aiResult.error_message })
+        if (!result.ok) {
+            console.error('[Interview] AI Evaluation failed:', result.error_message)
+            return createResponse(502, { error: 'Evaluation failed', details: result.error_message })
         }
 
-        const evaluation = aiResult.output as any
+        const evaluation = (result.output as any)?.data || result.output
 
         // 2. Save Session to Database
         const supabase = createAdminClient()
@@ -103,7 +91,7 @@ export const handler: Handler = async (event) => {
             data: {
                 evaluation,
                 sessionId: savedSession?.id,
-                trace_id: aiResult.trace_id
+                trace_id: result.trace_id
             }
         })
 

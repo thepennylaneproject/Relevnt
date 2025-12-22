@@ -186,8 +186,11 @@ function applyCursorToUrl(
 
 function buildSourceUrl(
   source: JobSource,
-  cursor?: IngestionCursor
+  cursor?: IngestionCursor,
+  searchParams?: { keywords?: string; location?: string }
 ): string | null {
+  const keywords = searchParams?.keywords || 'software developer'
+  const location = searchParams?.location || 'US'
   if (source.slug === 'adzuna_us') {
     const base = source.fetchUrl
     const appId = process.env.ADZUNA_APP_ID
@@ -202,7 +205,7 @@ function buildSourceUrl(
       app_id: appId,
       app_key: appKey,
       results_per_page: '50',
-      what: 'marketing',
+      what: keywords,
       sort_by: 'date',
     })
 
@@ -234,8 +237,8 @@ function buildSourceUrl(
     const startRecord = (page - 1) * pageSize
 
     // Search parameters
-    const keyword = '0' // '0' = all jobs
-    const location = 'US' // Nationwide
+    const keyword = keywords !== 'software developer' ? keywords : '0' // '0' = all jobs
+    const locationParam = location || 'US' // Nationwide
     const radius = '0' // Not used for nationwide
     const sortColumns = 'DatePosted' // Sort by post date for freshness
     const sortOrder = 'DESC'
@@ -243,7 +246,7 @@ function buildSourceUrl(
 
     const baseUrl = `https://api.careeronestop.org/v2/jobsearch/${userId}/${encodeURIComponent(
       keyword
-    )}/${encodeURIComponent(location)}/${radius}/${sortColumns}/${sortOrder}/${startRecord}/${pageSize}/${days}`
+    )}/${encodeURIComponent(locationParam)}/${radius}/${sortColumns}/${sortOrder}/${startRecord}/${pageSize}/${days}`
 
     return baseUrl
   }
@@ -314,12 +317,12 @@ function buildSourceUrl(
 
     const params = new URLSearchParams({
       locale_code: 'en_US',
-      keywords: 'software developer',
+      keywords: keywords,
       sort: 'date',
       page: String(page),
       page_size: String(pageSize),
-      user_ip: '0.0.0.0',
-      user_agent: 'relevnt-job-ingest/1.0',
+      user_ip: getRandomIp(),
+      user_agent: getRandomUserAgent(),
     })
     return `${source.fetchUrl}?${params.toString()}`
   }
@@ -380,20 +383,42 @@ function buildSourceUrl(
 }
 
 // Near the top (or wherever buildHeaders/buildSourceHeaders is):
+const USER_AGENTS = [
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0',
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:123.0) Gecko/20100101 Firefox/123.0',
+]
+
+function getRandomUserAgent(): string {
+  return USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)]
+}
+
+function getRandomIp(): string {
+  // Generate a random US-looking IP to avoid 0.0.0.0 blocks
+  // Using 67.x.x.x range (common US ISP)
+  const part2 = Math.floor(Math.random() * 255)
+  const part3 = Math.floor(Math.random() * 255)
+  const part4 = Math.floor(Math.random() * 255)
+  return `67.${part2}.${part3}.${part4}`
+}
+
 function buildHeaders(source?: JobSource): Record<string, string> {
+  const userAgent = getRandomUserAgent()
   if (source?.slug === 'usajobs') {
     const apiKey = process.env.USAJOBS_API_KEY
-    const userAgent = process.env.USAJOBS_USER_AGENT
-    if (!apiKey || !userAgent) {
+    const envUserAgent = process.env.USAJOBS_USER_AGENT
+    if (!apiKey || !envUserAgent) {
       console.error('ingest_jobs: missing USAJOBS_API_KEY or USAJOBS_USER_AGENT')
       return {
-        'User-Agent': 'relevnt-job-ingest/1.0',
+        'User-Agent': userAgent,
         Accept: 'application/json',
       }
     }
 
     return {
-      'User-Agent': userAgent,
+      'User-Agent': envUserAgent,
       'Authorization-Key': apiKey,
       Accept: 'application/json',
     }
@@ -404,13 +429,13 @@ function buildHeaders(source?: JobSource): Record<string, string> {
     if (!apiKey) {
       console.error('ingest_jobs: missing CAREERONESTOP_API_KEY')
       return {
-        'User-Agent': 'relevnt-job-ingest/1.0',
+        'User-Agent': userAgent,
         Accept: 'application/json',
       }
     }
     return {
       Authorization: `Bearer ${apiKey}`,
-      'User-Agent': 'relevnt-job-ingest/1.0',
+      'User-Agent': userAgent,
       Accept: 'application/json',
     }
   }
@@ -420,14 +445,14 @@ function buildHeaders(source?: JobSource): Record<string, string> {
     if (!apiKey) {
       console.error('ingest_jobs: missing FINDWORK_API_KEY')
       return {
-        'User-Agent': 'relevnt-job-ingest/1.0',
+        'User-Agent': userAgent,
         Accept: 'application/json',
       }
     }
 
     return {
       Authorization: `Token ${apiKey}`,
-      'User-Agent': 'relevnt-job-ingest/1.0',
+      'User-Agent': userAgent,
       Accept: 'application/json',
     }
   }
@@ -438,14 +463,14 @@ function buildHeaders(source?: JobSource): Record<string, string> {
     if (!apiKey) {
       console.error('ingest_jobs: missing JOBDATAFEEDS_API_KEY')
       return {
-        'User-Agent': 'relevnt-job-ingest/1.0',
+        'User-Agent': userAgent,
         Accept: 'application/json',
       }
     }
 
     return {
       Authorization: `Bearer ${apiKey}`,
-      'User-Agent': 'relevnt-job-ingest/1.0',
+      'User-Agent': userAgent,
       Accept: 'application/json',
     }
   }
@@ -456,14 +481,14 @@ function buildHeaders(source?: JobSource): Record<string, string> {
     if (!apiKey) {
       console.error('ingest_jobs: missing WHATJOBS_API_KEY')
       return {
-        'User-Agent': 'relevnt-job-ingest/1.0',
+        'User-Agent': userAgent,
         Accept: 'application/json',
       }
     }
 
     return {
       'x-api-key': apiKey,
-      'User-Agent': 'relevnt-job-ingest/1.0',
+      'User-Agent': userAgent,
       Accept: 'application/json',
     }
   }
@@ -474,14 +499,14 @@ function buildHeaders(source?: JobSource): Record<string, string> {
     if (!apiKey) {
       console.error('ingest_jobs: missing FANTASTIC_JOBS_API_KEY')
       return {
-        'User-Agent': 'relevnt-job-ingest/1.0',
+        'User-Agent': userAgent,
         Accept: 'application/json',
       }
     }
 
     return {
       Authorization: `Bearer ${apiKey}`,
-      'User-Agent': 'relevnt-job-ingest/1.0',
+      'User-Agent': userAgent,
       Accept: 'application/json',
     }
   }
@@ -492,7 +517,7 @@ function buildHeaders(source?: JobSource): Record<string, string> {
     if (!apiKey) {
       console.error('ingest_jobs: missing REED_API_KEY')
       return {
-        'User-Agent': 'relevnt-job-ingest/1.0',
+        'User-Agent': userAgent,
         Accept: 'application/json',
       }
     }
@@ -501,7 +526,7 @@ function buildHeaders(source?: JobSource): Record<string, string> {
     const credentials = Buffer.from(`${apiKey}:`).toString('base64')
     return {
       Authorization: `Basic ${credentials}`,
-      'User-Agent': 'relevnt-job-ingest/1.0',
+      'User-Agent': userAgent,
       Accept: 'application/json',
     }
   }
@@ -510,7 +535,7 @@ function buildHeaders(source?: JobSource): Record<string, string> {
   if (source?.slug === 'jooble') {
     return {
       'Content-Type': 'application/json',
-      'User-Agent': 'relevnt-job-ingest/1.0',
+      'User-Agent': userAgent,
       Accept: 'application/json',
     }
   }
@@ -521,14 +546,14 @@ function buildHeaders(source?: JobSource): Record<string, string> {
     if (!apiKey) {
       console.error('ingest_jobs: missing CAREERJET_API_KEY')
       return {
-        'User-Agent': 'relevnt-job-ingest/1.0',
+        'User-Agent': userAgent,
         Accept: 'application/json',
       }
     }
     const credentials = Buffer.from(`${apiKey}:`).toString('base64')
     return {
       Authorization: `Basic ${credentials}`,
-      'User-Agent': 'relevnt-job-ingest/1.0',
+      'User-Agent': userAgent,
       Accept: 'application/json',
     }
   }
@@ -536,7 +561,7 @@ function buildHeaders(source?: JobSource): Record<string, string> {
   // The Muse - no special headers needed, api_key is in URL
   if (source?.slug === 'themuse') {
     return {
-      'User-Agent': 'relevnt-job-ingest/1.0',
+      'User-Agent': userAgent,
       Accept: 'application/json',
     }
   }
@@ -546,14 +571,14 @@ function buildHeaders(source?: JobSource): Record<string, string> {
     const apiKey = process.env.THEIRSTACK_API_KEY
     if (!apiKey) {
       return {
-        'User-Agent': 'relevnt-job-ingest/1.0',
+        'User-Agent': userAgent,
         Accept: 'application/json',
       }
     }
     return {
       'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
-      'User-Agent': 'relevnt-job-ingest/1.0',
+      'User-Agent': userAgent,
       Accept: 'application/json',
     }
   }
@@ -561,7 +586,7 @@ function buildHeaders(source?: JobSource): Record<string, string> {
   // RemoteOK is sensitive to scrapers
   if (source?.slug === 'remoteok') {
     return {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'User-Agent': userAgent,
       Accept: 'application/json',
     }
   }
@@ -576,8 +601,10 @@ function buildHeaders(source?: JobSource): Record<string, string> {
 async function fetchJson(
   url: string,
   source?: JobSource,
-  cursor?: IngestionCursor
+  cursor?: IngestionCursor,
+  searchParams?: { keywords?: string; location?: string }
 ): Promise<any | null> {
+  const keywords = searchParams?.keywords || 'software developer'
   try {
     const headers: Record<string, string> = buildHeaders(source)
 
@@ -588,8 +615,8 @@ async function fetchJson(
       const pageSize = config.pageSize ?? DEFAULT_PAGE_SIZE
 
       const body = JSON.stringify({
-        keywords: 'software developer',
-        location: '',
+        keywords: keywords,
+        location: searchParams?.location || '',
         page: page,
         ResultOnPage: pageSize,
       })
@@ -1448,7 +1475,11 @@ async function ingestGreenhouseBoards(
   }
 }
 
-async function ingest(source: JobSource, runId?: string): Promise<IngestResult> {
+async function ingest(
+  source: JobSource, 
+  runId?: string,
+  searchParams?: { keywords?: string; location?: string;[key: string]: any }
+): Promise<IngestResult> {
   const supabase = createAdminClient()
   const pagination = SOURCE_PAGINATION[source.slug] || {}
   const sourceConfig = getSourceConfig(source.slug)
@@ -1607,6 +1638,8 @@ async function ingest(source: JobSource, runId?: string): Promise<IngestResult> 
 
       // Fetch from all companies in parallel using registry
       const allJobs = await fetchFromAllCompaniesInParallel(supabase, [platform]);
+      // Note: We don't propagate searchParams to Lever/Greenhouse yet as they are company-specific,
+      // but in the future we could filter the returned jobs by keyword if needed.
       const jobsList = allJobs[platform] || [];
 
       if (!jobsList.length) {
@@ -1667,7 +1700,7 @@ async function ingest(source: JobSource, runId?: string): Promise<IngestResult> 
     } else {
       // Standard pagination-based ingestion for other sources
       for (let i = 0; i < maxPages; i++) {
-        const url = buildSourceUrl(source, { page, since })
+        const url = buildSourceUrl(source, { page, since }, searchParams)
 
         if (!url) {
           console.warn(`ingest_jobs: no URL for ${source.slug}, skipping`)
@@ -1678,7 +1711,7 @@ async function ingest(source: JobSource, runId?: string): Promise<IngestResult> 
           `ingest_jobs: fetching from ${source.slug} (${url}) [page ${page}]`
         )
 
-        const raw = await fetchJson(url, source, { page, since })
+        const raw = await fetchJson(url, source, { page, since }, searchParams)
         if (!raw) {
           console.warn(`ingest_jobs: no data from ${source.slug} on page ${page}`)
           break
@@ -2060,7 +2093,7 @@ export async function ingestFromSource(
 
   try {
     // Use existing ingest function (it handles state internally)
-    const result = await ingest(source)
+    const result = await ingest(source, undefined, searchParams)
 
     console.log(`ingestFromSource: ${sourceSlug} completed with ${result.count} jobs`)
     return result.count

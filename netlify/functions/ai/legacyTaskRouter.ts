@@ -258,7 +258,7 @@ const LEGACY_CONFIG: Record<string, LegacyTaskConfig> = {
     quality: 'high',
   },
   'rejection-coaching': {
-    instructions: 'Provide a supportive but analytical post-rejection briefing. Identify potentially missing skills from the job description and suggest 3 high-impact actions for the next 48 hours.',
+    instructions: 'Provide a supportive but analytical post-rejection briefing. Identify potentially missing skills from the job description and suggest 3 high-impact actions for the next 48 hours. Also extract tone and a silver lining.',
     requiresJson: true,
     schema: {
       success: 'boolean',
@@ -266,6 +266,8 @@ const LEGACY_CONFIG: Record<string, LegacyTaskConfig> = {
         analysis: 'string',
         missingSkills: [],
         nextSteps: [],
+        tone: 'string',
+        silver_lining: 'string',
       },
     },
     quality: 'high',
@@ -278,6 +280,69 @@ const LEGACY_CONFIG: Record<string, LegacyTaskConfig> = {
       data: {
         draft: 'string',
         strategy: 'string',
+      },
+    },
+    quality: 'high',
+  },
+  'linkedin-profile-analysis': {
+    instructions: 'Analyze a LinkedIn profile. Score the headline, summary, and experience. Provide specific suggestions for improvement and rewritten versions of the headline and summary.',
+    requiresJson: true,
+    schema: {
+      success: 'boolean',
+      data: {
+        headline_score: 'number',
+        summary_score: 'number',
+        experience_score: 'number',
+        overall_score: 'number',
+        suggestions: [],
+        optimized_headline: 'string',
+        optimized_summary: 'string',
+      },
+    },
+    quality: 'high',
+  },
+  'portfolio-analysis': {
+    instructions: 'Analyze a professional portfolio website. Score visuals, usability, and content. Provide suggestions for improvement and perceived seniority.',
+    requiresJson: true,
+    schema: {
+      success: 'boolean',
+      data: {
+        visual_score: 'number',
+        usability_score: 'number',
+        content_score: 'number',
+        overall_score: 'number',
+        suggestions: [],
+        perceived_seniority: 'string',
+        suggested_tagline: 'string',
+      },
+    },
+    quality: 'high',
+  },
+  'interview-evaluate': {
+    instructions: 'Evaluate an interview response. Provide a score (1-10), qualitative feedback, strengths, areas to improve, and a suggested better answer.',
+    requiresJson: true,
+    schema: {
+      success: 'boolean',
+      data: {
+        score: 'number',
+        feedback: 'string',
+        strengths: [],
+        areas_to_improve: [],
+        suggested_better_answer: 'string',
+      },
+    },
+    quality: 'high',
+  },
+  'application-question-answer': {
+    instructions: 'Draft a high-quality answer for an application question using the provided resume context. Do not invent facts. If information is missing, use placeholders and provide warnings.',
+    requiresJson: true,
+    schema: {
+      success: 'boolean',
+      data: {
+        answer: 'string',
+        bullet_points: [],
+        follow_up_questions: [],
+        warnings: [],
       },
     },
     quality: 'high',

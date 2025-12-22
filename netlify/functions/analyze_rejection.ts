@@ -1,6 +1,6 @@
 
 import { createClient } from '@supabase/supabase-js'
-import OpenAI from 'openai'
+import { routeLegacyTask } from './ai/legacyTaskRouter'
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -9,9 +9,6 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 // Actually, standard pattern here is to create a client with the user's token if passed, 
 // OR use service key but verify ownership manually. 
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-})
 
 export const handler = async (event: any, context: any) => {
     if (event.httpMethod !== 'POST') {
@@ -57,36 +54,25 @@ export const handler = async (event: any, context: any) => {
             return { statusCode: 403, body: JSON.stringify({ error: 'Forbidden' }) }
         }
 
-        // 2. Call OpenAI
-        const completion = await openai.chat.completions.create({
-            model: "gpt-4-turbo-preview",
-            messages: [
-                {
-                    role: "system",
-                    content: `You are a career coach analyzing a job rejection email. 
-          Extract the following in JSON format:
-          - reason: The stated or implied reason (e.g., "Role filled", "Experience mismatch", "Generic").
-          - tone: The tone of the email (e.g., "Professional", "Cold", "Encouraging").
-          - suggestions: Array of actionable improvements based on the feedback (if any) or general advice.
-          - silver_lining: A brief, encouraging 1-sentence takeaway.
-          
-          If the email is generic, note that and suggest typical improvements (networking etc).`
-                },
-                {
-                    role: "user",
-                    content: rejectionText
-                }
-            ],
-            response_format: { type: "json_object" }
+        // 2. Call AI via Modular Router
+        const result = await routeLegacyTask('rejection-coaching', {
+            rejectionText
+        }, {
+            userId: user.id,
+            tier: 'premium', // Default to premium for this analysis
         })
 
-        const result = JSON.parse(completion.choices[0].message.content || '{}')
+        if (!result.ok) {
+            throw new Error(result.error_message || 'AI generation failed')
+        }
+
+        const analysis = (result.output as any)?.data || result.output
 
         // 3. Update Application
         const { error: updateError } = await supabase
             .from('applications')
             .update({
-                rejection_analysis: result,
+                rejection_analysis: analysis,
                 status: 'rejected' // Ensure status is rejected
             })
             .eq('id', applicationId)
@@ -97,7 +83,7 @@ export const handler = async (event: any, context: any) => {
 
         return {
             statusCode: 200,
-            body: JSON.stringify(result),
+            body: JSON.stringify(analysis),
         }
 
     } catch (error: any) {

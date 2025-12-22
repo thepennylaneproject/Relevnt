@@ -17,6 +17,7 @@ import AdminDashboard from './pages/AdminDashboard'
 import SettingsHub from './pages/SettingsHub'
 import ResumeWorkspacePage from './pages/ResumeWorkspacePage'
 import ProfileAnalyzer from './pages/ProfileAnalyzer'
+import SharedAuditPage from './pages/SharedAuditPage'
 import PersonaManagementPage from './pages/PersonaManagementPage'
 
 import InterviewPrepCenter from './pages/InterviewPrepCenter'
@@ -66,6 +67,11 @@ function AppInner() {
             <Route
               path="/signup"
               element={isAuthed ? <Navigate to="/dashboard" replace /> : <SignupPage />}
+            />
+
+            <Route
+              path="/shared/audit/:type/:token"
+              element={<SharedAuditPage />}
             />
 
             {/* Protected */}

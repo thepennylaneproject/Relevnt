@@ -127,16 +127,16 @@ export async function seedDefaultSearches(
     }
 
     const defaultSearches = [
-        { keywords: 'software engineer', location: 'US' },
-        { keywords: 'product manager', location: 'US' },
-        { keywords: 'data scientist', location: 'US' },
-        { keywords: 'UX designer', location: 'remote' },
+        { keywords: 'social media marketing', location: 'remote' },
+        { keywords: 'content strategy', location: 'remote' },
         { keywords: 'marketing manager', location: 'US' },
-        { keywords: 'frontend developer', location: 'remote' },
-        { keywords: 'backend engineer', location: 'US' },
-        { keywords: 'devops engineer', location: 'remote' },
-        { keywords: 'machine learning', location: 'US' },
-        { keywords: 'sales representative', location: 'US' },
+        { keywords: 'digital marketing', location: 'remote' },
+        { keywords: 'social media manager', location: 'US' },
+        { keywords: 'content marketing', location: 'remote' },
+        { keywords: 'brand strategy', location: 'US' },
+        { keywords: 'copywriter', location: 'remote' },
+        { keywords: 'marketing director', location: 'US' },
+        { keywords: 'creative director', location: 'remote' },
     ]
 
     const sources = ['careerjet', 'remoteok', 'remotive', 'himalayas', 'jobicy']

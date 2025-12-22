@@ -1,7 +1,7 @@
 
 import type { Handler } from '@netlify/functions'
 import { createResponse, handleCORS, verifyToken, createAdminClient } from './utils/supabase'
-import { runAI } from './ai/run'
+import { routeLegacyTask } from './ai/legacyTaskRouter'
 import type { UserTier } from '../../src/lib/ai/types'
 import type { LinkedInAnalysis } from '../../src/shared/types'
 
@@ -81,50 +81,25 @@ export const handler: Handler = async (event) => {
         // 1. Fetch Profile Data
         const profileData = await fetchLinkedInProfile(linkedinUrl)
 
-        // 2. Run AI Analysis
+        // 2. Run AI Analysis via Modular Router
         const aiInput = {
             profile: profileData,
             targetRoles: body.targetRoles || [],
             context: body.context || ''
         }
 
-        const aiResult = await runAI({
-            task: 'linkedin_profile_analysis',
-            input: aiInput,
+        const result = await routeLegacyTask('linkedin-profile-analysis', aiInput, {
             userId,
             tier,
-            jsonSchema: {
-                type: 'object',
-                properties: {
-                    headline_score: { type: 'number' },
-                    summary_score: { type: 'number' },
-                    experience_score: { type: 'number' },
-                    overall_score: { type: 'number' },
-                    suggestions: {
-                        type: 'array',
-                        items: {
-                            type: 'object',
-                            properties: {
-                                section: { type: 'string' },
-                                improvement: { type: 'string' },
-                                reason: { type: 'string' }
-                            },
-                            required: ['section', 'improvement', 'reason']
-                        }
-                    },
-                    optimized_headline: { type: 'string' },
-                    optimized_summary: { type: 'string' }
-                },
-                required: ['headline_score', 'summary_score', 'experience_score', 'overall_score', 'suggestions']
-            }
+            traceId: body.traceId
         })
 
-        if (!aiResult.ok) {
-            console.error('[LinkedIn] AI Analysis failed:', aiResult.error_message)
-            return createResponse(502, { error: 'Analysis failed', details: aiResult.error_message })
+        if (!result.ok) {
+            console.error('[LinkedIn] AI Analysis failed:', result.error_message)
+            return createResponse(502, { error: 'Analysis failed', details: result.error_message })
         }
 
-        const analysisResults = aiResult.output as LinkedInAnalysis
+        const analysisResults = (result.output as any)?.data || result.output
 
         // 3. Save to Database
         const supabase = createAdminClient()
@@ -149,7 +124,7 @@ export const handler: Handler = async (event) => {
             ok: true,
             data: {
                 profile: savedProfile || { linkedin_url: linkedinUrl, profile_data: profileData, analysis_results: analysisResults },
-                trace_id: aiResult.trace_id
+                trace_id: result.trace_id
             }
         })
 

@@ -1,7 +1,7 @@
 
 import type { Handler } from '@netlify/functions'
 import { createResponse, handleCORS, verifyToken, createAdminClient } from './utils/supabase'
-import { runAI } from './ai/run'
+import { routeLegacyTask } from './ai/legacyTaskRouter'
 import type { UserTier } from '../../src/lib/ai/types'
 import type { PortfolioAnalysis } from '../../src/shared/types'
 
@@ -70,7 +70,7 @@ export const handler: Handler = async (event) => {
         // 1. Get Portfolio Context
         const content = await fetchPortfolioContent(portfolioUrl)
 
-        // 2. Run AI Analysis
+        // 2. Run AI Analysis via Modular Router
         const aiInput = {
             url: portfolioUrl,
             content: content || 'Content extraction failed, please analyze based on URL and common patterns for this domain.',
@@ -78,43 +78,18 @@ export const handler: Handler = async (event) => {
             industry: body.industry || 'Technology'
         }
 
-        const aiResult = await runAI({
-            task: 'portfolio_analysis',
-            input: aiInput,
+        const result = await routeLegacyTask('portfolio-analysis', aiInput, {
             userId,
             tier,
-            jsonSchema: {
-                type: 'object',
-                properties: {
-                    visual_score: { type: 'number' },
-                    usability_score: { type: 'number' },
-                    content_score: { type: 'number' },
-                    overall_score: { type: 'number' },
-                    suggestions: {
-                        type: 'array',
-                        items: {
-                            type: 'object',
-                            properties: {
-                                category: { type: 'string' },
-                                improvement: { type: 'string' },
-                                impact: { type: 'string', enum: ['high', 'medium', 'low'] }
-                            },
-                            required: ['category', 'improvement', 'impact']
-                        }
-                    },
-                    perceived_seniority: { type: 'string' },
-                    suggested_tagline: { type: 'string' }
-                },
-                required: ['visual_score', 'usability_score', 'content_score', 'overall_score', 'suggestions', 'perceived_seniority']
-            }
+            traceId: body.traceId
         })
 
-        if (!aiResult.ok) {
-            console.error('[Portfolio] AI Analysis failed:', aiResult.error_message)
-            return createResponse(502, { error: 'Analysis failed', details: aiResult.error_message })
+        if (!result.ok) {
+            console.error('[Portfolio] AI Analysis failed:', result.error_message)
+            return createResponse(502, { error: 'Analysis failed', details: result.error_message })
         }
 
-        const analysisResults = aiResult.output as PortfolioAnalysis
+        const analysisResults = (result.output as any)?.data || result.output
 
         // 3. Save to Database
         const supabase = createAdminClient()
@@ -137,7 +112,7 @@ export const handler: Handler = async (event) => {
             ok: true,
             data: {
                 analysis: savedAnalysis || { portfolio_url: portfolioUrl, analysis_results: analysisResults },
-                trace_id: aiResult.trace_id
+                trace_id: result.trace_id
             }
         })
 

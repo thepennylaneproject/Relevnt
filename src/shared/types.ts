@@ -185,6 +185,8 @@ export interface LinkedInProfileRow {
   analysis_results: LinkedInAnalysis | null
   created_at: string
   updated_at: string
+  is_public?: boolean
+  share_token?: string
 }
 
 export interface LinkedInAnalysis {
@@ -208,6 +210,8 @@ export interface PortfolioAnalysisRow {
   analysis_results: PortfolioAnalysis | null
   created_at: string
   updated_at: string
+  is_public?: boolean
+  share_token?: string
 }
 
 export interface PortfolioAnalysis {
