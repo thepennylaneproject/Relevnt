@@ -1946,39 +1946,72 @@ export async function runIngestion(
   const results: IngestResult[] = []
   let failedSourceCount = 0
 
-  // Run sources sequentially to avoid overloading the Supabase connection pool or hitting rate limits
-  // In personal career concierge use cases, stability > speed.
-  for (const source of sourcesToRun) {
+  // Organize sources into batches for parallel execution within each batch
+  // Batches run sequentially to avoid overwhelming Supabase connection pool
+  const priorityBatches = [
+    // Batch 1: Premium sources (high value, special handling)
+    sourcesToRun.filter(s => ['greenhouse', 'lever'].includes(s.slug)),
+    // Batch 2: High-volume aggregators (remotive, himalayas, arbeitnow, findwork)
+    sourcesToRun.filter(s => ['remotive', 'himalayas', 'arbeitnow', 'findwork'].includes(s.slug)),
+    // Batch 3: Medium aggregators (jooble, themuse, reed_uk, careeronestop)
+    sourcesToRun.filter(s => ['jooble', 'themuse', 'reed_uk', 'careeronestop'].includes(s.slug)),
+    // Batch 4: Remaining sources (low volume, specialized)
+    sourcesToRun.filter(s => !['greenhouse', 'lever', 'remotive', 'himalayas', 'arbeitnow', 'findwork', 'jooble', 'themuse', 'reed_uk', 'careeronestop'].includes(s.slug)),
+  ].filter(batch => batch.length > 0)
+
+  console.log(`[Ingest] Running ${sourcesToRun.length} sources in ${priorityBatches.length} parallel batches`)
+
+  // Run batches sequentially, but sources within each batch in parallel
+  for (let batchIdx = 0; batchIdx < priorityBatches.length; batchIdx++) {
+    const batch = priorityBatches[batchIdx]
+
     // Check if we are approaching the Netlify timeout limit
     if (Date.now() - startTime > MAX_DURATION) {
-      console.warn(`[Ingest] Approaching 15-minute limit. Stopping gracefully. Remaining sources: ${sourcesToRun.slice(sourcesToRun.indexOf(source)).map(s => s.slug).join(', ')}`)
+      const remainingBatches = priorityBatches.slice(batchIdx).flat().map(s => s.slug).join(', ')
+      console.warn(`[Ingest] Approaching 15-minute limit. Stopping gracefully. Remaining sources: ${remainingBatches}`)
       break
     }
 
-    try {
-      console.log(`[Ingest: ${source.slug}] Starting...`)
-      const result = source.slug === 'greenhouse'
-        ? await ingestGreenhouseBoards(source, runId || undefined)
-        : await ingest(source, runId || undefined)
-      
+    console.log(`[Ingest] Starting batch ${batchIdx + 1}/${priorityBatches.length} (${batch.length} sources): ${batch.map(s => s.slug).join(', ')}`)
+    const batchStartTime = Date.now()
+
+    // Execute all sources in this batch in parallel
+    const batchPromises = batch.map(async (source) => {
+      try {
+        console.log(`[Ingest: ${source.slug}] Starting...`)
+        const result = source.slug === 'greenhouse'
+          ? await ingestGreenhouseBoards(source, runId || undefined)
+          : await ingest(source, runId || undefined)
+
+        console.log(`[Ingest: ${source.slug}] Finished. Count: ${result.count} in ${Date.now() - batchStartTime}ms`)
+        return result
+      } catch (err) {
+        console.error(`[Ingest: ${source.slug}] Fatal error:`, err)
+        return {
+          source: source.slug,
+          count: 0,
+          normalized: 0,
+          duplicates: 0,
+          staleFiltered: 0,
+          status: 'failed' as const,
+          error: err instanceof Error ? err.message : String(err),
+        }
+      }
+    })
+
+    // Wait for all sources in this batch to complete
+    const batchResults = await Promise.all(batchPromises)
+
+    // Collect results from batch
+    batchResults.forEach(result => {
       results.push(result)
       if (result.status === 'failed') {
         failedSourceCount++
       }
-      console.log(`[Ingest: ${source.slug}] Finished. Count: ${result.count}`)
-    } catch (err) {
-      console.error(`[Ingest: ${source.slug}] Fatal error:`, err)
-      results.push({
-        source: source.slug,
-        count: 0,
-        normalized: 0,
-        duplicates: 0,
-        staleFiltered: 0,
-        status: 'failed',
-        error: err instanceof Error ? err.message : String(err),
-      })
-      failedSourceCount++
-    }
+    })
+
+    const batchDuration = Date.now() - batchStartTime
+    console.log(`[Ingest] Batch ${batchIdx + 1} completed in ${batchDuration}ms with ${batchResults.filter(r => r.status === 'success').length}/${batchResults.length} successful`)
   }
 
   const summary = results.reduce<Record<string, number>>((acc, r) => {
