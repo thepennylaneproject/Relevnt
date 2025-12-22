@@ -538,6 +538,37 @@ h6,
   box-shadow: var(--shadow-md);
 }
 
+/* Card - Dark Academia Variants */
+[data-theme="dark-academia"] .card--job-listing {
+  border-left: 3px solid var(--color-secondary-accent);
+}
+
+[data-theme="dark-academia"] .card--job-listing:hover {
+  border-left-color: var(--color-accent);
+  transition: border-left-color var(--transition-base);
+}
+
+/* Application Status Cards */
+[data-theme="dark-academia"] .card--application {
+  border-top: 4px solid var(--color-jewel-slate-blue);
+}
+
+[data-theme="dark-academia"] .card--application.status-applied {
+  border-top-color: var(--color-jewel-slate-blue);
+}
+
+[data-theme="dark-academia"] .card--application.status-interviewing {
+  border-top-color: var(--color-accent);
+}
+
+[data-theme="dark-academia"] .card--application.status-offer {
+  border-top-color: var(--color-jewel-sage);
+}
+
+[data-theme="dark-academia"] .card--application.status-rejected {
+  border-top-color: var(--color-error);
+}
+
 /* Button Base */
 .btn {
   display: inline-flex;
