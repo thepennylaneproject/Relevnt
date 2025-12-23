@@ -15,7 +15,7 @@ import { createContext, useContext, useMemo, useCallback, useEffect, useState, R
 // TYPE DEFINITIONS
 // ============================================================================
 
-type ThemeMode = 'Light' | 'Dark'
+type ThemeMode = 'Light' | 'Dark' | 'DarkAcademia'
 
 interface ThemeColors {
   // Backgrounds
@@ -144,7 +144,7 @@ export function RelevntThemeProvider({
   const [mode, setModeState] = useState<ThemeMode>(() => {
     if (typeof window === 'undefined') return initialMode;
     const stored = localStorage.getItem('relevnt-theme-mode');
-    if (stored === 'Light' || stored === 'Dark') return stored;
+    if (stored === 'Light' || stored === 'Dark' || stored === 'DarkAcademia') return stored as ThemeMode;
     // Check system preference if no stored value
     if (window.matchMedia('(prefers-color-scheme: dark)').matches) return 'Dark';
     return initialMode;
@@ -154,12 +154,16 @@ export function RelevntThemeProvider({
   useEffect(() => {
     const root = document.documentElement;
 
+    // Remove all theme classes first
+    root.classList.remove('light', 'dark', 'dark-academia');
+
     if (mode === 'Dark') {
       root.classList.add('dark');
-      root.classList.remove('light');
       root.setAttribute('data-theme', 'dark');
+    } else if (mode === 'DarkAcademia') {
+      root.classList.add('dark-academia');
+      root.setAttribute('data-theme', 'dark-academia');
     } else {
-      root.classList.remove('dark');
       root.classList.add('light');
       root.setAttribute('data-theme', 'light');
     }
@@ -177,7 +181,12 @@ export function RelevntThemeProvider({
   }, []);
 
   const toggleMode = useCallback(() => {
-    setModeState((prev: ThemeMode) => prev === 'Light' ? 'Dark' : 'Light');
+    setModeState((prev: ThemeMode) => {
+      // Cycle: Light → Dark → DarkAcademia → Light
+      if (prev === 'Light') return 'Dark';
+      if (prev === 'Dark') return 'DarkAcademia';
+      return 'Light';
+    });
   }, []);
 
   // Colors come from CSS variables now, so we provide computed defaults
@@ -193,7 +202,7 @@ export function RelevntThemeProvider({
       setMode,
       toggleMode,
       colors,
-      isDark: mode === 'Dark',
+      isDark: mode === 'Dark' || mode === 'DarkAcademia',
     }),
     [mode, setMode, toggleMode, colors]
   );

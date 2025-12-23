@@ -2,19 +2,26 @@
  * ═══════════════════════════════════════════════════════════════════════════
  * RELEVNT DESIGN TOKENS
  * ═══════════════════════════════════════════════════════════════════════════
- * 
+ *
  * "Authentic intelligence for real people navigating broken systems."
- * 
+ *
  * This file is the single source of truth for all visual decisions.
  * Every color, spacing value, and shadow in the app should reference these tokens.
- * 
+ *
  * Philosophy:
  * - Light mode: Open journal in a sunlit café
  * - Dark mode: Same journal, open at midnight under a warm lamp
+ * - Dark Academia: Old library, dark cottage core, warm gold on deep navy
  * - Gold is sacred — never darken, never desaturate
- * 
+ *
  * ═══════════════════════════════════════════════════════════════════════════
  */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FONT IMPORTS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital@0;1&display=swap');
 
 /* ═══════════════════════════════════════════════════════════════════════════
    LIGHT MODE (Default)
@@ -121,12 +128,12 @@
      ───────────────────────────────────────────────────────────────────────── */
 
   /* Font Families */
-  --font-display: 'Fraunces', 'Georgia', serif;
-  /* Headlines - warm, editorial */
+  --font-display: 'Crimson Text', 'Georgia', serif;
+  /* Headlines - elegant, scholarly (dark academia) */
   --font-body: 'Source Sans 3', 'Segoe UI', sans-serif;
   /* Body - readable, friendly */
   --font-mono: 'JetBrains Mono', 'Consolas', monospace;
-  /* Code, data */
+  /* Code, data - copper accent in dark academia */
 
   /* Font Sizes */
   --text-xs: 0.75rem;
@@ -248,6 +255,99 @@
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
   --shadow-glow: 0 0 30px rgba(78, 128, 141, 0.15);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DARK ACADEMIA MODE
+   Old library, dark cottage core, warm gold on deep navy
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root.dark-academia,
+.dark-academia,
+[data-theme="dark-academia"] {
+  /* Core Surfaces - Dark Academia Palette */
+  --color-bg: #0F1419;
+  /* Deep navy - centuries of books */
+  --color-bg-alt: #1A1F2E;
+  /* Charcoal - card surfaces */
+  --color-surface: #1A1F2E;
+  /* Elevated surfaces - slightly lighter navy */
+  --color-surface-hover: rgba(255, 255, 255, 0.08);
+
+  /* Text - Dark Academia */
+  --color-ink: #F5F3F0;
+  /* Off-white - easy on eyes at night */
+  --color-ink-secondary: #D4CCC5;
+  /* Muted off-white for secondary text */
+  --color-ink-tertiary: #9D9691;
+  /* Deeper gray for tertiary text */
+  --color-ink-inverse: #0F1419;
+  /* Text on light backgrounds */
+
+  /* Illustration & Lines */
+  --color-graphite: #F5F3F0;
+  /* Light lines - off-white */
+  --color-graphite-light: #6B6A67;
+  /* Softer lines - charcoal gray */
+  --color-graphite-faint: #3A3F4A;
+  /* Very subtle borders - darker charcoal */
+
+  /* Primary Accent - Warm Gold (Sacred in dark academia) */
+  --color-accent: #D4A574;
+  /* Warm gold - aged metal patina */
+  --color-accent-hover: #E5B589;
+  /* Lighter gold on hover */
+  --color-accent-glow: rgba(212, 165, 116, 0.25);
+  /* Soft gold glow */
+
+  /* Secondary Accent - Copper */
+  --color-secondary-accent: #A0826D;
+  /* Copper - vintage metals, warmth */
+  --color-secondary-accent-hover: #B49485;
+
+  /* Jewel Tone Accents */
+  --color-jewel-emerald: #2D5A4A;
+  /* Deep emerald - prosperity, wisdom */
+  --color-jewel-sage: #7A9B6B;
+  /* Muted sage - growth, balance */
+  --color-jewel-slate-blue: #4A5A7A;
+  /* Slate blue - contemplation */
+
+  /* Semantic Colors - Dark Academia Palette */
+  --color-success: #7A9B6B;
+  /* Muted sage - soft growth indicator */
+  --color-success-bg: rgba(122, 155, 107, 0.15);
+  --color-warning: #B8743F;
+  /* Burnt orange - warm caution */
+  --color-warning-bg: rgba(184, 116, 63, 0.15);
+  --color-error: #A85545;
+  /* Muted red - honest rejection without alarm */
+  --color-error-bg: rgba(168, 85, 69, 0.15);
+  --color-info: #6B8A9D;
+  /* Slate blue - calm guidance */
+  --color-info-bg: rgba(107, 138, 157, 0.15);
+
+  /* Interactive States */
+  --color-focus-ring: rgba(212, 165, 116, 0.5);
+  /* Gold focus ring */
+  --color-selection: rgba(212, 165, 116, 0.2);
+  /* Gold selection highlight */
+
+  /* Borders - Dark Academia */
+  --border-default: 1px solid var(--color-graphite-faint);
+  --border-strong: 1px solid var(--color-graphite-light);
+  --border-accent: 2px solid var(--color-accent);
+  /* Gold border for active/important */
+  --border-accent-left: 3px solid var(--color-secondary-accent);
+  /* Copper left border for cards */
+
+  /* Shadows - Dark Academia (subtle, sophisticated) */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 24px rgba(212, 165, 116, 0.15);
+  /* Subtle gold glow for premium elements */
 }
 
 /* System preference detection */
@@ -436,6 +536,37 @@ h6,
 
 .card--elevated {
   box-shadow: var(--shadow-md);
+}
+
+/* Card - Dark Academia Variants */
+[data-theme="dark-academia"] .card--job-listing {
+  border-left: 3px solid var(--color-secondary-accent);
+}
+
+[data-theme="dark-academia"] .card--job-listing:hover {
+  border-left-color: var(--color-accent);
+  transition: border-left-color var(--transition-base);
+}
+
+/* Application Status Cards */
+[data-theme="dark-academia"] .card--application {
+  border-top: 4px solid var(--color-jewel-slate-blue);
+}
+
+[data-theme="dark-academia"] .card--application.status-applied {
+  border-top-color: var(--color-jewel-slate-blue);
+}
+
+[data-theme="dark-academia"] .card--application.status-interviewing {
+  border-top-color: var(--color-accent);
+}
+
+[data-theme="dark-academia"] .card--application.status-offer {
+  border-top-color: var(--color-jewel-sage);
+}
+
+[data-theme="dark-academia"] .card--application.status-rejected {
+  border-top-color: var(--color-error);
 }
 
 /* Button Base */

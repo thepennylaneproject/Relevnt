@@ -109,8 +109,8 @@ const SOURCE_PAGINATION: Record<string, PaginationConfig> = {
     pageSize: 50,
     maxPagesPerRun: 3,
   },
-  // Greenhouse doesn't use pagination; fetches all jobs in single request per board
-  greenhouse: { pageParam: 'page', pageSizeParam: 'limit', pageSize: 1000, maxPagesPerRun: 1 },
+  // Greenhouse: follows RFC-5988 Link headers for pagination across all pages per board
+  greenhouse: { pageParam: 'page', pageSizeParam: 'limit', pageSize: 1000, maxPagesPerRun: 100 },
   // Lever doesn't use pagination - it uses company-based fetching
   lever: {
     pageParam: undefined, // Not used for Lever
@@ -1121,9 +1121,27 @@ async function upsertJobs(jobs: NormalizedJob[]) {
     console.log(`ingest_jobs: enriched ${urlEnrichmentCount} job URLs with direct company links`)
   }
 
-  // Enrich jobs with ATS metadata
+  // Enrich jobs with ATS metadata and URL enrichment data
   const enrichedJobs = urlEnrichedJobs.map((j) => {
     const enrichment = enrichJob(j.title, j.description || '')
+
+    // Determine if URL is direct (from company careers page)
+    const isDirect = j.external_url && (
+      j.external_url.includes('greenhouse.io') ||
+      j.external_url.includes('jobs.lever.co') ||
+      j.external_url.includes('workday.com') ||
+      j.external_url.includes('/careers') ||
+      j.external_url.includes('/jobs')
+    )
+
+    // Detect ATS type from URL
+    let atsType = null
+    if (j.external_url) {
+      if (j.external_url.includes('greenhouse.io')) atsType = 'greenhouse'
+      else if (j.external_url.includes('jobs.lever.co')) atsType = 'lever'
+      else if (j.external_url.includes('workday.com')) atsType = 'workday'
+    }
+
     return {
       source_slug: j.source_slug,
       external_id: j.external_id,
@@ -1144,6 +1162,11 @@ async function upsertJobs(jobs: NormalizedJob[]) {
 
       description: j.description,
       is_active: true,
+
+      // URL enrichment fields (direct apply tracking)
+      is_direct: isDirect,
+      ats_type: atsType,
+      enrichment_confidence: isDirect ? 0.9 : 0.5,
 
       // ATS enrichment fields
       seniority_level: enrichment.seniority_level,
@@ -1214,6 +1237,90 @@ function filterByFreshness(
 /**
  * Special ingest handler for Greenhouse that iterates through multiple configured boards
  */
+/**
+ * Fetch all jobs from a Greenhouse board, following pagination links
+ * Greenhouse uses RFC-5988 Link headers for pagination
+ */
+async function fetchGreenhouseAllPages(
+  boardUrl: string,
+  source: JobSource,
+  maxPages: number = 100
+): Promise<any[]> {
+  const allJobs: any[] = []
+  let currentUrl: string | null = boardUrl
+  let pageCount = 0
+
+  while (currentUrl && pageCount < maxPages) {
+    try {
+      pageCount++
+      console.log(`ingest_jobs: Greenhouse fetching page ${pageCount}: ${currentUrl}`)
+
+      const headers: Record<string, string> = buildHeaders(source)
+      const res = await fetch(currentUrl, {
+        method: 'GET',
+        headers,
+      })
+
+      if (!res.ok) {
+        console.error(
+          `ingest_jobs: Greenhouse page ${pageCount} failed:`,
+          res.status,
+          res.statusText
+        )
+        break
+      }
+
+      const pageData = await res.json().catch((err) => {
+        console.error(`ingest_jobs: Greenhouse failed to parse page ${pageCount}:`, err)
+        return null
+      })
+
+      if (!pageData) break
+
+      // Extract jobs from this page
+      if (Array.isArray(pageData.jobs)) {
+        allJobs.push(...pageData.jobs)
+        console.log(
+          `ingest_jobs: Greenhouse page ${pageCount} fetched ${pageData.jobs.length} jobs (total: ${allJobs.length})`
+        )
+      }
+
+      // Check for next page via Link header (RFC-5988)
+      const linkHeader = res.headers.get('link')
+      currentUrl = null
+
+      if (linkHeader) {
+        // Parse Link header: <url>; rel="next", <url>; rel="prev", etc.
+        const links = linkHeader.split(',').map((link) => link.trim())
+        for (const link of links) {
+          const match = link.match(/<([^>]+)>;\s*rel="([^"]+)"/)
+          if (match && match[2] === 'next') {
+            currentUrl = match[1]
+            break
+          }
+        }
+      }
+
+      if (!currentUrl) {
+        console.log(
+          `ingest_jobs: Greenhouse reached last page at page ${pageCount} (${allJobs.length} total jobs)`
+        )
+      }
+    } catch (err) {
+      console.error(`ingest_jobs: Greenhouse page ${pageCount} error:`, err)
+      break
+    }
+  }
+
+  if (pageCount >= maxPages) {
+    console.warn(
+      `ingest_jobs: Greenhouse hit max pages limit (${maxPages}). May have more jobs available.`
+    )
+  }
+
+  return allJobs
+}
+
 async function ingestGreenhouseBoards(
   source: JobSource,
   runId?: string
@@ -1288,11 +1395,15 @@ async function ingestGreenhouseBoards(
         // Build Greenhouse API URL for this board
         const boardUrl = `https://api.greenhouse.io/v1/boards/${board.boardToken}/jobs?content=true`
 
-        const raw = await fetchJson(boardUrl, source, { page: 1 })
-        if (!raw) {
+        // Fetch ALL pages from this board using Link header pagination
+        const allJobsFromPages = await fetchGreenhouseAllPages(boardUrl, source)
+        if (!allJobsFromPages || !allJobsFromPages.length) {
           console.warn(`ingest_jobs: no data from Greenhouse board ${board.companyName}`)
           continue
         }
+
+        // Create a synthetic response object that matches the expected structure
+        const raw = { jobs: allJobsFromPages }
 
         // Normalize the response
         let normalized: NormalizedJob[] = []
@@ -1946,39 +2057,72 @@ export async function runIngestion(
   const results: IngestResult[] = []
   let failedSourceCount = 0
 
-  // Run sources sequentially to avoid overloading the Supabase connection pool or hitting rate limits
-  // In personal career concierge use cases, stability > speed.
-  for (const source of sourcesToRun) {
+  // Organize sources into batches for parallel execution within each batch
+  // Batches run sequentially to avoid overwhelming Supabase connection pool
+  const priorityBatches = [
+    // Batch 1: Premium sources (high value, special handling)
+    sourcesToRun.filter(s => ['greenhouse', 'lever'].includes(s.slug)),
+    // Batch 2: High-volume aggregators (remotive, himalayas, arbeitnow, findwork)
+    sourcesToRun.filter(s => ['remotive', 'himalayas', 'arbeitnow', 'findwork'].includes(s.slug)),
+    // Batch 3: Medium aggregators (jooble, themuse, reed_uk, careeronestop)
+    sourcesToRun.filter(s => ['jooble', 'themuse', 'reed_uk', 'careeronestop'].includes(s.slug)),
+    // Batch 4: Remaining sources (low volume, specialized)
+    sourcesToRun.filter(s => !['greenhouse', 'lever', 'remotive', 'himalayas', 'arbeitnow', 'findwork', 'jooble', 'themuse', 'reed_uk', 'careeronestop'].includes(s.slug)),
+  ].filter(batch => batch.length > 0)
+
+  console.log(`[Ingest] Running ${sourcesToRun.length} sources in ${priorityBatches.length} parallel batches`)
+
+  // Run batches sequentially, but sources within each batch in parallel
+  for (let batchIdx = 0; batchIdx < priorityBatches.length; batchIdx++) {
+    const batch = priorityBatches[batchIdx]
+
     // Check if we are approaching the Netlify timeout limit
     if (Date.now() - startTime > MAX_DURATION) {
-      console.warn(`[Ingest] Approaching 15-minute limit. Stopping gracefully. Remaining sources: ${sourcesToRun.slice(sourcesToRun.indexOf(source)).map(s => s.slug).join(', ')}`)
+      const remainingBatches = priorityBatches.slice(batchIdx).flat().map(s => s.slug).join(', ')
+      console.warn(`[Ingest] Approaching 15-minute limit. Stopping gracefully. Remaining sources: ${remainingBatches}`)
       break
     }
 
-    try {
-      console.log(`[Ingest: ${source.slug}] Starting...`)
-      const result = source.slug === 'greenhouse'
-        ? await ingestGreenhouseBoards(source, runId || undefined)
-        : await ingest(source, runId || undefined)
-      
+    console.log(`[Ingest] Starting batch ${batchIdx + 1}/${priorityBatches.length} (${batch.length} sources): ${batch.map(s => s.slug).join(', ')}`)
+    const batchStartTime = Date.now()
+
+    // Execute all sources in this batch in parallel
+    const batchPromises = batch.map(async (source) => {
+      try {
+        console.log(`[Ingest: ${source.slug}] Starting...`)
+        const result = source.slug === 'greenhouse'
+          ? await ingestGreenhouseBoards(source, runId || undefined)
+          : await ingest(source, runId || undefined)
+
+        console.log(`[Ingest: ${source.slug}] Finished. Count: ${result.count} in ${Date.now() - batchStartTime}ms`)
+        return result
+      } catch (err) {
+        console.error(`[Ingest: ${source.slug}] Fatal error:`, err)
+        return {
+          source: source.slug,
+          count: 0,
+          normalized: 0,
+          duplicates: 0,
+          staleFiltered: 0,
+          status: 'failed' as const,
+          error: err instanceof Error ? err.message : String(err),
+        }
+      }
+    })
+
+    // Wait for all sources in this batch to complete
+    const batchResults = await Promise.all(batchPromises)
+
+    // Collect results from batch
+    batchResults.forEach(result => {
       results.push(result)
       if (result.status === 'failed') {
         failedSourceCount++
       }
-      console.log(`[Ingest: ${source.slug}] Finished. Count: ${result.count}`)
-    } catch (err) {
-      console.error(`[Ingest: ${source.slug}] Fatal error:`, err)
-      results.push({
-        source: source.slug,
-        count: 0,
-        normalized: 0,
-        duplicates: 0,
-        staleFiltered: 0,
-        status: 'failed',
-        error: err instanceof Error ? err.message : String(err),
-      })
-      failedSourceCount++
-    }
+    })
+
+    const batchDuration = Date.now() - batchStartTime
+    console.log(`[Ingest] Batch ${batchIdx + 1} completed in ${batchDuration}ms with ${batchResults.filter(r => r.status === 'success').length}/${batchResults.length} successful`)
   }
 
   const summary = results.reduce<Record<string, number>>((acc, r) => {

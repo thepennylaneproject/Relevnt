@@ -2,11 +2,11 @@
 /**
  * Background worker for job ingestion
  * This function has a 15-minute timeout limit (vs 10-26s for regular functions)
- * 
+ *
  * Triggered by:
  * - admin_ingest_trigger (manual admin trigger)
  * - Scheduled cron (via Netlify scheduled functions)
- * 
+ *
  * The -background suffix in the filename makes this a Netlify background function.
  */
 
@@ -24,7 +24,11 @@ export const handler: Handler = async (
     context: HandlerContext
 ) => {
     const workerId = Math.random().toString(36).substring(7)
+    const startTime = Date.now()
     console.log(`[Worker:${workerId}] Starting background ingestion worker`)
+    console.log(`[Worker:${workerId}] Environment check:`)
+    console.log(`[Worker:${workerId}]   - CAREERJET_API_KEY: ${process.env.CAREERJET_API_KEY ? 'SET' : 'NOT SET'}`)
+    console.log(`[Worker:${workerId}]   - Event headers:`, JSON.stringify(event.headers))
 
     try {
         // Parse the request body
@@ -40,9 +44,10 @@ export const handler: Handler = async (
         const triggeredBy = payload.triggeredBy || 'manual'
         const requestedSource = payload.source || null
 
-        console.log('ingest_jobs_worker-background: running ingestion', {
+        console.log(`[Worker:${workerId}] Running ingestion with:`, {
             triggeredBy,
             source: requestedSource,
+            timestamp: new Date().toISOString(),
         })
 
         // Run the ingestion (this is the long-running operation)
@@ -51,13 +56,23 @@ export const handler: Handler = async (
         // Calculate summary
         const totalInserted = results.reduce((sum, r) => sum + r.count, 0)
         const totalNormalized = results.reduce((sum, r) => sum + r.normalized, 0)
-        const failedCount = results.filter(r => r.status === 'failed').length
+        const totalByStatus = results.reduce((acc, r) => {
+            acc[r.status] = (acc[r.status] || 0) + 1
+            return acc
+        }, {} as Record<string, number>)
 
-        console.log('ingest_jobs_worker-background: completed', {
+        const duration = Date.now() - startTime
+        console.log(`[Worker:${workerId}] Ingestion completed in ${duration}ms`, {
             totalSources: results.length,
             totalInserted,
             totalNormalized,
-            failedCount,
+            byStatus: totalByStatus,
+            details: results.map(r => ({
+                source: r.source,
+                status: r.status,
+                count: r.count,
+                error: r.error,
+            })),
         })
 
         // Background functions return 202 Accepted immediately to the caller,
@@ -72,12 +87,14 @@ export const handler: Handler = async (
                     sources: results.length,
                     inserted: totalInserted,
                     normalized: totalNormalized,
-                    failed: failedCount,
+                    byStatus: totalByStatus,
+                    durationMs: duration,
                 },
             }),
         }
     } catch (err) {
-        console.error('ingest_jobs_worker-background: fatal error', err)
+        const duration = Date.now() - startTime
+        console.error(`[Worker:${workerId}] Fatal error after ${duration}ms:`, err)
         return {
             statusCode: 500,
             body: JSON.stringify({
@@ -87,3 +104,4 @@ export const handler: Handler = async (
         }
     }
 }
+
