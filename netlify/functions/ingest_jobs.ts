@@ -1121,9 +1121,27 @@ async function upsertJobs(jobs: NormalizedJob[]) {
     console.log(`ingest_jobs: enriched ${urlEnrichmentCount} job URLs with direct company links`)
   }
 
-  // Enrich jobs with ATS metadata
+  // Enrich jobs with ATS metadata and URL enrichment data
   const enrichedJobs = urlEnrichedJobs.map((j) => {
     const enrichment = enrichJob(j.title, j.description || '')
+
+    // Determine if URL is direct (from company careers page)
+    const isDirect = j.external_url && (
+      j.external_url.includes('greenhouse.io') ||
+      j.external_url.includes('jobs.lever.co') ||
+      j.external_url.includes('workday.com') ||
+      j.external_url.includes('/careers') ||
+      j.external_url.includes('/jobs')
+    )
+
+    // Detect ATS type from URL
+    let atsType = null
+    if (j.external_url) {
+      if (j.external_url.includes('greenhouse.io')) atsType = 'greenhouse'
+      else if (j.external_url.includes('jobs.lever.co')) atsType = 'lever'
+      else if (j.external_url.includes('workday.com')) atsType = 'workday'
+    }
+
     return {
       source_slug: j.source_slug,
       external_id: j.external_id,
@@ -1144,6 +1162,11 @@ async function upsertJobs(jobs: NormalizedJob[]) {
 
       description: j.description,
       is_active: true,
+
+      // URL enrichment fields (direct apply tracking)
+      is_direct: isDirect,
+      ats_type: atsType,
+      enrichment_confidence: isDirect ? 0.9 : 0.5,
 
       // ATS enrichment fields
       seniority_level: enrichment.seniority_level,
