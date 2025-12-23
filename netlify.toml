@@ -65,9 +65,26 @@
 [functions."search_queue_cron"]
   schedule = "*/15 * * * *"
 
-# Full job ingestion sweep - runs every 1 hour (background)
-[functions."ingest_jobs_worker-background"]
+# ============================================
+# SPLIT JOB INGESTION SCHEDULES
+# ============================================
+# Instead of one big sweep that times out,
+# we run smaller batches on different schedules
+
+# Premium sources (Greenhouse + Lever) - runs every 1 hour
+# Duration: 1-3 minutes
+[functions."ingest_premium_sources"]
   schedule = "0 * * * *"
+
+# Aggregators (remotive, himalayas, arbeitnow, etc.) - runs every 2 hours
+# Duration: 3-6 minutes
+[functions."ingest_aggregators"]
+  schedule = "0 */2 * * *"
+
+# Remaining sources (usajobs, fantastic, etc.) - runs every 6 hours
+# Duration: 2-5 minutes
+[functions."ingest_remaining_sources"]
+  schedule = "0 */6 * * *"
 
 
 
