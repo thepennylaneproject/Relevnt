@@ -1,11 +1,7 @@
 -- Migration Verification Script
--- Run this in Supabase SQL Editor to check which migrations were applied
+-- Run this in Supabase SQL Editor to check if our critical tables and columns exist
 
--- 1. Check if schema_migrations table exists
--- (Supabase uses this to track applied migrations)
-SELECT * FROM extensions.migrations LIMIT 10;
-
--- 2. Check key tables that should exist from migrations
+-- 1. Check key tables that should exist from migrations
 SELECT
   'job_ingestion_state' as table_name,
   EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'job_ingestion_state') as exists
