@@ -138,16 +138,15 @@ const RelevntThemeContext = createContext<RelevntThemeContextValue | null>(null)
 
 export function RelevntThemeProvider({
   children,
-  initialMode = 'Light',
+  initialMode = 'DarkAcademia',
 }: RelevntThemeProviderProps) {
-  // Initialize from localStorage or prop
+  // Initialize from localStorage or prop (defaults to Dark Academia)
   const [mode, setModeState] = useState<ThemeMode>(() => {
     if (typeof window === 'undefined') return initialMode;
     const stored = localStorage.getItem('relevnt-theme-mode');
     if (stored === 'Light' || stored === 'Dark' || stored === 'DarkAcademia') return stored as ThemeMode;
-    // Check system preference if no stored value
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) return 'Dark';
-    return initialMode;
+    // Default to Dark Academia (old system preference checks removed)
+    return 'DarkAcademia';
   });
 
   // Apply theme class to document when mode changes
