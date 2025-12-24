@@ -1,0 +1,263 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * TEXTURE SYSTEM
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Layered visual interest without color complexity.
+ * Four texture patterns: paper grain, watercolor, canvas weave, ink speckle
+ *
+ * Usage:
+ *   <div className="textured-bg textured-bg--paper-grain">...</div>
+ *   <div className="textured-bg textured-bg--watercolor">...</div>
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+/* Paper Grain Texture - Subtle, organic, old paper */
+.textured-bg--paper-grain {
+  position: relative;
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 2px,
+      rgba(26, 26, 26, 0.02) 2px,
+      rgba(26, 26, 26, 0.02) 4px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 1px,
+      rgba(26, 26, 26, 0.01) 1px,
+      rgba(26, 26, 26, 0.01) 2px
+    ),
+    radial-gradient(
+      circle at 20% 50%,
+      rgba(26, 26, 26, 0.015) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(26, 26, 26, 0.01) 0%,
+      transparent 50%
+    );
+  background-size:
+    4px 100%,
+    100% 2px,
+    500px 500px,
+    500px 500px;
+  background-attachment: fixed;
+}
+
+.textured-bg--paper-grain.dark {
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 2px,
+      rgba(245, 241, 232, 0.03) 2px,
+      rgba(245, 241, 232, 0.03) 4px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 1px,
+      rgba(245, 241, 232, 0.02) 1px,
+      rgba(245, 241, 232, 0.02) 2px
+    ),
+    radial-gradient(
+      circle at 20% 50%,
+      rgba(245, 241, 232, 0.02) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(245, 241, 232, 0.01) 0%,
+      transparent 50%
+    );
+}
+
+/* Canvas Weave Texture - Diagonal woven pattern, subtle depth */
+.textured-bg--canvas-weave {
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 2px,
+      rgba(26, 26, 26, 0.02) 2px,
+      rgba(26, 26, 26, 0.02) 4px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 2px,
+      rgba(26, 26, 26, 0.015) 2px,
+      rgba(26, 26, 26, 0.015) 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 1px,
+      rgba(26, 26, 26, 0.01) 1px,
+      rgba(26, 26, 26, 0.01) 2px
+    );
+  background-size:
+    6px 6px,
+    6px 6px,
+    100% 2px;
+  background-attachment: fixed;
+}
+
+.textured-bg--canvas-weave.dark {
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 2px,
+      rgba(245, 241, 232, 0.025) 2px,
+      rgba(245, 241, 232, 0.025) 4px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 2px,
+      rgba(245, 241, 232, 0.02) 2px,
+      rgba(245, 241, 232, 0.02) 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 1px,
+      rgba(245, 241, 232, 0.01) 1px,
+      rgba(245, 241, 232, 0.01) 2px
+    );
+}
+
+/* Watercolor Texture - Organic, flowing, abstract */
+.textured-bg--watercolor {
+  background-image:
+    radial-gradient(
+      ellipse 800px 400px at 20% 30%,
+      rgba(1, 62, 48, 0.03) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 600px 500px at 80% 70%,
+      rgba(1, 62, 48, 0.02) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 400px 600px at 50% 50%,
+      rgba(1, 62, 48, 0.015) 0%,
+      transparent 50%
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 50px,
+      rgba(26, 26, 26, 0.005) 50px,
+      rgba(26, 26, 26, 0.005) 100px
+    );
+  background-size:
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    100% 100%;
+  background-attachment: fixed;
+}
+
+.textured-bg--watercolor.dark {
+  background-image:
+    radial-gradient(
+      ellipse 800px 400px at 20% 30%,
+      rgba(245, 241, 232, 0.025) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 600px 500px at 80% 70%,
+      rgba(245, 241, 232, 0.015) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 400px 600px at 50% 50%,
+      rgba(245, 241, 232, 0.01) 0%,
+      transparent 50%
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 50px,
+      rgba(245, 241, 232, 0.005) 50px,
+      rgba(245, 241, 232, 0.005) 100px
+    );
+}
+
+/* Ink Speckle Texture - Fine grain, elegant scatter */
+.textured-bg--ink-speckle {
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(26, 26, 26, 0.03) 1px, transparent 1px),
+    radial-gradient(circle at 3px 2px, rgba(26, 26, 26, 0.02) 1px, transparent 1px),
+    radial-gradient(circle at 2px 4px, rgba(26, 26, 26, 0.025) 1px, transparent 1px),
+    radial-gradient(circle at 4px 3px, rgba(26, 26, 26, 0.015) 0.5px, transparent 0.5px);
+  background-size:
+    100px 100px,
+    150px 150px,
+    120px 120px,
+    200px 200px;
+  background-attachment: fixed;
+  background-position:
+    0 0,
+    25px 25px,
+    12px 37px,
+    50px 75px;
+}
+
+.textured-bg--ink-speckle.dark {
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(245, 241, 232, 0.03) 1px, transparent 1px),
+    radial-gradient(circle at 3px 2px, rgba(245, 241, 232, 0.02) 1px, transparent 1px),
+    radial-gradient(circle at 2px 4px, rgba(245, 241, 232, 0.025) 1px, transparent 1px),
+    radial-gradient(circle at 4px 3px, rgba(245, 241, 232, 0.015) 0.5px, transparent 0.5px);
+}
+
+/* Texture combinations for different sections */
+
+.textured-bg--hero {
+  @apply textured-bg--watercolor;
+}
+
+.textured-bg--card {
+  @apply textured-bg--paper-grain;
+}
+
+.textured-bg--button {
+  @apply textured-bg--canvas-weave;
+}
+
+.textured-bg--accent {
+  @apply textured-bg--ink-speckle;
+}
+
+/* Opacity modifiers */
+.textured-bg--subtle {
+  opacity: 0.5;
+}
+
+.textured-bg--prominent {
+  opacity: 1;
+}
+
+.textured-bg--faint {
+  opacity: 0.25;
+}
+
+/* Preserve text readability */
+.textured-bg {
+  position: relative;
+  z-index: 0;
+}
+
+.textured-bg > * {
+  position: relative;
+  z-index: 1;
+}
