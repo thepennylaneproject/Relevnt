@@ -4,9 +4,9 @@ import App from './App';
 import { AuthProvider } from './contexts/AuthContext';
 import { ToastProvider } from './components/ui/Toast';
 
-import './styles/app-theme.css';  // ⬅ global theme
+import './index.css';             // ⬅ base styles + design tokens (FIRST)
+import './styles/app-theme.css';  // ⬅ theme utilities
 import './styles/textures.css';   // ⬅ texture system
-import './index.css';             // existing base styles
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
