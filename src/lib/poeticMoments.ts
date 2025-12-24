@@ -17,6 +17,9 @@ export type PoeticMoment =
   | 'wellness-sleep'
   | 'feature-discovery'
   | 'offer-negotiation'
+  | 'admin-recovery'
+  | 'admin-milestone'
+  | 'admin-discovery'
 
 export type PoetName = 'Poe' | 'Frost' | 'Shakespeare' | 'Angelou' | 'Oliver'
 
@@ -91,6 +94,33 @@ export const poeticMoments: Record<PoeticMoment, PoeticVerse> = {
     attribution: 'The Road Not Taken — Robert Frost',
     reflection: 'This offer is not the only path. Your choice—made thoughtfully, with full clarity of what you deserve—is the one that shapes your future.',
     tone: 'grounded',
+  },
+
+  'admin-recovery': {
+    moment: 'admin-recovery',
+    poet: 'Angelou',
+    verse: 'There is no greater agony than bearing an untold story inside you.\nBut there is great triumph in rising anyway—\nWithout apology, without explanation,\nJust rising, again and again.',
+    attribution: 'I Know Why the Caged Bird Sings (adapted) — Maya Angelou',
+    reflection: 'Your system recovered. It fell, and it rose. This is not failure—this is resilience. The ingestion pipeline that can recover is stronger than one that never stumbles.',
+    tone: 'resilient',
+  },
+
+  'admin-milestone': {
+    moment: 'admin-milestone',
+    poet: 'Angelou',
+    verse: 'I\'ve learned over the years that whether a person is a christian,\nMoslem, Hindu, Buddhist, or whatever—\nWhen you embrace them with love, when you are trying to help them,\nThe message of love gets across.',
+    attribution: 'Letter to My Daughter (adapted) — Maya Angelou',
+    reflection: "You've built something that works. That endures. That helps people. This milestone isn't just a number—it's proof of care, consistency, and strength.",
+    tone: 'resilient',
+  },
+
+  'admin-discovery': {
+    moment: 'admin-discovery',
+    poet: 'Oliver',
+    verse: 'Tell me, what is it you plan to do\nwith your one wild and precious life?\nI say, begin now to see the world—\nNotice it. All of it. Closely.',
+    attribution: 'The Journey (adapted) — Mary Oliver',
+    reflection: "You've discovered a new insight. A pattern. A truth about your data. This is wonder—the beginning of deeper understanding. Trust what you see.",
+    tone: 'contemplative',
   },
 }
 

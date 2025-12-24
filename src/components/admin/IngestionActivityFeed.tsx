@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Activity, CheckCircle, AlertCircle, Clock, Play } from 'lucide-react'
+import { CustomIcon } from '../ui/CustomIcon'
 import { supabase } from '../../lib/supabase'
 
 export interface ActivityLog {
@@ -26,8 +26,26 @@ export function IngestionActivityFeed() {
 
   useEffect(() => {
     fetchActivities()
-    const interval = setInterval(fetchActivities, 5000) // Refresh every 5s
-    return () => clearInterval(interval)
+
+    // Subscribe to real-time updates on ingestion_activity_log table
+    const subscription = supabase
+      .channel('ingestion_activity_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'ingestion_activity_log',
+        },
+        () => {
+          fetchActivities()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [])
 
   async function fetchActivities() {
@@ -52,15 +70,15 @@ export function IngestionActivityFeed() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'running':
-        return <Play className="w-4 h-4 text-blue-500 animate-pulse" />
+        return <CustomIcon name="zap" size={16} color="ink" style={{ color: '#2eac80' }} className="animate-pulse" />
       case 'success':
-        return <CheckCircle className="w-4 h-4 text-green-500" />
+        return <CustomIcon name="check-circle" size={16} color="ink" style={{ color: '#2eac80' }} />
       case 'partial':
-        return <AlertCircle className="w-4 h-4 text-yellow-500" />
+        return <CustomIcon name="alert-circle" size={16} color="ink" style={{ color: '#D4A16C' }} />
       case 'failed':
-        return <AlertCircle className="w-4 h-4 text-red-500" />
+        return <CustomIcon name="alert-circle" size={16} color="ink" style={{ color: '#C86C6C' }} />
       default:
-        return <Activity className="w-4 h-4 text-gray-400" />
+        return <CustomIcon name="compass" size={16} color="ink" style={{ color: '#8a8a8a' }} />
     }
   }
 
@@ -96,8 +114,8 @@ export function IngestionActivityFeed() {
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2 mb-4">
-        <Activity className="w-5 h-5 text-blue-600" />
-        <h3 className="font-semibold text-gray-900">Recent Ingestion Activity</h3>
+        <CustomIcon name="compass" size={20} color="ink" style={{ color: '#013E30' }} />
+        <h3 className="font-semibold" style={{ color: 'var(--text)' }}>Recent Ingestion Activity</h3>
       </div>
 
       {activities.length === 0 ? (
