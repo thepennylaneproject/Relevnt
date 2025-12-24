@@ -1143,6 +1143,7 @@ async function upsertJobs(jobs: NormalizedJob[]) {
     }
 
     return {
+      source: j.source_slug,
       source_slug: j.source_slug,
       external_id: j.external_id,
 
