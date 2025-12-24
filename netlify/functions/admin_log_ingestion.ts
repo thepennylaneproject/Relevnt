@@ -103,7 +103,7 @@ const handler: Handler = async (event) => {
           .from('job_source_health')
           .upsert(
             {
-              source_slug: source,
+              source: source,
               is_healthy: body.status === 'success',
               is_degraded: body.status === 'partial',
               consecutive_failures: 0,
@@ -112,13 +112,13 @@ const handler: Handler = async (event) => {
               updated_at: new Date().toISOString(),
               last_checked_at: new Date().toISOString(),
             },
-            { onConflict: 'source_slug' }
+            { onConflict: 'source' }
           )
       } else if (body.status === 'failed') {
         const { data: currentHealth } = await supabase
           .from('job_source_health')
           .select('consecutive_failures')
-          .eq('source_slug', source)
+          .eq('source', source)
           .single()
 
         const failureCount = (currentHealth?.consecutive_failures || 0) + 1
@@ -139,7 +139,7 @@ const handler: Handler = async (event) => {
           .from('job_source_health')
           .upsert(
             {
-              source_slug: source,
+              source: source,
               is_healthy: false,
               is_degraded: true,
               consecutive_failures: failureCount,
@@ -148,7 +148,7 @@ const handler: Handler = async (event) => {
               updated_at: new Date().toISOString(),
               last_checked_at: new Date().toISOString(),
             },
-            { onConflict: 'source_slug' }
+            { onConflict: 'source' }
           )
       }
     }
