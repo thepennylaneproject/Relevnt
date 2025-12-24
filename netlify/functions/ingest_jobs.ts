@@ -1195,7 +1195,7 @@ async function upsertJobs(jobs: NormalizedJob[]) {
   const { data, error } = await supabase
     .from('jobs')
     .upsert(enrichedJobs, {
-      onConflict: 'source,external_url',
+      onConflict: 'source_slug,external_id',
       ignoreDuplicates: false,
     })
     .select('id')
