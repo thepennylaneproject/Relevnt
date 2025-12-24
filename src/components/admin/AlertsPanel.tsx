@@ -23,8 +23,27 @@ export function AlertsPanel() {
 
   useEffect(() => {
     fetchAlerts()
-    const interval = setInterval(fetchAlerts, 10000) // Refresh every 10s
-    return () => clearInterval(interval)
+
+    // Subscribe to real-time updates on admin_alerts table
+    const subscription = supabase
+      .channel('admin_alerts_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'admin_alerts',
+          filter: 'is_dismissed=eq.false',
+        },
+        () => {
+          fetchAlerts()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [])
 
   async function fetchAlerts() {
@@ -78,38 +97,45 @@ export function AlertsPanel() {
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
       case 'critical':
-        return <AlertCircle className="w-5 h-5 text-red-500" />
+        return <AlertCircle className="w-5 h-5" style={{ color: '#dc2626' }} />
       case 'high':
-        return <AlertTriangle className="w-5 h-5 text-orange-500" />
+        return <AlertTriangle className="w-5 h-5" style={{ color: '#ea580c' }} />
       case 'medium':
-        return <Zap className="w-5 h-5 text-yellow-500" />
+        return <Zap className="w-5 h-5" style={{ color: '#ca8a04' }} />
       default:
-        return <CheckCircle className="w-5 h-5 text-blue-500" />
+        return <CheckCircle className="w-5 h-5" style={{ color: '#2563eb' }} />
     }
   }
 
   const getSeverityBgColor = (severity: string) => {
     switch (severity) {
       case 'critical':
-        return 'bg-red-50 border-red-200'
+        return 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800'
       case 'high':
-        return 'bg-orange-50 border-orange-200'
+        return 'bg-orange-50 dark:bg-orange-950/20 border-orange-200 dark:border-orange-800'
       case 'medium':
-        return 'bg-yellow-50 border-yellow-200'
+        return 'bg-yellow-50 dark:bg-yellow-950/20 border-yellow-200 dark:border-yellow-800'
       default:
-        return 'bg-blue-50 border-blue-200'
+        return 'bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800'
     }
   }
 
-  if (loading) return <div className="p-4 text-gray-500">Loading alerts...</div>
+  if (loading) {
+    return (
+      <div className="p-6 text-center">
+        <div className="animate-spin inline-block w-5 h-5 border-2 border-emerald border-t-transparent rounded-full" style={{ borderColor: '#013E30', borderTopColor: 'transparent' }} />
+        <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Loading alerts…</p>
+      </div>
+    )
+  }
 
   if (error) {
-    return <div className="p-4 bg-red-50 text-red-700 rounded border border-red-200">Error: {error}</div>
+    return <div className="p-4 bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-300 rounded-lg border border-red-200 dark:border-red-800">Error: {error}</div>
   }
 
   if (alerts.length === 0) {
     return (
-      <div className="p-4 bg-green-50 text-green-700 rounded border border-green-200 flex items-center gap-2">
+      <div className="p-4 bg-emerald/10 text-emerald rounded-lg border border-emerald/20 flex items-center gap-2" style={{ backgroundColor: 'rgba(1, 62, 48, 0.1)', color: '#013E30', borderColor: 'rgba(1, 62, 48, 0.2)' }}>
         <CheckCircle className="w-5 h-5" />
         <span>All systems operational - no active alerts</span>
       </div>
@@ -121,8 +147,8 @@ export function AlertsPanel() {
       {alerts.map(alert => (
         <div
           key={alert.id}
-          className={`p-4 rounded border ${getSeverityBgColor(alert.severity)} flex items-start gap-3 ${
-            !alert.is_read ? 'ring-2 ring-offset-1 ring-blue-300' : ''
+          className={`p-4 rounded-lg border ${getSeverityBgColor(alert.severity)} flex items-start gap-3 transition-all ${
+            !alert.is_read ? 'ring-2 ring-offset-1 ring-emerald/30' : ''
           }`}
         >
           <div className="flex-shrink-0 mt-0.5">
@@ -132,16 +158,20 @@ export function AlertsPanel() {
           <div className="flex-grow">
             <div className="flex items-start justify-between gap-2">
               <div>
-                <h3 className="font-semibold text-gray-900">{alert.title}</h3>
+                <h3 style={{ fontWeight: 600, color: 'var(--text)' }}>{alert.title}</h3>
                 {alert.description && (
-                  <p className="text-sm text-gray-700 mt-1">{alert.description}</p>
-                )}
-                {alert.source_slug && (
-                  <p className="text-xs text-gray-600 mt-1">
-                    Source: <code className="bg-gray-200 px-1 py-0.5 rounded">{alert.source_slug}</code>
+                  <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
+                    {alert.description}
                   </p>
                 )}
-                <p className="text-xs text-gray-500 mt-1">
+                {alert.source_slug && (
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                    Source: <code style={{ background: 'var(--surface-input)', padding: '0.125rem 0.25rem', borderRadius: '0.25rem' }}>
+                      {alert.source_slug}
+                    </code>
+                  </p>
+                )}
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
                   {new Date(alert.created_at).toLocaleString()}
                 </p>
               </div>
@@ -152,7 +182,16 @@ export function AlertsPanel() {
             {!alert.is_read && (
               <button
                 onClick={() => markAsRead(alert.id)}
-                className="text-sm px-2 py-1 bg-white rounded hover:bg-gray-100 transition"
+                style={{
+                  fontSize: '0.875rem',
+                  padding: '0.25rem 0.5rem',
+                  backgroundColor: 'white',
+                  border: '1px solid var(--border)',
+                  borderRadius: '0.375rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
+                className="hover:bg-gray-100 dark:hover:bg-gray-800"
                 title="Mark as read"
               >
                 Read
@@ -160,7 +199,12 @@ export function AlertsPanel() {
             )}
             <button
               onClick={() => dismissAlert(alert.id)}
-              className="text-gray-500 hover:text-gray-700 transition"
+              style={{
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+              className="hover:text-error dark:hover:text-red-400"
               title="Dismiss alert"
             >
               <X className="w-5 h-5" />

@@ -26,8 +26,26 @@ export function IngestionActivityFeed() {
 
   useEffect(() => {
     fetchActivities()
-    const interval = setInterval(fetchActivities, 5000) // Refresh every 5s
-    return () => clearInterval(interval)
+
+    // Subscribe to real-time updates on ingestion_activity_log table
+    const subscription = supabase
+      .channel('ingestion_activity_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'ingestion_activity_log',
+        },
+        () => {
+          fetchActivities()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [])
 
   async function fetchActivities() {
