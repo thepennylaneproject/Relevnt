@@ -1195,7 +1195,7 @@ async function upsertJobs(jobs: NormalizedJob[]) {
   const { data, error } = await supabase
     .from('jobs')
     .upsert(enrichedJobs, {
-      onConflict: 'source,external_url',
+      onConflict: 'source_slug,external_id',
       ignoreDuplicates: false,
     })
     .select('id')
@@ -1499,7 +1499,14 @@ async function ingestGreenhouseBoards(
     }
   } catch (ingestError) {
     sourceStatus = 'failed'
-    sourceError = ingestError instanceof Error ? ingestError.message : String(ingestError)
+    // Properly handle Supabase error objects
+    if (ingestError instanceof Error) {
+      sourceError = ingestError.message
+    } else if (typeof ingestError === 'object' && ingestError !== null) {
+      sourceError = (ingestError as any).message || JSON.stringify(ingestError, null, 2)
+    } else {
+      sourceError = String(ingestError)
+    }
     console.error(`ingest_jobs: error during Greenhouse ingest`, ingestError)
   }
 
@@ -1902,7 +1909,14 @@ async function ingest(
     }
   } catch (ingestError) {
     sourceStatus = 'failed'
-    sourceError = ingestError instanceof Error ? ingestError.message : String(ingestError)
+    // Properly handle Supabase error objects
+    if (ingestError instanceof Error) {
+      sourceError = ingestError.message
+    } else if (typeof ingestError === 'object' && ingestError !== null) {
+      sourceError = (ingestError as any).message || JSON.stringify(ingestError, null, 2)
+    } else {
+      sourceError = String(ingestError)
+    }
     console.error(`ingest_jobs: error during ingest for ${source.slug}`, ingestError)
   }
 
