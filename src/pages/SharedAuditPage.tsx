@@ -9,7 +9,7 @@ import '../styles/linkedin-optimizer.css'
 import '../styles/portfolio-optimizer.css'
 
 export default function SharedAuditPage() {
-    const { type, token } = useParams<{ type: string, token: string }>()
+    const { type, token } = useParams<{ type?: string, token?: string }>()
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [auditData, setAuditData] = useState<any>(null)

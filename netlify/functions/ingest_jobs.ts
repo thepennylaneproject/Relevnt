@@ -1196,7 +1196,7 @@ async function upsertJobs(jobs: NormalizedJob[]) {
     .from('jobs')
     .upsert(enrichedJobs, {
       onConflict: 'source_slug,external_id',
-      ignoreDuplicates: false,
+      ignoreDuplicates: true,
     })
     .select('id')
 

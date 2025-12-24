@@ -74,6 +74,201 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_alerts: {
+        Row: {
+          id: string
+          alert_type: string
+          severity: string
+          title: string
+          description: string | null
+          source_slug: string | null
+          metadata: Json
+          is_read: boolean
+          is_dismissed: boolean
+          created_at: string
+          triggered_at: string | null
+          resolved_at: string | null
+        }
+        Insert: {
+          id?: string
+          alert_type: string
+          severity: string
+          title: string
+          description?: string | null
+          source_slug?: string | null
+          metadata?: Json
+          is_read?: boolean
+          is_dismissed?: boolean
+          created_at?: string
+          triggered_at?: string | null
+          resolved_at?: string | null
+        }
+        Update: {
+          id?: string
+          alert_type?: string
+          severity?: string
+          title?: string
+          description?: string | null
+          source_slug?: string | null
+          metadata?: Json
+          is_read?: boolean
+          is_dismissed?: boolean
+          created_at?: string
+          triggered_at?: string | null
+          resolved_at?: string | null
+        }
+        Relationships: []
+      }
+      daily_ingestion_metrics: {
+        Row: {
+          date: string
+          total_runs: number
+          total_inserted: number
+          total_duplicates: number
+          total_failed: number
+          success_rate: number
+          avg_duration_seconds: number
+          sources_with_errors: number
+          duplicate_rate_percent: number
+          created_at: string
+        }
+        Insert: {
+          date: string
+          total_runs?: number
+          total_inserted?: number
+          total_duplicates?: number
+          total_failed?: number
+          success_rate?: number
+          avg_duration_seconds?: number
+          sources_with_errors?: number
+          duplicate_rate_percent?: number
+          created_at?: string
+        }
+        Update: {
+          date?: string
+          total_runs?: number
+          total_inserted?: number
+          total_duplicates?: number
+          total_failed?: number
+          success_rate?: number
+          avg_duration_seconds?: number
+          sources_with_errors?: number
+          duplicate_rate_percent?: number
+          created_at?: string
+        }
+        Relationships: []
+      }
+      ingestion_activity_log: {
+        Row: {
+          id: string
+          run_id: string | null
+          sources_requested: string[] | null
+          trigger_type: string | null
+          status: string | null
+          total_inserted: number
+          total_duplicates: number
+          total_failed: number
+          started_at: string | null
+          finished_at: string | null
+          duration_seconds: number | null
+          error_message: string | null
+          progress_percent: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          run_id?: string | null
+          sources_requested?: string[] | null
+          trigger_type?: string | null
+          status?: string | null
+          total_inserted?: number
+          total_duplicates?: number
+          total_failed?: number
+          started_at?: string | null
+          finished_at?: string | null
+          duration_seconds?: number | null
+          error_message?: string | null
+          progress_percent?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          run_id?: string | null
+          sources_requested?: string[] | null
+          trigger_type?: string | null
+          status?: string | null
+          total_inserted?: number
+          total_duplicates?: number
+          total_failed?: number
+          started_at?: string | null
+          finished_at?: string | null
+          duration_seconds?: number | null
+          error_message?: string | null
+          progress_percent?: number
+          created_at?: string
+        }
+        Relationships: []
+      }
+      source_performance_metrics: {
+        Row: {
+          source_slug: string
+          success_rate_7d: number
+          avg_jobs_per_run_7d: number
+          total_runs_7d: number
+          failed_runs_7d: number
+          success_rate_30d: number
+          avg_jobs_per_run_30d: number
+          total_runs_30d: number
+          failed_runs_30d: number
+          consecutive_failures: number
+          last_error: string | null
+          last_error_at: string | null
+          is_degraded: boolean
+          health_score: number
+          health_factors: Json
+          updated_at: string
+          last_run_at: string | null
+        }
+        Insert: {
+          source_slug: string
+          success_rate_7d?: number
+          avg_jobs_per_run_7d?: number
+          total_runs_7d?: number
+          failed_runs_7d?: number
+          success_rate_30d?: number
+          avg_jobs_per_run_30d?: number
+          total_runs_30d?: number
+          failed_runs_30d?: number
+          consecutive_failures?: number
+          last_error?: string | null
+          last_error_at?: string | null
+          is_degraded?: boolean
+          health_score?: number
+          health_factors?: Json
+          updated_at?: string
+          last_run_at?: string | null
+        }
+        Update: {
+          source_slug?: string
+          success_rate_7d?: number
+          avg_jobs_per_run_7d?: number
+          total_runs_7d?: number
+          failed_runs_7d?: number
+          success_rate_30d?: number
+          avg_jobs_per_run_30d?: number
+          total_runs_30d?: number
+          failed_runs_30d?: number
+          consecutive_failures?: number
+          last_error?: string | null
+          last_error_at?: string | null
+          is_degraded?: boolean
+          health_score?: number
+          health_factors?: Json
+          updated_at?: string
+          last_run_at?: string | null
+        }
+        Relationships: []
+      }
       ai_interactions: {
         Row: {
           created_at: string | null
