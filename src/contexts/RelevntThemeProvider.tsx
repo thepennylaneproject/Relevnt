@@ -138,9 +138,9 @@ const RelevntThemeContext = createContext<RelevntThemeContextValue | null>(null)
 
 export function RelevntThemeProvider({
   children,
-  initialMode = 'DarkAcademia',
+  initialMode = 'Light',
 }: RelevntThemeProviderProps) {
-  // Initialize from localStorage or prop (defaults to Dark Academia)
+  // Initialize from localStorage or prop (defaults to Light)
   const [mode, setModeState] = useState<ThemeMode>(() => {
     if (typeof window === 'undefined') return initialMode;
 
@@ -149,11 +149,10 @@ export function RelevntThemeProvider({
 
     const stored = localStorage.getItem('relevnt-theme-mode');
     // If they have an explicit preference that is valid, use it
-    if (stored === 'Dark' || stored === 'DarkAcademia') return stored as ThemeMode;
+    if (stored === 'Dark' || stored === 'Light' || stored === 'DarkAcademia') return stored as ThemeMode;
 
-    // For this refactor, we default anyone in Light Mode (or with no setting) to DarkAcademia
-    // This ensures they see the new design system. They can toggle back if they want.
-    return 'DarkAcademia';
+    // Default to Light mode to show the new Ink/Ivory/Emerald design system
+    return 'Light';
   });
 
   // Apply theme class to document when mode changes
