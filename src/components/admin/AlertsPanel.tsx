@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { AlertCircle, AlertTriangle, CheckCircle, Zap, X } from 'lucide-react'
+import { CustomIcon } from '../ui/CustomIcon'
 import { supabase } from '../../lib/supabase'
 
 export interface Alert {
@@ -97,13 +97,13 @@ export function AlertsPanel() {
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
       case 'critical':
-        return <AlertCircle className="w-5 h-5" style={{ color: '#dc2626' }} />
+        return <CustomIcon name="alert-circle" size={20} color="ink" style={{ color: '#dc2626' }} />
       case 'high':
-        return <AlertTriangle className="w-5 h-5" style={{ color: '#ea580c' }} />
+        return <CustomIcon name="alert-circle" size={20} color="ink" style={{ color: '#ea580c' }} />
       case 'medium':
-        return <Zap className="w-5 h-5" style={{ color: '#ca8a04' }} />
+        return <CustomIcon name="zap" size={20} color="ink" style={{ color: '#ca8a04' }} />
       default:
-        return <CheckCircle className="w-5 h-5" style={{ color: '#2563eb' }} />
+        return <CustomIcon name="check-circle" size={20} color="ink" style={{ color: '#2563eb' }} />
     }
   }
 
@@ -136,7 +136,7 @@ export function AlertsPanel() {
   if (alerts.length === 0) {
     return (
       <div className="p-4 bg-emerald/10 text-emerald rounded-lg border border-emerald/20 flex items-center gap-2" style={{ backgroundColor: 'rgba(1, 62, 48, 0.1)', color: '#013E30', borderColor: 'rgba(1, 62, 48, 0.2)' }}>
-        <CheckCircle className="w-5 h-5" />
+        <CustomIcon name="check-circle" size={20} color="emerald" />
         <span>All systems operational - no active alerts</span>
       </div>
     )
@@ -203,11 +203,16 @@ export function AlertsPanel() {
                 color: 'var(--text-secondary)',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
+                fontSize: '1.25rem',
+                lineHeight: 1,
+                border: 'none',
+                background: 'transparent',
+                padding: '2px 4px',
               }}
               className="hover:text-error dark:hover:text-red-400"
               title="Dismiss alert"
             >
-              <X className="w-5 h-5" />
+              ×
             </button>
           </div>
         </div>

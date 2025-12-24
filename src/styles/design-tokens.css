@@ -32,39 +32,39 @@
      COLOR TOKENS
      ───────────────────────────────────────────────────────────────────────── */
 
-  /* Core Surfaces - Starter Palette */
-  --color-bg: #F3F4E6;
-  /* Cool ivory paper */
-  --color-bg-alt: #E8E9DB;
+  /* Core Surfaces - Luxury Correspondence Palette */
+  --color-bg: #f5f1e8;
+  /* Warm ivory paper */
+  --color-bg-alt: #ede8de;
   /* Slightly darker ivory for cards */
-  --color-surface: #E8E9DB;
+  --color-surface: #ede8de;
   /* Cards match bg-alt */
-  --color-surface-hover: rgba(255, 255, 255, 0.5);
+  --color-surface-hover: rgba(26, 26, 26, 0.05);
 
-  /* Text - Starter Palette */
-  --color-ink: #0F1214;
-  /* Primary text - deep charcoal */
-  --color-ink-secondary: #3A3D40;
+  /* Text - Luxury Correspondence Palette */
+  --color-ink: #1a1a1a;
+  /* Primary text - charcoal */
+  --color-ink-secondary: #5a5a5a;
   /* Secondary text */
-  --color-ink-tertiary: #6A6D70;
+  --color-ink-tertiary: #8a8a8a;
   /* Muted text, placeholders */
-  --color-ink-inverse: #F3F4E6;
+  --color-ink-inverse: #f5f1e8;
   /* Text on dark backgrounds */
 
   /* Illustration & Lines */
-  --color-graphite: #0F1214;
+  --color-graphite: #1a1a1a;
   /* Line work */
-  --color-graphite-light: #6A6D70;
+  --color-graphite-light: #8a8a8a;
   /* Softer lines for empty states */
-  --color-graphite-faint: #D2D7CB;
-  /* Very soft lines, borders - muted from palette */
+  --color-graphite-faint: #d4d0c8;
+  /* Very soft lines, borders */
 
-  /* The Accent Color - Teal (updated from gold) */
-  --color-accent: #4E808D;
-  /* Sophisticated teal - primary accent */
-  --color-accent-hover: #5A9299;
+  /* The Accent Color - Emerald */
+  --color-accent: #013E30;
+  /* Deep emerald - premium accent */
+  --color-accent-hover: #0d5244;
   /* Slightly lighter on hover */
-  --color-accent-glow: rgba(78, 128, 141, 0.2);
+  --color-accent-glow: rgba(1, 62, 48, 0.15);
   /* Soft glow effect */
 
   /* Semantic Colors */
@@ -209,36 +209,37 @@
 :root.dark,
 .dark,
 [data-theme="dark"] {
-  /* Core Surfaces - Starter Dark Palette */
-  --color-bg: #0F1214;
-  /* Deep charcoal */
-  --color-bg-alt: #161A1D;
-  /* Slightly lighter charcoal - muted from palette */
-  --color-surface: #161A1D;
+  /* Core Surfaces - Dark mode (Ink complementary) */
+  --color-bg: #1a1a1a;
+  /* Deep charcoal - matches Ink */
+  --color-bg-alt: #2d2d2d;
+  /* Slightly lighter charcoal for cards */
+  --color-surface: #2d2d2d;
   /* Elevated surfaces */
-  --color-surface-hover: rgba(255, 255, 255, 0.05);
+  --color-surface-hover: rgba(245, 241, 232, 0.08);
 
-  /* Text - Starter Dark */
-  --color-ink: #F3F4E6;
-  /* Primary text - cool ivory */
-  --color-ink-secondary: #C8C9BB;
+  /* Text - Dark mode (Ivory complementary) */
+  --color-ink: #f5f1e8;
+  /* Primary text - warm ivory */
+  --color-ink-secondary: #d4cfc6;
   /* Secondary text */
-  --color-ink-tertiary: #8A8B7D;
+  --color-ink-tertiary: #a8a09a;
   /* Muted text */
-  --color-ink-inverse: #0F1214;
+  --color-ink-inverse: #1a1a1a;
   /* Text on light backgrounds */
 
   /* Illustration & Lines */
-  --color-graphite: #F3F4E6;
+  --color-graphite: #f5f1e8;
   /* Light lines */
-  --color-graphite-light: #8A8B7D;
+  --color-graphite-light: #a8a09a;
   /* Softer lines */
-  --color-graphite-faint: #2A2E31;
+  --color-graphite-faint: #3d3d3d;
   /* Very subtle borders */
 
-  /* The Accent Color - Teal stays consistent in dark mode */
-  /* --color-accent stays #4E808D */
-  /* Teal works beautifully in both modes */
+  /* The Accent Color - Emerald in dark mode */
+  --color-accent: #2eac80;
+  /* Brighter emerald for contrast on dark */
+  /* Slightly lighter than light mode for visibility */
 
   /* Semantic Colors - Slightly adjusted for dark backgrounds */
   --color-success: #6BA37A;
@@ -353,17 +354,17 @@
 /* System preference detection */
 @media (prefers-color-scheme: dark) {
   :root:not(.light):not([data-theme="light"]) {
-    --color-bg: #11100E;
-    --color-bg-alt: #1A1917;
-    --color-surface: #1A1917;
-    --color-surface-hover: rgba(255, 255, 255, 0.05);
-    --color-ink: #F8F4ED;
-    --color-ink-secondary: #C4C0B8;
-    --color-ink-tertiary: #8A8680;
-    --color-ink-inverse: #1A1A1A;
-    --color-graphite: #E8E2D7;
-    --color-graphite-light: #A8A29E;
-    --color-graphite-faint: #3D3A36;
+    --color-bg: #1a1a1a;
+    --color-bg-alt: #2d2d2d;
+    --color-surface: #2d2d2d;
+    --color-surface-hover: rgba(245, 241, 232, 0.08);
+    --color-ink: #f5f1e8;
+    --color-ink-secondary: #d4cfc6;
+    --color-ink-tertiary: #a8a09a;
+    --color-ink-inverse: #1a1a1a;
+    --color-graphite: #f5f1e8;
+    --color-graphite-light: #a8a09a;
+    --color-graphite-faint: #3d3d3d;
     --color-success: #6BA37A;
     --color-success-bg: rgba(107, 163, 122, 0.15);
     --color-warning: #D4A16C;
@@ -372,10 +373,11 @@
     --color-error-bg: rgba(200, 108, 108, 0.15);
     --color-info: #6C8A9F;
     --color-info-bg: rgba(108, 138, 159, 0.15);
+    --color-accent: #2eac80;
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
     --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
     --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
-    --shadow-glow: 0 0 30px rgba(78, 128, 141, 0.15);
+    --shadow-glow: 0 0 30px rgba(46, 172, 128, 0.15);
   }
 }
 
