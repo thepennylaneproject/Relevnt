@@ -1,83 +1,51 @@
 [
     {
-        "url": "https://stackoverflow.com/jobs/feed",
-        "company": "Stack Overflow Jobs",
-        "location_default": null,
-        "trust_level": "high"
+        "name": "Stack Overflow Jobs",
+        "feedUrl": "https://stackoverflow.com/jobs/feed",
+        "defaultCompany": "Stack Overflow",
+        "defaultLocation": null,
+        "trustLevel": "high"
     },
     {
-        "url": "https://weworkremotely.com/feed",
-        "company": "We Work Remotely",
-        "location_default": "Remote",
-        "trust_level": "high"
+        "name": "We Work Remotely",
+        "feedUrl": "https://weworkremotely.com/feed",
+        "defaultCompany": "We Work Remotely",
+        "defaultLocation": "Remote",
+        "trustLevel": "high"
     },
     {
-        "url": "https://dev.to/api/articles?tag=jobs",
-        "company": "Dev.to Jobs",
-        "location_default": null,
-        "trust_level": "medium"
+        "name": "Dev.to Jobs",
+        "feedUrl": "https://dev.to/api/articles?tag=jobs",
+        "defaultCompany": "Dev.to",
+        "defaultLocation": null,
+        "trustLevel": "medium"
     },
     {
-        "url": "https://dribbble.com/jobs/feed",
-        "company": "Dribbble Jobs",
-        "location_default": null,
-        "trust_level": "medium"
+        "name": "Dribbble Jobs",
+        "feedUrl": "https://dribbble.com/jobs/feed",
+        "defaultCompany": "Dribbble",
+        "defaultLocation": null,
+        "trustLevel": "medium"
     },
     {
-        "url": "https://www.problogger.com/feed/",
-        "company": "ProBlogger",
-        "location_default": "Remote",
-        "trust_level": "medium"
+        "name": "ProBlogger",
+        "feedUrl": "https://www.problogger.com/feed/",
+        "defaultCompany": "ProBlogger",
+        "defaultLocation": "Remote",
+        "trustLevel": "medium"
     },
     {
-        "url": "https://www.authenticjobs.com/feed/",
-        "company": "Authentic Jobs",
-        "location_default": null,
-        "trust_level": "medium"
+        "name": "Authentic Jobs",
+        "feedUrl": "https://www.authenticjobs.com/feed/",
+        "defaultCompany": "Authentic Jobs",
+        "defaultLocation": null,
+        "trustLevel": "medium"
     },
     {
-        "url": "https://www.hubspot.com/company/careers",
-        "company": "HubSpot Careers",
-        "location_default": null,
-        "trust_level": "high"
-    },
-    {
-        "url": "https://jobs.linkedin.com/feed?keywords=jobs",
-        "company": "LinkedIn Jobs Feed",
-        "location_default": null,
-        "trust_level": "medium"
-    },
-    {
-        "url": "https://www.indeed.com/rss?q=jobs&l=",
-        "company": "Indeed RSS",
-        "location_default": null,
-        "trust_level": "medium"
-    },
-    {
-        "url": "https://www.craigslist.org/about/best/feed",
-        "company": "Craigslist Meta Feed",
-        "location_default": null,
-        "trust_level": "low"
-    },
-    {
-        "url": "https://blog.hubspot.com/feed",
-        "company": "HubSpot",
-        "keywords": "marketing,content,social media",
-        "trust_level": "high"
-    },
-    {
-        "url": "https://www.contentmarketinginstitute.com/feed/",
-        "company": "Content Marketing Institute",
-        "trust_level": "medium"
-    },
-    {
-        "url": "https://blog.buffer.com/feed/",
-        "company": "Buffer",
-        "trust_level": "medium"
-    },
-    {
-        "url": "https://blog.hootsuite.com/feed/",
-        "company": "Hootsuite",
-        "trust_level": "medium"
+        "name": "HubSpot Careers",
+        "feedUrl": "https://www.hubspot.com/company/careers",
+        "defaultCompany": "HubSpot",
+        "defaultLocation": null,
+        "trustLevel": "high"
     }
 ]
