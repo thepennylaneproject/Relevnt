@@ -9,7 +9,7 @@ interface AutoApplyTabProps {
     onAutoSaveStatusChange: (status: AutoSaveStatus) => void
 }
 
-import { IconZap, IconShieldCheck, IconCheck } from 'lucide-react'
+import { Zap, ShieldCheck, Check } from 'lucide-react'
 
 export function AutoApplyTab({ onAutoSaveStatusChange }: AutoApplyTabProps) {
     const { user } = useAuth()
@@ -55,7 +55,7 @@ export function AutoApplyTab({ onAutoSaveStatusChange }: AutoApplyTabProps) {
                 <div className="card">
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <IconZap size={16} strokeWidth={1.5} color="var(--color-accent)" />
+                            <Zap size={16} strokeWidth={1.5} color="var(--color-accent)" />
                             <h3 style={{ margin: 0 }}>Enable auto-apply</h3>
                         </div>
                         <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
@@ -135,7 +135,7 @@ export function AutoApplyTab({ onAutoSaveStatusChange }: AutoApplyTabProps) {
 
                 <div className="card">
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-                        <IconShieldCheck size={16} strokeWidth={1.5} color="var(--color-accent)" />
+                        <ShieldCheck size={16} strokeWidth={1.5} color="var(--color-accent)" />
                         <h3 style={{ margin: 0 }}>Safety & alignment</h3>
                     </div>
                     <div style={{ display: 'grid', gap: 16 }}>
@@ -179,7 +179,7 @@ export function AutoApplyTab({ onAutoSaveStatusChange }: AutoApplyTabProps) {
                             gap: 8
                         }}
                     >
-                        <IconCheck size={14} color="var(--color-accent)" />
+                        <Check size={14} color="var(--color-accent)" />
                         You are always in control. Pause or adjust rules at any time.
                     </div>
                 </div>

@@ -9,7 +9,7 @@ interface SystemAutomationTabProps {
     onAutoSaveStatusChange: (status: AutoSaveStatus) => void
 }
 
-import { IconBell, IconSettings, IconRocket, IconChevronDown } from 'lucide-react'
+import { Bell, Settings, Rocket, ChevronDown } from 'lucide-react'
 
 export function SystemAutomationTab({ onAutoSaveStatusChange }: SystemAutomationTabProps) {
     const { settings, isLoading: settingsLoading, saveSettings } = useProfileSettings()
@@ -153,9 +153,9 @@ export function SystemAutomationTab({ onAutoSaveStatusChange }: SystemAutomation
                         width: '100%',
                     }}
                 >
-                    <IconSettings size={16} strokeWidth={1.5} color="var(--color-accent)" />
+                    <Settings size={16} strokeWidth={1.5} color="var(--color-accent)" />
                     <h3 style={{ margin: 0 }}>Advanced settings</h3>
-                    <IconChevronDown 
+                    <ChevronDown 
                         size={16} 
                         strokeWidth={1.5} 
                         style={{

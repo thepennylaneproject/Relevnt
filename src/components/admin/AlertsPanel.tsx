@@ -30,14 +30,14 @@ export function AlertsPanel() {
   async function fetchAlerts() {
     try {
       const { data, error: err } = await supabase
-        .from('admin_alerts')
+        .from('admin_alerts' as any)
         .select('*')
         .eq('is_dismissed', false)
         .order('created_at', { ascending: false })
         .limit(10)
 
       if (err) throw err
-      setAlerts(data || [])
+      setAlerts((data as any) || [])
       setError(null)
     } catch (err) {
       console.error('Failed to fetch alerts:', err)
@@ -50,8 +50,8 @@ export function AlertsPanel() {
   async function dismissAlert(alertId: string) {
     try {
       const { error: err } = await supabase
-        .from('admin_alerts')
-        .update({ is_dismissed: true })
+        .from('admin_alerts' as any)
+        .update({ is_dismissed: true } as any)
         .eq('id', alertId)
 
       if (err) throw err
@@ -64,8 +64,8 @@ export function AlertsPanel() {
   async function markAsRead(alertId: string) {
     try {
       const { error: err } = await supabase
-        .from('admin_alerts')
-        .update({ is_read: true })
+        .from('admin_alerts' as any)
+        .update({ is_read: true } as any)
         .eq('id', alertId)
 
       if (err) throw err

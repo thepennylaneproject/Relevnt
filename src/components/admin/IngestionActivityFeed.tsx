@@ -33,13 +33,13 @@ export function IngestionActivityFeed() {
   async function fetchActivities() {
     try {
       const { data, error: err } = await supabase
-        .from('ingestion_activity_log')
+        .from('ingestion_activity_log' as any)
         .select('*')
         .order('created_at', { ascending: false })
         .limit(20)
 
       if (err) throw err
-      setActivities(data || [])
+      setActivities((data as any) || [])
       setError(null)
     } catch (err) {
       console.error('Failed to fetch activities:', err)
