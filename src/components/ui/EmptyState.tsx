@@ -20,6 +20,8 @@
 
 import React from 'react';
 import { Icon, IconName } from './Icon';
+import { PoeticVerseMinimal } from './PoeticVerse';
+import { getPoeticVerse, PoeticMoment } from '@/lib/poeticMoments';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -52,6 +54,8 @@ export interface EmptyStateProps {
   action?: EmptyStateAction;
   /** Secondary action button */
   secondaryAction?: EmptyStateAction;
+  /** Show poetic verse below description */
+  includeVerse?: boolean;
   /** Additional CSS classes */
   className?: string;
 }
@@ -65,7 +69,21 @@ interface EmptyStateContent {
   icon: IconName;
   title: string;
   description: string;
+  poeticMoment?: PoeticMoment;
 }
+
+// Map empty state types to poetic moments
+const emptyStateToPoetic: Record<EmptyStateType, PoeticMoment | undefined> = {
+  applications: undefined,
+  jobs: 'empty-jobs',
+  resumes: undefined,
+  saved: undefined,
+  matches: undefined,
+  search: undefined,
+  learn: undefined,
+  analysis: undefined,
+  generic: undefined,
+};
 
 const emptyStateContent: Record<EmptyStateType, EmptyStateContent> = {
   applications: {
@@ -133,13 +151,17 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   description,
   action,
   secondaryAction,
+  includeVerse = false,
   className = '',
 }) => {
   const content = emptyStateContent[type] || emptyStateContent.generic;
-  
+
   const displayTitle = title || content.title;
   const displayDescription = description || content.description;
-  
+
+  const poeticMoment = emptyStateToPoetic[type];
+  const verse = includeVerse && poeticMoment ? getPoeticVerse(poeticMoment) : null;
+
   return (
     <div className={`empty-state ${className}`}>
       {/* Illustration */}
@@ -151,17 +173,24 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           label={displayTitle}
         />
       </div>
-      
+
       {/* Title */}
       <h3 className="empty-state__title">
         {displayTitle}
       </h3>
-      
+
       {/* Description */}
       <p className="empty-state__description">
         {displayDescription}
       </p>
-      
+
+      {/* Poetic Verse */}
+      {verse && (
+        <div className="empty-state__verse" style={{ marginTop: '1.5rem' }}>
+          <PoeticVerseMinimal verse={verse} />
+        </div>
+      )}
+
       {/* Actions */}
       {(action || secondaryAction) && (
         <div className="empty-state__actions">

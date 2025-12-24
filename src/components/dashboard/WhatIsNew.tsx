@@ -9,6 +9,8 @@
 
 import React from 'react'
 import { Sparkles, CheckCircle2, Zap } from 'lucide-react'
+import { PoeticVerseMinimal } from '../ui/PoeticVerse'
+import { getPoeticVerse } from '../../lib/poeticMoments'
 
 const UPDATES = [
     {
@@ -48,7 +50,12 @@ export function WhatIsNew() {
                 <Sparkles size={16} className="text-accent" />
                 <h3 className="sidebar-card-title m-0">What's New</h3>
             </div>
-            
+
+            {/* Poetic moment: Feature discovery */}
+            <div className="mb-4 p-3 rounded-lg bg-ivory/30 dark:bg-ink/30 border border-emerald/10">
+                <PoeticVerseMinimal verse={getPoeticVerse('feature-discovery')} />
+            </div>
+
             <div className="updates-list">
                 {UPDATES.map((u) => (
                     <div key={u.id} className="update-item group">

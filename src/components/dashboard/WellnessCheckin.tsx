@@ -2,6 +2,8 @@
 import React, { useState } from 'react'
 import { useWellnessCheckin } from '../../hooks/useWellnessCheckin'
 import { Icon } from '../ui/Icon'
+import { PoeticVerseMinimal } from '../ui/PoeticVerse'
+import { getPoeticVerse } from '../../lib/poeticMoments'
 
 const MOODS = [
     { score: 1, label: 'Exhausted', emoji: '😫' },
@@ -113,6 +115,14 @@ export function WellnessCheckin() {
             {selectedMoodData && (
                 <div className="mood-tip animate-in fade-in slide-in-from-top-2">
                     <strong>Tip:</strong> {selectedMoodData.tip}
+                </div>
+            )}
+
+            {/* Show poetic verse for exhausted mood */}
+            {selectedScore === 1 && (
+                <div className="mt-3 pt-3 border-t border-border/30 animate-in fade-in slide-in-from-top-2">
+                    <p className="text-[10px] uppercase font-bold text-muted mb-2">A moment of rest</p>
+                    <PoeticVerseMinimal verse={getPoeticVerse('wellness-sleep')} />
                 </div>
             )}
 

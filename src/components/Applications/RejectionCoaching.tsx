@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Icon } from '../ui/Icon'
+import { PoeticVerseMinimal } from '../ui/PoeticVerse'
+import { getPoeticVerse } from '../../lib/poeticMoments'
 import { supabase } from '../../lib/supabase'
 import { type Application } from '../../hooks/useApplications'
 import { useAuth } from '../../hooks/useAuth'
@@ -116,6 +118,12 @@ export function RejectionCoaching({ application }: RejectionCoachingProps) {
                             </p>
                         </div>
                     )}
+
+                    {/* Poetic wisdom for the moment */}
+                    <div className="pt-2 border-t border-danger/10">
+                        <p className="text-[10px] uppercase font-bold text-muted mb-2">Words for the moment</p>
+                        <PoeticVerseMinimal verse={getPoeticVerse('rejection')} />
+                    </div>
 
                     <div className="grid grid-cols-1 gap-4">
                         <div className="space-y-2">

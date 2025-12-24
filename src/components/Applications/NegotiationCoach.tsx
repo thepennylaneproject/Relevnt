@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 import { Icon } from '../ui/Icon'
+import { PoeticVerseMinimal } from '../ui/PoeticVerse'
+import { getPoeticVerse } from '../../lib/poeticMoments'
 import { useAITask } from '../../hooks/useAITask'
 import { useApplications, type Application } from '../../hooks/useApplications'
 
@@ -126,6 +128,12 @@ export function NegotiationCoach({ application }: NegotiationCoachProps) {
                                 </div>
                             ))}
                         </div>
+                    </div>
+
+                    {/* Poetic moment: Offer negotiation */}
+                    <div className="pt-3 border-t border-accent/10">
+                        <p className="text-[10px] uppercase font-bold text-muted mb-2">The road you take</p>
+                        <PoeticVerseMinimal verse={getPoeticVerse('offer-negotiation')} />
                     </div>
                 </div>
             )}

@@ -636,6 +636,7 @@ export default function JobsPage() {
           {!jobsLoading && !jobsError && sortedJobs.length === 0 && (
             <EmptyState
               type="jobs"
+              includeVerse={true}
               action={{
                 label: copy.jobs.filters.clearFilters,
                 onClick: handleClearFilters,
