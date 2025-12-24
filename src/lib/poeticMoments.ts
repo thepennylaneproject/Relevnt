@@ -110,7 +110,7 @@ export const poeticMoments: Record<PoeticMoment, PoeticVerse> = {
     poet: 'Angelou',
     verse: 'I\'ve learned over the years that whether a person is a christian,\nMoslem, Hindu, Buddhist, or whatever—\nWhen you embrace them with love, when you are trying to help them,\nThe message of love gets across.',
     attribution: 'Letter to My Daughter (adapted) — Maya Angelou',
-    reflection: 'You've built something that works. That endures. That helps people. This milestone isn\'t just a number—it\'s proof of care, consistency, and strength.',
+    reflection: "You've built something that works. That endures. That helps people. This milestone isn't just a number—it's proof of care, consistency, and strength.",
     tone: 'resilient',
   },
 
@@ -119,7 +119,7 @@ export const poeticMoments: Record<PoeticMoment, PoeticVerse> = {
     poet: 'Oliver',
     verse: 'Tell me, what is it you plan to do\nwith your one wild and precious life?\nI say, begin now to see the world—\nNotice it. All of it. Closely.',
     attribution: 'The Journey (adapted) — Mary Oliver',
-    reflection: 'You\'ve discovered a new insight. A pattern. A truth about your data. This is wonder—the beginning of deeper understanding. Trust what you see.',
+    reflection: "You've discovered a new insight. A pattern. A truth about your data. This is wonder—the beginning of deeper understanding. Trust what you see.",
     tone: 'contemplative',
   },
 }
