@@ -242,14 +242,14 @@
 :root.dark,
 .dark,
 [data-theme="dark"] {
-  /* Core Surfaces - Starter Dark Palette */
-  --color-bg: #0F1214;
-  /* Deep charcoal */
-  --color-bg-alt: #161A1D;
-  /* Slightly lighter charcoal - muted from palette */
-  --color-bg-secondary: #1C2024;
-  --color-bg-tertiary: #23272B;
-  --color-surface: #161A1D;
+  /* Core Surfaces - Dark mode (Ink complementary) */
+  --color-bg: #1a1a1a;
+  /* Deep charcoal - matches Ink */
+  --color-bg-alt: #2d2d2d;
+  /* Slightly lighter charcoal for cards */
+  --color-bg-secondary: #323232;
+  --color-bg-tertiary: #383838;
+  --color-surface: #2d2d2d;
   /* Elevated surfaces */
   --color-surface-hover: rgba(245, 241, 232, 0.08);
 
@@ -274,7 +274,6 @@
   /* The Accent Color - Emerald in dark mode */
   --color-accent: #2eac80;
   /* Brighter emerald for contrast on dark */
-  /* Slightly lighter than light mode for visibility */
 
   /* Semantic Colors - Slightly adjusted for dark backgrounds */
   --color-success: #6BA37A;
@@ -286,11 +285,17 @@
   --color-info: #6C8A9F;
   --color-info-bg: rgba(108, 138, 159, 0.15);
 
+  /* Interactive States */
+  --color-focus-ring: rgba(46, 172, 128, 0.5);
+  /* Emerald focus ring */
+  --color-selection: rgba(46, 172, 128, 0.2);
+  /* Emerald selection highlight */
+
   /* Shadows - Softer in dark mode */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
-  --shadow-glow: 0 0 30px rgba(78, 128, 141, 0.15);
+  --shadow-glow: 0 0 30px rgba(46, 172, 128, 0.15);
 }
 
 
