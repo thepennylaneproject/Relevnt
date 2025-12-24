@@ -6,6 +6,8 @@ import { useAuth } from '../contexts/AuthContext'
 import { Icon } from '../components/ui/Icon'
 import { Container } from '../components/shared/Container'
 import { useToast } from '../components/ui/Toast'
+import { PoeticEpigraph } from '../components/ui/PoeticVerse'
+import { getPoeticVerse } from '../lib/poeticMoments'
 import type { InterviewPrepRow, InterviewPracticeSession } from '../shared/types'
 import '../styles/interview-prep.css'
 
@@ -99,6 +101,11 @@ export default function InterviewPrepCenter() {
                     <p className="prep-center__subtitle">
                         Generate tailored practice sessions for any role. Refine your answers with AI-driven feedback based on your unique professional voice.
                     </p>
+
+                    {/* Poetic moment: Interview preparation */}
+                    <div style={{ marginTop: '2rem' }}>
+                        <PoeticEpigraph verse={getPoeticVerse('interview-prep')} />
+                    </div>
                 </header>
 
                 <div className="prep-center__grid">
