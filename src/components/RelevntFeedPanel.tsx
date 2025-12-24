@@ -6,6 +6,8 @@ import { useNetworkingCompanies, checkCompanyMatch } from '../hooks/useNetworkLo
 import { NetworkingOverlay } from './networking/NetworkingOverlay'
 import type { MatchJobsResult } from '../hooks/useMatchJobs'
 import type { MatchFactors } from '../lib/matchJobs'
+import Icon from './ui/Icon'
+import { copy } from '../lib/copy'
 
 type JobLike = {
   id?: string
@@ -20,17 +22,31 @@ type JobLike = {
   probability_estimate?: number | null
   growth_score?: number | null
   hiring_momentum?: number | null
+  source_slug?: string | null
+  employment_type?: string | null
 }
 
-export function RelevntFeedPanel() {
+export interface RelevntFeedPanelProps {
+  minSalary?: number
+  remoteOnly?: boolean
+  source?: string
+  employmentType?: string
+  refreshKey?: number
+}
+
+export function RelevntFeedPanel({
+  minSalary = 0,
+  remoteOnly = false,
+  source = '',
+  employmentType = '',
+  refreshKey = 0
+}: RelevntFeedPanelProps) {
   const { activePersona, loading: personasLoading } = usePersonas()
   const { matches, loading: feedLoading, error: feedError, runMatchJobs } =
     useMatchJobs()
   const { trackInteraction } = useJobInteractions()
   const { companies: networkingCompanies, companyCounts } = useNetworkingCompanies()
 
-  const [minSalary, setMinSalary] = useState(0)
-  const [remoteOnly, setRemoteOnly] = useState(false)
   const [dismissedJobIds, setDismissedJobIds] = useState<Set<string>>(new Set())
 
   const [selectedMatch, setSelectedMatch] = useState<MatchJobsResult | null>(null)
@@ -52,16 +68,9 @@ export function RelevntFeedPanel() {
     if (activePersona) {
       runMatchJobs(null, activePersona.id)
     } else {
-      // no active persona, maybe fallback or clear
-      // runMatchJobs(null, null) 
-      // Actually, if we want a "default" feed even without persona?
-      // For now, let's try to match with generic profile if permitted, 
-      // but requirement says "Ensure active persona ID flows into hook".
-      // If no persona, maybe we don't match or match generally?
-      // Let's match generally if no persona.
       runMatchJobs(null, null)
     }
-  }, [activePersona, runMatchJobs])
+  }, [activePersona, runMatchJobs, refreshKey])
 
   // Filter matches - but NO score cutoff. We show all jobs and flag weak matches.
   const filteredMatches = useMemo(() => {
@@ -86,9 +95,21 @@ export function RelevntFeedPanel() {
         if (!effective || effective < minSalary) return false
       }
 
+      if (source && job.source_slug !== source) {
+        return false
+      }
+
+      if (employmentType) {
+        // Simple partial match for employment type
+        const type = (job.employment_type || '').toLowerCase()
+        if (!type.includes(employmentType.toLowerCase())) {
+          return false
+        }
+      }
+
       return true
     })
-  }, [matches, minSalary, remoteOnly, dismissedJobIds])
+  }, [matches, minSalary, remoteOnly, source, employmentType, dismissedJobIds])
 
   const totalMatches = matches.length
   const visibleMatches = filteredMatches.length
@@ -96,9 +117,9 @@ export function RelevntFeedPanel() {
   return (
     <>
       <div className="feed-stack">
-        {/* top controls: track selector + explainer */}
-        <div className="surface-card feed-controls">
-          <div className="feed-explainer muted text-xs">
+        {/* top controls: explainer (formerly feed-controls) */}
+        <div className="feed-header-explainer">
+          <p className="subtitle">
             {activePersona ? (
               <>
                 Showing matches for <strong>{activePersona.name}</strong>. Relevnt uses this
@@ -110,50 +131,9 @@ export function RelevntFeedPanel() {
                 recommendations based on your profile.
               </>
             )}
-          </div>
+          </p>
         </div>
 
-        {/* feed filters - removed minScore filter, showing all jobs */}
-        <div className="surface-card feed-filters">
-          <div className="field">
-            <label className="section-label">
-              Minimum salary (USD)
-            </label>
-            <input
-              type="number"
-              min={0}
-              step={5000}
-              value={minSalary}
-              onChange={(e) => {
-                const raw = e.target.value
-                const numeric = raw.replace(/[^\d]/g, '')
-                const num = numeric === '' ? 0 : Number(numeric)
-                const next = num <= 0 ? 0 : num
-                setMinSalary(next)
-              }}
-              className="input-pill text-right"
-            />
-          </div>
-
-
-
-          <div className="feed-remote-filter">
-            <input
-              id="feed-remote-only"
-              type="checkbox"
-              checked={remoteOnly}
-              onChange={(e) =>
-                setRemoteOnly(e.target.checked)
-              }
-            />
-            <label
-              htmlFor="feed-remote-only"
-              className="text-sm"
-            >
-              Remote friendly only
-            </label>
-          </div>
-        </div>
 
         {/* status bar */}
         <div className="feed-status-bar text-xs muted">
@@ -176,9 +156,16 @@ export function RelevntFeedPanel() {
           {!feedLoading &&
             !feedError &&
             filteredMatches.length === 0 && (
-              <div className="muted text-sm">
-                No matches cleared your current filters yet. Try lowering the
-                minimum score or salary to see more of the landscape.
+              <div className="empty-state">
+                <Icon name="search" size="xl" className="empty-icon" />
+                <p className="empty-state__description">We couldn't load your matches right now...</p>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => runMatchJobs(null, activePersona?.id || null)}
+                >
+                  Try again
+                </button>
               </div>
             )}
 
@@ -206,109 +193,77 @@ export function RelevntFeedPanel() {
               : []
 
             return (
-              <article
-                key={m.job_id}
-                className="feed-job-card"
-              >
-                <div className="feed-job-title-row">
-                  <div className="feed-job-title">
-                    {job.title}
-                  </div>
-                  {/* Flag weak matches (below 50) with different style */}
-                  {m.score < 50 ? (
-                    <div className="feed-match-pill feed-match-pill--weak">
-                      Weak Match {Math.round(m.score)}
-                    </div>
-                  ) : (
-                    <div className="feed-match-pill">
-                      Match {Math.round(m.score)}
-                    </div>
-                  )}
+              <div key={m.job_id} className="card card-job-feed">
+                <div className="card-header">
+                  <h3>{job.title}</h3>
+                  <span className={`badge badge-match ${m.score < 50 ? 'weak' : ''}`}>
+                    {m.score < 50 ? 'Weak Match' : 'Match'} {Math.round(m.score)}
+                  </span>
                 </div>
 
-                <div className="feed-job-meta muted text-xs">
-                  {job.company && <span>{job.company}</span>}
+                <div className="card-meta">
+                  {job.company && (
+                    <span className="meta-item">
+                      <Icon name="briefcase" size="sm" /> {job.company}
+                    </span>
+                  )}
                   {job.location && (
-                    <span>• {job.location}</span>
+                    <span className="meta-item">
+                      <Icon name="map-pin" size="sm" /> {job.location}
+                    </span>
                   )}
                   {salaryLabel && (
-                    <span>• {salaryLabel}</span>
-                  )}
-                </div>
-
-                <div className="feed-tag-row">
-                  {/* Networking connection badge */}
-                  {job.company && (
-                    (() => {
-                      const count = checkCompanyMatch(job.company, networkingCompanies, companyCounts);
-                      return count > 0 ? (
-                        <span className="feed-tag feed-tag--networking" title={`You have ${count} connection${count > 1 ? 's' : ''} at this company`}>
-                          🔗 {count} {count === 1 ? 'Connection' : 'Connections'}
-                        </span>
-                      ) : null;
-                    })()
+                    <span className="meta-item">
+                      <Icon name="dollar" size="sm" /> {salaryLabel}
+                    </span>
                   )}
                   {isRemote && (
-                    <span className="feed-tag">
-                      Remote friendly
-                    </span>
-                  )}
-                  {job.competitiveness_level && (
-                    <span className="feed-tag">
-                      Market: {job.competitiveness_level}
-                    </span>
-                  )}
-                  {job.probability_estimate !== undefined && job.probability_estimate !== null && (
-                    <span className="feed-tag feed-tag--special">
-                      Success: {Math.round(job.probability_estimate * 100)}%
-                    </span>
-                  )}
-                  {job.growth_score !== undefined && job.growth_score !== null && job.growth_score > 70 && (
-                    <span className="feed-tag feed-tag--growth">
-                      🚀 High Growth
+                    <span className="meta-item">
+                      <Icon name="zap" size="sm" /> Remote
                     </span>
                   )}
                 </div>
 
                 {mainReasons.length > 0 && (
-                  <ul className="feed-reason-list muted text-xs">
+                  <ul className="card-reasons">
                     {mainReasons.map((reason, idx) => (
-                      <li key={idx}>{reason}</li>
+                      <li key={idx} className="positive">{reason}</li>
                     ))}
+                    {/* Placeholder for missing requirements to match template style if needed, 
+                        but we stick to what the data provides */}
                   </ul>
                 )}
 
-                <div className="feed-job-actions">
+                <div className="card-footer">
                   {job.external_url && (
                     <a
                       href={job.external_url}
                       target="_blank"
                       rel="noreferrer"
-                      className="ghost-button button-sm feed-accent-link"
+                      className="btn btn-secondary btn-with-icon"
                     >
-                      View posting
+                      View posting <Icon name="chevron-right" size="sm" />
                     </a>
                   )}
                   <button
                     type="button"
-                    className="ghost-button button-sm"
-                    onClick={() => {
-                      setSelectedMatch(m)
-                      setShowWhyModal(true)
-                    }}
+                    className="btn btn-ghost btn-with-icon"
+                    onClick={() => handleSaveJob(m.job_id, m.score)}
                   >
-                    Why this match
+                    <Icon name="bookmark" size="sm" /> Save
                   </button>
                   <button
                     type="button"
-                    className="ghost-button button-sm feed-dismiss-btn"
+                    className="btn btn-ghost btn-with-icon"
                     onClick={() => handleDismissJob(m.job_id, m.score)}
-                    title="Not interested"
                   >
-                    ✕ Dismiss
+                    <Icon name="x" size="sm" /> Dismiss
                   </button>
+                  {/* Keep "Why this match" as a ghost button? The prompt didn't include it in the template, 
+                      but it's good functionality. I'll omit it to strictly follow the template unless it's critical. 
+                      Actually, "Why this match" is usually helpful. I'll leave it out to match the prompt template exactly. */}
                 </div>
-              </article>
+              </div>
             )
           })}
         </div>
@@ -367,7 +322,7 @@ export function RelevntFeedPanel() {
             </div>
 
             {(() => {
-              const job = (selectedMatch.job as JobLike) || {}
+              const job = (selectedMatch?.job as JobLike) || {}
               return job.company ? (
                 <div className="feed-modal-section">
                   <NetworkingOverlay company={job.company} />
@@ -379,7 +334,7 @@ export function RelevntFeedPanel() {
               <div className="section-label">Job snapshot</div>
               <div className="text-xs">
                 {(() => {
-                  const job = (selectedMatch.job as JobLike) || {}
+                  const job = (selectedMatch?.job as JobLike) || {}
                   const salaryMin = job.salary_min || null
                   const salaryMax = job.salary_max || null
                   let salaryLabel = ''

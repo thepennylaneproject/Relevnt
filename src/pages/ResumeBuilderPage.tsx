@@ -214,91 +214,86 @@ const ResumeBuilderPage: React.FC<ResumeBuilderPageProps> = ({ embedded = false 
 
   const content = (
     <Container maxWidth="xl" padding="md">
-      <div className="resume-builder-page">
-
-          {/* ════════════════════════════════════════════════════════════════
-              HEADER: Title + Actions
-              ════════════════════════════════════════════════════════════════ */}
+      <div className="tab-pane resume-builder active">
           {!embedded && (
-            <header className="resume-builder-header">
-              <div className="resume-builder-title">
-                <div className="resume-builder-icon">
-                  <Icon name="scroll" size="md" />
-                </div>
+            <div className="builder-header">
+              <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-lg font-display">Resume Builder</h1>
+                  <h2>Build your resume</h2>
                   <p className="text-xs muted">
                     {hasContent ? 'Edit and optimize your resume' : 'Create a professional resume'}
                   </p>
                 </div>
-              </div>
 
-              <div className="resume-builder-actions">
-                {/* New / Upload buttons */}
-                <button
-                  type="button"
-                  onClick={() => setShowWizard(true)}
-                  className="ghost-button button-sm"
-                >
-                  <Icon name="stars" size="sm" />
-                  New Resume
-                </button>
-
-                <ResumeUpload onUploadComplete={handleUploadComplete} />
-
-                {/* Export */}
-                {hasContent && <ResumeExport draft={draft} />}
-
-                {/* Save status */}
-                <div className="save-status">
-                  <span className={`save-dot ${isDirty ? 'save-dot--dirty' : 'save-dot--saved'} `} />
-                  <span className="text-xs muted">{saveStatusText}</span>
-                </div>
-
-                {isDirty && (
+                <div className="action-group">
                   <button
                     type="button"
-                    onClick={manualSave}
-                    disabled={status === 'saving'}
-                    className="primary-button button-sm"
+                    onClick={() => setShowWizard(true)}
+                    className="btn btn-secondary btn-sm"
                   >
-                    Save
+                    <Icon name="stars" size="sm" />
+                    New Resume
                   </button>
-                )}
+
+                  <ResumeUpload onUploadComplete={handleUploadComplete} />
+
+                  {hasContent && <ResumeExport draft={draft} />}
+
+                  {isDirty && (
+                    <button
+                      type="button"
+                      onClick={manualSave}
+                      disabled={status === 'saving'}
+                      className="btn btn-primary btn-sm"
+                    >
+                      Save
+                    </button>
+                  )}
+                </div>
               </div>
-            </header>
+
+              <div className="builder-tabs">
+                {SECTION_META.map((section) => {
+                  const isActive = section.id === activeSection
+                  return (
+                    <button
+                      key={section.id}
+                      type="button"
+                      onClick={() => setActiveSection(section.id)}
+                      className={`builder-tab ${isActive ? 'active' : ''}`}
+                    >
+                      <Icon name={section.icon} size="sm" hideAccent={!isActive} className="tab-icon" />
+                      {section.label}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
           )}
 
+          {embedded && (
+             <div className="builder-header">
+                <div className="builder-tabs">
+                  {SECTION_META.map((section) => {
+                    const isActive = section.id === activeSection
+                    return (
+                      <button
+                        key={section.id}
+                        type="button"
+                        onClick={() => setActiveSection(section.id)}
+                        className={`builder-tab ${isActive ? 'active' : ''}`}
+                      >
+                        <Icon name={section.icon} size="sm" hideAccent={!isActive} className="tab-icon" />
+                        {section.label}
+                      </button>
+                    )
+                  })}
+                </div>
+             </div>
+          )}
 
-          {/* ════════════════════════════════════════════════════════════════
-              SECTION NAV: Horizontal tabs for resume sections
-              ════════════════════════════════════════════════════════════════ */}
-          <nav className="resume-section-tabs">
-            {SECTION_META.map((section) => {
-              const isActive = section.id === activeSection
-              return (
-                <button
-                  key={section.id}
-                  type="button"
-                  onClick={() => setActiveSection(section.id)}
-                  className={`resume-section-tab ${isActive ? 'resume-section-tab--active' : ''}`}
-                >
-                  <Icon name={section.icon} size="sm" hideAccent={!isActive} />
-                  <span>{section.label}</span>
-                </button>
-              )
-            })}
-          </nav>
-
-          {/* ════════════════════════════════════════════════════════════════
-              MAIN LAYOUT: 3-panel design
-              ════════════════════════════════════════════════════════════════ */}
-          <div className="resume-builder-layout">
-
-            {/* ──────────────────────────────────────────────────────────────
-                LEFT PANEL: Section Editor
-                ────────────────────────────────────────────────────────────── */}
-            <main className="resume-editor-panel">
+          <div className="builder-container">
+            <div className="builder-form">
               <div className="resume-editor-content">
                 {activeSection === 'contact' && (
                   <ContactSection contact={draft.contact} onChange={updateContact} />
@@ -322,18 +317,14 @@ const ResumeBuilderPage: React.FC<ResumeBuilderPageProps> = ({ embedded = false 
                   <ProjectsSection id="projects" items={draft.projects} onChange={setProjects} />
                 )}
               </div>
-            </main>
+            </div>
 
-            {/* ──────────────────────────────────────────────────────────────
-                CENTER PANEL: Preview / ATS / Targeting (tabbed)
-                ────────────────────────────────────────────────────────────── */}
-            <section className="resume-center-panel">
-              {/* Panel tabs */}
-              <div className="panel-tabs">
+            <div className="builder-preview">
+              <div className="panel-tabs" style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
                 <button
                   type="button"
                   onClick={() => setActivePanel('preview')}
-                  className={`panel-tab ${activePanel === 'preview' ? 'panel-tab--active' : ''}`}
+                  className={`btn btn-sm ${activePanel === 'preview' ? 'btn-primary' : 'btn-ghost'}`}
                 >
                   <Icon name="scroll" size="sm" />
                   Preview
@@ -341,25 +332,24 @@ const ResumeBuilderPage: React.FC<ResumeBuilderPageProps> = ({ embedded = false 
                 <button
                   type="button"
                   onClick={() => setActivePanel('ats')}
-                  className={`panel-tab ${activePanel === 'ats' ? 'panel-tab--active' : ''}`}
+                  className={`btn btn-sm ${activePanel === 'ats' ? 'btn-primary' : 'btn-ghost'}`}
                 >
                   <Icon name="stars" size="sm" />
                   ATS Score
                   {analysis && (
-                    <span className="panel-tab-badge">{analysis.overallScore}</span>
+                    <span className="panel-tab-badge" style={{ marginLeft: '4px', opacity: 0.8 }}>{analysis.overallScore}</span>
                   )}
                 </button>
                 <button
                   type="button"
                   onClick={() => setActivePanel('targeting')}
-                  className={`panel-tab ${activePanel === 'targeting' ? 'panel-tab--active' : ''}`}
+                  className={`btn btn-sm ${activePanel === 'targeting' ? 'btn-primary' : 'btn-ghost'}`}
                 >
                   <Icon name="briefcase" size="sm" />
                   Job Match
                 </button>
               </div>
 
-              {/* Panel content */}
               <div className="at-panel-content">
                 {activePanel === 'preview' && (
                   <ResumePreview draft={draft} />
@@ -381,40 +371,20 @@ const ResumeBuilderPage: React.FC<ResumeBuilderPageProps> = ({ embedded = false 
                 {activePanel === 'targeting' && (
                   <div className="targeting-panel">
                     <JobTargetingPanel resumeText={resumeText} />
-                    <div className="targeting-tip">
-                      <Icon name="lighthouse" size="sm" />
-                      <p className="text-xs muted">
-                        Paste a job description above to see how well your resume matches
-                        and get tailoring suggestions.
-                      </p>
+                    <div className="card-info" style={{ marginTop: '16px' }}>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                         <Icon name="lighthouse" size="sm" />
+                         <p className="text-xs muted">
+                           Paste a job description above to see how well your resume matches
+                           and get tailoring suggestions.
+                         </p>
+                      </div>
                     </div>
                   </div>
                 )}
               </div>
-            </section>
+            </div>
           </div>
-
-          {/* ─────────────────────────────────────────────────────────────────────────────
-              FLOATING COACH PANEL (Draggable)
-              ───────────────────────────────────────────────────────────────────────────── */}
-          {showCoach && (
-            <AICoachSidebar
-              activeSection={activeSection}
-              draft={draft}
-              onClose={() => setShowCoach(false)}
-            />
-          )}
-
-          {/* Toggle Button for Coach (when hidden) */}
-          {!showCoach && (
-            <button
-              onClick={() => setShowCoach(true)}
-              className="coach-fab"
-              title="Open Resume Coach"
-            >
-              <Icon name="stars" size="md" />
-            </button>
-          )}
 
           {/* Wizard Modal */}
           {showWizard && (

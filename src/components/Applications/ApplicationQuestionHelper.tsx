@@ -120,19 +120,13 @@ export const ApplicationQuestionHelper: React.FC = () => {
 
     // Render Helpers
     const renderModeSelector = (mini = false) => (
-        <div className={`flex flex-wrap gap-2 ${mini ? 'mb-4' : 'mb-6'}`}>
+        <div className={mini ? 'mb-4' : 'button-group'}>
             {MODES.map((m) => (
                 <button
                     key={m.value}
                     type="button"
-                    onClick={() => !loading && handleDraft(m.value)}
-                    className={`
-                        flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors
-                        ${m.value === selectedMode && !mini
-                            ? 'bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-300'
-                            : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400'
-                        }
-                    `}
+                    onClick={() => !loading && setSelectedMode(m.value)}
+                    className={`btn-option ${m.value === selectedMode ? 'active' : ''}`}
                 >
                     <Icon name={m.icon as any} size="sm" />
                     {mini ? `Rewrite: ${m.label}` : m.label}
@@ -210,20 +204,17 @@ export const ApplicationQuestionHelper: React.FC = () => {
     }
 
     return (
-        <div className="surface-card">
-            <header className="mb-6">
-                <div className="flex items-center gap-2 mb-1">
-                    <Icon name="stars" className="text-blue-500" />
-                    <h2 className="text-lg font-semibold">Application Question Helper</h2>
-                </div>
-                <p className="text-sm muted">
+        <div className="card card-helper">
+            <header className="card-header mb-6">
+                <h3 className="text-lg font-semibold">Application Question Helper</h3>
+                <p className="subtitle">
                     Paste a question from an application, add some context, and get a tailored draft based on your experience.
                 </p>
             </header>
 
             <div className="space-y-4">
-                <div>
-                    <label htmlFor="question" className="block text-sm font-medium mb-1.5">
+                <div className="form-group">
+                    <label htmlFor="question" className="label">
                         Question from application
                     </label>
                     <textarea
@@ -232,109 +223,103 @@ export const ApplicationQuestionHelper: React.FC = () => {
                         onChange={(e) => setQuestion(e.target.value)}
                         placeholder="e.g., 'Describe a time you failed and what you learned from it.'"
                         className="input w-full min-h-[100px] resize-y"
+                        rows={4}
                     />
                 </div>
 
-                {/* Context Accordion */}
-                <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-                    <button
-                        type="button"
-                        onClick={() => setContextOpen(!contextOpen)}
-                        className="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                    >
-                        <span className="text-sm font-medium flex items-center gap-2">
-                            <Icon name="briefcase" size="sm" />
-                            Add Context (Optional)
-                        </span>
-                        <Icon name="plus" size="sm" />
-                    </button>
+                <button
+                    type="button"
+                    onClick={() => setContextOpen(!contextOpen)}
+                    className="btn btn--secondary"
+                >
+                    <Icon name="plus" size="sm" className="mr-2" />
+                    Add Context (Optional)
+                </button>
 
-                    {contextOpen && (
-                        <div className="p-4 space-y-4 bg-white dark:bg-gray-900">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="text-xs font-semibold muted mb-1 block">Target Role</label>
-                                    <input
-                                        type="text"
-                                        className="input w-full"
-                                        placeholder="e.g. Senior Product Designer"
-                                        value={roleTitle}
-                                        onChange={e => setRoleTitle(e.target.value)}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-xs font-semibold muted mb-1 block">Company</label>
-                                    <input
-                                        type="text"
-                                        className="input w-full"
-                                        placeholder="e.g. Acme Corp"
-                                        value={companyName}
-                                        onChange={e => setCompanyName(e.target.value)}
-                                    />
-                                </div>
-                            </div>
-
+                {contextOpen && (
+                    <div className="p-4 space-y-4 bg-bg-secondary rounded-lg border border-graphite-faint animate-in fade-in slide-in-from-top-2">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="text-xs font-semibold muted mb-1 block">Job Description Excerpt</label>
-                                <textarea
-                                    className="input w-full min-h-[80px]"
-                                    placeholder="Paste key requirements or duties..."
-                                    value={jobDescription}
-                                    onChange={e => setJobDescription(e.target.value)}
+                                <label className="label text-xs uppercase text-ink-tertiary">Target Role</label>
+                                <input
+                                    type="text"
+                                    className="input w-full"
+                                    placeholder="e.g. Senior Product Designer"
+                                    value={roleTitle}
+                                    onChange={e => setRoleTitle(e.target.value)}
                                 />
                             </div>
-
                             <div>
-                                <label className="text-xs font-semibold muted mb-1 block">Resume / Experience Context</label>
-                                <textarea
-                                    className="input w-full min-h-[80px]"
-                                    placeholder="Paste relevant experience or resume summary..."
-                                    value={resumeContext}
-                                    onChange={e => setResumeContext(e.target.value)}
+                                <label className="label text-xs uppercase text-ink-tertiary">Company</label>
+                                <input
+                                    type="text"
+                                    className="input w-full"
+                                    placeholder="e.g. Acme Corp"
+                                    value={companyName}
+                                    onChange={e => setCompanyName(e.target.value)}
                                 />
-                                <p className="text-[10px] muted mt-1">
-                                    We use this only to ground the answer in facts. It is not stored.
-                                </p>
                             </div>
-
-                            {personas.length > 0 && (
-                                <div>
-                                    <label className="text-xs font-semibold muted mb-1 block">Persona</label>
-                                    <select
-                                        className="input w-full"
-                                        value={selectedPersonaId}
-                                        onChange={e => setSelectedPersonaId(e.target.value)}
-                                    >
-                                        <option value="">Default Profile</option>
-                                        {personas.map(p => (
-                                            <option key={p.id} value={p.id}>{p.name}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            )}
                         </div>
-                    )}
-                </div>
 
-                <div className="space-y-2">
-                    <label className="block text-sm font-medium">Tone / Mode</label>
+                        <div>
+                            <label className="label text-xs uppercase text-ink-tertiary">Job Description Excerpt</label>
+                            <textarea
+                                className="input w-full min-h-[80px]"
+                                placeholder="Paste key requirements or duties..."
+                                value={jobDescription}
+                                onChange={e => setJobDescription(e.target.value)}
+                            />
+                        </div>
+
+                        <div>
+                            <label className="label text-xs uppercase text-ink-tertiary">Resume / Experience Context</label>
+                            <textarea
+                                className="input w-full min-h-[80px]"
+                                placeholder="Paste relevant experience or resume summary..."
+                                value={resumeContext}
+                                onChange={e => setResumeContext(e.target.value)}
+                            />
+                            <p className="text-[10px] text-ink-tertiary mt-1 italic">
+                                We use this only to ground the answer in facts. It is not stored.
+                            </p>
+                        </div>
+
+                        {personas.length > 0 && (
+                            <div>
+                                <label className="label text-xs uppercase text-ink-tertiary">Persona</label>
+                                <select
+                                    className="input w-full"
+                                    value={selectedPersonaId}
+                                    onChange={e => setSelectedPersonaId(e.target.value)}
+                                >
+                                    <option value="">Default Profile</option>
+                                    {personas.map(p => (
+                                        <option key={p.id} value={p.id}>{p.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                <div className="tone-options">
+                    <label className="label">Tone / Mode</label>
                     {renderModeSelector()}
                 </div>
 
                 {error && (
-                    <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md border border-red-100 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300">
+                    <div className="alert alert--error">
                         {error}
                     </div>
                 )}
 
-                <Button
-                    variant="primary"
-                    fullWidth
+                <button
+                    className="btn btn--primary btn-lg w-full"
                     onClick={() => handleDraft()}
                     disabled={!question.trim()}
                 >
                     Draft Answer
-                </Button>
+                </button>
             </div>
         </div>
     )

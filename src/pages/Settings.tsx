@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Container } from '../components/shared/Container'
 import { Icon } from '../components/ui/Icon'
+import { Settings as IconSettings } from 'lucide-react'
 import { SettingsTabNav, type SettingsTab } from '../components/settings/SettingsTabNav'
 import { AutoSaveIndicator } from '../components/settings/AutoSaveIndicator'
 import { PersonaTab } from '../components/settings/tabs/PersonaTab'
@@ -19,7 +20,8 @@ function getTabFromHash(hash: string): SettingsTab {
     return VALID_TABS.includes(tab) ? tab : 'persona'
 }
 
-export default function SettingsHub(): JSX.Element {
+
+export default function Settings(): JSX.Element {
     const location = useLocation()
     const navigate = useNavigate()
 
@@ -62,54 +64,20 @@ export default function SettingsHub(): JSX.Element {
         }
     }
 
-    const TAB_TITLES: Record<SettingsTab, { title: string; subtitle: string }> = {
-        persona: {
-            title: 'Persona',
-            subtitle: 'Who are you job-searching as right now?',
-        },
-        career: {
-            title: 'Career Targets',
-            subtitle: 'What kinds of jobs are you open to?',
-        },
-        profile: {
-            title: 'Profile',
-            subtitle: 'What do we already know about you?',
-        },
-        voice: {
-            title: 'Voice & Style',
-            subtitle: 'How should Relevnt sound when it speaks for you?',
-        },
-        system: {
-            title: 'System & Automation',
-            subtitle: 'How hands-on do you want to be?',
-        },
-        'auto-apply': {
-            title: 'Auto-Apply',
-            subtitle: 'Set guardrails for when Relevnt can apply on your behalf.',
-        },
-    }
-
     return (
         <div className="page-wrapper">
             <Container maxWidth="lg" padding="md">
-                <header className="hero-shell">
-                    <div className="hero-header">
-                        <div className="hero-header-main">
-                            <div className="hero__badge">
-                                <Icon name="pocket-watch" size="sm" hideAccent />
-                                <span>Settings</span>
-                            </div>
-                            <h1>{TAB_TITLES[activeTab].title}</h1>
-                            <p className="hero-subtitle">
-                                {TAB_TITLES[activeTab].subtitle}
-                            </p>
-                        </div>
-
-                        <div className="hero-actions" style={{ justifyContent: 'flex-end', paddingTop: 0 }}>
+                <div className="page-header">
+                    <div className="icon-header">
+                        <IconSettings className="header-icon" size={16} />
+                        <span className="label">SETTINGS</span>
+                        <div style={{ marginLeft: 'auto' }}>
                             <AutoSaveIndicator status={autoSaveStatus} />
                         </div>
                     </div>
-                </header>
+                    <h1>Preferences</h1>
+                    <p>Customize how Relevnt matches and applies for you.</p>
+                </div>
 
                 <SettingsTabNav activeTab={activeTab} onTabChange={handleTabChange} />
 

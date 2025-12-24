@@ -15,7 +15,7 @@ export function AIButton({ label, onClick, disabled, loading }: AIButtonProps) {
       type="button"
       onClick={onClick}
       disabled={isDisabled}
-      className="inline-flex items-center justify-center rounded-lg border border-border bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+      className={`btn btn-primary btn-sm ${isDisabled ? 'opacity-60' : ''}`}
     >
       {loading ? 'Thinking…' : label}
     </button>

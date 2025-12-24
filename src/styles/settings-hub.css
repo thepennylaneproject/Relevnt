@@ -1,52 +1,337 @@
 /* ============================================================================
-   SETTINGS HUB TAB NAVIGATION
+   SETTINGS HUB - DARK ACADEMIA REFACTOR
    ============================================================================ */
 
-.settings-tab-nav {
-  display: flex;
-  gap: 4px;
-  padding: 4px;
-  background: var(--color-bg-alt);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  overflow-x: auto;
+.page-header {
+  margin-bottom: var(--space-8);
 }
 
-.settings-tab {
+.icon-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.header-icon {
+  color: var(--color-accent);
+}
+
+.icon-header .label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--color-accent);
+  text-transform: uppercase;
+}
+
+/* Persona Card Styling */
+.card-persona {
+  padding: 16px;
+  cursor: pointer;
+  border: 1px solid var(--color-graphite-faint);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-base);
+  background: var(--color-bg-secondary);
+}
+
+.card-persona h3 {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+}
+
+.card-persona .card-description {
+  font-size: 0.875rem;
+  color: var(--color-ink-secondary);
+  margin: 8px 0 12px;
+}
+
+.card-persona:hover {
+  border-color: var(--color-accent);
+}
+
+.card-persona.active {
+  border-left: 6px solid var(--color-accent);
+  background: var(--color-bg-tertiary);
+  box-shadow: 0 0 12px rgba(212, 165, 116, 0.3);
+}
+
+/* Option Buttons */
+.persona-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.option-button {
+  padding: 16px;
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-graphite-faint);
+  border-radius: 8px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.option-button:hover {
+  border-color: var(--color-accent);
+}
+
+.option-button .option-title {
+  display: block;
+  font-weight: 600;
+  color: var(--color-ink);
+  margin-bottom: 4px;
+}
+
+.option-button .option-desc {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--color-ink-secondary);
+}
+
+/* Button Group Contexts */
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.btn-option {
+  padding: 8px 16px;
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-graphite-faint);
+  border-radius: 4px;
+  color: var(--color-ink);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-option:hover {
+  border-color: var(--color-accent);
+}
+
+.btn-option.active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-ink-inverse);
+}
+
+/* Pill Input System */
+.pill-input {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-graphite-faint);
+  border-radius: var(--radius-md);
+  margin-top: 8px;
+}
+
+.pill-input .pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 10px 16px;
-  border-radius: var(--radius-md);
-  border: none;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--color-bg-tertiary);
+  border-left: 3px solid var(--color-accent);
+  color: var(--color-ink);
+  font-size: 0.8125rem;
+  border-radius: 4px;
+}
+
+.pill-input .pill-remove {
   background: transparent;
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 500;
+  border: none;
+  color: var(--color-ink-tertiary);
   cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
 }
 
-.settings-tab:hover {
-  background: var(--color-bg);
-  color: var(--text);
+.pill-input .pill-remove:hover {
+  color: var(--color-error);
 }
 
-.settings-tab.is-active {
-  background: var(--color-bg);
-  color: var(--text);
-  box-shadow: var(--shadow-sm);
+.pill-input-field {
+  flex: 1;
+  min-width: 150px;
+  background: transparent;
+  border: none;
+  padding: 4px;
+  color: var(--color-ink);
+  font-size: 0.875rem;
 }
 
-/* Make tabs stack on mobile */
-@media (max-width: 640px) {
-  .settings-tab-nav {
-    flex-direction: column;
-  }
-  
-  .settings-tab {
-    justify-content: flex-start;
-    width: 100%;
-  }
+.pill-input-field:focus {
+  outline: none;
+}
+
+/* Radio Card Group */
+.radio-card-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.radio-card {
+  position: relative;
+  cursor: pointer;
+}
+
+.radio-card input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.radio-card-content {
+  padding: 16px;
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-graphite-faint);
+  border-radius: 8px;
+  height: 100%;
+  transition: all 0.2s;
+}
+
+.radio-card:hover .radio-card-content {
+  border-color: var(--color-accent);
+}
+
+.radio-card input:checked + .radio-card-content {
+  border-color: var(--color-accent);
+  background: var(--color-bg-tertiary);
+  box-shadow: 0 0 12px var(--color-accent-glow);
+}
+
+.radio-card-content h4 {
+  margin: 0 0 4px;
+  font-family: var(--font-display);
+  font-size: 1rem;
+}
+
+.radio-card-content p {
+  font-size: 0.75rem;
+  color: var(--color-ink-secondary);
+  margin: 0;
+}
+
+/* Slider System */
+.form-group {
+  margin-bottom: 24px;
+}
+
+.slider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.form-label {
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--color-ink-secondary);
+  text-transform: uppercase;
+}
+
+.slider-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.form-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: var(--color-bg-tertiary);
+  border-radius: 3px;
+  outline: none;
+  margin: 12px 0;
+}
+
+.form-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: var(--color-accent);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.form-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 0 4px var(--color-accent-glow);
+}
+
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-ink-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Confirmation Group */
+.confirmation-group {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.confirmation-question h4 {
+  margin: 0 0 12px;
+  font-size: 1rem;
+  color: var(--color-ink);
+}
+
+/* Form Elements */
+.form-input, .form-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-graphite-faint);
+  border-radius: var(--radius-md);
+  color: var(--color-ink);
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+.form-input:focus, .form-textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.action-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.strengths-list {
+  padding-left: 20px;
+  margin: 16px 0;
+}
+
+.strengths-list li {
+  margin-bottom: 8px;
+  color: var(--color-ink-secondary);
+  font-size: 0.9375rem;
 }

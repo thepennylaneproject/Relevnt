@@ -59,69 +59,69 @@ export function OutcomeMetricsCard({ className = '' }: OutcomeMetricsCardProps) 
             
             <div className="metrics-grid">
                 {/* Response Rate - Most Important */}
-                <div className="metric-card metric-primary">
-                    <div className="metric-header">
-                        <Target size={16} />
-                        <span className="metric-label">Response Rate</span>
+                <div className="card card-stat">
+                    <div className="flex items-center gap-2 mb-2 text-secondary">
+                        <Target size={14} />
+                        <span className="stat-label">Response Rate</span>
                     </div>
-                    <div className="metric-value">{responseRate}%</div>
-                    <div className="metric-context">
+                    <div className="stat-value text-accent">{responseRate}%</div>
+                    <div className="stat-context mt-2">
                         {responseRate >= 15 ? (
-                            <span className="text-success">Above average (market: 10-12%)</span>
+                            <span className="text-success text-[10px]">Above average (market: 10-12%)</span>
                         ) : responseRate >= 8 ? (
-                            <span className="text-primary">On par with market</span>
+                            <span className="text-accent text-[10px]">On par with market</span>
                         ) : (
-                            <span className="text-muted">Room to improve quality</span>
+                            <span className="text-secondary text-[10px]">Room to improve quality</span>
                         )}
                     </div>
                 </div>
                 
                 {/* Interview Rate */}
-                <div className="metric-card">
-                    <div className="metric-header">
-                        <TrendingUp size={16} />
-                        <span className="metric-label">Interview Rate</span>
+                <div className="card card-stat">
+                    <div className="flex items-center gap-2 mb-2 text-secondary">
+                        <TrendingUp size={14} />
+                        <span className="stat-label">Interview Rate</span>
                     </div>
-                    <div className="metric-value">{interviewRate}%</div>
-                    <div className="metric-context">
+                    <div className="stat-value text-accent">{interviewRate}%</div>
+                    <div className="stat-context mt-2">
                         {interviewRate >= 8 ? (
-                            <span className="text-success">Strong conversion</span>
+                            <span className="text-success text-[10px]">Strong conversion</span>
                         ) : interviewRate >= 4 ? (
-                            <span className="text-primary">Solid progress</span>
+                            <span className="text-accent text-[10px]">Solid progress</span>
                         ) : (
-                            <span className="text-muted">Keep applying</span>
+                            <span className="text-secondary text-[10px]">Keep applying</span>
                         )}
                     </div>
                 </div>
                 
                 {/* Active Pipeline */}
-                <div className="metric-card">
-                    <div className="metric-header">
-                        <Clock size={16} />
-                        <span className="metric-label">Active Pipeline</span>
+                <div className="card card-stat">
+                    <div className="flex items-center gap-2 mb-2 text-secondary">
+                        <Clock size={14} />
+                        <span className="stat-label">Active Pipeline</span>
                     </div>
-                    <div className="metric-value">{activePipeline}</div>
-                    <div className="metric-context">
+                    <div className="stat-value text-accent">{activePipeline}</div>
+                    <div className="stat-context mt-2">
                         {activePipeline >= 3 ? (
-                            <span className="text-success">Healthy momentum</span>
+                            <span className="text-success text-[10px]">Healthy momentum</span>
                         ) : activePipeline >= 1 ? (
-                            <span className="text-primary">In progress</span>
+                            <span className="text-accent text-[10px]">In progress</span>
                         ) : (
-                            <span className="text-muted">Apply to more roles</span>
+                            <span className="text-secondary text-[10px]">Apply to more roles</span>
                         )}
                     </div>
                 </div>
                 
                 {/* Time to Response */}
                 {avgDaysToResponse !== null && (
-                    <div className="metric-card">
-                        <div className="metric-header">
-                            <Clock size={16} />
-                            <span className="metric-label">Avg. Days to Response</span>
+                    <div className="card card-stat">
+                        <div className="flex items-center gap-2 mb-2 text-secondary">
+                            <Clock size={14} />
+                            <span className="stat-label">Avg. Days to Response</span>
                         </div>
-                        <div className="metric-value">{avgDaysToResponse}</div>
-                        <div className="metric-context">
-                            <span className="text-muted">Typical: 5-10 days</span>
+                        <div className="stat-value text-accent">{avgDaysToResponse}</div>
+                        <div className="stat-context mt-2">
+                            <span className="text-secondary text-[10px]">Typical: 5-10 days</span>
                         </div>
                     </div>
                 )}
@@ -143,14 +143,11 @@ export function OutcomeMetricsCard({ className = '' }: OutcomeMetricsCardProps) 
             
             <style>{`
                 .outcome-metrics-card {
-                    background: var(--surface-elevated, #1a1a2e);
-                    border: 1px solid var(--border-subtle, #2a2a4a);
-                    border-radius: 16px;
-                    padding: 24px;
+                    margin-top: 2rem;
                 }
                 
                 .outcome-metrics-loading {
-                    color: var(--text-muted, #888);
+                    color: var(--color-text-tertiary);
                     text-align: center;
                     padding: 40px 20px;
                 }
@@ -163,9 +160,10 @@ export function OutcomeMetricsCard({ className = '' }: OutcomeMetricsCardProps) 
                 }
                 
                 .outcome-title {
-                    font-size: 18px;
+                    font-size: 1.5rem;
                     font-weight: 700;
-                    color: var(--text-primary, #fff);
+                    font-family: var(--font-display);
+                    color: var(--color-text-primary);
                     margin: 0;
                 }
                 
@@ -175,97 +173,46 @@ export function OutcomeMetricsCard({ className = '' }: OutcomeMetricsCardProps) 
                     gap: 4px;
                     font-size: 11px;
                     font-weight: 600;
-                    color: var(--accent-success, #22c55e);
-                    background: var(--surface-success, rgba(34, 197, 94, 0.1));
+                    color: var(--color-success);
+                    background: var(--color-success-bg);
                     padding: 4px 10px;
                     border-radius: 12px;
                 }
                 
                 .outcome-subtitle {
-                    font-size: 13px;
-                    color: var(--text-secondary, #aaa);
+                    font-size: 0.875rem;
+                    color: var(--color-text-secondary);
                     margin: 0 0 20px;
                 }
                 
                 .metrics-grid {
                     display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-                    gap: 12px;
+                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                    gap: 1rem;
                     margin-bottom: 16px;
-                }
-                
-                .metric-card {
-                    background: var(--surface-sunken, rgba(0,0,0,0.2));
-                    border: 1px solid var(--border-subtle, rgba(255,255,255,0.05));
-                    border-radius: 12px;
-                    padding: 16px;
-                }
-                
-                .metric-primary {
-                    border-color: var(--accent-primary, #6366f1);
-                    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(0,0,0,0.2) 100%);
-                }
-                
-                .metric-header {
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                    margin-bottom: 8px;
-                    color: var(--text-muted, #888);
-                }
-                
-                .metric-label {
-                    font-size: 11px;
-                    font-weight: 600;
-                    text-transform: uppercase;
-                    letter-spacing: 0.5px;
-                }
-                
-                .metric-value {
-                    font-size: 28px;
-                    font-weight: 800;
-                    color: var(--text-primary, #fff);
-                    line-height: 1;
-                    margin-bottom: 6px;
-                }
-                
-                .metric-context {
-                    font-size: 11px;
-                    font-weight: 500;
-                }
-                
-                .text-success {
-                    color: var(--accent-success, #22c55e);
-                }
-                
-                .text-primary {
-                    color: var(--accent-primary, #6366f1);
-                }
-                
-                .text-muted {
-                    color: var(--text-muted, #888);
                 }
                 
                 .outcome-insights {
                     margin-top: 16px;
                     padding-top: 16px;
-                    border-top: 1px solid var(--border-subtle, rgba(255,255,255,0.05));
+                    border-top: 1px solid var(--color-border);
                 }
                 
                 .insight-tip {
                     font-size: 12px;
-                    color: var(--text-secondary, #aaa);
-                    background: var(--surface-sunken, rgba(0,0,0,0.2));
-                    border-left: 3px solid var(--accent-warning, #f59e0b);
+                    color: var(--color-text-secondary);
+                    background: var(--color-bg-secondary);
+                    border-left: 3px solid var(--color-warning);
                     padding: 10px 12px;
                     border-radius: 6px;
+                    margin-bottom: 8px;
                 }
                 
                 .insight-success {
                     font-size: 12px;
-                    color: var(--accent-success, #22c55e);
-                    background: var(--surface-success, rgba(34, 197, 94, 0.1));
-                    border-left: 3px solid var(--accent-success, #22c55e);
+                    color: var(--color-success);
+                    background: var(--color-success-bg);
+                    border-left: 3px solid var(--color-success);
                     padding: 10px 12px;
                     border-radius: 6px;
                 }

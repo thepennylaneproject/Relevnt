@@ -37,6 +37,8 @@
   /* Cool ivory paper */
   --color-bg-alt: #E8E9DB;
   /* Slightly darker ivory for cards */
+  --color-bg-secondary: #F0F1E2;
+  --color-bg-tertiary: #EBECCB;
   --color-surface: #E8E9DB;
   /* Cards match bg-alt */
   --color-surface-hover: rgba(255, 255, 255, 0.5);
@@ -206,6 +208,37 @@
    Same journal, open at midnight under a warm lamp
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/* System preference detection (Fallback) */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light):not([data-theme="light"]):not(.dark):not([data-theme="dark"]):not(.dark-academia):not([data-theme="dark-academia"]) {
+    --color-bg: #11100E;
+    --color-bg-alt: #1A1917;
+    --color-bg-secondary: #1F1E1B;
+    --color-bg-tertiary: #262522;
+    --color-surface: #1A1917;
+    --color-surface-hover: rgba(255, 255, 255, 0.05);
+    --color-ink: #F8F4ED;
+    --color-ink-secondary: #C4C0B8;
+    --color-ink-tertiary: #8A8680;
+    --color-ink-inverse: #1A1A1A;
+    --color-graphite: #E8E2D7;
+    --color-graphite-light: #A8A29E;
+    --color-graphite-faint: #3D3A36;
+    --color-success: #6BA37A;
+    --color-success-bg: rgba(107, 163, 122, 0.15);
+    --color-warning: #D4A16C;
+    --color-warning-bg: rgba(212, 161, 108, 0.15);
+    --color-error: #C86C6C;
+    --color-error-bg: rgba(200, 108, 108, 0.15);
+    --color-info: #6C8A9F;
+    --color-info-bg: rgba(108, 138, 159, 0.15);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
+    --shadow-glow: 0 0 30px rgba(78, 128, 141, 0.15);
+  }
+}
+
 :root.dark,
 .dark,
 [data-theme="dark"] {
@@ -214,6 +247,8 @@
   /* Deep charcoal */
   --color-bg-alt: #161A1D;
   /* Slightly lighter charcoal - muted from palette */
+  --color-bg-secondary: #1C2024;
+  --color-bg-tertiary: #23272B;
   --color-surface: #161A1D;
   /* Elevated surfaces */
   --color-surface-hover: rgba(255, 255, 255, 0.05);
@@ -271,6 +306,8 @@
   /* Deep navy - centuries of books */
   --color-bg-alt: #1A1F2E;
   /* Charcoal - card surfaces */
+  --color-bg-secondary: #161B22;
+  --color-bg-tertiary: #22283D;
   --color-surface: #1A1F2E;
   /* Elevated surfaces - slightly lighter navy */
   --color-surface-hover: rgba(255, 255, 255, 0.08);
@@ -350,34 +387,7 @@
   /* Subtle gold glow for premium elements */
 }
 
-/* System preference detection */
-@media (prefers-color-scheme: dark) {
-  :root:not(.light):not([data-theme="light"]) {
-    --color-bg: #11100E;
-    --color-bg-alt: #1A1917;
-    --color-surface: #1A1917;
-    --color-surface-hover: rgba(255, 255, 255, 0.05);
-    --color-ink: #F8F4ED;
-    --color-ink-secondary: #C4C0B8;
-    --color-ink-tertiary: #8A8680;
-    --color-ink-inverse: #1A1A1A;
-    --color-graphite: #E8E2D7;
-    --color-graphite-light: #A8A29E;
-    --color-graphite-faint: #3D3A36;
-    --color-success: #6BA37A;
-    --color-success-bg: rgba(107, 163, 122, 0.15);
-    --color-warning: #D4A16C;
-    --color-warning-bg: rgba(212, 161, 108, 0.15);
-    --color-error: #C86C6C;
-    --color-error-bg: rgba(200, 108, 108, 0.15);
-    --color-info: #6C8A9F;
-    --color-info-bg: rgba(108, 138, 159, 0.15);
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
-    --shadow-glow: 0 0 30px rgba(78, 128, 141, 0.15);
-  }
-}
+
 
 
 /* ═══════════════════════════════════════════════════════════════════════════

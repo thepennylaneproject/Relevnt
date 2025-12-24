@@ -83,38 +83,38 @@ export default function DashboardPage(): JSX.Element {
             </p>
 
             <div className="stats-grid">
-              <div className={`stat-card ${activeApplications.length === 0 ? 'is-empty' : ''}`}>
-                <span className="stat-value">{activeApplications.length}</span>
+              <div className={`card card-stat ${activeApplications.length === 0 ? 'is-empty' : ''}`}>
                 <span className="stat-label">Active applications</span>
+                <span className="stat-value">{activeApplications.length}</span>
                 <span className="stat-description">Roles you're currently in process for</span>
                 {activeApplications.length === 0 && (
                   <>
                     <span className="stat-empty-help">You haven't started any applications yet.</span>
-                    <Link to="/jobs" className="stat-empty-cta">
-                      Find opportunities <Icon name="compass" size="sm" />
+                    <Link to="/jobs" className="btn btn-ghost btn-sm btn-with-icon">
+                      Find opportunities <Icon name="chevron-right" size="sm" />
                     </Link>
                   </>
                 )}
               </div>
 
-              <div className={`stat-card ${interviewingCount === 0 ? 'is-empty' : ''}`}>
-                <span className="stat-value">{interviewingCount}</span>
+              <div className={`card card-stat ${interviewingCount === 0 ? 'is-empty' : ''}`}>
                 <span className="stat-label">In interviews</span>
+                <span className="stat-value">{interviewingCount}</span>
                 <span className="stat-description">Active conversations with companies</span>
                 {interviewingCount === 0 && activeApplications.length > 0 && (
                   <span className="stat-empty-help">Keep applying — interviews will come.</span>
                 )}
               </div>
 
-              <div className={`stat-card ${(saved || 0) === 0 ? 'is-empty' : ''}`}>
-                <span className="stat-value">{saved || 0}</span>
+              <div className={`card card-stat ${(saved || 0) === 0 ? 'is-empty' : ''}`}>
                 <span className="stat-label">Saved opportunities</span>
+                <span className="stat-value">{saved || 0}</span>
                 <span className="stat-description">Jobs you've bookmarked for later</span>
                 {(saved || 0) === 0 && (
                   <>
                     <span className="stat-empty-help">Save jobs you're interested in to review later.</span>
-                    <Link to="/jobs" className="stat-empty-cta">
-                      Browse jobs <Icon name="compass" size="sm" />
+                    <Link to="/jobs" className="btn btn-ghost btn-sm btn-with-icon">
+                      Browse jobs <Icon name="chevron-right" size="sm" />
                     </Link>
                   </>
                 )}
@@ -218,16 +218,16 @@ export default function DashboardPage(): JSX.Element {
             <aside className="layout-sidebar">
               <WellnessCheckin />
 
-              <section className="sidebar-card">
-                <h3 className="sidebar-card-title">Market pulse</h3>
+              <section className="card card--job-listing">
+                <h3 className="card-title text-sm mb-4">Market pulse</h3>
                 <div className="space-y-4">
                   <div>
                     <div className="flex justify-between items-center mb-1">
-                      <span className="text-xs font-semibold">Applicant volume</span>
-                      <span className="text-xs text-danger font-semibold">High</span>
+                      <span className="text-xs font-semibold uppercase tracking-wider text-secondary">Applicant volume</span>
+                      <span className="text-xs text-error font-semibold">High</span>
                     </div>
                     <div className="volume-bar"><div className="volume-fill" style={{ width: '92%' }} /></div>
-                    <p className="text-[10px] muted mt-1">
+                    <p className="text-[10px] text-secondary mt-1">
                       Top roles receiving 400+ applications within 24 hours. Focus on quality over quantity.
                     </p>
                   </div>
@@ -239,22 +239,22 @@ export default function DashboardPage(): JSX.Element {
                       <p className="strategy-box-text">
                         Direct outreach to hiring leads has 4× the impact of cold applications right now.
                       </p>
-                        <Link to="/applications" className="strategy-box-cta">Track your outreach in Applications</Link>
+                        <Link to="/applications" className="btn btn-ghost btn-sm p-0 mt-2">Track your outreach in Applications</Link>
                     </div>
                   </div>
                 </div>
               </section>
 
-              <section className="sidebar-card">
-                <h3 className="sidebar-card-title">Today's insights</h3>
+              <section className="card card--job-listing">
+                <h3 className="card-title text-sm mb-4">Today's insights</h3>
                 <ul className="intel-list">
-                  <li>
-                    <Icon name="search" size="sm" className="intel-icon" />
-                    <span>12 listings flagged as potentially stale or closed.</span>
+                  <li className="flex gap-2 items-start py-2 border-b border-border">
+                    <Icon name="search" size="sm" className="text-accent" />
+                    <span className="text-xs">12 listings flagged as potentially stale or closed.</span>
                   </li>
-                  <li>
-                    <Icon name="lighthouse" size="sm" className="intel-icon" />
-                    <span>3 companies on your list have increased hiring velocity.</span>
+                  <li className="flex gap-2 items-start py-2">
+                    <Icon name="lighthouse" size="sm" className="text-accent" />
+                    <span className="text-xs">3 companies on your list have increased hiring velocity.</span>
                   </li>
                 </ul>
               </section>

@@ -22,20 +22,20 @@ export const SectionCard: React.FC<Props> = ({
   return (
     <section className={[base, className].filter(Boolean).join(' ')}>
       {(title || description || icon) && (
-        <header className="flex items-start gap-3">
+        <header className="flex items-start gap-4 mb-6">
           {icon && (
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#F3F4F6] text-[#1F2933]">
+            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--color-bg-alt)] text-[var(--color-accent)] border border-[var(--color-graphite-faint)]">
               {icon}
             </span>
           )}
           <div className="space-y-1">
             {title && (
-              <h2 className="text-sm font-semibold text-neutral-900">
+              <h2 className="text-base font-semibold text-[var(--color-ink)] font-serif">
                 {title}
               </h2>
             )}
             {description && (
-              <p className="text-xs leading-relaxed text-neutral-600">
+              <p className="text-xs leading-relaxed text-[var(--color-ink-secondary)]">
                 {description}
               </p>
             )}

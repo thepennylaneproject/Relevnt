@@ -22,7 +22,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Track',
     items: [
-      { path: '/dashboard', label: 'Dashboard', icon: 'compass', description: 'Your career hub' },
+      { path: '/dashboard', label: 'Dashboard', icon: 'gauge', description: 'Your career hub' },
       { path: '/jobs', label: 'Jobs', icon: 'briefcase', description: 'AI-ranked opportunities' },
       { path: '/applications', label: 'Applications', icon: 'paper-airplane', description: 'Track your pipeline' },
     ],
