@@ -1,6 +1,6 @@
 /**
  * PageHero - Consistent hero section for all pages
- * 
+ *
  * Pattern:
  * [Icon CATEGORY]
  * Headline
@@ -10,6 +10,7 @@
 
 import React from 'react'
 import { FeatureIcon, type FeatureIconName } from './FeatureIcon'
+import type { TextureType } from './TexturedBg'
 
 export type PageCategory = 'track' | 'optimize' | 'grow'
 
@@ -32,6 +33,8 @@ export interface PageHeroProps {
     contextLine?: string
     /** Action buttons to show on right side */
     actions?: PageHeroAction[]
+    /** Optional texture overlay (watercolor default for hero) */
+    texture?: TextureType | false
     /** Additional content below subtitle */
     children?: React.ReactNode
 }
@@ -49,10 +52,13 @@ export function PageHero({
     subtitle,
     contextLine,
     actions,
+    texture = 'watercolor',
     children,
 }: PageHeroProps) {
+    const textureClass = texture ? `textured-bg--${texture}` : ''
+
     return (
-        <section className="page-hero">
+        <section className={`page-hero ${textureClass}`}>
             {/* Category Pill */}
             {category && (
                 <div className="page-hero__category-pill">
