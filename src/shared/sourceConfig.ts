@@ -153,28 +153,28 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
     remoteok: {
         slug: 'remoteok',
         mode: 'fresh-only',
-        enabled: false, // DISABLED pending investigation
+        enabled: true, // ENABLED - API verified and working
         maxAgeDays: 30,
         maxPagesPerRun: 3,
         resetPaginationEachRun: false,
         trustLevel: 'medium',
         trackFreshnessRatio: false,
-        notes: 'Zero jobs is not neutral. It is wasted compute. Verify endpoint and response schema.',
+        notes: 'RemoteOK free API. No authentication required. Returns remote-focused jobs.',
     },
 
     // =========================================================================
-    // FIX OR DISABLE - Returning zero, needs credential check
+    // ENABLED - Credentials verified, API quota confirmed
     // =========================================================================
     adzuna_us: {
         slug: 'adzuna_us',
         mode: 'wide-capped',
-        enabled: false, // DISABLED pending investigation
+        enabled: true, // ENABLED - Credentials verified
         maxAgeDays: 30,
         maxPagesPerRun: 1,
         resetPaginationEachRun: false,
         trustLevel: 'medium',
         trackFreshnessRatio: false,
-        notes: 'Confirm location and category params. Validate API quota and credentials.',
+        notes: 'Adzuna US aggregator. Requires ADZUNA_APP_ID and ADZUNA_APP_KEY env vars. Broad job coverage.',
     },
 
     // =========================================================================
@@ -351,13 +351,13 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
     rss: {
         slug: 'rss',
         mode: 'wide-capped',
-        enabled: false, // Controlled by ENABLE_SOURCE_RSS env var in ingest
+        enabled: true, // ENABLED - Feeds configured in rss_feeds.json
         maxAgeDays: 30,
         maxPagesPerRun: 1, // RSS fetching is per-feed, not paginated
         resetPaginationEachRun: true,
         trustLevel: 'medium', // Varies by feed, can be overridden per-feed
         trackFreshnessRatio: true,
-        notes: 'RSS/Atom feed support. Feeds configured via RSS_FEEDS_JSON env var. Per-feed trust levels configurable.',
+        notes: 'RSS/Atom feed support. Feeds configured in src/data/jobSources/rss_feeds.json. Per-feed trust levels configurable.',
     },
 };
 
