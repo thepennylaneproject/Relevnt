@@ -5,6 +5,9 @@ import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import { Icon } from '../components/ui/Icon'
 import type { Database } from '../lib/database.types'
+import { AlertsPanel } from '../components/admin/AlertsPanel'
+import { IngestionActivityFeed } from '../components/admin/IngestionActivityFeed'
+import { SourcePerformanceMetrics } from '../components/admin/SourcePerformanceMetrics'
 
 type TabKey = 'overview' | 'users' | 'sources' | 'ingestion' | 'system'
 
@@ -266,6 +269,13 @@ function OverviewTab() {
 
   return (
     <div className="page-stack">
+      {/* System Alerts */}
+      <div className="surface-card" style={{ borderLeft: '4px solid var(--color-warning)' }}>
+        <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12 }}>🚨 System Alerts</h4>
+        <AlertsPanel />
+      </div>
+
+      {/* Key Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
         {card('Total users', stats.total, 'seeds', 'Registered profiles')}
         {card('Paid users', stats.paid, 'stars', 'With plan tier')}
@@ -273,6 +283,16 @@ function OverviewTab() {
         {card('Jobs (24h)', stats.recentJobs, 'briefcase', 'Ingested recently')}
         {card('Active sources', stats.activeSources, 'check-circle', 'Enabled integrations')}
         {card('Sources with errors', stats.sourcesWithErrors, 'alert-triangle', 'Need attention', true)}
+      </div>
+
+      {/* Real-Time Activity Feed */}
+      <div className="surface-card">
+        <IngestionActivityFeed />
+      </div>
+
+      {/* Source Performance Metrics */}
+      <div className="surface-card">
+        <SourcePerformanceMetrics />
       </div>
 
       {/* Quick Actions */}

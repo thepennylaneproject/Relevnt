@@ -583,7 +583,19 @@ function buildHeaders(source?: JobSource): Record<string, string> {
     }
   }
 
-  // RemoteOK is sensitive to scrapers
+  // Use rotating headers for sources with generous free tiers
+  // This helps avoid rate limiting and bot detection
+  try {
+    // Dynamic import to avoid TypeScript issues with Netlify build
+    const rotationModule = eval("require('../../src/utils/headerRotation')")
+    if (rotationModule && rotationModule.getRotatingHeaders && source) {
+      return rotationModule.getRotatingHeaders(source.slug)
+    }
+  } catch (err) {
+    console.debug('Header rotation module not available, using standard headers')
+  }
+
+  // Fallback: Standard headers
   if (source?.slug === 'remoteok') {
     return {
       'User-Agent': userAgent,
@@ -2133,6 +2145,7 @@ export async function runIngestion(
   console.log('ingest_jobs: completed ingestion run', summary)
 
   // Update run record
+  const finishedAt = new Date().toISOString()
   if (runId) {
     const totalNormalized = results.reduce((sum, r) => sum + r.normalized, 0)
     const totalInserted = results.reduce((sum, r) => sum + r.count, 0)
@@ -2143,7 +2156,7 @@ export async function runIngestion(
     await supabase
       .from('job_ingestion_runs')
       .update({
-        finished_at: new Date().toISOString(),
+        finished_at: finishedAt,
         status: overallStatus,
         total_normalized: totalNormalized,
         total_inserted: totalInserted,
@@ -2153,6 +2166,41 @@ export async function runIngestion(
           `${failedSourceCount}/${sourcesToRun.length} sources failed` : null,
       })
       .eq('id', runId)
+  }
+
+  // Log ingestion activity to admin dashboard
+  try {
+    const totalNormalized = results.reduce((sum, r) => sum + r.normalized, 0)
+    const totalInserted = results.reduce((sum, r) => sum + r.count, 0)
+    const totalDuplicates = results.reduce((sum, r) => sum + r.duplicates, 0)
+    const overallStatus = failedSourceCount === sourcesToRun.length ? 'failed' :
+      failedSourceCount > 0 ? 'partial' : 'success'
+
+    const adminSecret = process.env.ADMIN_SECRET
+    if (adminSecret) {
+      await fetch('https://api.relevnt.app/.netlify/functions/admin_log_ingestion', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-secret': adminSecret,
+        },
+        body: JSON.stringify({
+          sources_requested: sourcesToRun.map(s => s.slug),
+          trigger_type: triggeredBy === 'schedule' ? 'scheduled' : triggeredBy,
+          status: overallStatus,
+          total_inserted: totalInserted,
+          total_duplicates: totalDuplicates,
+          total_failed_sources: failedSourceCount,
+          started_at: startedAt,
+          finished_at: finishedAt,
+          error_message: failedSourceCount > 0 ? `${failedSourceCount} sources failed` : undefined,
+        }),
+      }).catch(err => {
+        console.warn('ingest_jobs: failed to log to admin dashboard', err)
+      })
+    }
+  } catch (err) {
+    console.warn('ingest_jobs: exception while logging to admin dashboard', err)
   }
 
   return results
