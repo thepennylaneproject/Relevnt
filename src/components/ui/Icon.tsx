@@ -30,6 +30,7 @@ export type IconName =
   | 'book'
   | 'microphone'
   | 'pocket-watch'
+  | 'gauge'
   // States
   | 'seeds'
   | 'candle'
@@ -49,7 +50,11 @@ export type IconName =
   | 'chevron-right'
   | 'user'
   | 'dollar'
-  | 'mailbox';
+  | 'mailbox'
+  | 'zap'
+  | 'bookmark'
+  | 'x'
+  | 'map-pin';
 
 export type IconSize = 'sm' | 'md' | 'lg' | 'xl' | 'hero';
 
@@ -191,6 +196,20 @@ const iconDefinitions: Record<IconName, IconDefinition> = {
       'M32 20v2M44 36h-2M32 48v-2M20 36h2',
     ],
     dotPosition: { cx: 32, cy: 36 },
+  },
+
+  gauge: {
+    paths: [
+      // Outer rim (semi-circle)
+      'M12 44a20 20 0 1 1 40 0',
+      // Base line
+      'M12 44h40',
+      // Needle
+      'M32 44l-12-16',
+      // Tick marks
+      'M20 28l2 2M44 28l-2 2M32 16v4',
+    ],
+    dotPosition: { cx: 32, cy: 44 },
   },
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -417,6 +436,31 @@ const iconDefinitions: Record<IconName, IconDefinition> = {
     ],
     dotPosition: { cx: 40, cy: 28 },
   },
+  zap: {
+    paths: [
+      'M32 8l-16 28h12l-4 20 20-28h-12l4-20z',
+    ],
+    dotPosition: { cx: 32, cy: 30 },
+  },
+  bookmark: {
+    paths: [
+      'M16 8h32v44l-16-12-16 12V8z',
+    ],
+    dotPosition: { cx: 32, cy: 24 },
+  },
+  x: {
+    paths: [
+      'M16 16l32 32M48 16L16 48',
+    ],
+    dotPosition: { cx: 32, cy: 32 },
+  },
+  'map-pin': {
+    paths: [
+      'M32 8c-8.8 0-16 7.2-16 16 0 12 16 32 16 32s16-20 16-32c0-8.8-7.2-16-16-16z',
+      'M32 30a6 6 0 1 0 0-12 6 6 0 0 0 0 12z',
+    ],
+    dotPosition: { cx: 32, cy: 24 },
+  },
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -464,13 +508,13 @@ export const Icon: React.FC<IconProps> = ({
         ))}
       </g>
 
-      {/* Gold accent dot - NEVER changes color */}
+      {/* Gold accent dot - Theme aware (Gold in Dark Academia, Teal in Light) */}
       {!hideAccent && dotPosition && (
         <circle
           cx={dotPosition.cx}
           cy={dotPosition.cy}
           r={dotSize}
-          fill="#4E808D"
+          fill="var(--color-accent)"
           className="accent-dot"
         />
       )}

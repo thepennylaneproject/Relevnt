@@ -205,18 +205,18 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ id, skillGroups, o
                   <span className="mb-1 block text-xs font-medium text-muted-foreground">Detailed Suggestions (Click to add):</span>
                   <div className="flex flex-wrap gap-2">
                     {pendingSuggestions[getGroupKey(group, index)].map((skill) => (
-                      <div key={skill} className="flex overflow-hidden rounded-md border border-indigo-200 bg-indigo-50 text-indigo-700">
+                      <div key={skill} className="flex overflow-hidden rounded-md border border-[var(--color-accent-glow)] bg-[var(--color-accent-glow)] text-[var(--color-accent)] animate-in slide-in-from-bottom-1">
                         <button
                           type="button"
                           onClick={() => handleAddSkill(index, skill)}
-                          className="px-2 py-1 text-xs font-medium hover:bg-indigo-100"
+                          className="px-2 py-1 text-xs font-medium hover:bg-[var(--color-accent)] hover:text-[var(--color-ink-inverse)] transition-colors"
                         >
                           + {skill}
                         </button>
                         <button
                           type="button"
                           onClick={() => handleDismissSkill(index, skill)}
-                          className="border-l border-indigo-200 px-1.5 py-1 text-xs hover:bg-indigo-100 hover:text-indigo-900"
+                          className="border-l border-[var(--color-accent-glow)] px-1.5 py-1 text-xs hover:bg-[var(--color-accent)] hover:text-[var(--color-ink-inverse)] transition-colors"
                           title="Dismiss"
                         >
                           ×

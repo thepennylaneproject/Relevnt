@@ -70,250 +70,197 @@ export function ProfileTab({ onAutoSaveStatusChange }: ProfileTabProps) {
     const hasCustomHeadline = !!profile.headline_raw
 
     return (
-        <>
-            {/* Headline */}
-            <article className="surface-card">
-                <div className="rl-field-grid">
-                    <div style={{ display: 'grid', gap: 6 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>
-                            <Icon name="compass" size="sm" hideAccent />
-                            <span>Your headline</span>
-                        </div>
-                        <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                            This is how you'll appear in applications. Does this look right?
-                        </p>
-                    </div>
-
-                    <div style={{
-                        padding: 16,
-                        background: 'var(--surface-subtle, rgba(0,0,0,0.02))',
-                        borderRadius: 'var(--radius-md)',
-                        border: '1px solid var(--border-subtle)',
-                    }}>
-                        {editingHeadline ? (
-                            <div style={{ display: 'grid', gap: 12 }}>
-                                <input
-                                    type="text"
-                                    className="rl-input"
-                                    value={headlineEdit}
-                                    onChange={(e) => setHeadlineEdit(e.target.value)}
-                                    placeholder="Your professional headline"
-                                    maxLength={120}
-                                    style={{ fontSize: 14 }}
-                                />
-                                <div style={{ display: 'flex', gap: 8 }}>
-                                    <button
-                                        type="button"
-                                        className="primary-button"
-                                        onClick={handleSaveHeadlineEdit}
-                                        style={{ padding: '6px 12px', fontSize: 12 }}
-                                    >
-                                        Save
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className="ghost-button button-sm"
-                                        onClick={() => setEditingHeadline(false)}
-                                    >
-                                        Cancel
-                                    </button>
-                                </div>
-                            </div>
-                        ) : (
-                            <>
-                                <p style={{ fontSize: 15, fontWeight: 500, color: 'var(--text)', lineHeight: 1.4 }}>
-                                    "{currentHeadline}"
-                                </p>
-                                <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-                                    {!hasCustomHeadline && !acceptedHeadline && (
-                                        <button
-                                            type="button"
-                                            className="primary-button"
-                                            onClick={handleAcceptHeadline}
-                                            style={{ padding: '6px 12px', fontSize: 12 }}
-                                        >
-                                            <Icon name="check" size="sm" />
-                                            <span>Accept</span>
-                                        </button>
-                                    )}
-                                    <button
-                                        type="button"
-                                        className="ghost-button button-sm"
-                                        onClick={() => {
-                                            setHeadlineEdit(currentHeadline)
-                                            setEditingHeadline(true)
-                                        }}
-                                    >
-                                        <Icon name="scroll" size="sm" hideAccent />
-                                        <span>Edit</span>
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className="ghost-button button-sm"
-                                        onClick={handleAcceptHeadline}
-                                    >
-                                        <Icon name="stars" size="sm" hideAccent />
-                                        <span>Regenerate</span>
-                                    </button>
-                                </div>
-                            </>
-                        )}
-                    </div>
-                </div>
-            </article>
-
-            {/* Strengths */}
-            <article className="surface-card">
-                <div className="rl-field-grid">
-                    <div style={{ display: 'grid', gap: 6 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>
-                            <Icon name="seeds" size="sm" hideAccent />
-                            <span>Key strengths</span>
-                        </div>
-                        <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                            We extracted these from your resume. Use them as-is or tweak slightly.
-                        </p>
-                    </div>
-
-                    <div style={{
-                        padding: 16,
-                        background: 'var(--surface-subtle, rgba(0,0,0,0.02))',
-                        borderRadius: 'var(--radius-md)',
-                        border: '1px solid var(--border-subtle)',
-                    }}>
-                        <ul style={{
-                            listStyle: 'none',
-                            padding: 0,
-                            margin: 0,
-                            display: 'grid',
-                            gap: 8,
-                        }}>
-                            {AI_GENERATED.strengths.map((strength, idx) => (
-                                <li
-                                    key={idx}
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'flex-start',
-                                        gap: 8,
-                                        fontSize: 13,
-                                        color: 'var(--text)',
-                                        lineHeight: 1.5,
-                                    }}
-                                >
-                                    <span style={{ color: 'var(--color-accent)', flexShrink: 0 }}>•</span>
-                                    {strength}
-                                </li>
-                            ))}
-                        </ul>
-
-                        <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-                            {!acceptedStrengths && (
+        <div className="tab-pane">
+            <div className="card">
+                <h3>Your headline</h3>
+                <p className="card-description">This is how you'll appear in applications. Does this look right?</p>
+                
+                <div style={{
+                    padding: 16,
+                    background: 'var(--color-bg-tertiary)',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--color-graphite-faint)',
+                }}>
+                    {editingHeadline ? (
+                        <div style={{ display: 'grid', gap: 12 }}>
+                            <input
+                                type="text"
+                                className="form-input"
+                                value={headlineEdit}
+                                onChange={(e) => setHeadlineEdit(e.target.value)}
+                                placeholder="Your professional headline"
+                                maxLength={120}
+                            />
+                            <div className="action-group">
                                 <button
                                     type="button"
-                                    className="primary-button"
-                                    onClick={handleAcceptStrengths}
-                                    style={{ padding: '6px 12px', fontSize: 12 }}
+                                    className="btn btn-primary btn-sm"
+                                    onClick={handleSaveHeadlineEdit}
                                 >
-                                    <Icon name="check" size="sm" />
-                                    <span>Accept all</span>
+                                    Save
                                 </button>
-                            )}
+                                <button
+                                    type="button"
+                                    className="btn btn-ghost btn-sm"
+                                    onClick={() => setEditingHeadline(false)}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            <p style={{ fontSize: '1.125rem', fontWeight: 500, color: 'var(--color-ink)', lineHeight: 1.4 }}>
+                                "{currentHeadline}"
+                            </p>
+                            <div className="action-group">
+                                {!hasCustomHeadline && !acceptedHeadline && (
+                                    <button
+                                        type="button"
+                                        className="btn btn-primary btn-sm"
+                                        onClick={handleAcceptHeadline}
+                                    >
+                                        <Icon name="check" size="sm" />
+                                        <span>Accept</span>
+                                    </button>
+                                )}
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary btn-sm"
+                                    onClick={() => {
+                                        setHeadlineEdit(currentHeadline)
+                                        setEditingHeadline(true)
+                                    }}
+                                >
+                                    <Icon name="scroll" size="sm" hideAccent />
+                                    <span>Edit</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn btn-ghost btn-sm"
+                                    onClick={handleAcceptHeadline}
+                                >
+                                    <Icon name="stars" size="sm" hideAccent />
+                                    <span>Regenerate</span>
+                                </button>
+                            </div>
+                        </>
+                    )}
+                </div>
+            </div>
+
+            <div className="card">
+                <h3>Key strengths</h3>
+                <p className="card-description">We extracted these from your resume. Use them as-is or tweak slightly.</p>
+                
+                <div style={{
+                    padding: 16,
+                    background: 'var(--color-bg-tertiary)',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--color-graphite-faint)',
+                }}>
+                    <ul className="strengths-list">
+                        {AI_GENERATED.strengths.map((strength, idx) => (
+                            <li key={idx}>{strength}</li>
+                        ))}
+                    </ul>
+
+                    <div className="action-group">
+                        {!acceptedStrengths && (
                             <button
                                 type="button"
-                                className="ghost-button button-sm"
+                                className="btn btn-primary btn-sm"
+                                onClick={handleAcceptStrengths}
                             >
-                                <Icon name="stars" size="sm" hideAccent />
-                                <span>Regenerate</span>
+                                <Icon name="check" size="sm" />
+                                <span>Accept all</span>
                             </button>
+                        )}
+                        <button
+                            type="button"
+                            className="btn btn-secondary btn-sm"
+                        >
+                            <Icon name="stars" size="sm" hideAccent />
+                            <span>Regenerate</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div className="card">
+                <h3>Quick confirmations</h3>
+                <p className="card-description">These answers get reused across applications so you don't need to re-type them.</p>
+                
+                <div className="confirmation-group">
+                    <div className="confirmation-question">
+                        <h4>Do you require visa sponsorship?</h4>
+                        <div className="button-group">
+                            {[
+                                { value: false, label: 'No' },
+                                { value: true, label: 'Yes' },
+                            ].map((opt) => (
+                                <button
+                                    key={opt.label}
+                                    type="button"
+                                    onClick={() => {
+                                        setField('needs_sponsorship', opt.value)
+                                        triggerSave()
+                                    }}
+                                    className={`btn-option ${profile.needs_sponsorship === opt.value ? 'active' : ''}`}
+                                >
+                                    {opt.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="confirmation-question">
+                        <h4>Open to relocation?</h4>
+                        <div className="button-group">
+                            {[
+                                { value: 'no', label: 'No' },
+                                { value: 'yes', label: 'Yes' },
+                                { value: 'depends', label: 'Depends on role' },
+                            ].map((opt) => (
+                                <button
+                                    key={opt.value}
+                                    type="button"
+                                    onClick={() => {
+                                        setField('relocate_preference', opt.value as any)
+                                        triggerSave()
+                                    }}
+                                    className={`btn-option ${profile.relocate_preference === opt.value ? 'active' : ''}`}
+                                >
+                                    {opt.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="confirmation-question">
+                        <h4>Travel preference</h4>
+                        <div className="button-group">
+                            {[
+                                { value: 'none', label: 'No travel' },
+                                { value: 'some', label: 'Occasional' },
+                                { value: 'frequent', label: 'Frequent OK' },
+                            ].map((opt) => (
+                                <button
+                                    key={opt.value}
+                                    type="button"
+                                    onClick={() => {
+                                        setField('travel_preference', opt.value as any)
+                                        triggerSave()
+                                    }}
+                                    className={`btn-option ${profile.travel_preference === opt.value ? 'active' : ''}`}
+                                >
+                                    {opt.label}
+                                </button>
+                            ))}
                         </div>
                     </div>
                 </div>
-            </article>
-
-            {/* Work Authorization - Quick confirmations */}
-            <article className="surface-card">
-                <div className="rl-field-grid">
-                    <div style={{ display: 'grid', gap: 6 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>
-                            <Icon name="scroll" size="sm" hideAccent />
-                            <span>Quick confirmations</span>
-                        </div>
-                        <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                            These answers get reused across applications so you don't need to re-type them.
-                        </p>
-                    </div>
-
-                    <div style={{ display: 'grid', gap: 16 }}>
-                        <div style={{ display: 'grid', gap: 8 }}>
-                            <div className="rl-label">Do you require visa sponsorship?</div>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                                {[
-                                    { value: false, label: 'No' },
-                                    { value: true, label: 'Yes' },
-                                ].map((opt) => (
-                                    <button
-                                        key={opt.label}
-                                        type="button"
-                                        onClick={() => {
-                                            setField('needs_sponsorship', opt.value)
-                                            triggerSave()
-                                        }}
-                                        className={`option-button ${profile.needs_sponsorship === opt.value ? 'is-active' : ''}`}
-                                    >
-                                        {opt.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div style={{ display: 'grid', gap: 8 }}>
-                            <div className="rl-label">Open to relocation?</div>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                                {[
-                                    { value: 'no', label: 'No' },
-                                    { value: 'yes', label: 'Yes' },
-                                    { value: 'depends', label: 'Depends on role' },
-                                ].map((opt) => (
-                                    <button
-                                        key={opt.value}
-                                        type="button"
-                                        onClick={() => {
-                                            setField('relocate_preference', opt.value as any)
-                                            triggerSave()
-                                        }}
-                                        className={`option-button ${profile.relocate_preference === opt.value ? 'is-active' : ''}`}
-                                    >
-                                        {opt.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div style={{ display: 'grid', gap: 8 }}>
-                            <div className="rl-label">Travel preference</div>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                                {[
-                                    { value: 'none', label: 'No travel' },
-                                    { value: 'some', label: 'Occasional' },
-                                    { value: 'frequent', label: 'Frequent OK' },
-                                ].map((opt) => (
-                                    <button
-                                        key={opt.value}
-                                        type="button"
-                                        onClick={() => {
-                                            setField('travel_preference', opt.value as any)
-                                            triggerSave()
-                                        }}
-                                        className={`option-button ${profile.travel_preference === opt.value ? 'is-active' : ''}`}
-                                    >
-                                        {opt.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </article>
-        </>
+            </div>
+        </div>
     )
 }

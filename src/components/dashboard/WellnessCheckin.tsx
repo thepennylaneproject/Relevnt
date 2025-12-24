@@ -70,69 +70,44 @@ export function WellnessCheckin() {
         const moodData = MOOD_TIPS[score as number] || MOOD_TIPS[5]
 
         return (
-            <div className="sidebar-card">
-                <h3 className="sidebar-card-title">How you're feeling</h3>
-                <div className="wellness-complete">
-                    <div className="wellness-complete-icon">
+            <div className="card card--job-listing">
+                <h3 className="card-title text-sm mb-4">How you're feeling</h3>
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="w-8 h-8 rounded-full bg-success/10 text-success flex items-center justify-center">
                         <Icon name="check" size="sm" />
                     </div>
-                    <p className="text-xs muted">Check-in captured for today.</p>
+                    <p className="text-xs text-secondary">Check-in captured for today.</p>
                 </div>
-                <p className="wellness-quote">"{moodData.quote}"</p>
+                <p className="italic text-secondary text-xs border-t border-border pt-4 text-center">"{moodData.quote}"</p>
             </div>
         )
     }
 
-    const selectedMoodData = selectedScore !== null ? MOOD_TIPS[selectedScore] : null
-
     return (
-        <div className="sidebar-card">
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 4 }}>
-                <h3 className="sidebar-card-title">How are you feeling today?</h3>
-                <div style={{ position: 'relative', group: 'hover' }}>
-                    <Icon name="question" size="sm" style={{ cursor: 'help', color: 'var(--text-secondary)' }} title="Your mood helps us adjust your dashboard pace and tone. Gentle mode reduces pressure when you need it." />
-                </div>
+        <div className="card card--job-listing">
+            <div className="flex items-start justify-between mb-2">
+                <h3 className="card-title text-sm">Wellness Check-in</h3>
+                <Icon name="stars" size="sm" className="text-accent" />
             </div>
-            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: 12, lineHeight: 1.4 }}>
-                Your mood helps us adjust your dashboard. Gentle mode reduces pressure when needed.
+            <p className="text-xs text-secondary mb-4 leading-relaxed">
+                Refining your experience based on today's focus.
             </p>
 
-            <div className="mood-selector">
-                {MOODS.map((m) => (
-                    <button
-                        key={m.score}
-                        onClick={() => setSelectedScore(m.score)}
-                        className={`mood-pill ${selectedScore === m.score ? 'is-selected' : ''}`}
-                    >
-                        <span className="mood-emoji">{m.emoji}</span>
-                        <span className="mood-label">{m.label}</span>
-                    </button>
-                ))}
+            <div className="flex flex-col gap-3">
+                <button
+                    onClick={() => {
+                        setSelectedScore(5);
+                        saveCheckin(5, "Quick check-in");
+                        setSubmitted(true);
+                    }}
+                    className="btn btn-primary w-full text-xs py-2"
+                >
+                    Capture daily reflection
+                </button>
+                <p className="text-[10px] text-secondary/60 text-center italic">
+                    Adjusts dashboard pace to your energy.
+                </p>
             </div>
-
-            {selectedMoodData && (
-                <div className="mood-tip animate-in fade-in slide-in-from-top-2">
-                    <strong>Tip:</strong> {selectedMoodData.tip}
-                </div>
-            )}
-
-            {selectedScore !== null && (
-                <div className="animate-in fade-in slide-in-from-top-2">
-                    <textarea
-                        className="rl-textarea text-xs p-2 mb-3 h-16 w-full"
-                        placeholder="Any reflections? (Optional)"
-                        value={note}
-                        onChange={(e) => setNote(e.target.value)}
-                    />
-                    <button
-                        onClick={handleSubmit}
-                        disabled={saving}
-                        className="primary-button w-full text-xs py-2"
-                    >
-                        {saving ? 'Saving...' : 'Save check-in'}
-                    </button>
-                </div>
-            )}
         </div>
     )
 }

@@ -191,318 +191,252 @@ export function CareerTargetsTab({ onAutoSaveStatusChange }: CareerTargetsTabPro
         !filteredSkillSuggestions.some(s => s.toLowerCase() === skillInputTrimmed.toLowerCase())
 
     return (
-        <>
-            {/* Job Titles */}
-            <article className="surface-card">
-                <div className="rl-field-grid">
-                    <div style={{ display: 'grid', gap: 6 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>
-                            <Icon name="briefcase" size="sm" hideAccent />
-                            <span>Target job titles</span>
+        <div className="tab-pane">
+            <div className="card">
+                <h3>Target job titles</h3>
+                <p className="card-description">Pick up to 5 titles. Type to search or add your own.</p>
+                
+                <div className="pill-input">
+                    {prefs.related_titles.map((title) => (
+                        <div key={title} className="pill">
+                            {title}
+                            <button className="pill-remove" onClick={() => removeRelatedTitle(title)}>X</button>
                         </div>
-                        <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                            Pick up to 5 titles. Type to search or add your own.
-                        </p>
-                    </div>
-
-                    {/* Selected titles */}
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                        {prefs.related_titles.map((title) => (
-                            <OptionChip
-                                key={title}
-                                label={title}
-                                selected
-                                onRemove={() => removeRelatedTitle(title)}
-                            />
-                        ))}
-                    </div>
-
-                    {/* Type-to-add input for titles */}
+                    ))}
                     {prefs.related_titles.length < 5 && (
-                        <div style={{ position: 'relative' }}>
-                            <input
-                                type="text"
-                                value={titleInput}
-                                onChange={(e) => setTitleInput(e.target.value)}
-                                onFocus={() => setTitleInputFocused(true)}
-                                onBlur={() => setTimeout(() => setTitleInputFocused(false), 150)}
-                                onKeyDown={handleTitleKeyDown}
-                                placeholder="Type a job title..."
-                                className="rl-input"
-                                style={{ fontSize: 13, padding: '10px 14px' }}
-                            />
-
-                            {/* Unified dropdown */}
-                            {showTitleDropdown && (titleInputIsNew || filteredTitleSuggestions.length > 0) && (
-                                <div style={{
-                                    position: 'absolute',
-                                    top: '100%',
-                                    left: 0,
-                                    right: 0,
-                                    marginTop: 4,
-                                    background: 'var(--color-bg)',
-                                    border: '1px solid var(--border)',
-                                    borderRadius: 'var(--radius-md)',
-                                    boxShadow: 'var(--shadow-md)',
-                                    zIndex: 10,
-                                    maxHeight: 240,
-                                    overflowY: 'auto',
-                                }}>
-                                    {/* Add custom option - at top when input is new */}
-                                    {titleInputIsNew && (
-                                        <button
-                                            type="button"
-                                            onMouseDown={(e) => {
-                                                e.preventDefault()
-                                                addRelatedTitle(titleInputTrimmed)
-                                            }}
-                                            style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: 8,
-                                                width: '100%',
-                                                padding: '10px 14px',
-                                                textAlign: 'left',
-                                                border: 'none',
-                                                borderBottom: filteredTitleSuggestions.length > 0 ? '1px solid var(--border-subtle)' : 'none',
-                                                background: 'var(--color-accent-glow)',
-                                                fontSize: 13,
-                                                fontWeight: 500,
-                                                color: 'var(--color-accent)',
-                                                cursor: 'pointer',
-                                            }}
-                                        >
-                                            <Icon name="plus" size="sm" hideAccent />
-                                            <span>Add "{titleInputTrimmed}"</span>
-                                        </button>
-                                    )}
-
-                                    {/* Suggestions */}
-                                    {filteredTitleSuggestions.map((title) => (
-                                        <button
-                                            key={title}
-                                            type="button"
-                                            onMouseDown={(e) => {
-                                                e.preventDefault()
-                                                addRelatedTitle(title)
-                                            }}
-                                            style={{
-                                                display: 'block',
-                                                width: '100%',
-                                                padding: '10px 14px',
-                                                textAlign: 'left',
-                                                border: 'none',
-                                                background: 'transparent',
-                                                fontSize: 13,
-                                                color: 'var(--text)',
-                                                cursor: 'pointer',
-                                            }}
-                                            onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-bg-alt)'}
-                                            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                                        >
-                                            {title}
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    <div style={{ display: 'grid', gap: 6, marginTop: 12 }}>
-                        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>Seniority levels</span>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                            {SENIORITY_OPTIONS.map((level) => (
-                                <OptionChip
-                                    key={level}
-                                    label={level}
-                                    selected={prefs.seniority_levels.includes(level)}
-                                    onClick={() => toggleSeniority(level)}
-                                />
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </article>
-
-            {/* Skills */}
-            <article className="surface-card">
-                <div className="rl-field-grid">
-                    <div style={{ display: 'grid', gap: 6 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>
-                            <Icon name="seeds" size="sm" hideAccent />
-                            <span>Skills to highlight</span>
-                        </div>
-                        <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                            Type to search or add your own. We'll suggest related skills.
-                        </p>
-                    </div>
-
-                    {/* Selected skills */}
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                        {(prefs.include_keywords || []).map((skill) => (
-                            <OptionChip
-                                key={skill}
-                                label={skill}
-                                selected
-                                onRemove={() => removeSkill(skill)}
-                            />
-                        ))}
-                    </div>
-
-                    {/* Type-to-add input for skills */}
-                    <div style={{ position: 'relative' }}>
                         <input
                             type="text"
-                            value={skillInput}
-                            onChange={(e) => setSkillInput(e.target.value)}
-                            onFocus={() => setSkillInputFocused(true)}
-                            onBlur={() => setTimeout(() => setSkillInputFocused(false), 150)}
-                            onKeyDown={handleSkillKeyDown}
-                            placeholder="Type a skill..."
-                            className="rl-input"
-                            style={{ fontSize: 13, padding: '10px 14px' }}
+                            value={titleInput}
+                            onChange={(e) => setTitleInput(e.target.value)}
+                            onFocus={() => setTitleInputFocused(true)}
+                            onBlur={() => setTimeout(() => setTitleInputFocused(false), 150)}
+                            onKeyDown={handleTitleKeyDown}
+                            placeholder="Add another..."
+                            className="pill-input-field"
                         />
-
-                        {/* Unified dropdown */}
-                        {showSkillDropdown && (skillInputIsNew || filteredSkillSuggestions.length > 0) && (
-                            <div style={{
-                                position: 'absolute',
-                                top: '100%',
-                                left: 0,
-                                right: 0,
-                                marginTop: 4,
-                                background: 'var(--color-bg)',
-                                border: '1px solid var(--border)',
-                                borderRadius: 'var(--radius-md)',
-                                boxShadow: 'var(--shadow-md)',
-                                zIndex: 10,
-                                maxHeight: 240,
-                                overflowY: 'auto',
-                            }}>
-                                {/* Add custom option - at top when input is new */}
-                                {skillInputIsNew && (
-                                    <button
-                                        type="button"
-                                        onMouseDown={(e) => {
-                                            e.preventDefault()
-                                            addSkill(skillInputTrimmed)
-                                        }}
-                                        style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: 8,
-                                            width: '100%',
-                                            padding: '10px 14px',
-                                            textAlign: 'left',
-                                            border: 'none',
-                                            borderBottom: filteredSkillSuggestions.length > 0 ? '1px solid var(--border-subtle)' : 'none',
-                                            background: 'var(--color-accent-glow)',
-                                            fontSize: 13,
-                                            fontWeight: 500,
-                                            color: 'var(--color-accent)',
-                                            cursor: 'pointer',
-                                        }}
-                                    >
-                                        <Icon name="plus" size="sm" hideAccent />
-                                        <span>Add "{skillInputTrimmed}"</span>
-                                    </button>
-                                )}
-
-                                {/* Suggestions */}
-                                {filteredSkillSuggestions.map((skill) => (
-                                    <button
-                                        key={skill}
-                                        type="button"
-                                        onMouseDown={(e) => {
-                                            e.preventDefault()
-                                            addSkill(skill)
-                                        }}
-                                        style={{
-                                            display: 'block',
-                                            width: '100%',
-                                            padding: '10px 14px',
-                                            textAlign: 'left',
-                                            border: 'none',
-                                            background: 'transparent',
-                                            fontSize: 13,
-                                            color: 'var(--text)',
-                                            cursor: 'pointer',
-                                        }}
-                                        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-bg-alt)'}
-                                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                                    >
-                                        {skill}
-                                    </button>
-                                ))}
-                            </div>
+                    )}
+                </div>
+                
+                {/* Suggestions Dropdown */}
+                {showTitleDropdown && (titleInputIsNew || filteredTitleSuggestions.length > 0) && (
+                    <div style={{
+                        marginTop: 4,
+                        background: 'var(--color-bg-tertiary)',
+                        border: '1px solid var(--color-graphite-faint)',
+                        borderRadius: 'var(--radius-md)',
+                        boxShadow: 'var(--shadow-md)',
+                        zIndex: 10,
+                        maxHeight: 200,
+                        overflowY: 'auto',
+                    }}>
+                        {titleInputIsNew && (
+                            <button
+                                type="button"
+                                onMouseDown={(e) => {
+                                    e.preventDefault()
+                                    addRelatedTitle(titleInputTrimmed)
+                                }}
+                                style={{
+                                    display: 'block',
+                                    width: '100%',
+                                    padding: '8px 12px',
+                                    textAlign: 'left',
+                                    border: 'none',
+                                    background: 'rgba(212, 165, 116, 0.1)',
+                                    color: 'var(--color-accent)',
+                                    cursor: 'pointer',
+                                    fontSize: '0.875rem'
+                                }}
+                            >
+                                Add "{titleInputTrimmed}"
+                            </button>
                         )}
+                        {filteredTitleSuggestions.map((title) => (
+                            <button
+                                key={title}
+                                type="button"
+                                onMouseDown={(e) => {
+                                    e.preventDefault()
+                                    addRelatedTitle(title)
+                                }}
+                                style={{
+                                    display: 'block',
+                                    width: '100%',
+                                    padding: '8px 12px',
+                                    textAlign: 'left',
+                                    border: 'none',
+                                    background: 'transparent',
+                                    color: 'var(--color-ink)',
+                                    cursor: 'pointer',
+                                    fontSize: '0.875rem'
+                                }}
+                            >
+                                {title}
+                            </button>
+                        ))}
+                    </div>
+                )}
+
+                <div style={{ marginTop: 24 }}>
+                    <label className="form-label">Seniority levels</label>
+                    <div className="button-group">
+                        {SENIORITY_OPTIONS.map((level) => (
+                            <button
+                                key={level}
+                                className={`btn-option ${prefs.seniority_levels.includes(level) ? 'active' : ''}`}
+                                onClick={() => toggleSeniority(level)}
+                            >
+                                {level}
+                            </button>
+                        ))}
                     </div>
                 </div>
-            </article>
+            </div>
 
-            {/* Location & Remote */}
-            <article className="surface-card">
-                <div className="rl-field-grid">
-                    <div style={{ display: 'grid', gap: 6 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>
-                            <Icon name="compass" size="sm" hideAccent />
-                            <span>Work location</span>
+            <div className="card">
+                <h3>Skills to highlight</h3>
+                <p className="card-description">Type to search or add your own. We'll suggest related skills.</p>
+                
+                <div className="pill-input">
+                    {(prefs.include_keywords || []).map((skill) => (
+                        <div key={skill} className="pill">
+                            {skill}
+                            <button className="pill-remove" onClick={() => removeSkill(skill)}>X</button>
                         </div>
-                    </div>
-
-                    <div style={{ display: 'grid', gap: 16 }}>
-                        <div style={{ display: 'grid', gap: 6 }}>
-                            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>Remote preference</span>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                                {REMOTE_OPTIONS.map((option) => (
-                                    <OptionChip
-                                        key={option.id}
-                                        label={option.label}
-                                        selected={prefs.remote_preference === option.id}
-                                        onClick={() => handleFieldChange('remote_preference', option.id)}
-                                    />
-                                ))}
-                            </div>
-                        </div>
-
-                        <RangeSliderWithPresets
-                            label="Location radius"
-                            value={50}
-                            min={0}
-                            max={100}
-                            onChange={() => { /* TODO: Add location radius to prefs */ }}
-                            leftLabel="Local"
-                            rightLabel="Anywhere"
-                        />
-                    </div>
-                </div>
-            </article>
-
-            {/* Salary */}
-            <article className="surface-card">
-                <div className="rl-field-grid">
-                    <div style={{ display: 'grid', gap: 6 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>
-                            <Icon name="scroll" size="sm" hideAccent />
-                            <span>Compensation</span>
-                        </div>
-                        <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                            This is never shared with employers. We use it to filter out roles below your floor.
-                        </p>
-                    </div>
-
-                    <RangeSliderWithPresets
-                        label="Minimum base salary"
-                        value={prefs.min_salary || 100000}
-                        min={30000}
-                        max={300000}
-                        step={5000}
-                        presets={SALARY_PRESETS}
-                        onChange={(value) => handleFieldChange('min_salary', value)}
-                        formatValue={(v) => `$${(v / 1000).toFixed(0)}K ${prefs.salary_currency}/${prefs.salary_unit === 'yearly' ? 'yr' : 'hr'}`}
+                    ))}
+                    <input
+                        type="text"
+                        value={skillInput}
+                        onChange={(e) => setSkillInput(e.target.value)}
+                        onFocus={() => setSkillInputFocused(true)}
+                        onBlur={() => setTimeout(() => setSkillInputFocused(false), 150)}
+                        onKeyDown={handleSkillKeyDown}
+                        placeholder="Add another..."
+                        className="pill-input-field"
                     />
                 </div>
-            </article>
-        </>
+                
+                {/* Suggestions Dropdown */}
+                {showSkillDropdown && (skillInputIsNew || filteredSkillSuggestions.length > 0) && (
+                    <div style={{
+                        marginTop: 4,
+                        background: 'var(--color-bg-tertiary)',
+                        border: '1px solid var(--color-graphite-faint)',
+                        borderRadius: 'var(--radius-md)',
+                        boxShadow: 'var(--shadow-md)',
+                        zIndex: 10,
+                        maxHeight: 200,
+                        overflowY: 'auto',
+                    }}>
+                        {skillInputIsNew && (
+                            <button
+                                type="button"
+                                onMouseDown={(e) => {
+                                    e.preventDefault()
+                                    addSkill(skillInputTrimmed)
+                                }}
+                                style={{
+                                    display: 'block',
+                                    width: '100%',
+                                    padding: '8px 12px',
+                                    textAlign: 'left',
+                                    border: 'none',
+                                    background: 'rgba(212, 165, 116, 0.1)',
+                                    color: 'var(--color-accent)',
+                                    cursor: 'pointer',
+                                    fontSize: '0.875rem'
+                                }}
+                            >
+                                Add "{skillInputTrimmed}"
+                            </button>
+                        )}
+                        {filteredSkillSuggestions.map((skill) => (
+                            <button
+                                key={skill}
+                                type="button"
+                                onMouseDown={(e) => {
+                                    e.preventDefault()
+                                    addSkill(skill)
+                                }}
+                                style={{
+                                    display: 'block',
+                                    width: '100%',
+                                    padding: '8px 12px',
+                                    textAlign: 'left',
+                                    border: 'none',
+                                    background: 'transparent',
+                                    color: 'var(--color-ink)',
+                                    cursor: 'pointer',
+                                    fontSize: '0.875rem'
+                                }}
+                            >
+                                {skill}
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            <div className="card">
+                <h3>Work location</h3>
+                <div className="form-group">
+                    <label className="form-label">Remote preference</label>
+                    <div className="button-group">
+                        {REMOTE_OPTIONS.map((option) => (
+                            <button
+                                key={option.id}
+                                className={`btn-option ${prefs.remote_preference === option.id ? 'active' : ''}`}
+                                onClick={() => handleFieldChange('remote_preference', option.id as any)}
+                            >
+                                {option.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="form-group" style={{ marginTop: 24 }}>
+                    <div className="slider-header">
+                        <label className="form-label">Location radius</label>
+                        <span className="slider-value">50 miles</span>
+                    </div>
+                    <input 
+                        type="range" 
+                        className="form-slider" 
+                        min="0" max="100" 
+                        defaultValue="50"
+                        onChange={() => {}}
+                    />
+                    <div className="slider-labels">
+                        <span>Local</span>
+                        <span>Anywhere</span>
+                    </div>
+                </div>
+            </div>
+
+            <div className="card">
+                <h3>Compensation</h3>
+                <p className="card-description">This is never shared with employers. We use it to filter out roles below your floor.</p>
+                
+                <div className="form-group">
+                    <div className="slider-header">
+                        <label className="form-label">Minimum base salary</label>
+                        <span className="slider-value">${(prefs.min_salary / 1000).toFixed(0)}K</span>
+                    </div>
+                    <input 
+                        type="range" 
+                        className="form-slider" 
+                        min="30000" 
+                        max="300000" 
+                        step="5000"
+                        value={prefs.min_salary}
+                        onChange={(e) => handleFieldChange('min_salary', parseInt(e.target.value))}
+                    />
+                    <div className="slider-labels">
+                        <span>$30K</span>
+                        <span>$300K</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     )
 }

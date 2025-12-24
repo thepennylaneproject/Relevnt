@@ -22,6 +22,7 @@ import { AddApplicationModal } from '../components/Applications/AddApplicationMo
 import { NetworkingConnectionPrompt } from '../components/intelligence/NetworkingConnectionPrompt'
 import { useNetworkingDraft } from '../hooks/useNetworkingDraft'
 import { formatRelativeTime } from '../lib/utils/time'
+import '../styles/applications.css'
 
 const STATUS_TABS: (ApplicationStatus | 'all')[] = [
   'all',
@@ -116,13 +117,13 @@ export default function ApplicationsPage() {
       <button
         key={key}
         type="button"
-        className={`ghost-button button-sm ${isActive ? 'is-active' : ''}`}
+        className={`filter-btn ${isActive ? 'active' : ''}`}
         onClick={() => handleStatusClick(key)}
       >
         <span>{label}</span>
         {typeof count === 'number' && (
-          <span className="count-badge">
-            {count}
+          <span className="count">
+            ({count})
           </span>
         )}
       </button>
@@ -154,35 +155,38 @@ export default function ApplicationsPage() {
     <PageBackground>
       <Container maxWidth="xl" padding="md">
         <div className="apps-page">
-          <PageHero
-            category="track"
-            headline={copy.applications.pageSubtitle}
-            subtitle="Keep cada role, status, and timeline in one place. Future You has the receipts."
-            actions={[{
-              label: 'Log a new application',
-              onClick: handleAddApplication,
-              variant: 'primary',
-              icon: <Plus size={16} aria-hidden="true" />,
-            }]}
-          >
-            {typeof totalApplications === 'number' && typeof activeApplications === 'number' && (
-              <div className="hero-actions-metrics" style={{ marginTop: 12 }}>
-                <span className="hero-metric-pill">
-                  <span className="font-semibold">{totalApplications}</span> Total
-                </span>
-                <span className="hero-metric-pill">
-                  <span className="font-semibold">{activeApplications}</span> Active
-                </span>
+          <header className="page-header">
+            <div className="header-top">
+              <span className="label">TRACK</span>
+            </div>
+            <h1>Track where you're at in each process, without losing the plot.</h1>
+            <p className="subtitle">Keep cada role, status, and timeline in one place. Future You has the receipts.</p>
+
+            <div className="stats">
+              <div className="stat-item">
+                <span className="stat-value">{totalApplications}</span>
+                <span className="stat-label">Total</span>
               </div>
-            )}
-          </PageHero>
+              <div className="stat-item">
+                <span className="stat-value">{activeApplications}</span>
+                <span className="stat-label">Active</span>
+              </div>
+            </div>
+
+            <div className="mt-8">
+              <button className="btn btn--primary" onClick={handleAddApplication}>
+                <Plus size={16} aria-hidden="true" className="mr-2" />
+                Log a new application
+              </button>
+            </div>
+          </header>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
             <div className="lg:col-span-2 space-y-6">
               <section className="surface-card">
-                <h2 className="text-sm font-semibold">Filter by status</h2>
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-ink-tertiary mb-4">Filter by status</h3>
 
-                <div className="filter-button-row">
+                <div className="filter-buttons">
                   {STATUS_TABS.map((statusKey) => {
                     const label =
                       statusKey === 'all'
@@ -208,13 +212,12 @@ export default function ApplicationsPage() {
                 {error && <p className="muted text-sm text-danger">{error}</p>}
 
                 {!loading && applications.length === 0 ? (
-                  <EmptyState
-                    type="applications"
-                    action={{
-                      label: "Log your first application",
-                      onClick: handleAddApplication,
-                    }}
-                  />
+                  <div className="empty-state">
+                    <Icon name="paper-airplane" size="xl" className="empty-icon" />
+                    <h2>Your story starts here</h2>
+                    <p>When you apply to your first role, we'll track every step together — no spreadsheets required.</p>
+                    <button className="btn btn--primary" onClick={handleAddApplication}>Log your first application</button>
+                  </div>
                 ) : (
                   <div className="item-grid">
                     {applications.map((app) => (
@@ -229,15 +232,15 @@ export default function ApplicationsPage() {
                           </div>
 
                           <div className="flex flex-col items-end gap-2">
-                            <span className={`pill app-status-pill--${app.status || 'none'}`}>
+                            <span className={`badge app-status-pill--${app.status || 'none'}`}>
                               {renderStatusIcon(app.status)}
                               <span>{prettyStatusLabel(app.status)}</span>
                             </span>
                             {(app.status === 'interviewing' || app.status === 'in-progress') && (
                               <Link
                                 to={`/interview-prep`}
-                                className="ghost-button button-xs color-accent"
-                                style={{ textDecoration: 'none' }}
+                                className="btn btn--ghost btn--xs"
+                                style={{ textDecoration: 'none', color: 'var(--color-accent)' }}
                               >
                                 <Icon name="microphone" size="sm" />
                                 <span>Practice</span>
@@ -325,7 +328,7 @@ export default function ApplicationsPage() {
                           </div>
                           <button
                             type="button"
-                            className="ghost-button button-sm mt-4"
+                            className="btn btn--ghost btn--sm mt-4"
                             onClick={() => {
                               if (expandedId === app.id) {
                                 setExpandedId(null)
@@ -336,22 +339,22 @@ export default function ApplicationsPage() {
                             }}
                           >
                             {expandedId === app.id ? 'Collapse' : 'Details'}
-                            <Icon name={expandedId === app.id ? 'anchor' : 'scroll'} size="sm" hideAccent />
+                            <Icon name={expandedId === app.id ? 'anchor' : 'scroll'} size="sm" hideAccent className="ml-2" />
                           </button>
                         </div>
 
                         {expandedId === app.id && (
                           <div className="mt-4 animate-in slide-in-from-top-2">
-                            <div className="flex gap-2 mb-4 border-b border-subtle pb-2">
+                            <div className="flex gap-2 mb-4 border-b border-graphite-faint pb-3">
                               <button
-                                className={`ghost-button button-xs ${expandedTab === 'timeline' ? 'is-active' : ''}`}
+                                className={`btn btn--ghost btn--xs ${expandedTab === 'timeline' ? 'is-active' : ''}`}
                                 onClick={() => setExpandedTab('timeline')}
                               >
                                 Timeline
                               </button>
                               {app.status === 'offer' && (
                                 <button
-                                  className={`ghost-button button-xs ${expandedTab === 'negotiate' ? 'is-active' : ''}`}
+                                  className={`btn btn--ghost btn--xs ${expandedTab === 'negotiate' ? 'is-active' : ''}`}
                                   onClick={() => setExpandedTab('negotiate')}
                                 >
                                   Negotiation Coach
@@ -359,14 +362,14 @@ export default function ApplicationsPage() {
                               )}
                               {app.status === 'rejected' && (
                                 <button
-                                  className={`ghost-button button-xs ${expandedTab === 'coaching' ? 'is-active' : ''}`}
+                                  className={`btn btn--ghost btn--xs ${expandedTab === 'coaching' ? 'is-active' : ''}`}
                                   onClick={() => setExpandedTab('coaching')}
                                 >
                                   De-brief
                                 </button>
                               )}
                               <button
-                                className={`ghost-button button-xs ${expandedTab === 'letter' ? 'is-active' : ''}`}
+                                className={`btn btn--ghost btn--xs ${expandedTab === 'letter' ? 'is-active' : ''}`}
                                 onClick={() => setExpandedTab('letter')}
                               >
                                 Cover Letter
@@ -400,11 +403,12 @@ export default function ApplicationsPage() {
                           </div>
                         )}
 
-                        <footer className="item-card-footer mt-4 pt-4 border-t border-subtle flex justify-between">
+                        <footer className="item-card-footer mt-4 pt-4 border-t border-graphite-faint flex justify-between">
                           <p className="muted text-[11px]">Updated {formatUpdated(app)}</p>
                           <button
                             type="button"
-                            className="ghost-button button-xs text-danger"
+                            className="btn btn--ghost btn--xs"
+                            style={{ color: 'var(--color-error)' }}
                             onClick={() => handleDeleteClick(app.id, app.position)}
                           >
                             Delete
@@ -425,38 +429,6 @@ export default function ApplicationsPage() {
           </div>
         </div>
       </Container>
-      <style>{`
-          .enhanced-app-card {
-              transition: all 0.2s ease;
-          }
-          .app-status-select {
-              border: none;
-              background: var(--surface-accent);
-              padding: 4px 8px;
-              border-radius: 4px;
-              font-size: 13px;
-              color: var(--text);
-              cursor: pointer;
-          }
-          .app-timeline {
-              padding: 12px;
-              background: var(--surface-accent);
-              border-radius: 8px;
-          }
-          .timeline-event {
-              position: relative;
-              padding-left: 12px;
-          }
-          .timeline-dot {
-              position: absolute;
-              left: 0;
-              top: 4px;
-              width: 6px;
-              height: 6px;
-              border-radius: 50%;
-              background: var(--color-accent);
-          }
-      `}</style>
 
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog
