@@ -9,6 +9,8 @@
  * - Style: Slightly organic, hand-drawn quality without being sketchy
  */
 
+import React from 'react'
+
 export interface CustomIconProps {
   size?: number | string
   color?: 'ink' | 'emerald' | 'ivory' | 'gray'
