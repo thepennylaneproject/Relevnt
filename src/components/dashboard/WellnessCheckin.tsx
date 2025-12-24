@@ -2,6 +2,8 @@
 import React, { useState } from 'react'
 import { useWellnessCheckin } from '../../hooks/useWellnessCheckin'
 import { Icon } from '../ui/Icon'
+import { PoeticVerseMinimal } from '../ui/PoeticVerse'
+import { getPoeticVerse } from '../../lib/poeticMoments'
 
 const MOODS = [
     { score: 1, label: 'Exhausted', emoji: '😫' },
