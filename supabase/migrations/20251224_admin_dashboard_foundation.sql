@@ -19,12 +19,7 @@ CREATE TABLE IF NOT EXISTS admin_alerts (
     is_dismissed BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT NOW(),
     triggered_at TIMESTAMP,
-    resolved_at TIMESTAMP,
-
-    INDEX idx_alerts_created_at (created_at DESC),
-    INDEX idx_alerts_source (source_slug),
-    INDEX idx_alerts_unread (is_read, is_dismissed),
-    INDEX idx_alerts_severity (severity)
+    resolved_at TIMESTAMP
 );
 
 -- ============================================================================
@@ -54,15 +49,11 @@ CREATE TABLE IF NOT EXISTS source_performance_metrics (
 
     -- Health calculation
     health_score INT DEFAULT 100, -- 0-100
-    health_factors JSONB DEFAULT '{"success_rate": 0, "failures": 0, "freshness": 0, "duplicates": 0}',
+    health_factors JSONB DEFAULT '{"success_rate":0,"failures":0,"freshness":0,"duplicates":0}'::jsonb,
 
     -- Tracking
     updated_at TIMESTAMP DEFAULT NOW(),
-    last_run_at TIMESTAMP,
-
-    INDEX idx_perf_health (health_score),
-    INDEX idx_perf_success_rate (success_rate_7d),
-    INDEX idx_perf_updated (updated_at DESC)
+    last_run_at TIMESTAMP
 );
 
 -- ============================================================================
@@ -87,9 +78,7 @@ CREATE TABLE IF NOT EXISTS daily_ingestion_metrics (
     duplicate_rate_percent FLOAT DEFAULT 0,
 
     -- Tracking
-    created_at TIMESTAMP DEFAULT NOW(),
-
-    INDEX idx_daily_date (date DESC)
+    created_at TIMESTAMP DEFAULT NOW()
 );
 
 -- ============================================================================
@@ -116,11 +105,7 @@ CREATE TABLE IF NOT EXISTS job_source_health (
 
     -- Tracking
     updated_at TIMESTAMP DEFAULT NOW(),
-    last_checked_at TIMESTAMP,
-
-    INDEX idx_health_status (is_healthy),
-    INDEX idx_health_degraded (is_degraded),
-    INDEX idx_health_updated (updated_at DESC)
+    last_checked_at TIMESTAMP
 );
 
 -- ============================================================================
@@ -151,15 +136,40 @@ CREATE TABLE IF NOT EXISTS ingestion_activity_log (
     progress_percent INT DEFAULT 0, -- 0-100 if running
 
     -- Tracking
-    created_at TIMESTAMP DEFAULT NOW(),
-
-    INDEX idx_activity_created (created_at DESC),
-    INDEX idx_activity_status (status),
-    INDEX idx_activity_started (started_at DESC)
+    created_at TIMESTAMP DEFAULT NOW()
 );
 
 -- ============================================================================
--- 6. GRANT PERMISSIONS
+-- CREATE INDEXES
+-- ============================================================================
+
+-- Indexes for admin_alerts
+CREATE INDEX IF NOT EXISTS idx_alerts_created_at ON admin_alerts (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_alerts_source ON admin_alerts (source_slug);
+CREATE INDEX IF NOT EXISTS idx_alerts_unread ON admin_alerts (is_read, is_dismissed) WHERE is_dismissed = FALSE;
+CREATE INDEX IF NOT EXISTS idx_alerts_severity ON admin_alerts (severity);
+
+-- Indexes for source_performance_metrics
+CREATE INDEX IF NOT EXISTS idx_perf_health ON source_performance_metrics (health_score);
+CREATE INDEX IF NOT EXISTS idx_perf_success_rate ON source_performance_metrics (success_rate_7d);
+CREATE INDEX IF NOT EXISTS idx_perf_updated ON source_performance_metrics (updated_at DESC);
+
+-- Indexes for daily_ingestion_metrics
+CREATE INDEX IF NOT EXISTS idx_daily_date ON daily_ingestion_metrics (date DESC);
+
+-- Indexes for job_source_health
+CREATE INDEX IF NOT EXISTS idx_health_status ON job_source_health (is_healthy);
+CREATE INDEX IF NOT EXISTS idx_health_degraded ON job_source_health (is_degraded) WHERE is_degraded = TRUE;
+CREATE INDEX IF NOT EXISTS idx_health_updated ON job_source_health (updated_at DESC);
+
+-- Indexes for ingestion_activity_log
+CREATE INDEX IF NOT EXISTS idx_activity_created ON ingestion_activity_log (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_activity_status ON ingestion_activity_log (status);
+CREATE INDEX IF NOT EXISTS idx_activity_started ON ingestion_activity_log (started_at DESC);
+CREATE INDEX IF NOT EXISTS idx_activity_feed ON ingestion_activity_log (created_at DESC, status) WHERE status IN ('running', 'success', 'partial', 'failed');
+
+-- ============================================================================
+-- GRANT PERMISSIONS
 -- ============================================================================
 -- Allow authenticated users to read alerts and metrics
 GRANT SELECT ON admin_alerts TO authenticated;
@@ -175,17 +185,3 @@ GRANT ALL ON daily_ingestion_metrics TO service_role;
 GRANT ALL ON job_source_health TO service_role;
 GRANT ALL ON ingestion_activity_log TO service_role;
 
--- ============================================================================
--- INDEXES FOR COMMON QUERIES
--- ============================================================================
--- Activity feed: recent runs by status
-CREATE INDEX IF NOT EXISTS idx_activity_feed ON ingestion_activity_log (created_at DESC, status)
-    WHERE status IN ('running', 'success', 'partial', 'failed');
-
--- Alerts: unread and dismissable
-CREATE INDEX IF NOT EXISTS idx_alerts_actionable ON admin_alerts (is_read DESC, is_dismissed DESC, created_at DESC)
-    WHERE is_dismissed = FALSE;
-
--- Source health: degraded sources
-CREATE INDEX IF NOT EXISTS idx_sources_degraded ON job_source_health (is_degraded DESC, consecutive_failures DESC)
-    WHERE is_degraded = TRUE;
