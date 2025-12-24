@@ -84,29 +84,13 @@ CREATE TABLE IF NOT EXISTS daily_ingestion_metrics (
 -- ============================================================================
 -- 4. JOB SOURCE HEALTH TABLE (extends existing)
 -- ============================================================================
--- If this table doesn't exist, create it. Otherwise we'll just track health.
--- This is for per-source health information
+-- Table already exists in Supabase. Add missing columns for admin dashboard.
 
-CREATE TABLE IF NOT EXISTS job_source_health (
-    source_slug TEXT PRIMARY KEY,
-
-    -- Status tracking
-    is_healthy BOOLEAN DEFAULT TRUE,
-    is_degraded BOOLEAN DEFAULT FALSE,
-
-    -- Failure tracking
-    consecutive_failures INT DEFAULT 0,
-    last_failure_at TIMESTAMP,
-    last_failure_reason TEXT,
-
-    -- Success tracking
-    last_success_at TIMESTAMP,
-    success_count_24h INT DEFAULT 0,
-
-    -- Tracking
-    updated_at TIMESTAMP DEFAULT NOW(),
-    last_checked_at TIMESTAMP
-);
+ALTER TABLE IF EXISTS job_source_health
+ADD COLUMN IF NOT EXISTS is_healthy BOOLEAN DEFAULT TRUE,
+ADD COLUMN IF NOT EXISTS last_failure_reason TEXT,
+ADD COLUMN IF NOT EXISTS success_count_24h INT DEFAULT 0,
+ADD COLUMN IF NOT EXISTS last_checked_at TIMESTAMP;
 
 -- ============================================================================
 -- 5. INGESTION ACTIVITY LOG (for recent activity feed)
