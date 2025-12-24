@@ -33,6 +33,17 @@ export interface RelevanceTunerProps {
 
     /** Compact mode for tight spaces */
     compact?: boolean
+
+    // --- Feed Filter Props ---
+    minSalary?: number
+    setMinSalary?: (val: number) => void
+    remoteOnly?: boolean
+    setRemoteOnly?: (val: boolean) => void
+    source?: string
+    setSource?: (val: string) => void
+    employmentType?: string
+    setEmploymentType?: (val: string) => void
+    availableSources?: { id: string; name: string; source_key: string }[]
 }
 
 // =============================================================================
@@ -43,6 +54,15 @@ export function RelevanceTuner({
     onWeightsChange,
     className = '',
     compact = false,
+    minSalary = 0,
+    setMinSalary,
+    remoteOnly = false,
+    setRemoteOnly,
+    source = '',
+    setSource,
+    employmentType = '',
+    setEmploymentType,
+    availableSources = [],
 }: RelevanceTunerProps) {
     const {
         presets,
@@ -179,8 +199,8 @@ export function RelevanceTuner({
 
     if (loading) {
         return (
-            <div className={`relevance-tuner relevance-tuner--loading ${className}`} style={styles.container}>
-                <div style={styles.loadingText}>Loading tuner settings...</div>
+            <div className={`relevance-tuner relevance-tuner--loading ${className}`}>
+                <div className="tuner-loading">Loading tuner settings...</div>
             </div>
         )
     }
@@ -210,11 +230,83 @@ export function RelevanceTuner({
             {/* Expandable Content */}
             {isExpanded && (
                 <div className="tuner-body">
+                    
+                    {/* Filter Section */}
+                    <div className="tuner-filters">
+                        <div className="filter-grid">
+                            <div className="form-group">
+                                <label className="form-label">Minimum Salary (USD)</label>
+                                <input
+                                    type="number"
+                                    min={0}
+                                    step={5000}
+                                    value={minSalary}
+                                    onChange={(e) => {
+                                        const raw = e.target.value
+                                        const numeric = raw.replace(/[^\d]/g, '')
+                                        const num = numeric === '' ? 0 : Number(numeric)
+                                        const next = num <= 0 ? 0 : num
+                                        setMinSalary?.(next)
+                                    }}
+                                    className="form-input"
+                                    placeholder="e.g. 100000"
+                                />
+                            </div>
+
+                            <div className="field">
+                                <label className="form-label">Source</label>
+                                <select
+                                    value={source}
+                                    onChange={(e) => setSource?.(e.target.value)}
+                                    className="form-select"
+                                >
+                                    <option value="">All Sources</option>
+                                    {availableSources.map((s) => (
+                                        <option key={s.id} value={s.source_key}>
+                                            {s.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="field">
+                                <label className="form-label">Employment Type</label>
+                                <select
+                                    value={employmentType}
+                                    onChange={(e) => setEmploymentType?.(e.target.value)}
+                                    className="form-select"
+                                >
+                                    <option value="">All Types</option>
+                                    <option value="full-time">Full-time</option>
+                                    <option value="part-time">Part-time</option>
+                                    <option value="contract">Contract</option>
+                                    <option value="temporary">Temporary</option>
+                                </select>
+                            </div>
+
+                            <div className="form-group checkbox-field">
+                                <input
+                                    id="remote-only-toggle"
+                                    type="checkbox"
+                                    className="form-checkbox"
+                                    checked={remoteOnly}
+                                    onChange={(e) => setRemoteOnly?.(e.target.checked)}
+                                />
+                                <label htmlFor="remote-only-toggle" className="form-label">
+                                    Remote Friendly Only
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="tuner-divider">
+                        <span className="divider-text">Ranking Weights</span>
+                    </div>
 
                     {/* Error Message */}
                     {error && (
-                        <div style={styles.errorBox}>
-                            <div style={styles.errorIcon}>
+                        <div className="error-box">
+                            <div className="error-icon">
                                 <Icon name="alert-triangle" size="sm" hideAccent />
                             </div>
                             <span>{error}</span>
@@ -222,11 +314,11 @@ export function RelevanceTuner({
                     )}
 
                     {/* Preset Controls */}
-                    <div style={styles.presetControls}>
+                    <div className="preset-controls">
                         <select
                             value={selectedPreset?.id || ''}
                             onChange={handleLoadPreset}
-                            style={styles.presetSelect}
+                            className="form-select preset-select"
                             disabled={loading}
                         >
                             <option value="">Balanced</option>
@@ -238,17 +330,17 @@ export function RelevanceTuner({
                         </select>
                         {/* Show description for selected preset */}
                         {selectedPreset && PRESET_LABELS[selectedPreset.name.toLowerCase()] && (
-                            <div style={styles.presetDescription}>
+                            <div className="preset-description">
                                 {PRESET_LABELS[selectedPreset.name.toLowerCase()].description}
                             </div>
                         )}
 
-                        <div style={styles.presetButtons}>
+                        <div className="preset-buttons">
                             {selectedPreset && !selectedPreset.is_default && (
                                 <button
                                     type="button"
                                     onClick={handleDeletePreset}
-                                    style={styles.deleteButton}
+                                    className="btn btn-destructive btn-sm"
                                     title="Delete preset"
                                 >
                                     🗑️
@@ -257,14 +349,14 @@ export function RelevanceTuner({
                             <button
                                 type="button"
                                 onClick={() => setShowSaveForm(!showSaveForm)}
-                                style={styles.secondaryButton}
+                                className="btn btn-secondary btn-sm"
                             >
                                 {showSaveForm ? 'Cancel' : 'Save'}
                             </button>
                             <button
                                 type="button"
                                 onClick={handleReset}
-                                style={styles.secondaryButton}
+                                className="btn btn-ghost btn-sm"
                             >
                                 Reset
                             </button>
@@ -273,19 +365,19 @@ export function RelevanceTuner({
 
                     {/* Save Form */}
                     {showSaveForm && (
-                        <form onSubmit={handleSavePreset} style={styles.saveForm}>
+                        <form onSubmit={handleSavePreset} className="save-form">
                             <input
                                 type="text"
                                 value={presetName}
                                 onChange={(e) => setPresetName(e.target.value)}
                                 placeholder="Preset name..."
-                                style={styles.presetInput}
+                                className="form-input"
                                 disabled={saving}
                                 autoFocus
                             />
                             <button
                                 type="submit"
-                                style={styles.primaryButton}
+                                className="btn btn-primary btn-sm"
                                 disabled={saving || !presetName.trim()}
                             >
                                 {saving ? 'Saving...' : 'Save'}
@@ -294,11 +386,11 @@ export function RelevanceTuner({
                     )}
 
                     {/* Sliders */}
-                    <div style={styles.slidersContainer}>
-                        <div style={styles.sliderGroup}>
-                            <label style={styles.sliderLabel}>
-                                <span style={styles.labelText}>Skills</span>
-                                <span style={styles.labelValue}>{Math.round(percentages.skill)}%</span>
+                    <div className="sliders-container">
+                        <div className="slider-group">
+                            <label className="slider-label">
+                                <span className="label-text">Skills</span>
+                                <span className="label-value">{Math.round(percentages.skill)}%</span>
                             </label>
                             <input
                                 type="range"
@@ -306,16 +398,15 @@ export function RelevanceTuner({
                                 max="100"
                                 value={currentWeights.skill_weight * 100}
                                 onChange={(e) => handleWeightChange('skill_weight', parseFloat(e.target.value))}
-                                style={styles.slider}
                                 className="tuner-slider"
                             />
-                            <div style={styles.hint}>Match what you're already good at</div>
+                            <div className="hint">Match what you're already good at</div>
                         </div>
 
-                        <div style={styles.sliderGroup}>
-                            <label style={styles.sliderLabel}>
-                                <span style={styles.labelText}>Salary</span>
-                                <span style={styles.labelValue}>{Math.round(percentages.salary)}%</span>
+                        <div className="slider-group">
+                            <label className="slider-label">
+                                <span className="label-text">Salary</span>
+                                <span className="label-value">{Math.round(percentages.salary)}%</span>
                             </label>
                             <input
                                 type="range"
@@ -323,16 +414,15 @@ export function RelevanceTuner({
                                 max="100"
                                 value={currentWeights.salary_weight * 100}
                                 onChange={(e) => handleWeightChange('salary_weight', parseFloat(e.target.value))}
-                                style={styles.slider}
                                 className="tuner-slider"
                             />
-                            <div style={styles.hint}>Higher pay floats to the top</div>
+                            <div className="hint">Higher pay floats to the top</div>
                         </div>
 
-                        <div style={styles.sliderGroup}>
-                            <label style={styles.sliderLabel}>
-                                <span style={styles.labelText}>Location</span>
-                                <span style={styles.labelValue}>{Math.round(percentages.location)}%</span>
+                        <div className="slider-group">
+                            <label className="slider-label">
+                                <span className="label-text">Location</span>
+                                <span className="label-value">{Math.round(percentages.location)}%</span>
                             </label>
                             <input
                                 type="range"
@@ -340,16 +430,15 @@ export function RelevanceTuner({
                                 max="100"
                                 value={currentWeights.location_weight * 100}
                                 onChange={(e) => handleWeightChange('location_weight', parseFloat(e.target.value))}
-                                style={styles.slider}
                                 className="tuner-slider"
                             />
-                            <div style={styles.hint}>Favor your preferred cities or regions</div>
+                            <div className="hint">Favor your preferred cities or regions</div>
                         </div>
 
-                        <div style={styles.sliderGroup}>
-                            <label style={styles.sliderLabel}>
-                                <span style={styles.labelText}>Remote</span>
-                                <span style={styles.labelValue}>{Math.round(percentages.remote)}%</span>
+                        <div className="slider-group">
+                            <label className="slider-label">
+                                <span className="label-text">Remote</span>
+                                <span className="label-value">{Math.round(percentages.remote)}%</span>
                             </label>
                             <input
                                 type="range"
@@ -357,16 +446,15 @@ export function RelevanceTuner({
                                 max="100"
                                 value={currentWeights.remote_weight * 100}
                                 onChange={(e) => handleWeightChange('remote_weight', parseFloat(e.target.value))}
-                                style={styles.slider}
                                 className="tuner-slider"
                             />
-                            <div style={styles.hint}>Remote-friendly roles rank higher</div>
+                            <div className="hint">Remote-friendly roles rank higher</div>
                         </div>
 
-                        <div style={styles.sliderGroup}>
-                            <label style={styles.sliderLabel}>
-                                <span style={styles.labelText}>Industry</span>
-                                <span style={styles.labelValue}>{Math.round(percentages.industry)}%</span>
+                        <div className="slider-group">
+                            <label className="slider-label">
+                                <span className="label-text">Industry</span>
+                                <span className="label-value">{Math.round(percentages.industry)}%</span>
                             </label>
                             <input
                                 type="range"
@@ -374,83 +462,82 @@ export function RelevanceTuner({
                                 max="100"
                                 value={currentWeights.industry_weight * 100}
                                 onChange={(e) => handleWeightChange('industry_weight', parseFloat(e.target.value))}
-                                style={styles.slider}
                                 className="tuner-slider"
                             />
-                            <div style={styles.hint}>Lean toward industries you care about</div>
+                            <div className="hint">Lean toward industries you care about</div>
                         </div>
                     </div>
 
                     {/* Collapsible Weight Distribution Visualization */}
-                    <div style={styles.distributionSection}>
+                    <div className="distribution-section">
                         <button
                             type="button"
                             onClick={() => setShowDistribution(!showDistribution)}
-                            style={styles.distributionToggle}
+                            className="distribution-toggle"
                         >
                             {showDistribution ? '▼' : '▶'} See how your weights stack up
                         </button>
 
                         {showDistribution && (
                             <>
-                                <div style={styles.distributionBar}>
+                                <div className="distribution-bar">
                                     <div
+                                        className="distribution-segment"
                                         style={{
-                                            ...styles.distributionSegment,
                                             width: `${percentages.skill}%`,
-                                            backgroundColor: 'var(--accent-primary, #d4af37)',
+                                            backgroundColor: 'var(--color-accent, #d4af37)',
                                         }}
                                         title={`Skills: ${Math.round(percentages.skill)}%`}
                                     >
-                                        {percentages.skill > 10 && <span style={styles.segmentLabel}>{Math.round(percentages.skill)}%</span>}
+                                        {percentages.skill > 10 && <span className="segment-label">{Math.round(percentages.skill)}%</span>}
                                     </div>
                                     <div
+                                        className="distribution-segment"
                                         style={{
-                                            ...styles.distributionSegment,
                                             width: `${percentages.salary}%`,
                                             backgroundColor: 'var(--color-success, #4ade80)',
                                         }}
                                         title={`Salary: ${Math.round(percentages.salary)}%`}
                                     >
-                                        {percentages.salary > 10 && <span style={styles.segmentLabel}>{Math.round(percentages.salary)}%</span>}
+                                        {percentages.salary > 10 && <span className="segment-label">{Math.round(percentages.salary)}%</span>}
                                     </div>
                                     <div
+                                        className="distribution-segment"
                                         style={{
-                                            ...styles.distributionSegment,
                                             width: `${percentages.location}%`,
                                             backgroundColor: 'var(--color-info, #60a5fa)',
                                         }}
                                         title={`Location: ${Math.round(percentages.location)}%`}
                                     >
-                                        {percentages.location > 10 && <span style={styles.segmentLabel}>{Math.round(percentages.location)}%</span>}
+                                        {percentages.location > 10 && <span className="segment-label">{Math.round(percentages.location)}%</span>}
                                     </div>
                                     <div
+                                        className="distribution-segment"
                                         style={{
-                                            ...styles.distributionSegment,
                                             width: `${percentages.remote}%`,
                                             backgroundColor: 'var(--color-warning, #fbbf24)',
                                         }}
                                         title={`Remote: ${Math.round(percentages.remote)}%`}
                                     >
-                                        {percentages.remote > 10 && <span style={styles.segmentLabel}>{Math.round(percentages.remote)}%</span>}
+                                        {percentages.remote > 10 && <span className="segment-label">{Math.round(percentages.remote)}%</span>}
                                     </div>
                                     <div
+                                        className="distribution-segment"
                                         style={{
-                                            ...styles.distributionSegment,
                                             width: `${percentages.industry}%`,
                                             backgroundColor: 'var(--color-purple, #a78bfa)',
                                         }}
                                         title={`Industry: ${Math.round(percentages.industry)}%`}
                                     >
-                                        {percentages.industry > 10 && <span style={styles.segmentLabel}>{Math.round(percentages.industry)}%</span>}
+                                        {percentages.industry > 10 && <span className="segment-label">{Math.round(percentages.industry)}%</span>}
                                     </div>
                                 </div>
-                                <div style={styles.distributionLegend}>
-                                    <span style={{ ...styles.legendItem, color: 'var(--accent-primary, #d4af37)' }}>■ Skills</span>
-                                    <span style={{ ...styles.legendItem, color: 'var(--color-success, #4ade80)' }}>■ Salary</span>
-                                    <span style={{ ...styles.legendItem, color: 'var(--color-info, #60a5fa)' }}>■ Location</span>
-                                    <span style={{ ...styles.legendItem, color: 'var(--color-warning, #fbbf24)' }}>■ Remote</span>
-                                    <span style={{ ...styles.legendItem, color: 'var(--color-purple, #a78bfa)' }}>■ Industry</span>
+                                <div className="distribution-legend">
+                                    <span className="legend-item" style={{ color: 'var(--color-accent, #d4af37)' }}>■ Skills</span>
+                                    <span className="legend-item" style={{ color: 'var(--color-success, #4ade80)' }}>■ Salary</span>
+                                    <span className="legend-item" style={{ color: 'var(--color-info, #60a5fa)' }}>■ Location</span>
+                                    <span className="legend-item" style={{ color: 'var(--color-warning, #fbbf24)' }}>■ Remote</span>
+                                    <span className="legend-item" style={{ color: 'var(--color-purple, #a78bfa)' }}>■ Industry</span>
                                 </div>
                             </>
                         )}
@@ -706,6 +793,37 @@ const styles: Record<string, React.CSSProperties> = {
         padding: '20px',
         color: 'var(--text-muted)',
         fontStyle: 'italic',
+    },
+
+    filtersWrapper: {
+        marginBottom: '24px',
+    },
+
+    filterGrid: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: '20px',
+    },
+
+    tunerDivider: {
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        margin: '24px 0',
+        height: '1px',
+        background: 'var(--border-subtle)',
+    },
+
+    dividerText: {
+        position: 'absolute',
+        background: 'var(--color-bg-secondary)',
+        padding: '0 12px',
+        fontSize: '0.75rem',
+        fontWeight: 700,
+        textTransform: 'uppercase',
+        letterSpacing: '0.05em',
+        color: 'var(--color-ink-tertiary)',
     },
 }
 

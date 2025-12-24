@@ -32,14 +32,14 @@ export function IngestionTrendsChart() {
       startDate.setDate(startDate.getDate() - daysBack)
 
       const { data, error: err } = await supabase
-        .from('daily_ingestion_metrics')
+        .from('daily_ingestion_metrics' as any)
         .select('*')
         .gte('date', startDate.toISOString().split('T')[0])
         .order('date', { ascending: true })
 
       if (err) throw err
 
-      setMetrics(data || [])
+      setMetrics((data as any) || [])
       setError(null)
     } catch (err) {
       console.error('Failed to fetch metrics:', err)

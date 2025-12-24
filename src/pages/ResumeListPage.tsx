@@ -108,31 +108,24 @@ export default function ResumeListPage({ embedded = false }: { embedded?: boolea
 
   const content = (
     <Container maxWidth="xl" padding="md">
-      <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="rounded-full bg-slate-900 text-white p-2">
-              <Icon name="scroll" size="sm" />
-            </div>
-            <div>
-              <h1 className="text-lg font-display">Your Resumes</h1>
-              <p className="text-sm text-slate-600">
-                Create, edit, and organize multiple resumes.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              className="primary-button button-sm"
-              onClick={createResume}
-              disabled={creating}
-            >
-              {creating ? 'Creating…' : 'New Resume'}
-            </button>
-            <Link to="/resumes/builder" className="ghost-button button-sm">
-              Open Builder
-            </Link>
-          </div>
+      <div className="tab-pane active">
+        <div className="section-header">
+          <h2>Your Resumes</h2>
+          <p>Create, edit, and organize multiple resumes.</p>
+        </div>
+
+        <div className="section-actions">
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={createResume}
+            disabled={creating}
+          >
+            {creating ? 'Creating…' : 'New Resume'}
+          </button>
+          <Link to="/resumes/builder" className="btn btn-secondary">
+            Open Builder
+          </Link>
         </div>
 
         {statusText && (
@@ -146,7 +139,7 @@ export default function ResumeListPage({ embedded = false }: { embedded?: boolea
             </p>
             <button
               type="button"
-              className="primary-button button-sm"
+              className="btn btn-primary"
               onClick={createResume}
               disabled={creating}
             >
@@ -154,38 +147,36 @@ export default function ResumeListPage({ embedded = false }: { embedded?: boolea
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="resume-list">
             {resumes.map((resume) => (
-              <div key={resume.id} className="card flex flex-col gap-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-semibold">
-                      {resume.title || 'Untitled Resume'}
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      Updated {resume.updated_at ? new Date(resume.updated_at).toLocaleString() : '—'}
-                    </p>
-                  </div>
+              <div key={resume.id} className="card-resume">
+                <div className="card-header">
+                  <h3 className="text-sm font-semibold">
+                    {resume.title || 'Untitled Resume'}
+                  </h3>
+                  <p className="meta">
+                    Updated {resume.updated_at ? new Date(resume.updated_at).toLocaleString() : '—'}
+                  </p>
+                </div>
+                <div className="card-actions">
                   <button
                     type="button"
-                    className="text-xs text-rose-600 hover:text-rose-700"
+                    className="btn btn-destructive btn-sm"
                     onClick={() => deleteResume(resume.id)}
                     disabled={deletingId === resume.id}
                   >
                     {deletingId === resume.id ? 'Deleting…' : 'Delete'}
                   </button>
-                </div>
-                <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    className="ghost-button button-sm"
+                    className="btn btn-secondary btn-sm"
                     onClick={() => navigate(`/resumes/builder?id=${resume.id}`)}
                   >
                     Edit
                   </button>
                   <button
                     type="button"
-                    className="ghost-button button-sm"
+                    className="btn btn-ghost btn-sm"
                     onClick={() => navigate(`/resumes/builder?id=${resume.id}`)}
                   >
                     Open
@@ -195,6 +186,7 @@ export default function ResumeListPage({ embedded = false }: { embedded?: boolea
             ))}
           </div>
         )}
+      </div>
     </Container>
   )
 

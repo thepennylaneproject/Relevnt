@@ -28,7 +28,7 @@ export default function SharedAuditPage() {
             const { data, error } = await supabase
                 .from(table)
                 .select('*')
-                .eq('share_token', token)
+                .eq('share_token', token!)
                 .eq('is_public', true)
                 .maybeSingle()
 

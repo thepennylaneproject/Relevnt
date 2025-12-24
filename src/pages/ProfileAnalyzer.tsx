@@ -151,7 +151,7 @@ export default function ProfileAnalyzer() {
         const table = type === 'linkedin' ? 'linkedin_profiles' : 'portfolio_analyses'
         const { error } = await supabase
             .from(table)
-            .update({ is_public: makePublic })
+            .update({ is_public: makePublic } as any)
             .eq('id', id)
 
         if (error) {
@@ -175,264 +175,232 @@ export default function ProfileAnalyzer() {
         <PageBackground>
             <Container maxWidth="xl" padding="md">
                 <div className="profile-analyzer">
-                    <header className="hero-shell mb-6">
-                        <div className="hero-header">
-                            <div className="hero-icon">
-                                <Icon name="stars" size="lg" />
-                            </div>
-                            <div className="hero-header-main">
-                                <p className="text-xs muted uppercase tracking-widest font-bold">Optimize Your Presence</p>
-                                <h1 className="font-display text-4xl mt-1">Profile Analyzer</h1>
-                                <p className="muted max-w-2xl mt-2">
-                                    Get AI-powered feedback on your LinkedIn profile and portfolio. 
-                                    Optimize for recruiters, improve your narrative, and stand out.
-                                </p>
-                            </div>
+                    <div className="page-header">
+                        <div className="icon-header">
+                            <Icon name="stars" className="header-icon" />
+                            <span className="label">OPTIMIZE YOUR PRESENCE</span>
                         </div>
-                    </header>
+                        <h1>Profile Analyzer</h1>
+                        <p>Get AI-powered feedback on your LinkedIn profile and portfolio. Optimize for recruiters, improve your narrative, and stand out.</p>
+                    </div>
 
                     {/* Tab Switcher */}
-                    <div className="surface-card mb-6">
-                        <div className="flex gap-2 border-b border-border-subtle">
-                            <button
-                                className={`tab-button ${activeTab === 'linkedin' ? 'tab-button--active' : ''}`}
-                                onClick={() => setActiveTab('linkedin')}
-                            >
-                                <Icon name="stars" size="sm" hideAccent />
-                                <span>LinkedIn</span>
-                            </button>
-                            <button
-                                className={`tab-button ${activeTab === 'portfolio' ? 'tab-button--active' : ''}`}
-                                onClick={() => setActiveTab('portfolio')}
-                            >
-                                <Icon name="lighthouse" size="sm" hideAccent />
-                                <span>Portfolio</span>
-                            </button>
-                        </div>
+                    <div className="tabs mb-6">
+                        <button
+                            className={`tab ${activeTab === 'linkedin' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('linkedin')}
+                        >
+                            <Icon name="stars" size="sm" hideAccent className="tab-icon" />
+                            <span>LinkedIn</span>
+                        </button>
+                        <button
+                            className={`tab ${activeTab === 'portfolio' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('portfolio')}
+                        >
+                            <Icon name="briefcase" size="sm" hideAccent className="tab-icon" />
+                            <span>Portfolio</span>
+                        </button>
                     </div>
 
                     {/* LinkedIn Tab Content */}
                     {activeTab === 'linkedin' && (
-                        <div className="linkedin-optimizer">
-                            <div className="linkedin-optimizer__content">
-                                <section className="linkedin-optimizer__input-section">
-                                    <form className="linkedin-optimizer__form" onSubmit={handleLinkedInAnalyze}>
-                                        <div className="linkedin-optimizer__input-group">
-                                            <label htmlFor="linkedin-url">LinkedIn Profile URL</label>
+                        <>
+                            <div className="tab-pane active">
+                                <div className="card">
+                                    <form onSubmit={handleLinkedInAnalyze}>
+                                        <div className="form-group">
+                                            <label htmlFor="linkedin-url" className="form-label">LinkedIn Profile URL</label>
                                             <input
                                                 id="linkedin-url"
                                                 type="url"
+                                                className="form-input"
                                                 placeholder="https://www.linkedin.com/in/your-profile"
                                                 value={linkedinUrl}
                                                 onChange={(e) => setLinkedinUrl(e.target.value)}
                                                 required
                                             />
-                                            <button
-                                                type="submit"
-                                                className="linkedin-optimizer__button"
-                                                disabled={linkedinAnalyzing}
-                                            >
-                                                {linkedinAnalyzing ? 'Analyzing…' : linkedinProfile ? 'Refresh Analysis' : 'Start Analysis'}
-                                            </button>
                                         </div>
-                                        {linkedinError && <p className="linkedin-optimizer__error">{linkedinError}</p>}
+                                        <button
+                                            type="submit"
+                                            className="btn btn-primary btn-lg"
+                                            disabled={linkedinAnalyzing}
+                                        >
+                                            {linkedinAnalyzing ? 'Analyzing…' : linkedinProfile ? 'Refresh Analysis' : 'Start Analysis'}
+                                        </button>
+                                        {linkedinError && <p className="form-error-text mt-4">{linkedinError}</p>}
                                     </form>
-                                </section>
-
-                                {linkedinAnalyzing && (
-                                    <div className="linkedin-optimizer__analysis-loading">
-                                        <div className="pulse-loader"></div>
-                                        <p>Our AI is reviewing your profile experience, headline, and summary...</p>
-                                    </div>
-                                )}
-
-                                {linkedinAnalysis && !linkedinAnalyzing && (
-                                    <div className="linkedin-optimizer__results animate-fade-in">
-                                        <ShareSection 
-                                            type="linkedin" 
-                                            id={linkedinProfile!.id} 
-                                            shareToken={linkedinProfile!.share_token || linkedinProfile!.id}
-                                            isPublic={!!linkedinProfile!.is_public}
-                                            onTogglePublic={(pub) => handleToggleShare('linkedin', linkedinProfile!.id, pub)}
-                                        />
-                                        <div className="linkedin-optimizer__scores">
-                                            <ScoreCard label="Overall" score={linkedinAnalysis.overall_score} />
-                                            <ScoreCard label="Headline" score={linkedinAnalysis.headline_score} />
-                                            <ScoreCard label="Summary" score={linkedinAnalysis.summary_score} />
-                                            <ScoreCard label="Experience" score={linkedinAnalysis.experience_score} />
-                                        </div>
-
-                                        <div className="linkedin-optimizer__suggestions-grid">
-                                            <div className="linkedin-optimizer__main-suggestions">
-                                                <h2>Key Improvements</h2>
-                                                <div className="suggestions-list">
-                                                    {linkedinAnalysis.suggestions.map((s, i) => (
-                                                        <div key={i} className="suggestion-item">
-                                                            <div className="suggestion-item__header">
-                                                                <span className="suggestion-item__section">{s.section}</span>
-                                                            </div>
-                                                            <p className="suggestion-item__improvement">{s.improvement}</p>
-                                                            <p className="suggestion-item__reason">{s.reason}</p>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-
-                                            <div className="linkedin-optimizer__optimized-content">
-                                                {linkedinAnalysis.optimized_headline && (
-                                                    <div className="optimized-block">
-                                                        <h2>AI-Optimized Headline</h2>
-                                                        <div className="optimized-box">
-                                                            {linkedinAnalysis.optimized_headline}
-                                                            <button
-                                                                className="copy-button"
-                                                                onClick={() => navigator.clipboard.writeText(linkedinAnalysis.optimized_headline!)}
-                                                            >
-                                                                Copy
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                )}
-
-                                                {linkedinAnalysis.optimized_summary && (
-                                                    <div className="optimized-block">
-                                                        <h2>AI-Optimized Summary</h2>
-                                                        <div className="optimized-box optimized-box--multiline">
-                                                            {linkedinAnalysis.optimized_summary}
-                                                            <button
-                                                                className="copy-button"
-                                                                onClick={() => navigator.clipboard.writeText(linkedinAnalysis.optimized_summary!)}
-                                                            >
-                                                                Copy
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
+                                </div>
                             </div>
-                        </div>
-                    )}
 
-                    {/* Portfolio Tab Content */}
-                    {activeTab === 'portfolio' && (
-                        <div className="portfolio-optimizer">
-                            <div className="portfolio-optimizer__content">
-                                <section className="portfolio-optimizer__input-section">
-                                    <form className="portfolio-optimizer__form" onSubmit={handlePortfolioAnalyze}>
-                                        <div className="portfolio-optimizer__input-group">
-                                            <label htmlFor="portfolio-url">Portfolio URL</label>
-                                            <input
-                                                id="portfolio-url"
-                                                type="url"
-                                                placeholder="https://yourname.com or https://behance.net/you"
-                                                value={portfolioUrl}
-                                                onChange={(e) => setPortfolioUrl(e.target.value)}
-                                                required
-                                            />
-                                            <button
-                                                type="submit"
-                                                className="portfolio-optimizer__button"
-                                                disabled={portfolioAnalyzing}
-                                            >
-                                                {portfolioAnalyzing ? 'Evaluating…' : portfolioResults ? 'Re-evaluate Portfolio' : 'Evaluate Portfolio'}
-                                            </button>
-                                        </div>
-                                        {portfolioError && <p className="portfolio-optimizer__error">{portfolioError}</p>}
-                                    </form>
-                                </section>
+                            {linkedinAnalyzing && (
+                                <div className="linkedin-optimizer__analysis-loading">
+                                    <div className="pulse-loader"></div>
+                                    <p>Our AI is reviewing your profile experience, headline, and summary...</p>
+                                </div>
+                            )}
 
-                                {portfolioAnalyzing && (
-                                    <div className="portfolio-optimizer__analysis-loading">
-                                        <div className="wave-loader">
-                                            <span></span><span></span><span></span>
-                                        </div>
-                                        <p>Scanning your portfolio and assessing visual narratives...</p>
+                            {linkedinAnalysis && !linkedinAnalyzing && (
+                                <div className="linkedin-optimizer__results animate-fade-in">
+                                    <ShareSection 
+                                        type="linkedin" 
+                                        id={linkedinProfile!.id} 
+                                        shareToken={linkedinProfile!.share_token || linkedinProfile!.id}
+                                        isPublic={!!linkedinProfile!.is_public}
+                                        onTogglePublic={(pub) => handleToggleShare('linkedin', linkedinProfile!.id, pub)}
+                                    />
+                                    <div className="linkedin-optimizer__scores">
+                                        <ScoreCard label="Overall" score={linkedinAnalysis.overall_score} />
+                                        <ScoreCard label="Headline" score={linkedinAnalysis.headline_score} />
+                                        <ScoreCard label="Summary" score={linkedinAnalysis.summary_score} />
+                                        <ScoreCard label="Experience" score={linkedinAnalysis.experience_score} />
                                     </div>
-                                )}
 
-                                {portfolioResults && !portfolioAnalyzing && (
-                                    <div className="portfolio-optimizer__results animate-fade-in">
-                                        <ShareSection 
-                                            type="portfolio" 
-                                            id={portfolioAnalysis!.id} 
-                                            shareToken={portfolioAnalysis!.share_token || portfolioAnalysis!.id}
-                                            isPublic={!!portfolioAnalysis!.is_public}
-                                            onTogglePublic={(pub) => handleToggleShare('portfolio', portfolioAnalysis!.id, pub)}
-                                        />
-                                        <div className="portfolio-optimizer__main-stats">
-                                            <div className="overall-score-large">
-                                                <span className="label">Overall Impact</span>
-                                                <span className="value">{portfolioResults.overall_score}</span>
-                                            </div>
-                                            <div className="seniority-badge">
-                                                <span className="label">Perceived Seniority</span>
-                                                <span className="value">{portfolioResults.perceived_seniority}</span>
-                                            </div>
-                                        </div>
-
-                                        <div className="portfolio-optimizer__scores">
-                                            <MetricBox label="Visual" score={portfolioResults.visual_score} icon="stars" />
-                                            <MetricBox label="Usability" score={portfolioResults.usability_score} icon="compass" />
-                                            <MetricBox label="Content" score={portfolioResults.content_score} icon="book" />
-                                        </div>
-
-                                        <div className="portfolio-optimizer__suggestions">
-                                            <h2>Strategic Improvements</h2>
-                                            <div className="portfolio-suggestions-list">
-                                                {portfolioResults.suggestions.map((s, i) => (
-                                                    <div key={i} className={`portfolio-suggestion-card impact--${s.impact}`}>
-                                                        <div className="card-header">
-                                                            <span className="category">{s.category}</span>
-                                                            <span className="impact-tag">{s.impact} impact</span>
+                                    <div className="linkedin-optimizer__suggestions-grid">
+                                        <div className="linkedin-optimizer__main-suggestions">
+                                            <h2>Key Improvements</h2>
+                                            <div className="suggestions-list">
+                                                {linkedinAnalysis.suggestions.map((s, i) => (
+                                                    <div key={i} className="suggestion-item">
+                                                        <div className="suggestion-item__header">
+                                                            <span className="suggestion-item__section">{s.section}</span>
                                                         </div>
-                                                        <p className="improvement">{s.improvement}</p>
+                                                        <p className="suggestion-item__improvement">{s.improvement}</p>
+                                                        <p className="suggestion-item__reason">{s.reason}</p>
                                                     </div>
                                                 ))}
                                             </div>
                                         </div>
 
-                                        {portfolioResults.suggested_tagline && (
-                                            <div className="portfolio-optimizer__tagline">
-                                                <h2>Suggested Narrative Tagline</h2>
-                                                <div className="tagline-box">
-                                                    "{portfolioResults.suggested_tagline}"
+                                        <div className="linkedin-optimizer__optimized-content">
+                                            {linkedinAnalysis.optimized_headline && (
+                                                <div className="optimized-block">
+                                                    <h2>AI-Optimized Headline</h2>
+                                                    <div className="optimized-box">
+                                                        {linkedinAnalysis.optimized_headline}
+                                                        <button
+                                                            className="copy-button"
+                                                            onClick={() => navigator.clipboard.writeText(linkedinAnalysis.optimized_headline!)}
+                                                        >
+                                                            Copy
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        )}
+                                            )}
+
+                                            {linkedinAnalysis.optimized_summary && (
+                                                <div className="optimized-block">
+                                                    <h2>AI-Optimized Summary</h2>
+                                                    <div className="optimized-box optimized-box--multiline">
+                                                        {linkedinAnalysis.optimized_summary}
+                                                        <button
+                                                            className="copy-button"
+                                                            onClick={() => navigator.clipboard.writeText(linkedinAnalysis.optimized_summary!)}
+                                                        >
+                                                            Copy
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                )}
+                                </div>
+                            )}
+                        </>
+                    )}
+
+                    {/* Portfolio Tab Content */}
+                    {activeTab === 'portfolio' && (
+                        <>
+                            <div className="tab-pane active">
+                                <div className="card">
+                                    <form onSubmit={handlePortfolioAnalyze}>
+                                        <div className="form-group">
+                                            <label htmlFor="portfolio-url" className="form-label">Portfolio URL</label>
+                                            <input
+                                                id="portfolio-url"
+                                                type="url"
+                                                className="form-input"
+                                                placeholder="https://yourname.com or https://behance.net/you"
+                                                value={portfolioUrl}
+                                                onChange={(e) => setPortfolioUrl(e.target.value)}
+                                                required
+                                            />
+                                        </div>
+                                        <button
+                                            type="submit"
+                                            className="btn btn-primary btn-lg"
+                                            disabled={portfolioAnalyzing}
+                                        >
+                                            {portfolioAnalyzing ? 'Evaluating…' : portfolioResults ? 'Re-evaluate Portfolio' : 'Evaluate Portfolio'}
+                                        </button>
+                                        {portfolioError && <p className="form-error-text mt-4">{portfolioError}</p>}
+                                    </form>
+                                </div>
                             </div>
-                        </div>
+
+                            {portfolioAnalyzing && (
+                                <div className="portfolio-optimizer__analysis-loading">
+                                    <div className="wave-loader">
+                                        <span></span><span></span><span></span>
+                                    </div>
+                                    <p>Scanning your portfolio and assessing visual narratives...</p>
+                                </div>
+                            )}
+
+                            {portfolioResults && !portfolioAnalyzing && (
+                                <div className="portfolio-optimizer__results animate-fade-in">
+                                    <ShareSection 
+                                        type="portfolio" 
+                                        id={portfolioAnalysis!.id} 
+                                        shareToken={portfolioAnalysis!.share_token || portfolioAnalysis!.id}
+                                        isPublic={!!portfolioAnalysis!.is_public}
+                                        onTogglePublic={(pub) => handleToggleShare('portfolio', portfolioAnalysis!.id, pub)}
+                                    />
+                                    <div className="portfolio-optimizer__main-stats">
+                                        <div className="overall-score-large">
+                                            <span className="label">Overall Impact</span>
+                                            <span className="value">{portfolioResults.overall_score}</span>
+                                        </div>
+                                        <div className="seniority-badge">
+                                            <span className="label">Perceived Seniority</span>
+                                            <span className="value">{portfolioResults.perceived_seniority}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="portfolio-optimizer__scores">
+                                        <MetricBox label="Visual" score={portfolioResults.visual_score} icon="stars" />
+                                        <MetricBox label="Usability" score={portfolioResults.usability_score} icon="compass" />
+                                        <MetricBox label="Content" score={portfolioResults.content_score} icon="book" />
+                                    </div>
+
+                                    <div className="portfolio-optimizer__suggestions">
+                                        <h2>Strategic Improvements</h2>
+                                        <div className="portfolio-suggestions-list">
+                                            {portfolioResults.suggestions.map((s, i) => (
+                                                <div key={i} className={`portfolio-suggestion-card impact--${s.impact}`}>
+                                                    <div className="card-header">
+                                                        <span className="category">{s.category}</span>
+                                                        <span className="impact-tag">{s.impact} impact</span>
+                                                    </div>
+                                                    <p className="improvement">{s.improvement}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {portfolioResults.suggested_tagline && (
+                                        <div className="portfolio-optimizer__tagline">
+                                            <h2>Suggested Narrative Tagline</h2>
+                                            <div className="tagline-box">
+                                                "{portfolioResults.suggested_tagline}"
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
-
-                <style>{`
-                    .tab-button {
-                        display: flex;
-                        align-items: center;
-                        gap: 8px;
-                        padding: 12px 20px;
-                        border: none;
-                        background: none;
-                        color: var(--text-secondary);
-                        font-size: 14px;
-                        font-weight: 500;
-                        cursor: pointer;
-                        border-bottom: 2px solid transparent;
-                        transition: all 0.2s;
-                    }
-                    .tab-button:hover {
-                        color: var(--text);
-                        background: var(--surface-soft);
-                    }
-                    .tab-button--active {
-                        color: var(--accent);
-                        border-bottom-color: var(--accent);
-                    }
-                `}</style>
             </Container>
         </PageBackground>
     )

@@ -1,23 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import {
-  SlidersHorizontal,
-  Filter,
-  ArrowRight,
-  FolderOpen,
-  Clock,
-  DollarSign,
-} from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { RelevntFeedPanel } from '../components/RelevntFeedPanel'
 import { useAuth } from '../contexts/AuthContext'
 import PageBackground from '../components/shared/PageBackground'
 import { Container } from '../components/shared/Container'
 import { Icon } from '../components/ui/Icon'
-import { PageHero } from '../components/ui/PageHero'
 import { EmptyState } from '../components/ui/EmptyState'
 import { copy } from '../lib/copy'
 import type { JobRow } from '../shared/types'
-import { PersonaSwitcher } from '../components/personas/PersonaSwitcher'
 import { usePersonas } from '../hooks/usePersonas'
 import { RelevanceTuner } from '../components/personas/RelevanceTuner'
 import { PatternInsightsPanel } from '../components/intelligence/PatternInsightsPanel'
@@ -53,7 +43,7 @@ const PAGE_SIZE = 50
 export default function JobsPage() {
   const [activeTab, setActiveTab] = useState<'feed' | 'browse'>('feed')
   const { user } = useAuth()
-  const { activePersona } = usePersonas()
+  const { activePersona, personas, setActivePersona } = usePersonas()
 
   // browse side (jobs list from Supabase)
   const [jobs, setJobs] = useState<JobRow[]>([])
@@ -70,8 +60,15 @@ export default function JobsPage() {
   const [page, setPage] = useState(0)
   const [sortBy, setSortBy] = useState<SortBy>('recent')
 
+  // feed filters (lifted from RelevntFeedPanel)
+  const [minSalaryFeed, setMinSalaryFeed] = useState(0)
+  const [remoteOnlyFeed, setRemoteOnlyFeed] = useState(false)
+  const [sourceFeed, setSourceFeed] = useState('')
+  const [employmentTypeFeed, setEmploymentTypeFeed] = useState('')
+
   const [sources, setSources] = useState<JobSourceRow[]>([])
   const [savedJobIds, setSavedJobIds] = useState<string[]>([])
+  const [refreshKey, setRefreshKey] = useState(0)
 
   const fetchSources = useCallback(async () => {
     try {
@@ -409,26 +406,30 @@ export default function JobsPage() {
     }
 
     return (
-      <div className="jobs-section-stack">
-        <section className="surface-card jobs-context">
-          <div className="jobs-context-main">
-            <Icon name="compass" size="md" />
-            <div>
-              <h2 className="text-sm font-medium">{copy.jobs.tabs.feed}</h2>
-              <p className="muted text-xs">
-                Jobs ranked by AI using your {activePersona.name} persona preferences.
-                Adjust the weights below to fine-tune your results.
-              </p>
-            </div>
-          </div>
-        </section>
+      <div className="feed-stack">
+        <div className="feed-header-explainer">
+          <p className="subtitle">
+            Jobs ranked by AI using your <strong>{activePersona.name}</strong> persona preferences.
+            Adjust the weights below to fine-tune your results.
+          </p>
+        </div>
 
-        {/* Relevance Tuner */}
-        <RelevanceTuner onWeightsChange={() => {
-          // Weight changes are saved to DB by the hook
-          // The feed uses these weights, so refresh the page to apply
-          // Future: trigger refetch via context or state management
-        }} />
+        {/* Relevance Tuner with Feed Filters */}
+        <RelevanceTuner 
+          onWeightsChange={() => {
+            // Weights are saved to DB. Trigger feed refresh.
+            setRefreshKey(prev => prev + 1)
+          }}
+          minSalary={minSalaryFeed}
+          setMinSalary={setMinSalaryFeed}
+          remoteOnly={remoteOnlyFeed}
+          setRemoteOnly={setRemoteOnlyFeed}
+          source={sourceFeed}
+          setSource={setSourceFeed}
+          employmentType={employmentTypeFeed}
+          setEmploymentType={setEmploymentTypeFeed}
+          availableSources={sources}
+        />
 
         {/* Auto-Tune Suggestions - Concierge mode */}
         <AutoTuneSuggestions />
@@ -438,62 +439,26 @@ export default function JobsPage() {
 
         {/* Job Feed */}
         <div className="jobs-feed-container">
-          <RelevntFeedPanel />
+          <RelevntFeedPanel 
+            minSalary={minSalaryFeed}
+            remoteOnly={remoteOnlyFeed}
+            source={sourceFeed}
+            employmentType={employmentTypeFeed}
+            refreshKey={refreshKey}
+          />
         </div>
       </div>
     )
   }
 
   const renderBrowseTab = () => {
-    const hasPersonaFilters = activePersona?.preferences && (
-      activePersona.preferences.job_title_keywords?.length > 0 ||
-      activePersona.preferences.locations?.length > 0 ||
-      activePersona.preferences.remote_preference === 'remote' ||
-      activePersona.preferences.min_salary
-    )
-
     return (
-      <div className="jobs-section-stack">
-        <section className="surface-card jobs-context jobs-context-browse">
-          <div className="jobs-context-main">
-            <Filter className="w-5 h-5 text-graphite" aria-hidden="true" />
-            <div>
-              <h2 className="text-sm font-medium">
-                {hasPersonaFilters && activePersona ? `Browsing as ${activePersona.name}` : 'Browsing all roles'}
-              </h2>
-              <p className="muted text-xs">
-                {hasPersonaFilters
-                  ? 'Jobs are filtered based on your persona preferences. Manual filters will override these defaults.'
-                  : 'The full stream from every source. Keep filters tight to stay focused.'}
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section className="surface-card jobs-filters">
-          <div className="jobs-filters-header">
-            <div className="jobs-filters-title">
-              <SlidersHorizontal className="w-4 h-4 text-graphite" aria-hidden="true" />
-              <span className="text-sm font-medium">Filter the stream</span>
-            </div>
-            <div className="jobs-filters-actions">
-              <button type="button" className="ghost-button" onClick={handleClearFilters}>
-                Clear filters
-              </button>
-              <button
-                type="button"
-                className="primary-button"
-                onClick={() => fetchJobs()}
-                disabled={jobsLoading}
-              >
-                {jobsLoading ? 'Refreshing…' : 'Refresh jobs'}
-              </button>
-            </div>
-          </div>
-
-          <div className="jobs-filter-grid">
-            <div className="field">
-              <label className="section-label">Search title or company</label>
+      <div className="jobs-browse-layout">
+        <aside className="jobs-sidebar">
+          <div>
+            <h3 className="filter-section-title">Search & Source</h3>
+            <div className="form-group">
+              <label className="form-label">Job Title or Keyword</label>
               <input
                 type="text"
                 value={search}
@@ -501,13 +466,13 @@ export default function JobsPage() {
                   setSearch(e.target.value)
                   setPage(0)
                 }}
-                placeholder="Product designer, marketing, security…"
-                className="input-pill"
+                placeholder="Product designer, marketing…"
+                className="form-input"
               />
             </div>
 
-            <div className="field">
-              <label className="section-label">Location</label>
+            <div className="form-group">
+              <label className="form-label">Location</label>
               <input
                 type="text"
                 value={locationFilter}
@@ -516,19 +481,19 @@ export default function JobsPage() {
                   setPage(0)
                 }}
                 placeholder="Remote, New York, Europe…"
-                className="input-pill"
+                className="form-input"
               />
             </div>
 
-            <div className="field">
-              <label className="section-label">Source</label>
+            <div className="form-group">
+              <label className="form-label">Source</label>
               <select
                 value={sourceKey}
                 onChange={(e) => {
                   setSourceKey(e.target.value)
                   setPage(0)
                 }}
-                className="input-pill"
+                className="form-select"
               >
                 <option value="">All sources</option>
                 {sources.map((s) => (
@@ -540,16 +505,17 @@ export default function JobsPage() {
             </div>
           </div>
 
-          <div className="jobs-filter-grid">
-            <div className="field">
-              <label className="section-label">Employment type</label>
+          <div>
+            <h3 className="filter-section-title">Refine</h3>
+            <div className="form-group">
+              <label className="form-label">Employment type</label>
               <select
                 value={employmentType}
                 onChange={(e) => {
                   setEmploymentType(e.target.value)
                   setPage(0)
                 }}
-                className="input-pill"
+                className="form-select"
               >
                 <option value="">Any</option>
                 <option value="full-time">Full time</option>
@@ -559,15 +525,15 @@ export default function JobsPage() {
               </select>
             </div>
 
-            <div className="field">
-              <label className="section-label">Posted within</label>
+            <div className="form-group">
+              <label className="form-label">Posted within</label>
               <select
                 value={postedSince}
                 onChange={(e) => {
                   setPostedSince(e.target.value as '7d' | '30d' | '90d' | '')
                   setPage(0)
                 }}
-                className="input-pill"
+                className="form-select"
               >
                 <option value="">Anytime</option>
                 <option value="7d">Last 7 days</option>
@@ -576,8 +542,8 @@ export default function JobsPage() {
               </select>
             </div>
 
-            <div className="field">
-              <label className="section-label">Min salary (USD)</label>
+            <div className="form-group">
+              <label className="form-label">Min salary (USD)</label>
               <input
                 type="number"
                 min={0}
@@ -591,34 +557,32 @@ export default function JobsPage() {
                   setMinSalaryBrowse(next)
                   setPage(0)
                 }}
-                className="input-pill text-right"
+                className="form-input text-right"
               />
             </div>
 
-            <div className="field checkbox-field">
-              <label className="section-label">Remote friendly</label>
-              <div className="checkbox-inline">
+            <div className="form-group">
+              <div className="feed-remote-filter">
                 <input
                   id="browse-remote-only"
                   type="checkbox"
+                  className="form-checkbox"
                   checked={remoteOnlyBrowse}
                   onChange={(e) => {
                     setRemoteOnlyBrowse(e.target.checked)
                     setPage(0)
                   }}
                 />
-                <label htmlFor="browse-remote-only">Only show remote-friendly roles</label>
+                <label htmlFor="browse-remote-only" className="text-sm">Remote friendly roles</label>
               </div>
             </div>
-          </div>
 
-          <div className="jobs-filters-footer">
-            <div className="field inline-field">
-              <label className="section-label">Sort by</label>
+            <div className="form-group">
+              <label className="form-label">Sort by</label>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortBy)}
-                className="input-pill"
+                className="form-select"
               >
                 <option value="recent">Most recent</option>
                 <option value="salary-high">Salary, high to low</option>
@@ -628,24 +592,35 @@ export default function JobsPage() {
               </select>
             </div>
           </div>
-        </section>
 
-        <div className="jobs-list">
+          <div className="form-actions">
+            <button className="btn btn-primary" onClick={() => fetchJobs()}>
+              Refresh jobs
+            </button>
+            <button className="btn btn-secondary" onClick={handleClearFilters}>
+              Clear filters
+            </button>
+          </div>
+        </aside>
+
+        <main className="jobs-list">
           {jobsLoading && <div className="muted">Loading jobs…</div>}
           {!jobsLoading && jobsError && <div className="error-text">{jobsError}</div>}
           {!jobsLoading && !jobsError && sortedJobs.length === 0 && (
             <EmptyState
               type="jobs"
-              includeVerse={true}
+              title="We couldn't load your matches right now..."
+              description="Check your connection or try clearing your filters to see more of the landscape."
               action={{
-                label: copy.jobs.filters.clearFilters,
-                onClick: handleClearFilters,
+                label: "Try again",
+                onClick: () => fetchJobs(),
+                variant: 'secondary'
               }}
             />
           )}
 
           {!jobsLoading && !jobsError && sortedJobs.length > 0 && (
-            <div className="item-grid">
+            <div className="card-grid-3col">
               {sortedJobs.map((job) => {
                 const salaryMin = job.salary_min || null
                 const salaryMax = job.salary_max || null
@@ -677,92 +652,60 @@ export default function JobsPage() {
                 }
 
                 return (
-                  <article key={job.id} className="item-card">
-                    <header className="item-card-header">
-                      <div>
-                        <h3 className="text-sm font-semibold">{job.title}</h3>
-                        <p className="muted text-xs">
-                          {job.company && <span>{job.company}</span>}
-                          {job.company && job.location && <span> • </span>}
-                          {job.location && <span>{job.location}</span>}
-                        </p>
-                      </div>
-                      {matchScore !== null && (
-                        <span className="pill pill--accent">Match {matchScore}%</span>
-                      )}
-                      {job.probability_estimate !== undefined && job.probability_estimate !== null && (
-                        <span className="pill pill--indigo">
-                          Success: {Math.round(job.probability_estimate * 100)}%
-                        </span>
-                      )}
-                      {job.growth_score !== undefined && job.growth_score !== null && job.growth_score > 70 && (
-                        <span className="pill pill--success">🚀 High Growth</span>
-                      )}
-                    </header>
+                  <div key={job.id} className="card card-job-grid">
+                    <div className="card-header">
+                      <h3>{job.title}</h3>
+                    </div>
 
-                    <div className="tag-row">
-                      {job.company && (
-                        (() => {
-                          const count = checkCompanyMatch(job.company, networkingCompanies, companyCounts);
-                          return count > 0 ? (
-                            <span className="pill pill--networking" title={`You have ${count} connection${count > 1 ? 's' : ''} at this company`}>
-                              🔗 {count} {count === 1 ? 'Connection' : 'Connections'}
-                            </span>
-                          ) : null;
-                        })()
-                      )}
-                      {isRemote && <span className="tag">Remote friendly</span>}
+                    <div className="card-company">
+                      {job.company || 'Unknown Company'} {job.location ? `• ${job.location}` : ''}
+                    </div>
+
+                    <div className="card-meta">
                       {job.employment_type && (
-                        <span className="tag">
+                        <span className="meta-item">
                           <Icon name="briefcase" size="sm" hideAccent />
-                          {job.employment_type}
-                        </span>
-                      )}
-                      {salaryLabel && (
-                        <span className="tag">
-                          <DollarSign className="w-3 h-3 text-graphite" aria-hidden="true" />
-                          {salaryLabel}
+                          {job.employment_type.replace('_', ' ')}
                         </span>
                       )}
                       {postedLabel && (
-                        <span className="tag">
-                          <Clock className="w-3 h-3 text-graphite" aria-hidden="true" />
+                        <span className="meta-item">
+                          <Icon name="pocket-watch" size="sm" hideAccent />
                           Posted {postedLabel}
                         </span>
                       )}
-                      {job.competitiveness_level && (
-                        <span className="tag">Market: {job.competitiveness_level}</span>
-                      )}
+                    </div>
+
+                    <div className="card-tags">
+                      {isRemote && <span className="tag">remote</span>}
                       {job.source_slug && <span className="tag">{job.source_slug}</span>}
                     </div>
 
-                    <footer className="item-card-footer">
+                    <div className="card-footer">
                       {job.external_url && (
                         <a
                           href={job.external_url}
                           target="_blank"
                           rel="noreferrer"
-                          className="ghost-button"
+                          className="btn btn-secondary btn-sm btn-with-icon"
                         >
-                          View posting
-                          <ArrowRight className="w-4 h-4 text-graphite" aria-hidden="true" />
+                          View <Icon name="chevron-right" size="sm" hideAccent />
                         </a>
                       )}
                       <button
                         type="button"
                         onClick={() => toggleSavedJob(job.id)}
-                        className={`ghost-button ${isSaved ? 'is-active' : ''}`}
+                        className={`btn btn-ghost btn-sm btn-with-icon ${isSaved ? 'is-active' : ''}`}
                       >
-                        <FolderOpen className="w-4 h-4 text-graphite" aria-hidden="true" />
-                        {isSaved ? 'Saved' : 'Save'}
+                        <Icon name="bookmark" size="sm" hideAccent />
                       </button>
-                    </footer>
-                  </article>
+                    </div>
+                  </div>
                 )
               })}
             </div>
           )}
-        </div>
+        </main>
       </div>
     )
   }
@@ -771,47 +714,45 @@ export default function JobsPage() {
     <PageBackground>
       <Container maxWidth="xl" padding="md">
         <div className="jobs-page">
-          {/* Hero Section */}
-          <PageHero
-            category="track"
-            headline={copy.jobs.pageHeadline}
-            subtitle={copy.jobs.pageSubtitle}
-          />
-
-          {/* Context Band: Persona + Tabs in one row */}
-          <section className="jobs-context-band">
-            <div className="jobs-context-band__persona">
-              <PersonaSwitcher />
-              {activePersona && (
-                <div className="jobs-persona-stats">
-                  {activePersona.preferences?.remote_preference === 'remote' && (
-                    <span className="persona-stat">Prefers remote</span>
-                  )}
-                  {activePersona.preferences?.min_salary && (
-                    <span className="persona-stat">
-                      Target: ${Math.round(activePersona.preferences.min_salary / 1000)}k+
-                    </span>
-                  )}
-                </div>
-              )}
+          {/* Page Header */}
+          <div className="page-header">
+            <div className="header-top">
+              <h1>Discover</h1>
+              <span className="label">TRACK</span>
             </div>
-            <div className="jobs-tabs">
+            <p>Let Relevnt bring the right roles to you.</p>
+          </div>
+
+          {/* Feed Controls: Persona + Tabs in one row */}
+          <div className="feed-controls">
+            <select
+              className="form-select"
+              value={activePersona?.id || ''}
+              onChange={(e) => setActivePersona(e.target.value)}
+            >
+              {personas.map(p => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+              {!personas.length && <option disabled>No personas found</option>}
+            </select>
+
+            <div className="tabs">
               <button
                 type="button"
-                className={`jobs-tab ${activeTab === 'feed' ? 'active' : ''}`}
+                className={`tab ${activeTab === 'feed' ? 'active' : ''}`}
                 onClick={() => setActiveTab('feed')}
               >
                 {copy.jobs.tabs.feed}
               </button>
               <button
                 type="button"
-                className={`jobs-tab ${activeTab === 'browse' ? 'active' : ''}`}
+                className={`tab ${activeTab === 'browse' ? 'active' : ''}`}
                 onClick={() => setActiveTab('browse')}
               >
                 {copy.jobs.tabs.all}
               </button>
             </div>
-          </section>
+          </div>
 
           {/* Transparency line for feed tab */}
           {activeTab === 'feed' && activePersona && (

@@ -14,7 +14,8 @@ import DashboardPage from './pages/DashboardPage'
 import JobsPage from './pages/JobsPage'
 import ApplicationsPage from './pages/ApplicationsPage'
 import AdminDashboard from './pages/AdminDashboard'
-import SettingsHub from './pages/SettingsHub'
+import { lazy } from 'react'
+const Settings = lazy(() => import('./pages/Settings'))
 import ResumeWorkspacePage from './pages/ResumeWorkspacePage'
 import ProfileAnalyzer from './pages/ProfileAnalyzer'
 import SharedAuditPage from './pages/SharedAuditPage'
@@ -121,7 +122,7 @@ function AppInner() {
             {/* Unified Settings Hub */}
             <Route
               path="/settings"
-              element={isAuthed ? <SettingsHub /> : <Navigate to="/login" replace />}
+              element={isAuthed ? <Settings /> : <Navigate to="/login" replace />}
             />
 
             {/* Legacy route redirects to Settings Hub tabs */}

@@ -31,12 +31,12 @@ export function SourcePerformanceMetrics() {
   async function fetchMetrics() {
     try {
       const { data, error: err } = await supabase
-        .from('source_performance_metrics')
+        .from('source_performance_metrics' as any)
         .select('*')
         .order('health_score', { ascending: false })
 
       if (err) throw err
-      setMetrics(data || [])
+      setMetrics((data as any) || [])
       setError(null)
     } catch (err) {
       console.error('Failed to fetch metrics:', err)

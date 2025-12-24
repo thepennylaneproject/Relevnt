@@ -39,15 +39,15 @@ export function SourceHealthScore() {
       setLoading(true)
 
       const { data, error: err } = await supabase
-        .from('source_performance_metrics')
+        .from('source_performance_metrics' as any)
         .select('*')
         .order('health_score', { ascending: false })
 
       if (err) throw err
 
-      setSources(data || [])
+      setSources((data as any) || [])
       if (data && data.length > 0) {
-        setSelectedSource(data[0])
+        setSelectedSource(data[0] as any)
       }
       setError(null)
     } catch (err) {

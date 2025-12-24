@@ -143,9 +143,16 @@ export function RelevntThemeProvider({
   // Initialize from localStorage or prop (defaults to Dark Academia)
   const [mode, setModeState] = useState<ThemeMode>(() => {
     if (typeof window === 'undefined') return initialMode;
+
+    // Migration: Clear old system theme key if it exists to prevent conflicts
+    localStorage.removeItem('relevnt-theme');
+
     const stored = localStorage.getItem('relevnt-theme-mode');
-    if (stored === 'Light' || stored === 'Dark' || stored === 'DarkAcademia') return stored as ThemeMode;
-    // Default to Dark Academia (old system preference checks removed)
+    // If they have an explicit preference that is valid, use it
+    if (stored === 'Dark' || stored === 'DarkAcademia') return stored as ThemeMode;
+
+    // For this refactor, we default anyone in Light Mode (or with no setting) to DarkAcademia
+    // This ensures they see the new design system. They can toggle back if they want.
     return 'DarkAcademia';
   });
 

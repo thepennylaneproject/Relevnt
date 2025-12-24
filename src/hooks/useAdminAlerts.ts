@@ -36,7 +36,7 @@ export function useAdminAlerts(options: UseAdminAlertsOptions = {}) {
   async function fetchAlerts() {
     try {
       let query = supabase
-        .from('admin_alerts')
+        .from('admin_alerts' as any)
         .select('*')
 
       if (onlyUnread) {
@@ -49,7 +49,7 @@ export function useAdminAlerts(options: UseAdminAlertsOptions = {}) {
 
       if (err) throw err
 
-      setAlerts(data || [])
+      setAlerts((data as any) || [])
       setError(null)
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err))
@@ -72,8 +72,8 @@ export function useAdminAlerts(options: UseAdminAlertsOptions = {}) {
   async function dismissAlert(alertId: string) {
     try {
       const { error: err } = await supabase
-        .from('admin_alerts')
-        .update({ is_dismissed: true })
+        .from('admin_alerts' as any)
+        .update({ is_dismissed: true } as any)
         .eq('id', alertId)
 
       if (err) throw err
@@ -88,8 +88,8 @@ export function useAdminAlerts(options: UseAdminAlertsOptions = {}) {
   async function markAsRead(alertId: string) {
     try {
       const { error: err } = await supabase
-        .from('admin_alerts')
-        .update({ is_read: true })
+        .from('admin_alerts' as any)
+        .update({ is_read: true } as any)
         .eq('id', alertId)
 
       if (err) throw err

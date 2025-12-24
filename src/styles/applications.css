@@ -1,0 +1,301 @@
+/* Applications Page Styles */
+
+.apps-page .page-header {
+  margin-bottom: var(--space-8);
+}
+
+.apps-page .header-top {
+  margin-bottom: var(--space-2);
+}
+
+.apps-page .header-top .label {
+  display: inline-block;
+  padding: 4px 12px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-graphite-faint);
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-ink-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.apps-page h1 {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  line-height: 1.1;
+  margin: 0 0 var(--space-4);
+}
+
+.apps-page .subtitle {
+  font-size: var(--text-base);
+  color: var(--color-ink-secondary);
+  max-width: 600px;
+}
+
+.apps-page .stats {
+  display: flex;
+  gap: var(--space-12);
+  margin-top: var(--space-8);
+}
+
+.apps-page .stat-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.apps-page .stat-value {
+  font-family: var(--font-display);
+  font-size: var(--text-4xl);
+  font-weight: 700;
+  color: var(--color-accent);
+  line-height: 1;
+}
+
+.apps-page .stat-label {
+  font-size: var(--text-sm);
+  color: var(--color-ink-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  margin-top: var(--space-1);
+}
+
+.filter-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 24px 0;
+}
+
+.filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-graphite-faint);
+  border-radius: var(--radius-sm);
+  color: var(--color-ink);
+  font-weight: 600;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-btn .count {
+  font-size: 0.75rem;
+  color: var(--color-ink-tertiary);
+}
+
+.filter-btn:hover {
+  border-color: var(--color-accent);
+  background: var(--color-bg-tertiary);
+}
+
+.filter-btn.active {
+  border-color: var(--color-accent);
+  background: var(--color-bg-tertiary);
+  color: var(--color-accent);
+}
+
+.filter-btn.active .count {
+  color: var(--color-accent);
+}
+
+/* Empty State */
+.apps-page .empty-state {
+  text-align: center;
+  padding: 64px 32px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.apps-page .empty-icon {
+  width: 48px;
+  height: 48px;
+  color: var(--color-accent);
+  opacity: 0.6;
+  margin-bottom: 24px;
+}
+
+.apps-page .empty-state h2 {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  margin: 0 0 12px;
+}
+
+.apps-page .empty-state p {
+  color: var(--color-ink-secondary);
+  font-size: var(--text-base);
+  margin: 0 0 24px;
+}
+
+/* Question Helper */
+.card-helper {
+  border-left: 3px solid var(--color-secondary-accent) !important;
+}
+
+.card-helper .card-header .subtitle {
+  font-size: var(--text-xs);
+  color: var(--color-ink-tertiary);
+  margin-top: 4px;
+}
+
+.tone-options .button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.btn-option {
+  padding: 8px 16px;
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-graphite-faint);
+  border-radius: var(--radius-sm);
+  color: var(--color-ink);
+  font-weight: 600;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-option:hover {
+  border-color: var(--color-accent);
+}
+
+.btn-option.active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-ink-inverse);
+}
+
+@media (max-width: 768px) {
+  .apps-page h1 {
+    font-size: 1.75rem;
+  }
+  
+  .apps-page .stats {
+    gap: var(--space-6);
+  }
+
+  .stats .stat-value {
+    font-size: var(--text-3xl);
+  }
+
+  .apps-page .empty-state {
+    padding: 32px 16px;
+  }
+}
+
+/* Button Size Variants */
+.btn--xs {
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  gap: 4px;
+}
+
+.btn--sm {
+  padding: 6px 12px;
+  font-size: 0.8125rem;
+  gap: 6px;
+}
+
+.btn--lg {
+  padding: 12px 24px;
+  font-size: 1rem;
+  gap: 8px;
+}
+
+/* Utility for active states in nav-like buttons */
+.btn.is-active,
+.btn-option.active {
+  background: var(--color-accent) !important;
+  color: var(--color-ink-inverse) !important;
+  border-color: var(--color-accent) !important;
+}
+
+/* Card Improvements */
+.enhanced-app-card {
+  transition: all 0.2s ease;
+  border-left: 3px solid var(--color-secondary-accent);
+}
+
+.enhanced-app-card:hover {
+  border-left-color: var(--color-accent);
+}
+
+.app-status-select {
+  border: 1px solid var(--color-graphite-faint);
+  background: var(--color-bg-secondary);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--color-ink);
+  cursor: pointer;
+  width: 100%;
+}
+
+.app-status-select:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.app-timeline {
+  padding: 12px;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-graphite-faint);
+}
+
+.timeline-event {
+  position: relative;
+  padding-left: 12px;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: 0;
+  top: 4px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+
+/* Status Pill Colors */
+.app-status-pill--applied {
+  background-color: var(--color-info-bg) !important;
+  color: var(--color-info) !important;
+}
+
+.app-status-pill--interviewing {
+  background-color: var(--color-accent-glow) !important;
+  color: var(--color-accent) !important;
+}
+
+.app-status-pill--in-progress {
+  background-color: var(--color-warning-bg) !important;
+  color: var(--color-warning) !important;
+}
+
+.app-status-pill--offer,
+.app-status-pill--accepted {
+  background-color: var(--color-success-bg) !important;
+  color: var(--color-success) !important;
+}
+
+.app-status-pill--rejected {
+  background-color: var(--color-error-bg) !important;
+  color: var(--color-error) !important;
+}
+
+.app-status-pill--withdrawn {
+  background-color: var(--color-bg-alt) !important;
+  color: var(--color-ink-tertiary) !important;
+}
