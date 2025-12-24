@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS source_performance_metrics (
 
     -- Health calculation
     health_score INT DEFAULT 100, -- 0-100
-    health_factors JSONB DEFAULT '{"success_rate": 0, "failures": 0, "freshness": 0, "duplicates": 0}',
+    health_factors JSONB DEFAULT '{"success_rate":0,"failures":0,"freshness":0,"duplicates":0}'::jsonb,
 
     -- Tracking
     updated_at TIMESTAMP DEFAULT NOW(),
