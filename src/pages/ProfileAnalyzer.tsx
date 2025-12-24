@@ -151,7 +151,7 @@ export default function ProfileAnalyzer() {
         const table = type === 'linkedin' ? 'linkedin_profiles' : 'portfolio_analyses'
         const { error } = await supabase
             .from(table)
-            .update({ is_public: makePublic })
+            .update({ is_public: makePublic } as any)
             .eq('id', id)
 
         if (error) {

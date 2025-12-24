@@ -420,7 +420,7 @@ export function CareerTargetsTab({ onAutoSaveStatusChange }: CareerTargetsTabPro
                 <div className="form-group">
                     <div className="slider-header">
                         <label className="form-label">Minimum base salary</label>
-                        <span className="slider-value">${(prefs.min_salary / 1000).toFixed(0)}K</span>
+                        <span className="slider-value">${((prefs.min_salary ?? 0) / 1000).toFixed(0)}K</span>
                     </div>
                     <input 
                         type="range" 
@@ -428,7 +428,7 @@ export function CareerTargetsTab({ onAutoSaveStatusChange }: CareerTargetsTabPro
                         min="30000" 
                         max="300000" 
                         step="5000"
-                        value={prefs.min_salary}
+                        value={prefs.min_salary ?? 30000}
                         onChange={(e) => handleFieldChange('min_salary', parseInt(e.target.value))}
                     />
                     <div className="slider-labels">
