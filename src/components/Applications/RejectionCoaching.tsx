@@ -1,10 +1,55 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Icon } from '../ui/Icon'
 import { PoeticVerseMinimal } from '../ui/PoeticVerse'
 import { getPoeticVerse } from '../../lib/poeticMoments'
 import { supabase } from '../../lib/supabase'
 import { type Application } from '../../hooks/useApplications'
 import { useAuth } from '../../hooks/useAuth'
+import { useJobPreferences } from '../../hooks/useJobPreferences'
+import { useToast } from '../ui/Toast'
+
+// =============================================================================
+// ACTION TYPE DETECTION
+// =============================================================================
+
+type SuggestionAction = {
+    type: 'remote' | 'skill' | 'learning' | 'networking' | 'none'
+    label: string
+    data?: string
+}
+
+function parseActionType(suggestion: string): SuggestionAction {
+    const lowerSuggestion = suggestion.toLowerCase()
+    
+    // Remote work patterns
+    if (lowerSuggestion.includes('remote') || lowerSuggestion.includes('work from home')) {
+        return { type: 'remote', label: 'Prioritize Remote Jobs' }
+    }
+    
+    // Skill/learning patterns
+    const skillPatterns = [
+        /(?:learn|build|develop|improve|strengthen|emphasiz[e|ing])\s+(?:your\s+)?([a-zA-Z]+(?:\s+[a-zA-Z]+)?)/i,
+        /(?:more\s+)?([a-zA-Z]+(?:\s+[a-zA-Z]+)?)\s+(?:experience|skills?|projects?)/i,
+    ]
+    
+    for (const pattern of skillPatterns) {
+        const match = suggestion.match(pattern)
+        if (match && match[1]) {
+            const skill = match[1].trim()
+            // Filter out common non-skill words
+            if (!['your', 'the', 'more', 'some', 'any'].includes(skill.toLowerCase())) {
+                return { type: 'learning', label: `Find ${skill} courses`, data: skill }
+            }
+        }
+    }
+    
+    // Networking patterns
+    if (lowerSuggestion.includes('network') || lowerSuggestion.includes('connect') || lowerSuggestion.includes('reach out')) {
+        return { type: 'networking', label: 'Draft outreach message' }
+    }
+    
+    return { type: 'none', label: '' }
+}
 
 interface RejectionCoachingProps {
     application: Application
@@ -16,12 +61,45 @@ export function RejectionCoaching({ application }: RejectionCoachingProps) {
     const [coaching, setCoaching] = useState<any>(application.rejection_analysis || null)
     const [rejectionText, setRejectionText] = useState('')
     const [loading, setLoading] = useState(false)
+    const [appliedActions, setAppliedActions] = useState<Set<number>>(new Set())
+    
+    // Hooks for taking action
+    const { setField, save } = useJobPreferences()
+    const { showToast } = useToast()
 
     useEffect(() => {
         if (application.rejection_analysis) {
             setCoaching(application.rejection_analysis)
         }
     }, [application.rejection_analysis])
+    
+    // Action handlers
+    const handleAction = useCallback(async (action: SuggestionAction, index: number) => {
+        try {
+            switch (action.type) {
+                case 'remote':
+                    setField('remote_preference', 'remote')
+                    await save()
+                    showToast('Now prioritizing remote opportunities', 'success')
+                    break
+                    
+                case 'learning':
+                    // Open Coursera search for the skill
+                    const searchQuery = encodeURIComponent(action.data || 'professional skills')
+                    window.open(`https://www.coursera.org/search?query=${searchQuery}`, '_blank')
+                    showToast(`Opened courses for ${action.data}`, 'info')
+                    break
+                    
+                case 'networking':
+                    showToast('Networking feature coming soon!', 'info')
+                    break
+            }
+            
+            setAppliedActions(prev => new Set(prev).add(index))
+        } catch (err) {
+            showToast('Failed to apply action', 'error')
+        }
+    }, [setField, save, showToast])
 
     const handleStartCoaching = async () => {
         if (!rejectionText.trim()) return
@@ -129,12 +207,42 @@ export function RejectionCoaching({ application }: RejectionCoachingProps) {
                         <div className="space-y-2">
                             <label className="text-[10px] uppercase font-bold text-accent">Strategic Adjustments</label>
                             <ul className="space-y-2">
-                                {(coaching.suggestions || []).map((step: string, i: number) => (
-                                    <li key={i} className="text-xs flex items-start gap-2 bg-surface p-2 rounded border border-subtle">
-                                        <Icon name="check" size="sm" className="text-accent mt-0.5 shrink-0" />
-                                        <span>{step}</span>
-                                    </li>
-                                ))}
+                                {(coaching.suggestions || []).map((step: string, i: number) => {
+                                    const action = parseActionType(step)
+                                    const isApplied = appliedActions.has(i)
+                                    
+                                    return (
+                                        <li key={i} className="text-xs bg-surface p-3 rounded border border-subtle">
+                                            <div className="flex items-start gap-2">
+                                                <Icon name="check" size="sm" className="text-accent mt-0.5 shrink-0" />
+                                                <span className="flex-1">{step}</span>
+                                            </div>
+                                            {action.type !== 'none' && (
+                                                <button
+                                                    onClick={() => handleAction(action, i)}
+                                                    disabled={isApplied}
+                                                    className={`mt-2 w-full text-[11px] py-1.5 px-3 rounded flex items-center justify-center gap-1 transition-colors ${
+                                                        isApplied 
+                                                            ? 'bg-success/10 text-success-text cursor-default'
+                                                            : 'bg-accent/10 text-accent hover:bg-accent/20'
+                                                    }`}
+                                                >
+                                                    {isApplied ? (
+                                                        <>
+                                                            <Icon name="check" size="sm" />
+                                                            Applied
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            {action.label}
+                                                            <Icon name="chevron-right" size="sm" />
+                                                        </>
+                                                    )}
+                                                </button>
+                                            )}
+                                        </li>
+                                    )
+                                })}
                             </ul>
                         </div>
                     </div>

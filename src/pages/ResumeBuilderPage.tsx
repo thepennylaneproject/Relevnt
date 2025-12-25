@@ -29,6 +29,7 @@ import { ATSScoreCard } from '../components/ResumeBuilder/ATSScoreCard'
 import { ATSSuggestions } from '../components/ResumeBuilder/ATSSuggestions'
 import { JobTargetingPanel } from '../components/ResumeBuilder/JobTargetingPanel'
 import { NewResumeWizard } from '../components/ResumeBuilder/NewResumeWizard'
+import { ResumePerformancePanel } from '../components/ResumeBuilder/ResumePerformancePanel'
 
 // UI components
 import { Icon, IconName } from '../components/ui/Icon'
@@ -357,6 +358,9 @@ const ResumeBuilderPage: React.FC<ResumeBuilderPageProps> = ({ embedded = false 
 
                 {activePanel === 'ats' && (
                   <div className="ats-panel">
+                    {resumeId && (
+                      <ResumePerformancePanel resumeId={resumeId} />
+                    )}
                     <ATSScoreCard
                       analysis={analysis}
                       loading={analyzing}

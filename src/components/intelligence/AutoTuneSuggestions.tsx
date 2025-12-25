@@ -17,7 +17,7 @@ interface AutoTuneSuggestionsProps {
 }
 
 export function AutoTuneSuggestions({ className = '' }: AutoTuneSuggestionsProps) {
-    const { suggestions, loading, applySuggestion, dismissSuggestion, hasSuggestions } = useAutoTuning()
+    const { suggestions, loading, applyingId, applySuggestion, dismissSuggestion, hasSuggestions } = useAutoTuning()
     
     if (loading || !hasSuggestions) {
         return null
@@ -56,13 +56,15 @@ export function AutoTuneSuggestions({ className = '' }: AutoTuneSuggestionsProps
                                 <button
                                     className="suggestion-apply-btn"
                                     onClick={() => applySuggestion(suggestion.id)}
+                                    disabled={applyingId === suggestion.id}
                                 >
-                                    {suggestion.actionLabel}
-                                    <ChevronRight size={14} />
+                                    {applyingId === suggestion.id ? 'Applying...' : suggestion.actionLabel}
+                                    {applyingId !== suggestion.id && <ChevronRight size={14} />}
                                 </button>
                                 <button
                                     className="suggestion-skip-btn"
                                     onClick={() => dismissSuggestion(suggestion.id)}
+                                    disabled={applyingId === suggestion.id}
                                 >
                                     Not now
                                 </button>

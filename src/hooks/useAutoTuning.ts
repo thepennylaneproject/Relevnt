@@ -10,6 +10,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useJobInteractions, type DismissalPattern } from './useJobInteractions'
+import { useJobPreferences } from './useJobPreferences'
+import { useToast } from '../components/ui/Toast'
 
 export interface AutoTuneSuggestion {
     id: string
@@ -25,6 +27,7 @@ export interface AutoTuneSuggestion {
 export interface UseAutoTuningReturn {
     suggestions: AutoTuneSuggestion[]
     loading: boolean
+    applyingId: string | null
     applySuggestion: (suggestionId: string) => Promise<void>
     dismissSuggestion: (suggestionId: string) => void
     hasSuggestions: boolean
@@ -34,8 +37,11 @@ const SUGGESTION_THRESHOLD = 60 // Show suggestion if 60%+ of dismissals had low
 
 export function useAutoTuning(): UseAutoTuningReturn {
     const { getDismissalPatterns, loading: patternsLoading } = useJobInteractions()
+    const { prefs, setField, save } = useJobPreferences()
+    const { showToast } = useToast()
     const [suggestions, setSuggestions] = useState<AutoTuneSuggestion[]>([])
     const [loading, setLoading] = useState(true)
+    const [applyingId, setApplyingId] = useState<string | null>(null)
     const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set())
     
     // Generate suggestions from dismissal patterns
@@ -131,21 +137,62 @@ export function useAutoTuning(): UseAutoTuningReturn {
         generateSuggestions()
     }, [generateSuggestions])
     
-    // Apply a suggestion (would integrate with user preferences/filters)
+    // Apply a suggestion by updating user preferences
     const applySuggestion = useCallback(async (suggestionId: string) => {
         const suggestion = suggestions.find(s => s.id === suggestionId)
         if (!suggestion) return
         
-        // TODO: Integrate with actual user preferences system
-        // For now, we just remove it from the list
-        console.log('Applying suggestion:', suggestion)
+        setApplyingId(suggestionId)
         
-        // Remove from suggestions
-        setSuggestions(prev => prev.filter(s => s.id !== suggestionId))
-        
-        // Mark as applied (would persist this)
-        setDismissedIds(prev => new Set(prev).add(suggestionId))
-    }, [suggestions])
+        try {
+            switch (suggestion.factor) {
+                case 'salary': {
+                    // Increase minimum salary by 20% or set to a sensible baseline
+                    const currentMin = prefs?.min_salary ?? 80000
+                    const newMinSalary = Math.round(currentMin * 1.2 / 5000) * 5000 // Round to nearest $5K
+                    setField('min_salary', newMinSalary)
+                    await save()
+                    showToast(`Updated minimum salary to $${newMinSalary.toLocaleString()}`, 'success')
+                    break
+                }
+                    
+                case 'remote preference': {
+                    setField('remote_preference', 'remote')
+                    await save()
+                    showToast('Now prioritizing remote opportunities', 'success')
+                    break
+                }
+                    
+                case 'location': {
+                    // For location, we note the intent - user should review their locations
+                    showToast('Please review your preferred locations in Settings', 'info')
+                    break
+                }
+                    
+                case 'skills':
+                case 'industry':
+                case 'job title': {
+                    // These require more nuanced updates - notify user to review
+                    showToast(`We've noted your ${suggestion.factor} preferences. Review in Settings for fine-tuning.`, 'info')
+                    break
+                }
+                    
+                default: {
+                    showToast('Preference noted. Check Settings to fine-tune.', 'info')
+                }
+            }
+            
+            // Remove from suggestions after successful apply
+            setSuggestions(prev => prev.filter(s => s.id !== suggestionId))
+            setDismissedIds(prev => new Set(prev).add(suggestionId))
+            
+        } catch (err) {
+            console.error('Error applying suggestion:', err)
+            showToast('Failed to update preferences. Please try again.', 'error')
+        } finally {
+            setApplyingId(null)
+        }
+    }, [suggestions, prefs, setField, save, showToast])
     
     // Dismiss a suggestion without applying
     const dismissSuggestion = useCallback((suggestionId: string) => {
@@ -156,6 +203,7 @@ export function useAutoTuning(): UseAutoTuningReturn {
     return {
         suggestions,
         loading: loading || patternsLoading,
+        applyingId,
         applySuggestion,
         dismissSuggestion,
         hasSuggestions: suggestions.length > 0
@@ -163,3 +211,4 @@ export function useAutoTuning(): UseAutoTuningReturn {
 }
 
 export default useAutoTuning
+
