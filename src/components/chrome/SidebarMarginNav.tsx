@@ -32,6 +32,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { path: '/resumes', label: 'Resume', icon: 'scroll', description: 'ATS-optimized builder' },
       { path: '/profile-analyzer', label: 'Profile Analyzer', icon: 'stars', description: 'LinkedIn & Portfolio feedback', badge: 'AI' },
+      { path: '/interview-prep', label: 'Interview Prep', icon: 'microphone', description: 'Practice with AI coaching', badge: 'AI' },
     ],
   },
 ]
@@ -44,7 +45,7 @@ const DOODLES: Record<string, string> = {
   '/applications': '/doodles/sidebar-notebook.svg',
   '/resumes': '/doodles/sidebar-tools.svg',
   '/profile-analyzer': '/doodles/sidebar-constellation.svg',
-  '/interview-prep': '/doodles/sidebar-notes.svg',
+  '/interview-prep': '/doodles/sidebar-microphone.svg',
   '/settings': '/doodles/sidebar-phoenix.svg',
 }
 

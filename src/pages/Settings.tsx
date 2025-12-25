@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Container } from '../components/shared/Container'
 import { Icon } from '../components/ui/Icon'
-import { Settings as IconSettings } from 'lucide-react'
 import { SettingsTabNav, type SettingsTab } from '../components/settings/SettingsTabNav'
 import { AutoSaveIndicator } from '../components/settings/AutoSaveIndicator'
 import { PersonaTab } from '../components/settings/tabs/PersonaTab'
@@ -69,7 +68,7 @@ export default function Settings(): JSX.Element {
             <Container maxWidth="lg" padding="md">
                 <div className="page-header">
                     <div className="icon-header">
-                        <IconSettings className="header-icon" size={16} />
+                        <Icon name="pocket-watch" size="sm" />
                         <span className="label">SETTINGS</span>
                         <div style={{ marginLeft: 'auto' }}>
                             <AutoSaveIndicator status={autoSaveStatus} />

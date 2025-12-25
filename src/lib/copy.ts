@@ -33,15 +33,16 @@ export const copy = {
   // NAVIGATION
   // ─────────────────────────────────────────────────────────────────────────
   nav: {
-    dashboard: 'Dash',
+    dashboard: 'Dashboard',
     jobs: 'Jobs',
-    applications: 'Apps',
+    applications: 'Applications',
     autoApplyQueue: 'Queue',
-    resumes: 'CVs',
+    resumes: 'Resume',
     learn: 'Learn',
     voice: 'Voice',
     personas: 'Personas',
-    settings: 'Prefs',
+    settings: 'Settings',
+    interviewPrep: 'Interview Prep',
   },
 
   // ─────────────────────────────────────────────────────────────────────────

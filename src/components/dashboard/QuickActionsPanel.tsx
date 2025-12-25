@@ -35,14 +35,14 @@ const QUICK_ACTIONS: QuickAction[] = [
         title: 'Optimize LinkedIn',
         description: 'Receive AI-powered feedback on your profile\'s impact',
         icon: 'lighthouse',
-        route: '/linkedin-optimizer',
+        route: '/profile-analyzer',
     },
     {
         id: 'resume-builder',
         title: 'Build a resume',
         description: 'ATS-optimized builder with real-time scoring',
         icon: 'scroll',
-        route: '/resumes/builder',
+        route: '/resumes',
     },
     {
         id: 'auto-apply',
@@ -51,13 +51,6 @@ const QUICK_ACTIONS: QuickAction[] = [
         icon: 'paper-airplane',
         route: '/settings#auto-apply',
         badge: 'new',
-    },
-    {
-        id: 'offer-compare',
-        title: 'Compare offers',
-        description: 'Side-by-side analysis of compensation packages',
-        icon: 'dollar',
-        route: '/offers/compare',
     },
 ]
 
