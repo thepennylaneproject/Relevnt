@@ -27,6 +27,7 @@ import PersonaManagementPage from './pages/PersonaManagementPage'
 import SidebarMarginNav from './components/chrome/SidebarMarginNav'
 import { OnboardingGate } from './components/onboarding'
 import './styles/margin-nav.css'
+import PersonaManagementPage from './pages/PersonaManagementPage'
 
 import './App.css'
 
