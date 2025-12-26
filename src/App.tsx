@@ -26,6 +26,7 @@ import InterviewPracticer from './pages/InterviewPracticer'
 import SidebarMarginNav from './components/chrome/SidebarMarginNav'
 import { OnboardingGate } from './components/onboarding'
 import './styles/margin-nav.css'
+import PersonaManagementPage from './pages/PersonaManagementPage'
 
 import './App.css'
 
@@ -115,36 +116,6 @@ function AppInner() {
                 element={isAuthed ? <Settings /> : <Navigate to="/login" replace />}
               />
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-            {/* Legacy route redirects to Settings Hub tabs */}
-            <Route
-              path="/job-preferences"
-              element={isAuthed ? <Navigate to="/settings#career" replace /> : <Navigate to="/login" replace />}
-            />
-            <Route
-              path="/profile/personal"
-              element={isAuthed ? <Navigate to="/settings#profile" replace /> : <Navigate to="/login" replace />}
-            />
-            <Route
-              path="/profile/professional"
-              element={isAuthed ? <Navigate to="/settings#profile" replace /> : <Navigate to="/login" replace />}
-            />
-            <Route
-              path="/voice"
-              element={isAuthed ? <Navigate to="/settings#voice" replace /> : <Navigate to="/login" replace />}
-            />
-            <Route
-              path="/settings/voice"
-              element={isAuthed ? <Navigate to="/settings#voice" replace /> : <Navigate to="/login" replace />}
-            />
-            <Route
-              path="/personas"
-              element={isAuthed ? <Navigate to="/settings#targeting" replace /> : <Navigate to="/login" replace />}
-            />
-=======
-=======
->>>>>>> Stashed changes
               {/* Legacy route redirects to Settings Hub tabs */}
               <Route
                 path="/job-preferences"
@@ -170,10 +141,6 @@ function AppInner() {
                 path="/personas"
                 element={isAuthed ? <PersonaManagementPage /> : <Navigate to="/login" replace />}
               />
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 
               <Route
                 path="/admin"
