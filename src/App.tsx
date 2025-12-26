@@ -23,7 +23,6 @@ import SharedAuditPage from './pages/SharedAuditPage'
 
 import InterviewPrepCenter from './pages/InterviewPrepCenter'
 import InterviewPracticer from './pages/InterviewPracticer'
-import PersonaManagementPage from './pages/PersonaManagementPage'
 import SidebarMarginNav from './components/chrome/SidebarMarginNav'
 import { OnboardingGate } from './components/onboarding'
 import './styles/margin-nav.css'
