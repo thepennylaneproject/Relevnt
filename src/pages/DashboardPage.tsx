@@ -74,7 +74,7 @@ export default function DashboardPage(): JSX.Element {
         <div className="clarity-hub-dashboard">
           {/* CLARITY HUB HEADER */}
           <section className="clarity-hero">
-            <h1>Clarity Hub</h1>
+            <h1 className="font-serif">Clarity Hub</h1>
             <p className={`hero-subhead ${wellnessMode === 'gentle' ? 'text-accent-primary' : ''}`}>
               {guidance.greeting}
             </p>

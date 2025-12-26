@@ -124,7 +124,6 @@ export const CustomIcon: React.FC<CustomIconWrapperProps> = ({
         strokeLinecap="round"
         strokeLinejoin="round"
         className={className}
-        title={title}
         style={style}
       >
         <circle cx="12" cy="12" r="10" />
