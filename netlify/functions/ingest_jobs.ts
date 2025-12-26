@@ -1192,11 +1192,12 @@ async function upsertJobs(jobs: NormalizedJob[]) {
     }
   })
 
-  const { data, error } = await supabase
+  const { data, error, count } = await supabase
     .from('jobs')
     .upsert(enrichedJobs, {
       onConflict: 'source_slug,external_id',
-      ignoreDuplicates: true,
+      ignoreDuplicates: false,  // Update existing jobs with fresh data
+      count: 'exact',
     })
     .select('id')
 
@@ -1205,7 +1206,11 @@ async function upsertJobs(jobs: NormalizedJob[]) {
     throw error
   }
 
-  return { inserted: data?.length ?? 0 }
+  // With ignoreDuplicates=false, all rows are upserted (inserted or updated)
+  const upsertedCount = data?.length ?? count ?? enrichedJobs.length
+  console.log(`ingest_jobs: upserted ${upsertedCount} jobs (new + updated)`)
+  
+  return { inserted: upsertedCount }
 }
 
 /**

@@ -1,0 +1,325 @@
+/* src/components/onboarding/onboarding-wizard.css */
+
+/* Overlay */
+.onboarding-wizard-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 12, 16, 0.95);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: fade-in 0.3s ease-out;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Wizard container */
+.onboarding-wizard {
+  background: var(--surface, #1a1c23);
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+  border-radius: 16px;
+  max-width: 560px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  animation: slide-up 0.4s ease-out;
+}
+
+@keyframes slide-up {
+  from { 
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Progress */
+.wizard-progress {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px 24px 0;
+}
+
+.progress-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border, rgba(255, 255, 255, 0.1));
+  transition: all 0.2s ease;
+}
+
+.progress-dot.active {
+  background: var(--color-accent, #D4A574);
+  transform: scale(1.2);
+}
+
+.progress-dot.complete {
+  background: var(--color-accent, #D4A574);
+  opacity: 0.5;
+}
+
+/* Content */
+.wizard-content {
+  flex: 1;
+  padding: 32px 40px;
+}
+
+.wizard-step {
+  animation: step-in 0.3s ease-out;
+}
+
+@keyframes step-in {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.step-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.step-icon svg {
+  width: 48px;
+  height: 48px;
+  color: var(--color-accent, #D4A574);
+}
+
+.step-icon.success svg {
+  color: var(--color-success, #2D5A4A);
+}
+
+.wizard-step h2 {
+  font-family: var(--font-heading, 'Crimson Text', serif);
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text, #f0f0f0);
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.step-description {
+  font-size: 14px;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+  text-align: center;
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+
+/* Form elements */
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+  margin-bottom: 8px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--surface-soft, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
+  border-radius: 8px;
+  color: var(--text, #f0f0f0);
+  font-size: 15px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--color-accent, #D4A574);
+  box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.15);
+}
+
+.form-input::placeholder {
+  color: var(--text-tertiary, rgba(255, 255, 255, 0.4));
+}
+
+.form-hint {
+  font-size: 12px;
+  color: var(--text-tertiary, rgba(255, 255, 255, 0.5));
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+/* Radio cards */
+.radio-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.radio-card {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  background: var(--surface-soft, rgba(255, 255, 255, 0.02));
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.radio-card:hover {
+  border-color: var(--border-hover, rgba(255, 255, 255, 0.15));
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.radio-card.selected {
+  border-color: var(--color-accent, #D4A574);
+  background: rgba(212, 165, 116, 0.08);
+}
+
+.radio-card input {
+  display: none;
+}
+
+.radio-card-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text, #f0f0f0);
+  margin-bottom: 4px;
+}
+
+.radio-card-desc {
+  font-size: 12px;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.6));
+}
+
+/* Tag input and list */
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(212, 165, 116, 0.12);
+  border: 1px solid rgba(212, 165, 116, 0.25);
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--color-accent, #D4A574);
+}
+
+.tag-remove {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  font-size: 16px;
+  line-height: 1;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.tag-remove:hover {
+  opacity: 1;
+}
+
+/* Summary card */
+.summary-card {
+  background: var(--surface-soft, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+  border-left: 3px solid var(--color-accent, #D4A574);
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.summary-card h3 {
+  font-family: var(--font-heading, 'Crimson Text', serif);
+  font-size: 18px;
+  color: var(--color-accent, #D4A574);
+  margin-bottom: 16px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.05));
+}
+
+.summary-row:last-child {
+  border-bottom: none;
+}
+
+.summary-label {
+  font-size: 13px;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.6));
+}
+
+.summary-value {
+  font-size: 13px;
+  color: var(--text, #f0f0f0);
+  text-align: right;
+  max-width: 60%;
+}
+
+/* Footer */
+.wizard-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px 40px 24px;
+  border-top: 1px solid var(--border, rgba(255, 255, 255, 0.06));
+}
+
+.wizard-footer .btn {
+  min-width: 120px;
+}
+
+/* Error */
+.error-text {
+  color: var(--color-error, #cb4b4b);
+  font-size: 13px;
+  text-align: center;
+  margin-top: 16px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .onboarding-wizard-overlay {
+    padding: 16px;
+  }
+
+  .wizard-content {
+    padding: 24px 20px;
+  }
+
+  .wizard-footer {
+    padding: 16px 20px 20px;
+  }
+
+  .radio-cards {
+    grid-template-columns: 1fr;
+  }
+}

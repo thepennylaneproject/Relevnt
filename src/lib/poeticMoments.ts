@@ -11,6 +11,9 @@
 
 export type PoeticMoment =
   | 'empty-jobs'
+  | 'empty-applications'
+  | 'empty-saved'
+  | 'empty-resumes'
   | 'rejection'
   | 'interview-prep'
   | 'application-submitted'
@@ -121,6 +124,33 @@ export const poeticMoments: Record<PoeticMoment, PoeticVerse> = {
     attribution: 'The Journey (adapted) — Mary Oliver',
     reflection: "You've discovered a new insight. A pattern. A truth about your data. This is wonder—the beginning of deeper understanding. Trust what you see.",
     tone: 'contemplative',
+  },
+
+  'empty-applications': {
+    moment: 'empty-applications',
+    poet: 'Angelou',
+    verse: 'There is no greater agony than bearing an untold story inside you.',
+    attribution: 'I Know Why the Caged Bird Sings — Maya Angelou',
+    reflection: 'Your story is waiting to be told. Each application is a chapter you write. Begin, and the story will find its shape.',
+    tone: 'resilient',
+  },
+
+  'empty-saved': {
+    moment: 'empty-saved',
+    poet: 'Oliver',
+    verse: 'Instructions for living a life:\nPay attention.\nBe astonished.\nTell about it.',
+    attribution: 'Sometimes — Mary Oliver',
+    reflection: 'When you find something worth keeping, save it. The act of noticing is the first step toward having.',
+    tone: 'contemplative',
+  },
+
+  'empty-resumes': {
+    moment: 'empty-resumes',
+    poet: 'Shakespeare',
+    verse: 'This above all: to thine own self be true,\nAnd it must follow, as the night the day,\nThou canst not then be false to any man.',
+    attribution: 'Hamlet — William Shakespeare',
+    reflection: 'Your résumé is your truth on paper. It is not embellishment—it is clarity. Tell your story plainly, and let your work speak.',
+    tone: 'bold',
   },
 }
 

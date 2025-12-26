@@ -15,9 +15,6 @@ import { SmallWins } from '../components/dashboard/SmallWins'
 import { OutcomeMetricsCard } from '../components/dashboard/OutcomeMetricsCard'
 import { QuickActionsPanel } from '../components/dashboard/QuickActionsPanel'
 import { OpportunityAlerts } from '../components/dashboard/OpportunityAlerts'
-import { SkillsTrajectoryCard } from '../components/dashboard/SkillsTrajectoryCard'
-import { ApplicationPerformanceInsights } from '../components/dashboard/ApplicationPerformanceInsights'
-import { WhatIsNew } from '../components/dashboard/WhatIsNew'
 import '../styles/dashboard-clarity.css'
 
 export default function DashboardPage(): JSX.Element {
@@ -146,11 +143,6 @@ export default function DashboardPage(): JSX.Element {
               {/* Outcome Metrics - Shift from activity to results */}
               <OutcomeMetricsCard className="mt-8" />
 
-              <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <SkillsTrajectoryCard />
-                <ApplicationPerformanceInsights />
-              </div>
-
               <div className="tab-switcher mt-8">
                 <button
                   className={`tab-link ${activeTab === 'triage' ? 'is-active' : ''}`}
@@ -205,61 +197,15 @@ export default function DashboardPage(): JSX.Element {
                         </div>
                       </div>
                     </div>
-                    <p className="muted text-xs mt-6 italic text-center">
-                      Market average callback rate: 3%. Your Relevnt-optimized rate: 12%.
-                    </p>
                   </div>
 
                 </div>
               )}
             </div>
 
-            {/* RIGHT: SIDEBAR */}
+            {/* RIGHT: SIDEBAR - Streamlined */}
             <aside className="layout-sidebar">
               <WellnessCheckin />
-
-              <section className="card card--job-listing">
-                <h3 className="card-title text-sm mb-4">Market pulse</h3>
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="text-xs font-semibold uppercase tracking-wider text-secondary">Applicant volume</span>
-                      <span className="text-xs text-error font-semibold">High</span>
-                    </div>
-                    <div className="volume-bar"><div className="volume-fill" style={{ width: '92%' }} /></div>
-                    <p className="text-[10px] text-secondary mt-1">
-                      Top roles receiving 400+ applications within 24 hours. Focus on quality over quantity.
-                    </p>
-                  </div>
-
-                  <div className="strategy-box">
-                    <Icon name="stars" size="sm" className="strategy-box-icon" />
-                    <div className="strategy-box-content">
-                      <div className="strategy-box-title">Prioritize referrals</div>
-                      <p className="strategy-box-text">
-                        Direct outreach to hiring leads has 4× the impact of cold applications right now.
-                      </p>
-                        <Link to="/applications" className="btn btn-ghost btn-sm p-0 mt-2">Track your outreach in Applications</Link>
-                    </div>
-                  </div>
-                </div>
-              </section>
-
-              <section className="card card--job-listing">
-                <h3 className="card-title text-sm mb-4">Today's insights</h3>
-                <ul className="intel-list">
-                  <li className="flex gap-2 items-start py-2 border-b border-border">
-                    <Icon name="search" size="sm" className="text-accent" />
-                    <span className="text-xs">12 listings flagged as potentially stale or closed.</span>
-                  </li>
-                  <li className="flex gap-2 items-start py-2">
-                    <Icon name="lighthouse" size="sm" className="text-accent" />
-                    <span className="text-xs">3 companies on your list have increased hiring velocity.</span>
-                  </li>
-                </ul>
-              </section>
-
-              <WhatIsNew />
             </aside>
           </div>
         </div>

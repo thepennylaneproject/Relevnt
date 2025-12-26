@@ -24,6 +24,7 @@ import SharedAuditPage from './pages/SharedAuditPage'
 import InterviewPrepCenter from './pages/InterviewPrepCenter'
 import InterviewPracticer from './pages/InterviewPracticer'
 import SidebarMarginNav from './components/chrome/SidebarMarginNav'
+import { OnboardingGate } from './components/onboarding'
 import './styles/margin-nav.css'
 
 import './App.css'
@@ -41,78 +42,80 @@ function AppInner() {
     <BrowserRouter>
       <SidebarMarginNav />
       <div className="app-content">
-        <WelcomeModal />
-        <AppLayout>
-          <Routes>
-            {/* Public */}
-            <Route
-              path="/"
-              element={isAuthed ? <Navigate to="/dashboard" replace /> : <HomePage />}
-            />
-            <Route
-              path="/login"
-              element={isAuthed ? <Navigate to="/dashboard" replace /> : <LoginPage />}
-            />
-            <Route
-              path="/signup"
-              element={isAuthed ? <Navigate to="/dashboard" replace /> : <SignupPage />}
-            />
+        <OnboardingGate>
+          <WelcomeModal />
+          <AppLayout>
+            <Routes>
+              {/* Public */}
+              <Route
+                path="/"
+                element={isAuthed ? <Navigate to="/dashboard" replace /> : <HomePage />}
+              />
+              <Route
+                path="/login"
+                element={isAuthed ? <Navigate to="/dashboard" replace /> : <LoginPage />}
+              />
+              <Route
+                path="/signup"
+                element={isAuthed ? <Navigate to="/dashboard" replace /> : <SignupPage />}
+              />
 
-            <Route
-              path="/shared/audit/:type/:token"
-              element={<SharedAuditPage />}
-            />
+              <Route
+                path="/shared/audit/:type/:token"
+                element={<SharedAuditPage />}
+              />
 
-            {/* Protected */}
-            <Route
-              path="/dashboard"
-              element={isAuthed ? <DashboardPage /> : <Navigate to="/login" replace />}
-            />
-            <Route
-              path="/resumes"
-              element={isAuthed ? <ResumeWorkspacePage /> : <Navigate to="/login" replace />}
-            />
+              {/* Protected */}
+              <Route
+                path="/dashboard"
+                element={isAuthed ? <DashboardPage /> : <Navigate to="/login" replace />}
+              />
+              <Route
+                path="/resumes"
+                element={isAuthed ? <ResumeWorkspacePage /> : <Navigate to="/login" replace />}
+              />
 
-            <Route
-              path="/jobs"
-              element={isAuthed ? <JobsPage /> : <Navigate to="/login" replace />}
-            />
-            <Route
-              path="/applications"
-              element={isAuthed ? <ApplicationsPage /> : <Navigate to="/login" replace />}
-            />
-            <Route
-              path="/auto-apply"
-              element={isAuthed ? <Navigate to="/settings#auto-apply" replace /> : <Navigate to="/login" replace />}
-            />
-            <Route
-              path="/profile-analyzer"
-              element={isAuthed ? <ProfileAnalyzer /> : <Navigate to="/login" replace />}
-            />
-            <Route
-              path="/linkedin-optimizer"
-              element={<Navigate to="/profile-analyzer" replace />}
-            />
-            <Route
-              path="/portfolio-optimizer"
-              element={<Navigate to="/profile-analyzer" replace />}
-            />
-            <Route
-              path="/interview-prep"
-              element={isAuthed ? <InterviewPrepCenter /> : <Navigate to="/login" replace />}
-            />
-            <Route
-              path="/interview-practice/:id"
-              element={isAuthed ? <InterviewPracticer /> : <Navigate to="/login" replace />}
-            />
+              <Route
+                path="/jobs"
+                element={isAuthed ? <JobsPage /> : <Navigate to="/login" replace />}
+              />
+              <Route
+                path="/applications"
+                element={isAuthed ? <ApplicationsPage /> : <Navigate to="/login" replace />}
+              />
+              <Route
+                path="/auto-apply"
+                element={isAuthed ? <Navigate to="/settings#auto-apply" replace /> : <Navigate to="/login" replace />}
+              />
+              <Route
+                path="/profile-analyzer"
+                element={isAuthed ? <ProfileAnalyzer /> : <Navigate to="/login" replace />}
+              />
+              <Route
+                path="/linkedin-optimizer"
+                element={<Navigate to="/profile-analyzer" replace />}
+              />
+              <Route
+                path="/portfolio-optimizer"
+                element={<Navigate to="/profile-analyzer" replace />}
+              />
+              <Route
+                path="/interview-prep"
+                element={isAuthed ? <InterviewPrepCenter /> : <Navigate to="/login" replace />}
+              />
+              <Route
+                path="/interview-practice/:id"
+                element={isAuthed ? <InterviewPracticer /> : <Navigate to="/login" replace />}
+              />
 
 
-            {/* Unified Settings Hub */}
-            <Route
-              path="/settings"
-              element={isAuthed ? <Settings /> : <Navigate to="/login" replace />}
-            />
+              {/* Unified Settings Hub */}
+              <Route
+                path="/settings"
+                element={isAuthed ? <Settings /> : <Navigate to="/login" replace />}
+              />
 
+<<<<<<< Updated upstream
             {/* Legacy route redirects to Settings Hub tabs */}
             <Route
               path="/job-preferences"
@@ -138,13 +141,41 @@ function AppInner() {
               path="/personas"
               element={isAuthed ? <Navigate to="/settings#targeting" replace /> : <Navigate to="/login" replace />}
             />
+=======
+              {/* Legacy route redirects to Settings Hub tabs */}
+              <Route
+                path="/job-preferences"
+                element={isAuthed ? <Navigate to="/settings#career" replace /> : <Navigate to="/login" replace />}
+              />
+              <Route
+                path="/profile/personal"
+                element={isAuthed ? <Navigate to="/settings#profile" replace /> : <Navigate to="/login" replace />}
+              />
+              <Route
+                path="/profile/professional"
+                element={isAuthed ? <Navigate to="/settings#profile" replace /> : <Navigate to="/login" replace />}
+              />
+              <Route
+                path="/voice"
+                element={isAuthed ? <Navigate to="/settings#voice" replace /> : <Navigate to="/login" replace />}
+              />
+              <Route
+                path="/settings/voice"
+                element={isAuthed ? <Navigate to="/settings#voice" replace /> : <Navigate to="/login" replace />}
+              />
+              <Route
+                path="/personas"
+                element={isAuthed ? <PersonaManagementPage /> : <Navigate to="/login" replace />}
+              />
+>>>>>>> Stashed changes
 
-            <Route
-              path="/admin"
-              element={isAuthed ? <AdminDashboard /> : <Navigate to="/login" replace />}
-            />
-          </Routes>
-        </AppLayout>
+              <Route
+                path="/admin"
+                element={isAuthed ? <AdminDashboard /> : <Navigate to="/login" replace />}
+              />
+            </Routes>
+          </AppLayout>
+        </OnboardingGate>
       </div>
     </BrowserRouter>
   )

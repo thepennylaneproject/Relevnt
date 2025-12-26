@@ -29,13 +29,23 @@ const QUICK_ACTIONS: QuickAction[] = [
         description: 'Practice with AI-generated questions tailored to your target role',
         icon: 'microphone',
         route: '/interview-prep',
+        badge: 'ai',
     },
     {
+<<<<<<< Updated upstream
         id: 'linkedin',
         title: 'Optimize LinkedIn',
         description: 'Receive AI-powered feedback on your profile\'s impact',
         icon: 'lighthouse',
         route: '/profile-analyzer',
+=======
+        id: 'auto-apply',
+        title: 'Auto-Apply',
+        description: 'Let AI submit applications for you — save 2–3 hours per week',
+        icon: 'paper-airplane',
+        route: '/settings#auto-apply',
+        badge: 'ai',
+>>>>>>> Stashed changes
     },
     {
         id: 'resume-builder',
@@ -45,12 +55,21 @@ const QUICK_ACTIONS: QuickAction[] = [
         route: '/resumes',
     },
     {
+<<<<<<< Updated upstream
         id: 'auto-apply',
         title: 'Auto-Apply (Pro)',
         description: 'Efficiency engine: automate applications to save 2–3 hours/week',
         icon: 'paper-airplane',
         route: '/settings#auto-apply',
         badge: 'new',
+=======
+        id: 'linkedin',
+        title: 'Profile Analyzer',
+        description: 'Get AI feedback on your LinkedIn and portfolio',
+        icon: 'lighthouse',
+        route: '/profile-analyzer',
+        badge: 'ai',
+>>>>>>> Stashed changes
     },
 ]
 
@@ -83,6 +102,9 @@ export function QuickActionsPanel(): JSX.Element {
                                     {action.title}
                                     {action.badge === 'new' && (
                                         <span className="text-[9px] uppercase tracking-widest bg-accent/20 text-accent px-1.5 py-0.5 rounded">NEW</span>
+                                    )}
+                                    {action.badge === 'ai' && (
+                                        <span className="text-[9px] uppercase tracking-widest bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded">AI</span>
                                     )}
                                 </h4>
                                 <p className="text-xs text-secondary mt-1 leading-relaxed">{action.description}</p>

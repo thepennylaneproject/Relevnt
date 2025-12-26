@@ -609,11 +609,23 @@ export default function JobsPage() {
           {!jobsLoading && !jobsError && sortedJobs.length === 0 && (
             <EmptyState
               type="jobs"
-              title="We couldn't load your matches right now..."
-              description="Check your connection or try clearing your filters to see more of the landscape."
+              title="No opportunities found yet"
+              description={
+                search || locationFilter || sourceKey || employmentType || postedSince || minSalaryBrowse > 0 || remoteOnlyBrowse
+                  ? "Try adjusting your filters to see more opportunities."
+                  : "\"Two roads diverged in a yellow wood...\" Your perfect role may be on its way. We're continuously searching."
+              }
               action={{
-                label: "Try again",
-                onClick: () => fetchJobs(),
+                label: search || locationFilter || sourceKey || employmentType || postedSince || minSalaryBrowse > 0 || remoteOnlyBrowse
+                  ? "Clear filters"
+                  : "Refresh",
+                onClick: () => {
+                  if (search || locationFilter || sourceKey || employmentType || postedSince || minSalaryBrowse > 0 || remoteOnlyBrowse) {
+                    handleClearFilters()
+                  } else {
+                    fetchJobs()
+                  }
+                },
                 variant: 'secondary'
               }}
             />

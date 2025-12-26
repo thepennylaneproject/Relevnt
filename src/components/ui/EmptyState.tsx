@@ -74,10 +74,10 @@ interface EmptyStateContent {
 
 // Map empty state types to poetic moments
 const emptyStateToPoetic: Record<EmptyStateType, PoeticMoment | undefined> = {
-  applications: undefined,
+  applications: 'empty-applications',
   jobs: 'empty-jobs',
-  resumes: undefined,
-  saved: undefined,
+  resumes: 'empty-resumes',
+  saved: 'empty-saved',
   matches: undefined,
   search: undefined,
   learn: undefined,

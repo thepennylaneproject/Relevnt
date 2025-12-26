@@ -33,7 +33,11 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { path: '/resumes', label: 'Resume', icon: 'scroll', description: 'ATS-optimized builder' },
       { path: '/profile-analyzer', label: 'Profile Analyzer', icon: 'stars', description: 'LinkedIn & Portfolio feedback', badge: 'AI' },
+<<<<<<< Updated upstream
       { path: '/interview-prep', label: 'Interview Prep', icon: 'microphone', description: 'Practice with AI coaching', badge: 'AI' },
+=======
+      { path: '/interview-prep', label: 'Interview Prep', icon: 'microphone', description: 'Practice and prepare' },
+>>>>>>> Stashed changes
     ],
   },
 ]

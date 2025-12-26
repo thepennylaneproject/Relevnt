@@ -1,63 +1,130 @@
 // src/components/layout/Header.tsx
-import React from 'react'
+import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { Menu, X } from 'lucide-react'
+import './header.css'
 
 export interface HeaderProps {
   userInitial?: string
 }
 
+const NAV_LINKS = [
+  { path: '/dashboard', label: 'Dashboard' },
+  { path: '/jobs', label: 'Jobs' },
+  { path: '/applications', label: 'Applications' },
+  { path: '/resumes', label: 'Resume' },
+  { path: '/interview-prep', label: 'Interview Prep' },
+  { path: '/settings', label: 'Settings' },
+]
+
 export function Header({ userInitial }: HeaderProps) {
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const initial =
     userInitial ||
     (user?.email ? user.email.charAt(0).toUpperCase() : 'R')
 
   const handleLogout = async () => {
+    setMobileMenuOpen(false)
     await signOut()
     navigate('/login')
   }
 
+  const handleNavClick = (path: string) => {
+    setMobileMenuOpen(false)
+    navigate(path)
+  }
+
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-        <Link to="/" style={{ textDecoration: 'none', color: 'var(--text)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--surface-soft)', border: '1px solid var(--border)' }} />
-            <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>relevnt</div>
-          </div>
-        </Link>
+    <>
+      <div className="header-container">
+        <div className="header-left">
+          <Link to="/" className="header-logo">
+            <div className="header-logo-icon" />
+            <span className="header-logo-text">relevnt</span>
+          </Link>
+        </div>
+
+        <div className="header-right">
+          {user ? (
+            <>
+              <div className="header-avatar">{initial}</div>
+              <button type="button" onClick={handleLogout} className="ghost-button button-sm header-desktop-only">
+                Log out
+              </button>
+              <button
+                type="button"
+                className="header-mobile-menu-btn"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label="Toggle navigation menu"
+              >
+                {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                className="ghost-button button-sm"
+                onClick={() => navigate('/login')}
+              >
+                Log in
+              </button>
+              <button
+                type="button"
+                className="primary-button button-sm"
+                onClick={() => navigate('/signup')}
+              >
+                Get started
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        {user ? (
-          <>
-            <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--color-accent-glow)', color: 'var(--color-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 600 }}>{initial}</div>
-            <button type="button" onClick={handleLogout} className="ghost-button button-sm">
-              Log out
-            </button>
-          </>
-        ) : (
-          <>
-            <button
-              type="button"
-              className="ghost-button button-sm"
-              onClick={() => navigate('/login')}
-            >
-              Log in
-            </button>
-            <button
-              type="button"
-              className="primary-button button-sm"
-              onClick={() => navigate('/signup')}
-            >
-              Get started
-            </button>
-          </>
-        )}
-      </div>
-    </div>
+      {/* Mobile Navigation Drawer */}
+      {mobileMenuOpen && user && (
+        <div className="mobile-nav-overlay" onClick={() => setMobileMenuOpen(false)}>
+          <nav className="mobile-nav-drawer" onClick={(e) => e.stopPropagation()}>
+            <div className="mobile-nav-header">
+              <span className="mobile-nav-title">Menu</span>
+              <button
+                type="button"
+                className="mobile-nav-close"
+                onClick={() => setMobileMenuOpen(false)}
+                aria-label="Close menu"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <ul className="mobile-nav-links">
+              {NAV_LINKS.map((link) => (
+                <li key={link.path}>
+                  <button
+                    type="button"
+                    className="mobile-nav-link"
+                    onClick={() => handleNavClick(link.path)}
+                  >
+                    {link.label}
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <div className="mobile-nav-footer">
+              <button
+                type="button"
+                className="btn btn-ghost w-full"
+                onClick={handleLogout}
+              >
+                Log out
+              </button>
+            </div>
+          </nav>
+        </div>
+      )}
+    </>
   )
 }
