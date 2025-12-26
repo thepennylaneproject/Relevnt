@@ -116,6 +116,7 @@ function AppInner() {
               />
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             {/* Legacy route redirects to Settings Hub tabs */}
             <Route
               path="/job-preferences"
@@ -142,6 +143,8 @@ function AppInner() {
               element={isAuthed ? <Navigate to="/settings#targeting" replace /> : <Navigate to="/login" replace />}
             />
 =======
+=======
+>>>>>>> Stashed changes
               {/* Legacy route redirects to Settings Hub tabs */}
               <Route
                 path="/job-preferences"
@@ -167,6 +170,9 @@ function AppInner() {
                 path="/personas"
                 element={isAuthed ? <PersonaManagementPage /> : <Navigate to="/login" replace />}
               />
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
               <Route

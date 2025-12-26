@@ -33,18 +33,24 @@ const QUICK_ACTIONS: QuickAction[] = [
     },
     {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         id: 'linkedin',
         title: 'Optimize LinkedIn',
         description: 'Receive AI-powered feedback on your profile\'s impact',
         icon: 'lighthouse',
         route: '/profile-analyzer',
 =======
+=======
+>>>>>>> Stashed changes
         id: 'auto-apply',
         title: 'Auto-Apply',
         description: 'Let AI submit applications for you — save 2–3 hours per week',
         icon: 'paper-airplane',
         route: '/settings#auto-apply',
         badge: 'ai',
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
     },
     {
@@ -56,6 +62,7 @@ const QUICK_ACTIONS: QuickAction[] = [
     },
     {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         id: 'auto-apply',
         title: 'Auto-Apply (Pro)',
         description: 'Efficiency engine: automate applications to save 2–3 hours/week',
@@ -63,12 +70,17 @@ const QUICK_ACTIONS: QuickAction[] = [
         route: '/settings#auto-apply',
         badge: 'new',
 =======
+=======
+>>>>>>> Stashed changes
         id: 'linkedin',
         title: 'Profile Analyzer',
         description: 'Get AI feedback on your LinkedIn and portfolio',
         icon: 'lighthouse',
         route: '/profile-analyzer',
         badge: 'ai',
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
     },
 ]
