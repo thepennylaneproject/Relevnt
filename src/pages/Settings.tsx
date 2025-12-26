@@ -4,19 +4,20 @@ import { Container } from '../components/shared/Container'
 import { Icon } from '../components/ui/Icon'
 import { SettingsTabNav, type SettingsTab } from '../components/settings/SettingsTabNav'
 import { AutoSaveIndicator } from '../components/settings/AutoSaveIndicator'
-import { PersonaTab } from '../components/settings/tabs/PersonaTab'
-import { CareerTargetsTab } from '../components/settings/tabs/CareerTargetsTab'
+import { TargetingTab } from '../components/settings/tabs/TargetingTab'
 import { ProfileTab } from '../components/settings/tabs/ProfileTab'
 import { VoiceStyleTab } from '../components/settings/tabs/VoiceStyleTab'
 import { SystemAutomationTab } from '../components/settings/tabs/SystemAutomationTab'
 import { AutoApplyTab } from '../components/settings/tabs/AutoApplyTab'
 import type { AutoSaveStatus } from '../hooks/useSettingsAutoSave'
 
-const VALID_TABS: SettingsTab[] = ['persona', 'career', 'profile', 'voice', 'system', 'auto-apply']
+const VALID_TABS: SettingsTab[] = ['targeting', 'profile', 'voice', 'system', 'auto-apply']
 
 function getTabFromHash(hash: string): SettingsTab {
-    const tab = hash.replace('#', '') as SettingsTab
-    return VALID_TABS.includes(tab) ? tab : 'persona'
+    const tab = hash.replace('#', '')
+    // Handle legacy tab names
+    if (tab === 'persona' || tab === 'career') return 'targeting'
+    return VALID_TABS.includes(tab as SettingsTab) ? (tab as SettingsTab) : 'targeting'
 }
 
 
@@ -46,10 +47,8 @@ export default function Settings(): JSX.Element {
 
     const renderTabContent = () => {
         switch (activeTab) {
-            case 'persona':
-                return <PersonaTab onAutoSaveStatusChange={handleAutoSaveStatusChange} />
-            case 'career':
-                return <CareerTargetsTab onAutoSaveStatusChange={handleAutoSaveStatusChange} />
+            case 'targeting':
+                return <TargetingTab onAutoSaveStatusChange={handleAutoSaveStatusChange} />
             case 'profile':
                 return <ProfileTab onAutoSaveStatusChange={handleAutoSaveStatusChange} />
             case 'voice':

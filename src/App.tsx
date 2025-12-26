@@ -136,7 +136,7 @@ function AppInner() {
             />
             <Route
               path="/personas"
-              element={isAuthed ? <Navigate to="/settings#persona" replace /> : <Navigate to="/login" replace />}
+              element={isAuthed ? <Navigate to="/settings#targeting" replace /> : <Navigate to="/login" replace />}
             />
 
             <Route

@@ -1,13 +1,12 @@
-import { 
-    User as IconUser, 
-    Target as IconTarget, 
-    FileText as IconProfile, 
-    Mic2 as IconVoice, 
-    Settings as IconGear, 
-    Bot as IconRobot 
+import {
+    Target as IconTarget,
+    FileText as IconProfile,
+    Mic2 as IconVoice,
+    Settings as IconGear,
+    Bot as IconRobot
 } from 'lucide-react'
 
-export type SettingsTab = 'persona' | 'career' | 'profile' | 'voice' | 'system' | 'auto-apply'
+export type SettingsTab = 'targeting' | 'profile' | 'voice' | 'system' | 'auto-apply'
 
 interface TabConfig {
     id: SettingsTab
@@ -16,8 +15,7 @@ interface TabConfig {
 }
 
 const TABS: TabConfig[] = [
-    { id: 'persona', label: 'Persona', Icon: IconUser },
-    { id: 'career', label: 'Career Targets', Icon: IconTarget },
+    { id: 'targeting', label: 'Targeting', Icon: IconTarget },
     { id: 'profile', label: 'Profile', Icon: IconProfile },
     { id: 'voice', label: 'Voice & Style', Icon: IconVoice },
     { id: 'system', label: 'System', Icon: IconGear },
