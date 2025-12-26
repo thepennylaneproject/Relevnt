@@ -206,3 +206,131 @@
   color: var(--color-ink);
   background-color: var(--color-accent-glow);
 }
+
+/* ============================================================================
+   MOBILE NAVIGATION
+   Hamburger menu pattern for screens < 768px
+   ============================================================================ */
+
+.mobile-nav-toggle {
+  display: none;
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 1001;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-ink);
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.mobile-nav-toggle:hover {
+  background: var(--color-bg-alt);
+  transform: scale(1.05);
+}
+
+.mobile-nav-toggle:active {
+  transform: scale(0.95);
+}
+
+.mobile-nav-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+/* Mobile breakpoint */
+@media (max-width: 768px) {
+  .mobile-nav-toggle {
+    display: flex;
+  }
+
+  .mobile-nav-overlay {
+    display: block;
+  }
+
+  .margin-nav {
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    width: 260px;
+    z-index: 1000;
+  }
+
+  .margin-nav.is-open {
+    transform: translateX(0);
+    animation: slideIn 0.25s ease;
+  }
+
+  /* Adjust main content to not have left margin on mobile */
+  .app-content {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+  }
+
+  /* Show labels on mobile for better touch targets */
+  .margin-nav__label {
+    display: block;
+  }
+
+  /* Make nav items horizontal-ish for better mobile use */
+  .margin-nav__item {
+    flex-direction: row;
+    gap: 12px;
+    padding: 12px 16px;
+    justify-content: flex-start;
+  }
+
+  /* Adjust nav group styling for mobile */
+  .nav-group__header {
+    padding: 10px 16px;
+    font-size: 10px;
+  }
+
+  .nav-group__items {
+    gap: 4px;
+  }
+
+  /* Hide doodle on mobile to save space */
+  .margin-nav__doodle {
+    display: none;
+  }
+
+  /* Close button positioning */
+  .margin-nav.is-open .mobile-nav-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+  }
+}
+
+/* Tablet breakpoint - slightly wider sidebar */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .margin-nav {
+    width: 80px;
+  }
+
+  .margin-nav__label {
+    font-size: 9px;
+  }
+}

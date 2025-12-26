@@ -6,6 +6,7 @@ import { useAuth } from './contexts/AuthContext'
 import { AppLayout } from './components/layout/AppLayout'
 import { ErrorBoundary } from './components/ui/ErrorBoundary'
 import { WelcomeModal } from './components/ui/WelcomeModal'
+import { LoadingState } from './components/ui/LoadingState'
 
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
@@ -19,7 +20,6 @@ const Settings = lazy(() => import('./pages/Settings'))
 import ResumeWorkspacePage from './pages/ResumeWorkspacePage'
 import ProfileAnalyzer from './pages/ProfileAnalyzer'
 import SharedAuditPage from './pages/SharedAuditPage'
-import PersonaManagementPage from './pages/PersonaManagementPage'
 
 import InterviewPrepCenter from './pages/InterviewPrepCenter'
 import InterviewPracticer from './pages/InterviewPracticer'
@@ -32,19 +32,7 @@ function AppInner() {
   const { user, loading } = useAuth()
 
   if (loading) {
-    return (
-      <div
-        style={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
-        }}
-      >
-        Loading…
-      </div>
-    )
+    return <LoadingState message="Loading Relevnt..." fullPage />
   }
 
   const isAuthed = !!user
@@ -148,7 +136,7 @@ function AppInner() {
             />
             <Route
               path="/personas"
-              element={isAuthed ? <PersonaManagementPage /> : <Navigate to="/login" replace />}
+              element={isAuthed ? <Navigate to="/settings#targeting" replace /> : <Navigate to="/login" replace />}
             />
 
             <Route

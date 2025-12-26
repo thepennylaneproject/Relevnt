@@ -1,8 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useLocation, Link } from 'react-router-dom'
 import { Icon, IconName } from '../ui/Icon'
 import { copy } from '../../lib/copy'
 import NotificationCenter from './NotificationCenter'
+import { Menu, X } from 'lucide-react'
 
 // Define nav groups with items
 interface NavItem {
@@ -32,6 +33,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { path: '/resumes', label: 'Resume', icon: 'scroll', description: 'ATS-optimized builder' },
       { path: '/profile-analyzer', label: 'Profile Analyzer', icon: 'stars', description: 'LinkedIn & Portfolio feedback', badge: 'AI' },
+      { path: '/interview-prep', label: 'Interview Prep', icon: 'microphone', description: 'Practice with AI coaching', badge: 'AI' },
     ],
   },
 ]
@@ -44,7 +46,7 @@ const DOODLES: Record<string, string> = {
   '/applications': '/doodles/sidebar-notebook.svg',
   '/resumes': '/doodles/sidebar-tools.svg',
   '/profile-analyzer': '/doodles/sidebar-constellation.svg',
-  '/interview-prep': '/doodles/sidebar-notes.svg',
+  '/interview-prep': '/doodles/sidebar-microphone.svg',
   '/settings': '/doodles/sidebar-phoenix.svg',
 }
 
@@ -53,9 +55,28 @@ export default function SidebarMarginNav() {
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
     new Set(NAV_GROUPS.map(g => g.label)) // All expanded by default
   )
+  const [mobileOpen, setMobileOpen] = useState(false)
+
   const active = (path: string) => pathname.startsWith(path)
   const doodle =
     DOODLES[Object.keys(DOODLES).find((p) => pathname.startsWith(p)) ?? '/dashboard']
+
+  // Close mobile nav when route changes
+  useEffect(() => {
+    setMobileOpen(false)
+  }, [pathname])
+
+  // Prevent body scroll when mobile nav is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [mobileOpen])
 
   const toggleGroup = (label: string) => {
     setExpandedGroups(prev => {
@@ -70,7 +91,27 @@ export default function SidebarMarginNav() {
   }
 
   return (
-    <aside className="margin-nav">
+    <>
+      {/* Mobile hamburger button */}
+      <button
+        className="mobile-nav-toggle"
+        onClick={() => setMobileOpen(!mobileOpen)}
+        aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'}
+        aria-expanded={mobileOpen}
+      >
+        {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
+
+      {/* Overlay for mobile */}
+      {mobileOpen && (
+        <div
+          className="mobile-nav-overlay"
+          onClick={() => setMobileOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      <aside className={`margin-nav ${mobileOpen ? 'is-open' : ''}`}>
       <div className="margin-nav__doodle">
         <img src={doodle} alt="" />
       </div>
@@ -132,5 +173,6 @@ export default function SidebarMarginNav() {
         </div>
       </nav>
     </aside>
+    </>
   )
 }
