@@ -1,18 +1,15 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * RELEVNT DESIGN TOKENS
+ * RELEVNT DESIGN TOKENS — INK & IVORY
  * ═══════════════════════════════════════════════════════════════════════════
  *
  * "Authentic intelligence for real people navigating broken systems."
  *
- * This file is the single source of truth for all visual decisions.
- * Every color, spacing value, and shadow in the app should reference these tokens.
- *
  * Philosophy:
- * - Light mode: Open journal in a sunlit café
- * - Dark mode: Same journal, open at midnight under a warm lamp
- * - Dark Academia: Old library, dark cottage core, warm gold on deep navy
- * - Gold is sacred — never darken, never desaturate
+ * - Monochrome foundation: Ink (charcoal) on Ivory (warm white)
+ * - Texture for warmth: Paper grain, canvas weave, watercolor wash
+ * - Single accent: Terracotta (craft, warmth, vintage stationery)
+ * - Typography: Bold all-caps headings, lyrical serif body, poetic italics
  *
  * ═══════════════════════════════════════════════════════════════════════════
  */
@@ -21,84 +18,159 @@
    FONT IMPORTS
    ═══════════════════════════════════════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital@0;1&display=swap');
+/* Bebas Neue: Bold all-caps headings */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+
+/* Lora: Elegant, lyrical body text */
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap');
+
+/* Crimson Text: Poetic passages and quotes */
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
+/* JetBrains Mono: Code blocks and technical text */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   LIGHT MODE (Default)
+   LIGHT MODE (Default) — Ink on Ivory
    ═══════════════════════════════════════════════════════════════════════════ */
 
 :root {
   /* ─────────────────────────────────────────────────────────────────────────
-     COLOR TOKENS
+     INK SCALE — Text, lines, graphite work
      ───────────────────────────────────────────────────────────────────────── */
 
-  /* Core Surfaces - Luxury Correspondence Palette */
-  --color-bg: #f5f1e8;
-  /* Warm ivory paper */
-  --color-bg-alt: #ede8de;
-  /* Slightly darker ivory for cards */
-  --color-bg-secondary: #F0F1E2;
-  --color-bg-tertiary: #EBECCB;
-  --color-surface: #E8E9DB;
-  /* Cards match bg-alt */
-  --color-surface-hover: rgba(26, 26, 26, 0.05);
-
-  /* Text - Luxury Correspondence Palette */
-  --color-ink: #1a1a1a;
-  /* Primary text - charcoal */
-  --color-ink-secondary: #5a5a5a;
-  /* Secondary text */
-  --color-ink-tertiary: #8a8a8a;
-  /* Muted text, placeholders */
-  --color-ink-inverse: #f5f1e8;
-  /* Text on dark backgrounds */
-
-  /* Illustration & Lines */
-  --color-graphite: #1a1a1a;
-  /* Line work */
-  --color-graphite-light: #8a8a8a;
-  /* Softer lines for empty states */
-  --color-graphite-faint: #d4d0c8;
-  /* Very soft lines, borders */
-
-  /* The Accent Color - Emerald */
-  --color-accent: #013E30;
-  /* Deep emerald - premium accent */
-  --color-accent-hover: #0d5244;
-  /* Slightly lighter on hover */
-  --color-accent-glow: rgba(1, 62, 48, 0.15);
-  /* Soft glow effect */
-
-  /* Semantic Colors */
-  --color-success: #5A8F6A;
-  /* Muted green - growth, blooming */
-  --color-success-bg: rgba(90, 143, 106, 0.1);
-  --color-warning: #C4915C;
-  /* Warm amber - attention without alarm */
-  --color-warning-bg: rgba(196, 145, 92, 0.1);
-  --color-error: #B85C5C;
-  /* Muted red - honest but not scary */
-  --color-error-bg: rgba(184, 92, 92, 0.1);
-  --color-info: #5C7A8F;
-  /* Muted blue - calm guidance */
-  --color-info-bg: rgba(92, 122, 143, 0.1);
-
-  /* Interactive States */
-  --color-focus-ring: rgba(78, 128, 141, 0.5);
-  --color-selection: rgba(78, 128, 141, 0.2);
+  --ink-900: #0d0d0d;    /* Deepest black, sparingly used */
+  --ink-800: #1a1a1a;    /* Primary text */
+  --ink-700: #2d2d2d;    /* Strong secondary */
+  --ink-600: #4a4a4a;    /* Secondary text */
+  --ink-500: #6a6a6a;    /* Tertiary */
+  --ink-400: #8a8a8a;    /* Muted, placeholders */
+  --ink-300: #a8a8a8;    /* Disabled states */
+  --ink-200: #c4c4c4;    /* Subtle borders */
+  --ink-100: #e0e0e0;    /* Faint lines */
 
   /* ─────────────────────────────────────────────────────────────────────────
-     BORDERS & SHADOWS
+     IVORY SCALE — Backgrounds, surfaces, paper
      ───────────────────────────────────────────────────────────────────────── */
 
-  --border-default: 1px solid var(--color-graphite-faint);
-  --border-strong: 1px solid var(--color-graphite-light);
-  --border-accent: 2px solid var(--color-accent);
+  --ivory-50:  #fdfcfa;   /* Brightest surface (modals) */
+  --ivory-100: #f5f1e8;   /* Primary background */
+  --ivory-200: #ede8de;   /* Card surfaces */
+  --ivory-300: #e4ded2;   /* Elevated/nested surfaces */
+  --ivory-400: #d9d3c7;   /* Hover states */
+  --ivory-500: #cec7ba;   /* Pressed states */
+  --ivory-600: #b8b0a2;   /* Darker accents */
 
-  --shadow-sm: 0 1px 2px rgba(26, 26, 26, 0.04);
-  --shadow-md: 0 4px 12px rgba(26, 26, 26, 0.06);
-  --shadow-lg: 0 8px 24px rgba(26, 26, 26, 0.08);
-  --shadow-glow: 0 0 20px var(--color-accent-glow);
+  /* ─────────────────────────────────────────────────────────────────────────
+     TERRACOTTA — The Single Accent Color
+     Warmth, craft, vintage stationery
+     ───────────────────────────────────────────────────────────────────────── */
+
+  --terracotta-600: #8a5a42;   /* Darker hover state */
+  --terracotta-500: #a0715c;   /* Primary accent */
+  --terracotta-400: #b88a76;   /* Lighter variant */
+  --terracotta-300: #d0a896;   /* Soft backgrounds */
+  --terracotta-200: #e8c7b8;   /* Very soft tint */
+  --terracotta-100: #f5e5dc;   /* Barely there tint */
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     SAGE GREEN — Dark Mode Accent
+     Growth, calm, sophisticated complement to ink
+     ───────────────────────────────────────────────────────────────────────── */
+
+  --sage-600: #3d5a4c;         /* Darker hover state */
+  --sage-500: #5c7a6a;         /* Primary accent (dark mode) */
+  --sage-400: #7a9a8a;         /* Lighter variant */
+  --sage-300: #a8c4b4;         /* Soft backgrounds */
+  --sage-200: #d4e5dc;         /* Very soft tint */
+  --sage-100: #eaf3ef;         /* Barely there tint */
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     SEMANTIC MAPPINGS — For consistent usage
+     ───────────────────────────────────────────────────────────────────────── */
+
+  /* Core Colors */
+  --color-bg: var(--ivory-100);
+  --color-bg-alt: var(--ivory-200);
+  --color-bg-secondary: var(--ivory-300);
+  --color-bg-tertiary: var(--ivory-400);
+  --color-surface: var(--ivory-200);
+  --color-surface-hover: var(--ivory-400);
+  --color-surface-pressed: var(--ivory-500);
+
+  /* Text Colors */
+  --color-ink: var(--ink-800);
+  --color-ink-secondary: var(--ink-600);
+  --color-ink-tertiary: var(--ink-400);
+  --color-ink-inverse: var(--ivory-100);
+
+  /* Line Work */
+  --color-graphite: var(--ink-800);
+  --color-graphite-light: var(--ink-400);
+  --color-graphite-faint: var(--ink-200);
+
+  /* The Accent */
+  --color-accent: var(--terracotta-500);
+  --color-accent-hover: var(--terracotta-600);
+  --color-accent-glow: rgba(160, 113, 92, 0.15);
+  --color-accent-soft: var(--terracotta-100);
+
+  /* Semantic Status Colors (monochrome-friendly) */
+  --color-success: #5c7a6a;           /* Muted sage */
+  --color-success-bg: rgba(92, 122, 106, 0.1);
+  --color-warning: var(--terracotta-500);  /* Use accent for warnings */
+  --color-warning-bg: var(--terracotta-100);
+  --color-error: #8b5c5c;             /* Muted dusty rose */
+  --color-error-bg: rgba(139, 92, 92, 0.1);
+  --color-info: var(--ink-600);       /* Just darker ink */
+  --color-info-bg: var(--ivory-300);
+
+  /* Interactive States */
+  --color-focus-ring: rgba(160, 113, 92, 0.4);
+  --color-selection: rgba(160, 113, 92, 0.2);
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     TYPOGRAPHY
+     ───────────────────────────────────────────────────────────────────────── */
+
+  /* Font Families */
+  --font-display: 'Bebas Neue', 'Impact', sans-serif;
+  --font-body: 'Lora', 'Georgia', serif;
+  --font-poetic: 'Crimson Text', 'Georgia', serif;
+  --font-mono: 'JetBrains Mono', 'Consolas', monospace;
+
+  /* Font Sizes */
+  --text-xs: 0.75rem;     /* 12px */
+  --text-sm: 0.875rem;    /* 14px */
+  --text-base: 1rem;      /* 16px */
+  --text-lg: 1.125rem;    /* 18px */
+  --text-xl: 1.25rem;     /* 20px */
+  --text-2xl: 1.5rem;     /* 24px */
+  --text-3xl: 1.875rem;   /* 30px */
+  --text-4xl: 2.25rem;    /* 36px */
+  --text-5xl: 3rem;       /* 48px */
+  --text-6xl: 3.75rem;    /* 60px */
+
+  /* Line Heights */
+  --leading-tight: 1.1;
+  --leading-snug: 1.3;
+  --leading-normal: 1.6;
+  --leading-relaxed: 1.75;
+  --leading-loose: 2;
+
+  /* Letter Spacing */
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.05em;
+  --tracking-wider: 0.1em;
+  --tracking-widest: 0.15em;
+
+  /* Font Weights */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
 
   /* ─────────────────────────────────────────────────────────────────────────
      SPACING SCALE (4px base)
@@ -119,55 +191,23 @@
 
   /* Semantic Layout Spacing */
   --layout-gap-hero: var(--space-8);
-  /* Between Hero and first content block */
   --layout-gap-section: var(--space-6);
-  /* Between distinct content sections */
   --layout-gap-elements: var(--space-4);
-  /* Between related elements (e.g. cards) */
 
   /* ─────────────────────────────────────────────────────────────────────────
-     TYPOGRAPHY
+     BORDERS & SHADOWS
      ───────────────────────────────────────────────────────────────────────── */
 
-  /* Font Families */
-  --font-display: 'Crimson Text', 'Georgia', serif;
-  /* Headlines - elegant, scholarly (dark academia) */
-  --font-body: 'Source Sans 3', 'Segoe UI', sans-serif;
-  /* Body - readable, friendly */
-  --font-mono: 'JetBrains Mono', 'Consolas', monospace;
-  /* Code, data - copper accent in dark academia */
+  --border-default: 1px solid var(--ink-200);
+  --border-strong: 1px solid var(--ink-400);
+  --border-accent: 2px solid var(--color-accent);
+  --border-accent-soft: 1px solid var(--terracotta-300);
 
-  /* Font Sizes */
-  --text-xs: 0.75rem;
-  /* 12px */
-  --text-sm: 0.875rem;
-  /* 14px */
-  --text-base: 1rem;
-  /* 16px */
-  --text-lg: 1.125rem;
-  /* 18px */
-  --text-xl: 1.25rem;
-  /* 20px */
-  --text-2xl: 1.5rem;
-  /* 24px */
-  --text-3xl: 1.875rem;
-  /* 30px */
-  --text-4xl: 2.25rem;
-  /* 36px */
-  --text-5xl: 3rem;
-  /* 48px */
-
-  /* Line Heights */
-  --leading-tight: 1.25;
-  --leading-snug: 1.375;
-  --leading-normal: 1.5;
-  --leading-relaxed: 1.625;
-
-  /* Font Weights */
-  --font-normal: 400;
-  --font-medium: 500;
-  --font-semibold: 600;
-  --font-bold: 700;
+  --shadow-sm: 0 1px 2px rgba(26, 26, 26, 0.04);
+  --shadow-md: 0 4px 12px rgba(26, 26, 26, 0.06);
+  --shadow-lg: 0 8px 24px rgba(26, 26, 26, 0.08);
+  --shadow-xl: 0 16px 48px rgba(26, 26, 26, 0.1);
+  --shadow-glow: 0 0 20px var(--color-accent-glow);
 
   /* ─────────────────────────────────────────────────────────────────────────
      BORDER RADIUS
@@ -204,196 +244,102 @@
 
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   DARK MODE
-   Same journal, open at midnight under a warm lamp
+   DARK MODE — Ivory on Ink
+   Same journal, open at midnight
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* System preference detection (Fallback) */
 @media (prefers-color-scheme: dark) {
-  :root:not(.light):not([data-theme="light"]):not(.dark):not([data-theme="dark"]):not(.dark-academia):not([data-theme="dark-academia"]) {
-    --color-bg: #11100E;
-    --color-bg-alt: #1A1917;
-    --color-bg-secondary: #1F1E1B;
-    --color-bg-tertiary: #262522;
-    --color-surface: #1A1917;
-    --color-surface-hover: rgba(255, 255, 255, 0.05);
-    --color-ink: #F8F4ED;
-    --color-ink-secondary: #C4C0B8;
-    --color-ink-tertiary: #8A8680;
-    --color-ink-inverse: #1A1A1A;
-    --color-graphite: #E8E2D7;
-    --color-graphite-light: #A8A29E;
-    --color-graphite-faint: #3D3A36;
-    --color-success: #6BA37A;
-    --color-success-bg: rgba(107, 163, 122, 0.15);
-    --color-warning: #D4A16C;
-    --color-warning-bg: rgba(212, 161, 108, 0.15);
-    --color-error: #C86C6C;
-    --color-error-bg: rgba(200, 108, 108, 0.15);
-    --color-info: #6C8A9F;
-    --color-info-bg: rgba(108, 138, 159, 0.15);
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
-    --shadow-glow: 0 0 30px rgba(78, 128, 141, 0.15);
+  :root:not(.light):not([data-theme="light"]) {
+    /* Layered ink backgrounds for visual dimension */
+    --color-bg: #141414;           /* Deeper base */
+    --color-bg-alt: #1a1a1a;       /* Subtle lift */
+    --color-bg-secondary: #242424; /* Medium elevation */
+    --color-bg-tertiary: #2d2d2d;  /* Higher elevation */
+    --color-surface: #1e1e1e;      /* Card surfaces */
+    --color-surface-hover: #2a2a2a;
+    --color-surface-pressed: #333333;
+
+    /* Text inverts — ivory on ink */
+    --color-ink: var(--ivory-100);
+    --color-ink-secondary: var(--ivory-400);
+    --color-ink-tertiary: var(--ivory-600);
+    --color-ink-inverse: var(--ink-900);
+
+    /* Line work inverts */
+    --color-graphite: var(--ivory-200);
+    --color-graphite-light: var(--ivory-500);
+    --color-graphite-faint: #3a3a3a;
+
+    /* Sage green accent for dark mode personality */
+    --color-accent: var(--sage-400);
+    --color-accent-hover: var(--sage-300);
+    --color-accent-glow: rgba(122, 154, 138, 0.25);
+    --color-accent-soft: rgba(92, 122, 106, 0.15);
+
+    /* Semantic status colors (dark mode variants) */
+    --color-success: var(--sage-400);
+    --color-success-bg: rgba(92, 122, 106, 0.15);
+
+    /* Borders with subtle visibility */
+    --border-default: 1px solid #3a3a3a;
+    --border-strong: 1px solid #4a4a4a;
+    --border-accent: 2px solid var(--sage-400);
+    --border-accent-soft: 1px solid var(--sage-500);
+
+    /* Deeper shadows for true dark */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+    --shadow-glow: 0 0 20px var(--color-accent-glow);
   }
 }
 
+/* Explicit dark mode class */
 :root.dark,
 .dark,
 [data-theme="dark"] {
-  /* Core Surfaces - Dark mode (Ink complementary) */
-  --color-bg: #1a1a1a;
-  /* Deep charcoal - matches Ink */
-  --color-bg-alt: #2d2d2d;
-  /* Slightly lighter charcoal for cards */
-  --color-bg-secondary: #323232;
-  --color-bg-tertiary: #383838;
-  --color-surface: #2d2d2d;
-  /* Elevated surfaces */
-  --color-surface-hover: rgba(245, 241, 232, 0.08);
+  /* Layered ink backgrounds for visual dimension */
+  --color-bg: #141414;
+  --color-bg-alt: #1a1a1a;
+  --color-bg-secondary: #242424;
+  --color-bg-tertiary: #2d2d2d;
+  --color-surface: #1e1e1e;
+  --color-surface-hover: #2a2a2a;
+  --color-surface-pressed: #333333;
 
-  /* Text - Dark mode (Ivory complementary) */
-  --color-ink: #f5f1e8;
-  /* Primary text - warm ivory */
-  --color-ink-secondary: #d4cfc6;
-  /* Secondary text */
-  --color-ink-tertiary: #a8a09a;
-  /* Muted text */
-  --color-ink-inverse: #1a1a1a;
-  /* Text on light backgrounds */
+  /* Text — ivory on ink */
+  --color-ink: var(--ivory-100);
+  --color-ink-secondary: var(--ivory-400);
+  --color-ink-tertiary: var(--ivory-600);
+  --color-ink-inverse: var(--ink-900);
 
-  /* Illustration & Lines */
-  --color-graphite: #f5f1e8;
-  /* Light lines */
-  --color-graphite-light: #a8a09a;
-  /* Softer lines */
-  --color-graphite-faint: #3d3d3d;
-  /* Very subtle borders */
+  /* Line work */
+  --color-graphite: var(--ivory-200);
+  --color-graphite-light: var(--ivory-500);
+  --color-graphite-faint: #3a3a3a;
 
-  /* The Accent Color - Emerald in dark mode */
-  --color-accent: #2eac80;
-  /* Brighter emerald for contrast on dark */
+  /* Sage green accent */
+  --color-accent: var(--sage-400);
+  --color-accent-hover: var(--sage-300);
+  --color-accent-glow: rgba(122, 154, 138, 0.25);
+  --color-accent-soft: rgba(92, 122, 106, 0.15);
 
-  /* Semantic Colors - Slightly adjusted for dark backgrounds */
-  --color-success: #6BA37A;
-  --color-success-bg: rgba(107, 163, 122, 0.15);
-  --color-warning: #D4A16C;
-  --color-warning-bg: rgba(212, 161, 108, 0.15);
-  --color-error: #C86C6C;
-  --color-error-bg: rgba(200, 108, 108, 0.15);
-  --color-info: #6C8A9F;
-  --color-info-bg: rgba(108, 138, 159, 0.15);
+  /* Status colors */
+  --color-success: var(--sage-400);
+  --color-success-bg: rgba(92, 122, 106, 0.15);
 
-  /* Interactive States */
-  --color-focus-ring: rgba(46, 172, 128, 0.5);
-  /* Emerald focus ring */
-  --color-selection: rgba(46, 172, 128, 0.2);
-  /* Emerald selection highlight */
+  /* Borders */
+  --border-default: 1px solid #3a3a3a;
+  --border-strong: 1px solid #4a4a4a;
+  --border-accent: 2px solid var(--sage-400);
+  --border-accent-soft: 1px solid var(--sage-500);
 
-  /* Shadows - Softer in dark mode */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
-  --shadow-glow: 0 0 30px rgba(46, 172, 128, 0.15);
-}
-
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   DARK ACADEMIA MODE
-   Old library, dark cottage core, warm gold on deep navy
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-:root.dark-academia,
-.dark-academia,
-[data-theme="dark-academia"] {
-  /* Core Surfaces - Dark Academia Palette */
-  --color-bg: #0F1419;
-  /* Deep navy - centuries of books */
-  --color-bg-alt: #1A1F2E;
-  /* Charcoal - card surfaces */
-  --color-bg-secondary: #161B22;
-  --color-bg-tertiary: #22283D;
-  --color-surface: #1A1F2E;
-  /* Elevated surfaces - slightly lighter navy */
-  --color-surface-hover: rgba(255, 255, 255, 0.08);
-
-  /* Text - Dark Academia */
-  --color-ink: #F5F3F0;
-  /* Off-white - easy on eyes at night */
-  --color-ink-secondary: #D4CCC5;
-  /* Muted off-white for secondary text */
-  --color-ink-tertiary: #9D9691;
-  /* Deeper gray for tertiary text */
-  --color-ink-inverse: #0F1419;
-  /* Text on light backgrounds */
-
-  /* Illustration & Lines */
-  --color-graphite: #F5F3F0;
-  /* Light lines - off-white */
-  --color-graphite-light: #6B6A67;
-  /* Softer lines - charcoal gray */
-  --color-graphite-faint: #3A3F4A;
-  /* Very subtle borders - darker charcoal */
-
-  /* Primary Accent - Warm Gold (Sacred in dark academia) */
-  --color-accent: #D4A574;
-  /* Warm gold - aged metal patina */
-  --color-accent-hover: #E5B589;
-  /* Lighter gold on hover */
-  --color-accent-glow: rgba(212, 165, 116, 0.25);
-  /* Soft gold glow */
-
-  /* Secondary Accent - Copper */
-  --color-secondary-accent: #A0826D;
-  /* Copper - vintage metals, warmth */
-  --color-secondary-accent-hover: #B49485;
-
-  /* Jewel Tone Accents */
-  --color-jewel-emerald: #2D5A4A;
-  /* Deep emerald - prosperity, wisdom */
-  --color-jewel-sage: #7A9B6B;
-  /* Muted sage - growth, balance */
-  --color-jewel-slate-blue: #4A5A7A;
-  /* Slate blue - contemplation */
-
-  /* Semantic Colors - Dark Academia Palette */
-  --color-success: #7A9B6B;
-  /* Muted sage - soft growth indicator */
-  --color-success-bg: rgba(122, 155, 107, 0.15);
-  --color-warning: #B8743F;
-  /* Burnt orange - warm caution */
-  --color-warning-bg: rgba(184, 116, 63, 0.15);
-  --color-error: #A85545;
-  /* Muted red - honest rejection without alarm */
-  --color-error-bg: rgba(168, 85, 69, 0.15);
-  --color-info: #6B8A9D;
-  /* Slate blue - calm guidance */
-  --color-info-bg: rgba(107, 138, 157, 0.15);
-
-  /* Interactive States */
-  --color-focus-ring: rgba(212, 165, 116, 0.5);
-  /* Gold focus ring */
-  --color-selection: rgba(212, 165, 116, 0.2);
-  /* Gold selection highlight */
-
-  /* Borders - Dark Academia */
-  --border-default: 1px solid var(--color-graphite-faint);
-  --border-strong: 1px solid var(--color-graphite-light);
-  --border-accent: 2px solid var(--color-accent);
-  /* Gold border for active/important */
-  --border-accent-left: 3px solid var(--color-secondary-accent);
-  /* Copper left border for cards */
-
-  /* Shadows - Dark Academia (subtle, sophisticated) */
+  /* Shadows */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
-  --shadow-glow: 0 0 24px rgba(212, 165, 116, 0.15);
-  /* Subtle gold glow for premium elements */
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 20px var(--color-accent-glow);
 }
-
-
 
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -428,7 +374,7 @@ body {
   color: var(--color-ink);
 }
 
-/* Focus states - golden glow */
+/* Focus states — terracotta glow */
 :focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
@@ -436,99 +382,67 @@ body {
 
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   TYPOGRAPHY UTILITIES
+   TYPOGRAPHY CLASSES
    ═══════════════════════════════════════════════════════════════════════════ */
 
-.font-display {
+/* Display Headings — Bold, All Caps, Bebas Neue */
+.heading,
+h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
-}
-
-.font-body {
-  font-family: var(--font-body);
-}
-
-.font-mono {
-  font-family: var(--font-mono);
-}
-
-/* Headings */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-.heading {
-  font-family: var(--font-display);
-  font-weight: var(--font-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
   line-height: var(--leading-tight);
   color: var(--color-ink);
+  margin: 0;
 }
 
-h1,
-.text-5xl {
-  font-size: var(--text-5xl);
+h1, .text-5xl { font-size: var(--text-5xl); }
+h2, .text-4xl { font-size: var(--text-4xl); }
+h3, .text-3xl { font-size: var(--text-3xl); }
+h4, .text-2xl { font-size: var(--text-2xl); }
+h5, .text-xl { font-size: var(--text-xl); }
+h6, .text-lg { font-size: var(--text-lg); }
+
+/* Body Text — Lyrical Lora */
+.body-text,
+p, li, td, label, span {
+  font-family: var(--font-body);
+  line-height: var(--leading-normal);
 }
 
-h2,
-.text-4xl {
-  font-size: var(--text-4xl);
+/* Poetic Text — Crimson Text for literary moments */
+.poetic,
+.poetic-verse,
+.poetic-epigraph {
+  font-family: var(--font-poetic);
+  font-style: italic;
+  color: var(--color-accent);
+  line-height: var(--leading-relaxed);
+  letter-spacing: 0.02em;
 }
 
-h3,
-.text-3xl {
-  font-size: var(--text-3xl);
-}
-
-h4,
-.text-2xl {
-  font-size: var(--text-2xl);
-}
-
-h5,
-.text-xl {
-  font-size: var(--text-xl);
-}
-
-h6,
-.text-lg {
+.poetic-verse {
   font-size: var(--text-lg);
 }
 
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   GOLD DUST ANIMATION (for hero illustrations)
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-.gold-dust {
-  position: relative;
+.poetic-epigraph {
+  font-size: var(--text-base);
+  border-left: 3px solid var(--color-accent);
+  padding-left: var(--space-4);
+  margin: var(--space-4) 0;
 }
 
-.gold-dust::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(circle, var(--color-accent) 1px, transparent 1px);
-  background-size: 24px 24px;
-  opacity: 0.25;
-  mask-image: radial-gradient(ellipse 50% 70% at 60% 40%, black 10%, transparent 60%);
-  animation: dust-float 10s ease-in-out infinite;
-  pointer-events: none;
+/* Code/Mono Text */
+.font-mono,
+code, pre {
+  font-family: var(--font-mono);
 }
 
-@keyframes dust-float {
-
-  0%,
-  100% {
-    transform: translateY(0) scale(1);
-    opacity: 0.25;
-  }
-
-  50% {
-    transform: translateY(-8px) scale(1.02);
-    opacity: 0.35;
-  }
-}
+/* Text utilities */
+.font-display { font-family: var(--font-display); }
+.font-body { font-family: var(--font-body); }
+.uppercase { text-transform: uppercase; }
+.normal-case { text-transform: none; }
 
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -554,35 +468,9 @@ h6,
   box-shadow: var(--shadow-md);
 }
 
-/* Card - Dark Academia Variants */
-[data-theme="dark-academia"] .card--job-listing {
-  border-left: 3px solid var(--color-secondary-accent);
-}
-
-[data-theme="dark-academia"] .card--job-listing:hover {
-  border-left-color: var(--color-accent);
-  transition: border-left-color var(--transition-base);
-}
-
-/* Application Status Cards */
-[data-theme="dark-academia"] .card--application {
-  border-top: 4px solid var(--color-jewel-slate-blue);
-}
-
-[data-theme="dark-academia"] .card--application.status-applied {
-  border-top-color: var(--color-jewel-slate-blue);
-}
-
-[data-theme="dark-academia"] .card--application.status-interviewing {
-  border-top-color: var(--color-accent);
-}
-
-[data-theme="dark-academia"] .card--application.status-offer {
-  border-top-color: var(--color-jewel-sage);
-}
-
-[data-theme="dark-academia"] .card--application.status-rejected {
-  border-top-color: var(--color-error);
+/* Card with accent left border */
+.card--accent {
+  border-left: 3px solid var(--color-accent);
 }
 
 /* Button Base */
@@ -592,9 +480,10 @@ h6,
   justify-content: center;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-5);
-  font-family: var(--font-body);
+  font-family: var(--font-display);
   font-size: var(--text-sm);
-  font-weight: var(--font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
   line-height: 1;
   border-radius: var(--radius-md);
   border: none;
@@ -608,7 +497,7 @@ h6,
   cursor: not-allowed;
 }
 
-/* Primary Button - Gold */
+/* Primary Button — Terracotta */
 .btn--primary {
   background-color: var(--color-accent);
   color: var(--color-ink-inverse);
@@ -619,7 +508,7 @@ h6,
   box-shadow: var(--shadow-glow);
 }
 
-/* Secondary Button - Outlined */
+/* Secondary Button — Outlined */
 .btn--secondary {
   background-color: transparent;
   color: var(--color-ink);
@@ -628,7 +517,7 @@ h6,
 
 .btn--secondary:hover:not(:disabled) {
   background-color: var(--color-surface-hover);
-  border-color: var(--color-graphite);
+  border-color: var(--color-ink);
 }
 
 /* Ghost Button */
@@ -657,6 +546,7 @@ h6,
 
 .input::placeholder {
   color: var(--color-ink-tertiary);
+  font-style: italic;
 }
 
 .input:hover {
@@ -673,28 +563,15 @@ h6,
   border-color: var(--color-error);
 }
 
-.input--error:focus {
-  box-shadow: 0 0 0 3px rgba(184, 92, 92, 0.2);
-}
-
 /* Label */
 .label {
   display: block;
   margin-bottom: var(--space-2);
-  font-size: var(--text-sm);
-  font-weight: var(--font-medium);
-  color: var(--color-ink);
-}
-
-/* Helper text */
-.helper-text {
-  margin-top: var(--space-1);
-  font-size: var(--text-sm);
-  color: var(--color-ink-tertiary);
-}
-
-.helper-text--error {
-  color: var(--color-error);
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  color: var(--color-ink-secondary);
 }
 
 
@@ -709,6 +586,7 @@ h6,
   padding: var(--space-4);
   border-radius: var(--radius-md);
   font-size: var(--text-sm);
+  border-left: 3px solid currentColor;
 }
 
 .alert--success {
@@ -733,7 +611,7 @@ h6,
 
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   SIDEBAR NAV PATTERN
+   NAVIGATION PATTERN
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .nav-item {
@@ -745,8 +623,10 @@ h6,
   border-radius: var(--radius-lg);
   color: var(--color-ink-secondary);
   text-decoration: none;
+  font-family: var(--font-display);
   font-size: var(--text-xs);
-  font-weight: var(--font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
   transition: all var(--transition-fast);
 }
 
@@ -757,14 +637,13 @@ h6,
 
 .nav-item--active {
   color: var(--color-accent);
-  background-color: var(--color-accent-glow);
+  background-color: var(--color-accent-soft);
 }
 
 .nav-item--active:hover {
   color: var(--color-accent);
 }
 
-/* Icon inside nav item */
 .nav-item .icon {
   width: 24px;
   height: 24px;
@@ -797,55 +676,59 @@ h6,
 .empty-state__title {
   font-family: var(--font-display);
   font-size: var(--text-xl);
-  font-weight: var(--font-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
   color: var(--color-ink);
-  margin: 0 0 var(--space-2);
+  margin-bottom: var(--space-2);
 }
 
 .empty-state__description {
-  font-size: var(--text-base);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
   color: var(--color-ink-secondary);
-  margin: 0 0 var(--space-6);
   line-height: var(--leading-relaxed);
+  margin-bottom: var(--space-4);
 }
 
-.empty-state__action {
-  margin-top: var(--space-2);
+/* Poetic empty state */
+.empty-state--poetic .poetic-verse {
+  margin-bottom: var(--space-4);
 }
 
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   BADGE / TAG PATTERN
+   PILL & TAG PATTERNS
    ═══════════════════════════════════════════════════════════════════════════ */
 
-.badge {
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  border: 1px solid var(--ink-200);
+  background: var(--ivory-200);
+  color: var(--ink-600);
+}
+
+.pill--accent {
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.tag {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
   padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
   font-size: var(--text-xs);
-  font-weight: var(--font-medium);
-  border-radius: var(--radius-full);
-  background-color: var(--color-bg-alt);
-  color: var(--color-ink-secondary);
-}
-
-.badge--accent {
-  background-color: var(--color-accent-glow);
-  color: var(--color-accent);
-}
-
-.badge--success {
-  background-color: var(--color-success-bg);
-  color: var(--color-success);
-}
-
-.badge--warning {
-  background-color: var(--color-warning-bg);
-  color: var(--color-warning);
-}
-
-.badge--error {
-  background-color: var(--color-error-bg);
-  color: var(--color-error);
+  color: var(--color-ink-tertiary);
+  background: var(--ivory-300);
 }

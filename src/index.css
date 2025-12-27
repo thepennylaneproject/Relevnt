@@ -1,15 +1,15 @@
 /* ============================================================================
-   RELEVNT DESIGN SYSTEM
+   RELEVNT DESIGN SYSTEM — INK & IVORY
    Single source of truth for all styling and theme tokens
    ============================================================================ */
 
-/* Import design tokens - the foundation of our visual language */
+/* Import design tokens and texture system */
 @import "./styles/design-tokens.css";
+@import "./styles/textures.css";
 @import "./styles/settings-hub.css";
 @import "./styles/jobs.css";
 
-/* Import fonts: Fraunces (display), Source Sans 3 (body), JetBrains Mono (code) */
-@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap");
+/* Fonts are imported in design-tokens.css (Bebas Neue, Lora, Crimson Text, JetBrains Mono) */
 
 /* ============================================================================
    LEGACY THEME TOKENS (for backward compatibility)
@@ -85,39 +85,40 @@ body {
 }
 
 /* ============================================================================
-   TYPOGRAPHY
+   TYPOGRAPHY — INK & IVORY
+   Bold all-caps headings (Bebas Neue) + Lyrical body (Lora)
    ============================================================================ */
 
-h1 {
-  font-family: var(--font-serif);
-  font-size: 1.75rem;
-  font-weight: 500;
-  letter-spacing: -0.01em;
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: var(--leading-tight);
   margin: 0;
   color: var(--text);
+}
+
+h1 {
+  font-size: var(--text-4xl);
 }
 
 h2 {
-  font-family: var(--font-serif);
-  font-size: 1.35rem;
-  font-weight: 500;
-  letter-spacing: -0.005em;
-  margin: 0;
-  color: var(--text);
+  font-size: var(--text-2xl);
 }
 
 h3 {
-  font-family: var(--font-serif);
-  font-size: 1.1rem;
-  font-weight: 500;
-  margin: 0;
-  color: var(--text);
+  font-size: var(--text-xl);
+}
+
+h4 {
+  font-size: var(--text-lg);
 }
 
 p {
-  font-size: 0.95rem;
+  font-family: var(--font-body);
+  font-size: 1rem;
   font-weight: 400;
-  line-height: 1.6;
+  line-height: var(--leading-normal);
   margin: 0;
   color: var(--text);
 }
@@ -136,6 +137,26 @@ p {
 
 .font-semibold {
   font-weight: 600;
+}
+
+/* Poetic voice styling */
+.poetic-verse {
+  font-family: var(--font-poetic);
+  font-style: italic;
+  font-size: var(--text-lg);
+  color: var(--color-accent);
+  line-height: var(--leading-relaxed);
+  letter-spacing: 0.02em;
+}
+
+.poetic-epigraph {
+  font-family: var(--font-poetic);
+  font-style: italic;
+  font-size: var(--text-base);
+  color: var(--color-accent);
+  border-left: 3px solid var(--color-accent);
+  padding-left: var(--space-4);
+  margin: var(--space-4) 0;
 }
 
 code,
@@ -213,7 +234,7 @@ select:focus {
 }
 
 /* ============================================================================
-   BUTTONS
+   BUTTONS — INK & IVORY
    ============================================================================ */
 
 button {
@@ -221,25 +242,27 @@ button {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.65rem 1.25rem;
+  padding: 0.75rem 1.5rem;
   border-radius: var(--radius-md);
   border: none;
-  font-size: 0.95rem;
-  font-weight: 500;
-  font-family: inherit;
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
   background: var(--color-accent);
   color: var(--color-ink-inverse);
 }
 
 button:hover:not(:disabled) {
-  opacity: 0.9;
+  background: var(--color-accent-hover);
+  box-shadow: var(--shadow-glow);
   transform: translateY(-1px);
 }
 
 button:focus-visible {
-  outline: 2px solid var(--focus-ring);
+  outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
 }
 
@@ -254,19 +277,21 @@ button:disabled {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 10px 18px;
+  padding: 12px 24px;
   border-radius: var(--radius-md);
   border: none;
   background: var(--color-accent);
   color: var(--color-ink-inverse);
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .primary-button:hover:not(:disabled) {
-  opacity: 0.88;
+  background: var(--color-accent-hover);
   box-shadow: var(--shadow-glow);
 }
 

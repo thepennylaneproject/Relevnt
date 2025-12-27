@@ -1,263 +1,383 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * TEXTURE SYSTEM
+ * TEXTURE SYSTEM — INK & IVORY
  * ═══════════════════════════════════════════════════════════════════════════
  *
- * Layered visual interest without color complexity.
- * Four texture patterns: paper grain, watercolor, canvas weave, ink speckle
+ * Layered visual interest through texture, not color.
+ * Creates warmth and connection in a monochrome palette.
  *
- * Usage:
- *   <div className="textured-bg textured-bg--paper-grain">...</div>
- *   <div className="textured-bg textured-bg--watercolor">...</div>
+ * Usage Strategy:
+ *   - Watercolor Wash + Ink Speckle → Page backgrounds, hero sections
+ *   - Paper Grain + Canvas Weave → Cards, panels, elevated surfaces
  *
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-/* Paper Grain Texture - Subtle, organic, old paper */
-.textured-bg--paper-grain {
+/* ═══════════════════════════════════════════════════════════════════════════
+   BACKGROUND TEXTURES — Watercolor Wash + Ink Speckle
+   For page-level backgrounds and hero sections
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Watercolor Wash — Organic, flowing, abstract warmth */
+.texture-bg--watercolor {
   position: relative;
   background-image:
-    repeating-linear-gradient(
-      90deg,
-      transparent,
-      transparent 2px,
-      rgba(26, 26, 26, 0.02) 2px,
-      rgba(26, 26, 26, 0.02) 4px
-    ),
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 1px,
-      rgba(26, 26, 26, 0.01) 1px,
-      rgba(26, 26, 26, 0.01) 2px
+    radial-gradient(
+      ellipse 900px 450px at 15% 25%,
+      rgba(160, 113, 92, 0.04) 0%,
+      transparent 60%
     ),
     radial-gradient(
-      circle at 20% 50%,
-      rgba(26, 26, 26, 0.015) 0%,
-      transparent 50%
+      ellipse 700px 550px at 85% 75%,
+      rgba(160, 113, 92, 0.03) 0%,
+      transparent 55%
     ),
     radial-gradient(
-      circle at 80% 80%,
-      rgba(26, 26, 26, 0.01) 0%,
+      ellipse 500px 400px at 45% 55%,
+      rgba(139, 92, 92, 0.02) 0%,
       transparent 50%
     );
-  background-size:
-    4px 100%,
-    100% 2px,
-    500px 500px,
-    500px 500px;
   background-attachment: fixed;
+  background-size: 100% 100%;
 }
 
-.textured-bg--paper-grain.dark {
+/* Ink Speckle — Fine grain, elegant scatter */
+.texture-bg--ink-speckle {
+  position: relative;
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(26, 26, 26, 0.025) 1px, transparent 1px),
+    radial-gradient(circle at 3px 2px, rgba(26, 26, 26, 0.018) 1px, transparent 1px),
+    radial-gradient(circle at 2px 4px, rgba(26, 26, 26, 0.022) 1px, transparent 1px),
+    radial-gradient(circle at 4px 3px, rgba(26, 26, 26, 0.012) 0.5px, transparent 0.5px);
+  background-size:
+    120px 120px,
+    180px 180px,
+    150px 150px,
+    220px 220px;
+  background-attachment: fixed;
+  background-position:
+    0 0,
+    30px 30px,
+    15px 45px,
+    60px 90px;
+}
+
+/* Combined background texture for pages */
+.texture-bg--page {
+  position: relative;
+}
+
+.texture-bg--page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background-image:
+    /* Watercolor wash layer */
+    radial-gradient(
+      ellipse 900px 450px at 15% 25%,
+      rgba(160, 113, 92, 0.035) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 700px 550px at 85% 75%,
+      rgba(160, 113, 92, 0.025) 0%,
+      transparent 55%
+    ),
+    /* Ink speckle layer */
+    radial-gradient(circle at 1px 1px, rgba(26, 26, 26, 0.02) 1px, transparent 1px),
+    radial-gradient(circle at 3px 2px, rgba(26, 26, 26, 0.015) 1px, transparent 1px);
+  background-size:
+    100% 100%,
+    100% 100%,
+    100px 100px,
+    150px 150px;
+  background-position:
+    0 0,
+    0 0,
+    0 0,
+    25px 25px;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SURFACE TEXTURES — Paper Grain + Canvas Weave
+   For cards, panels, and elevated surfaces
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Paper Grain — Subtle, organic, vintage paper feel */
+.texture-surface--paper {
   background-image:
     repeating-linear-gradient(
       90deg,
-      transparent,
-      transparent 2px,
-      rgba(245, 241, 232, 0.03) 2px,
-      rgba(245, 241, 232, 0.03) 4px
-    ),
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 1px,
-      rgba(245, 241, 232, 0.02) 1px,
-      rgba(245, 241, 232, 0.02) 2px
-    ),
-    radial-gradient(
-      circle at 20% 50%,
-      rgba(245, 241, 232, 0.02) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      circle at 80% 80%,
-      rgba(245, 241, 232, 0.01) 0%,
-      transparent 50%
-    );
-}
-
-/* Canvas Weave Texture - Diagonal woven pattern, subtle depth */
-.textured-bg--canvas-weave {
-  background-image:
-    repeating-linear-gradient(
-      45deg,
-      transparent,
-      transparent 2px,
-      rgba(26, 26, 26, 0.02) 2px,
-      rgba(26, 26, 26, 0.02) 4px
-    ),
-    repeating-linear-gradient(
-      -45deg,
       transparent,
       transparent 2px,
       rgba(26, 26, 26, 0.015) 2px,
       rgba(26, 26, 26, 0.015) 4px
     ),
     repeating-linear-gradient(
-      90deg,
+      0deg,
       transparent,
       transparent 1px,
-      rgba(26, 26, 26, 0.01) 1px,
-      rgba(26, 26, 26, 0.01) 2px
+      rgba(26, 26, 26, 0.008) 1px,
+      rgba(26, 26, 26, 0.008) 2px
+    ),
+    /* Subtle aging marks */
+    radial-gradient(
+      circle at 25% 45%,
+      rgba(26, 26, 26, 0.012) 0%,
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 75% 70%,
+      rgba(26, 26, 26, 0.008) 0%,
+      transparent 35%
     );
   background-size:
-    6px 6px,
-    6px 6px,
-    100% 2px;
-  background-attachment: fixed;
+    4px 100%,
+    100% 2px,
+    300px 300px,
+    400px 400px;
 }
 
-.textured-bg--canvas-weave.dark {
+/* Canvas Weave — Diagonal woven pattern, tactile depth */
+.texture-surface--canvas {
   background-image:
     repeating-linear-gradient(
       45deg,
       transparent,
       transparent 2px,
-      rgba(245, 241, 232, 0.025) 2px,
-      rgba(245, 241, 232, 0.025) 4px
+      rgba(26, 26, 26, 0.018) 2px,
+      rgba(26, 26, 26, 0.018) 4px
     ),
     repeating-linear-gradient(
       -45deg,
+      transparent,
+      transparent 2px,
+      rgba(26, 26, 26, 0.012) 2px,
+      rgba(26, 26, 26, 0.012) 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 1px,
+      rgba(26, 26, 26, 0.006) 1px,
+      rgba(26, 26, 26, 0.006) 2px
+    );
+  background-size:
+    6px 6px,
+    6px 6px,
+    100% 2px;
+}
+
+/* Combined surface texture for cards */
+.texture-surface--card {
+  background-image:
+    /* Paper grain base */
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 2px,
+      rgba(26, 26, 26, 0.012) 2px,
+      rgba(26, 26, 26, 0.012) 4px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 1px,
+      rgba(26, 26, 26, 0.006) 1px,
+      rgba(26, 26, 26, 0.006) 2px
+    ),
+    /* Canvas weave overlay for depth */
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 3px,
+      rgba(26, 26, 26, 0.008) 3px,
+      rgba(26, 26, 26, 0.008) 6px
+    );
+  background-size:
+    4px 100%,
+    100% 2px,
+    8px 8px;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DARK MODE TEXTURE INVERSIONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.dark .texture-bg--watercolor,
+[data-theme="dark"] .texture-bg--watercolor {
+  background-image:
+    /* Sage green accent wash for dark mode */
+    radial-gradient(
+      ellipse 900px 450px at 15% 25%,
+      rgba(92, 122, 106, 0.06) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 700px 550px at 85% 75%,
+      rgba(122, 154, 138, 0.04) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 500px 400px at 45% 55%,
+      rgba(92, 122, 106, 0.03) 0%,
+      transparent 50%
+    ),
+    /* Subtle vignette for depth */
+    radial-gradient(
+      ellipse at center,
+      transparent 0%,
+      rgba(0, 0, 0, 0.08) 100%
+    );
+}
+
+.dark .texture-bg--ink-speckle,
+[data-theme="dark"] .texture-bg--ink-speckle {
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(245, 241, 232, 0.025) 1px, transparent 1px),
+    radial-gradient(circle at 3px 2px, rgba(245, 241, 232, 0.018) 1px, transparent 1px),
+    radial-gradient(circle at 2px 4px, rgba(245, 241, 232, 0.022) 1px, transparent 1px),
+    radial-gradient(circle at 4px 3px, rgba(245, 241, 232, 0.012) 0.5px, transparent 0.5px);
+}
+
+.dark .texture-surface--paper,
+[data-theme="dark"] .texture-surface--paper {
+  background-image:
+    repeating-linear-gradient(
+      90deg,
       transparent,
       transparent 2px,
       rgba(245, 241, 232, 0.02) 2px,
       rgba(245, 241, 232, 0.02) 4px
     ),
     repeating-linear-gradient(
-      90deg,
+      0deg,
       transparent,
       transparent 1px,
       rgba(245, 241, 232, 0.01) 1px,
       rgba(245, 241, 232, 0.01) 2px
-    );
-}
-
-/* Watercolor Texture - Organic, flowing, abstract */
-.textured-bg--watercolor {
-  background-image:
-    radial-gradient(
-      ellipse 800px 400px at 20% 30%,
-      rgba(1, 62, 48, 0.03) 0%,
-      transparent 50%
     ),
     radial-gradient(
-      ellipse 600px 500px at 80% 70%,
-      rgba(1, 62, 48, 0.02) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      ellipse 400px 600px at 50% 50%,
-      rgba(1, 62, 48, 0.015) 0%,
-      transparent 50%
-    ),
-    repeating-linear-gradient(
-      90deg,
-      transparent,
-      transparent 50px,
-      rgba(26, 26, 26, 0.005) 50px,
-      rgba(26, 26, 26, 0.005) 100px
-    );
-  background-size:
-    100% 100%,
-    100% 100%,
-    100% 100%,
-    100% 100%;
-  background-attachment: fixed;
-}
-
-.textured-bg--watercolor.dark {
-  background-image:
-    radial-gradient(
-      ellipse 800px 400px at 20% 30%,
-      rgba(245, 241, 232, 0.025) 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      ellipse 600px 500px at 80% 70%,
+      circle at 25% 45%,
       rgba(245, 241, 232, 0.015) 0%,
-      transparent 50%
+      transparent 40%
     ),
     radial-gradient(
-      ellipse 400px 600px at 50% 50%,
+      circle at 75% 70%,
       rgba(245, 241, 232, 0.01) 0%,
-      transparent 50%
+      transparent 35%
+    );
+}
+
+.dark .texture-surface--canvas,
+[data-theme="dark"] .texture-surface--canvas {
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 2px,
+      rgba(245, 241, 232, 0.022) 2px,
+      rgba(245, 241, 232, 0.022) 4px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 2px,
+      rgba(245, 241, 232, 0.015) 2px,
+      rgba(245, 241, 232, 0.015) 4px
     ),
     repeating-linear-gradient(
       90deg,
       transparent,
-      transparent 50px,
-      rgba(245, 241, 232, 0.005) 50px,
-      rgba(245, 241, 232, 0.005) 100px
+      transparent 1px,
+      rgba(245, 241, 232, 0.008) 1px,
+      rgba(245, 241, 232, 0.008) 2px
     );
 }
 
-/* Ink Speckle Texture - Fine grain, elegant scatter */
-.textured-bg--ink-speckle {
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SEMANTIC ALIASES — Utility classes for common patterns
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Hero sections get the full watercolor + speckle treatment */
+.texture--hero {
+  position: relative;
   background-image:
-    radial-gradient(circle at 1px 1px, rgba(26, 26, 26, 0.03) 1px, transparent 1px),
-    radial-gradient(circle at 3px 2px, rgba(26, 26, 26, 0.02) 1px, transparent 1px),
-    radial-gradient(circle at 2px 4px, rgba(26, 26, 26, 0.025) 1px, transparent 1px),
-    radial-gradient(circle at 4px 3px, rgba(26, 26, 26, 0.015) 0.5px, transparent 0.5px);
-  background-size:
-    100px 100px,
-    150px 150px,
-    120px 120px,
-    200px 200px;
+    radial-gradient(ellipse 900px 450px at 15% 25%, rgba(160, 113, 92, 0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 700px 550px at 85% 75%, rgba(160, 113, 92, 0.03) 0%, transparent 55%),
+    radial-gradient(circle at 1px 1px, rgba(26, 26, 26, 0.02) 1px, transparent 1px);
   background-attachment: fixed;
-  background-position:
-    0 0,
-    25px 25px,
-    12px 37px,
-    50px 75px;
+  background-size: 100% 100%, 100% 100%, 100px 100px;
 }
 
-.textured-bg--ink-speckle.dark {
+/* Standard cards get paper grain with subtle canvas */
+.texture--card {
   background-image:
-    radial-gradient(circle at 1px 1px, rgba(245, 241, 232, 0.03) 1px, transparent 1px),
-    radial-gradient(circle at 3px 2px, rgba(245, 241, 232, 0.02) 1px, transparent 1px),
-    radial-gradient(circle at 2px 4px, rgba(245, 241, 232, 0.025) 1px, transparent 1px),
-    radial-gradient(circle at 4px 3px, rgba(245, 241, 232, 0.015) 0.5px, transparent 0.5px);
+    repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(26, 26, 26, 0.012) 2px, rgba(26, 26, 26, 0.012) 4px),
+    repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(26, 26, 26, 0.006) 1px, rgba(26, 26, 26, 0.006) 2px),
+    repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(26, 26, 26, 0.008) 3px, rgba(26, 26, 26, 0.008) 6px);
+  background-size: 4px 100%, 100% 2px, 8px 8px;
 }
 
-/* Texture combinations for different sections */
-
-.textured-bg--hero {
-  @apply textured-bg--watercolor;
+/* Elevated modals get pure paper */
+.texture--modal {
+  background-image:
+    repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(26, 26, 26, 0.015) 2px, rgba(26, 26, 26, 0.015) 4px),
+    repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(26, 26, 26, 0.008) 1px, rgba(26, 26, 26, 0.008) 2px);
+  background-size: 4px 100%, 100% 2px;
 }
 
-.textured-bg--card {
-  @apply textured-bg--paper-grain;
+/* Interactive buttons get canvas weave for tactile feel */
+.texture--button {
+  background-image:
+    repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(26, 26, 26, 0.018) 2px, rgba(26, 26, 26, 0.018) 4px),
+    repeating-linear-gradient(-45deg, transparent, transparent 2px, rgba(26, 26, 26, 0.012) 2px, rgba(26, 26, 26, 0.012) 4px);
+  background-size: 6px 6px, 6px 6px;
 }
 
-.textured-bg--button {
-  @apply textured-bg--canvas-weave;
-}
 
-.textured-bg--accent {
-  @apply textured-bg--ink-speckle;
-}
+/* ═══════════════════════════════════════════════════════════════════════════
+   INTENSITY MODIFIERS
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-/* Opacity modifiers */
-.textured-bg--subtle {
+.texture--subtle {
   opacity: 0.5;
 }
 
-.textured-bg--prominent {
+.texture--prominent {
   opacity: 1;
 }
 
-.textured-bg--faint {
+.texture--faint {
   opacity: 0.25;
 }
 
-/* Preserve text readability */
-.textured-bg {
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TEXT READABILITY PRESERVATION
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.texture-bg--watercolor,
+.texture-bg--ink-speckle,
+.texture-bg--page,
+.texture-surface--paper,
+.texture-surface--canvas,
+.texture-surface--card {
   position: relative;
   z-index: 0;
 }
 
-.textured-bg > * {
+.texture-bg--watercolor > *,
+.texture-bg--ink-speckle > *,
+.texture-bg--page > *,
+.texture-surface--paper > *,
+.texture-surface--canvas > *,
+.texture-surface--card > * {
   position: relative;
   z-index: 1;
 }
