@@ -7,9 +7,9 @@
  * 2. Retry failed sources with backoff
  * 3. Reset cursors for parse errors
  * 4. Escalate persistent failures
- * 
- * Schedule: */15 * * * * (every 15 minutes)
  */
+
+// Cron schedule: every 15 minutes
 
 import type { BackgroundHandler } from '@netlify/functions'
 import { createAdminClient, createResponse } from './utils/supabase'
