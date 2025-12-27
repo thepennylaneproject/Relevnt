@@ -11,7 +11,7 @@
  * 📖 REFERENCE:
  * - Brand One-Pager: Authentic intelligence for real people navigating broken systems
  * - Core Values: Radical Clarity, Empowered Honesty, Ethical Intelligence
- * - Visual Direction: Clean layouts, generous white space, luxury through restraint
+ * - Visual Direction: Terracotta-led warmth with sage support on an ink/ivory base that inverts cleanly
  */
 
 // ============================================================================
@@ -39,9 +39,9 @@ export interface ColorTokens {
   textInverse: string;     // Text on colored backgrounds
 
   // Accents (semantic)
-  accent: string;          // Primary action, highlight (Gold)
+  accent: string;          // Primary action, highlight (Terracotta)
   accentHover: string;     // Hover state for accent
-  support: string;         // Secondary action (Teal)
+  support: string;         // Secondary action (Sage)
   supportHover: string;    // Hover state for support
 
   // Structural
@@ -119,7 +119,7 @@ export interface SpacingTokens {
 /**
  * Shadow System: Soft, subtle shadows
  * Shadows are used sparingly to indicate elevation and interactivity.
- * Relevnt avoids harsh shadows—favoring flat design with teal/gold borders instead.
+ * Relevnt avoids harsh shadows—favoring flat design with terracotta accents and sage support.
  */
 export interface ShadowTokens {
   none: string;
@@ -169,33 +169,41 @@ export interface Theme {
 // ============================================================================
 
 /**
- * 🎨 CORE COLOR PALETTE
- * 
- * These 5 colors represent Relevnt's entire visual identity.
- * They work across both light and dark modes, maintain WCAG AA contrast ratios,
- * and support the brand's premium-yet-ethical positioning.
+ * 🎨 CORE COLOR PALETTE — TERRACOTTA, SAGE, INK, IVORY
+ * Terracotta is the primary accent, Sage is the supporting accent, everything
+ * else lives in Ink/Ivory neutrals that invert cleanly between light/dark.
  */
 
 const COLORS = {
-  // Primary Brand Colors
-  gold: '#CDAA70',          // Accent, primary action, luxury
-  teal: '#009B9B',          // Support, secondary action, trust
+  // Accents
+  terracotta: '#A0715C',          // Primary accent
+  terracottaHover: '#8A5A42',     // Accent hover/active
+  sage: '#5C7A6A',                // Supporting accent
+  sageHover: '#3D5A4C',           // Supporting hover/active
   
   // Neutrals
-  black: '#0B0B0B',         // Deep black for text (almost black)
-  white: '#FFFFFF',         // Pure white for surfaces
-  champagne: '#E7DCC8',     // Soft, warm champagne (rarely used)
+  ink: '#0D0D0D',                 // Deep ink for dark backgrounds
+  inkSurface: '#161616',          // Elevated surface on dark
+  ivory: '#F5F1E8',               // Base ivory for light backgrounds
+  ivorySurface: '#FDFCF9',        // Elevated surface on light
   
-  // Neutral derivatives
-  warmNeutral: '#F3F1ED',   // Warm neutral background (light mode)
-  darkGray: '#1A1A1A',      // Dark gray for surfaces (dark mode)
-  mediumGray: '#999999',    // Mid-tone for secondary text
-  lightGray: '#E0E0E0',     // Light gray for borders/disabled states
+  // Typography
+  textPrimary: '#0F0F0F',         // Primary text on light
+  textSecondary: '#4A4A4A',       // Secondary text on light
+  textMuted: '#8A8378',           // Tertiary/muted text on light
+  textPrimaryInverse: '#F7F3EA',  // Primary text on dark
+  textSecondaryInverse: '#D7D0C5',// Secondary text on dark
   
-  // Semantic colors (minimal use)
-  success: '#10B981',       // Green - Success states
-  warning: '#F59E0B',       // Amber - Warning states
-  error: '#EF4444',         // Red - Error states
+  // Structural
+  borderLight: 'rgba(13, 13, 13, 0.08)',
+  borderStrongLight: 'rgba(13, 13, 13, 0.15)',
+  borderDark: 'rgba(247, 243, 234, 0.12)',
+  borderStrongDark: 'rgba(247, 243, 234, 0.24)',
+  
+  // Semantic colors (neutral-friendly)
+  success: '#5C7A6A',             // Muted sage
+  warning: '#A0715C',             // Terracotta for warm alerts
+  error: '#8B5C5C',               // Dusty rose for errors
 };
 
 // ============================================================================
@@ -204,30 +212,30 @@ const COLORS = {
 
 const lightModeColors: ColorTokens = {
   // 🏙️ BACKGROUNDS & SURFACES
-  background: '#F7F4ED',             // Ivory page background to match Jobs/Settings
-  surface: COLORS.white,             // #FFFFFF - Cards, panels
-  surfaceHover: '#FFFDF8',           // Soft ivory hover/fill
+  background: COLORS.ivory,         // Ivory page background
+  surface: COLORS.ivorySurface,     // Elevated surfaces
+  surfaceHover: '#F1ECE2',          // Soft ivory hover/fill
 
   // 📝 TEXT
-  textPrimary: COLORS.black,         // #0B0B0B - Headlines, body text
-  textSecondary: COLORS.mediumGray,  // #999999 - Supporting text, metadata
-  textInverse: COLORS.white,         // White text on colored backgrounds
+  textPrimary: COLORS.textPrimary,          // Headlines, body text
+  textSecondary: COLORS.textSecondary,      // Supporting text, metadata
+  textInverse: COLORS.ivorySurface,         // Text on colored backgrounds
 
   // ✨ ACCENTS
-  accent: COLORS.gold,               // #CDAA70 - Primary CTAs, highlights
-  accentHover: '#B89F64',            // Slightly darker gold on hover
-  support: COLORS.teal,              // #009B9B - Secondary actions
-  supportHover: '#007D7D',           // Darker teal on hover
+  accent: COLORS.terracotta,               // Primary CTAs, highlights
+  accentHover: COLORS.terracottaHover,     // Hover state
+  support: COLORS.sage,                    // Secondary actions
+  supportHover: COLORS.sageHover,          // Hover state for support
 
   // 🗂️ STRUCTURE
-  border: 'rgba(0, 0, 0, 0.08)',     // Soft border for light backgrounds
-  borderStrong: 'rgba(0, 0, 0, 0.15)',  // Stronger border for interactive elements
-  disabled: 'rgba(0, 0, 0, 0.4)',    // Disabled text opacity
+  border: COLORS.borderLight,              // Soft border for light backgrounds
+  borderStrong: COLORS.borderStrongLight,  // Stronger border for interactive elements
+  disabled: 'rgba(15, 15, 15, 0.35)',      // Disabled text opacity
 
   // 🎯 FEEDBACK
-  success: COLORS.success,           // #10B981
-  warning: COLORS.warning,           // #F59E0B
-  error: COLORS.error,               // #EF4444
+  success: COLORS.success,
+  warning: COLORS.warning,
+  error: COLORS.error,
 };
 
 // ============================================================================
@@ -236,30 +244,30 @@ const lightModeColors: ColorTokens = {
 
 const darkModeColors: ColorTokens = {
   // 🌙 BACKGROUNDS & SURFACES
-  background: COLORS.black,          // #0B0B0B - Main page background
-  surface: COLORS.darkGray,          // #1A1A1A - Cards, panels
-  surfaceHover: '#2A2A2A',           // Slightly lighter gray on hover
+  background: COLORS.ink,            // Deep ink
+  surface: COLORS.inkSurface,        // Cards, panels
+  surfaceHover: '#1F1F1F',           // Slightly lighter ink on hover
 
   // 📝 TEXT
-  textPrimary: COLORS.warmNeutral,   // #F3F1ED - Headlines, body text
-  textSecondary: '#B0B0B0',          // Mid-tone gray for supporting text
-  textInverse: COLORS.black,         // Black text on light backgrounds
+  textPrimary: COLORS.textPrimaryInverse,     // Ivory on ink
+  textSecondary: COLORS.textSecondaryInverse, // Muted ivory
+  textInverse: COLORS.ink,                     // Ink on light backgrounds
 
   // ✨ ACCENTS
-  accent: COLORS.gold,               // #CDAA70 - Primary CTAs, highlights (unchanged)
-  accentHover: '#E8C185',            // Lighter gold on hover (for contrast in dark mode)
-  support: '#00D4D4',                // Slightly brighter teal for dark mode contrast
-  supportHover: '#00B8B8',           // Darker bright teal on hover
+  accent: COLORS.terracotta,               // Terracotta primary
+  accentHover: '#B88A76',                  // Lifted terracotta for contrast
+  support: COLORS.sage,                    // Sage support
+  supportHover: '#7A9A8A',                 // Lighter sage hover
 
   // 🗂️ STRUCTURE
-  border: 'rgba(255, 255, 255, 0.12)',     // Soft border for dark backgrounds
-  borderStrong: 'rgba(255, 255, 255, 0.25)',  // Stronger border for interactive elements
-  disabled: 'rgba(255, 255, 255, 0.4)',    // Disabled text opacity
+  border: COLORS.borderDark,                   // Soft border for dark backgrounds
+  borderStrong: COLORS.borderStrongDark,       // Stronger border for interactive elements
+  disabled: 'rgba(247, 243, 234, 0.45)',       // Disabled text opacity
 
   // 🎯 FEEDBACK
-  success: '#34D399',                // Brighter green for dark mode
-  warning: '#FBBF24',                // Brighter amber for dark mode
-  error: '#F87171',                  // Brighter red for dark mode
+  success: '#7AA28F',                // Brighter sage for dark mode
+  warning: '#C48B73',                // Warm terracotta warning
+  error: '#C18686',                  // Elevated dusty rose
 };
 
 // ============================================================================
@@ -505,17 +513,11 @@ export const buttonStyles = {
 };
 
 /**
- * WCAG Contrast Verification (Light Mode):
- * - Text Primary (#0B0B0B) on Background (#F3F1ED): ✓ 21:1 (AAA)
- * - Text Primary (#0B0B0B) on White (#FFFFFF): ✓ 22:1 (AAA)
- * - Gold (#CDAA70) on White (#FFFFFF): ✓ 7.2:1 (AAA)
- * - Teal (#009B9B) on White (#FFFFFF): ✓ 7.5:1 (AAA)
- * 
- * WCAG Contrast Verification (Dark Mode):
- * - Text Primary (#F3F1ED) on Black (#0B0B0B): ✓ 21:1 (AAA)
- * - Text Primary (#F3F1ED) on Dark Gray (#1A1A1A): ✓ 17:1 (AAA)
- * - Gold (#CDAA70) on Black (#0B0B0B): ✓ 8.2:1 (AAA)
- * - Bright Teal (#00D4D4) on Black (#0B0B0B): ✓ 9.8:1 (AAA)
+ * WCAG Contrast Guidance:
+ * - Text Primary (#0F0F0F) on Ivory (#F5F1E8): ✓ AA/AAA
+ * - Terracotta (#A0715C) on Ivory (#F5F1E8): ✓ AA
+ * - Text Primary Inverse (#F7F3EA) on Ink (#0D0D0D): ✓ AAA
+ * - Terracotta (#A0715C) on Ink (#0D0D0D): ✓ AA
  */
 
 // ============================================================================
@@ -539,9 +541,9 @@ export const buttonStyles = {
  * In index.css:
  * ```css
  * :root {
- *   --bg: #F3F1ED;
- *   --accent: #CDAA70;
- *   --text-primary: #0B0B0B;
+ *   --bg: #F5F1E8;
+ *   --accent: #A0715C;
+ *   --text-primary: #0F0F0F;
  *   ...
  * }
  * 
@@ -556,8 +558,8 @@ export const buttonStyles = {
  * module.exports = {
  *   theme: {
  *     colors: {
- *       primary: '#CDAA70',
- *       accent: '#009B9B',
+ *       primary: '#A0715C',
+ *       accent: '#5C7A6A',
  *       // ...
  *     }
  *   }

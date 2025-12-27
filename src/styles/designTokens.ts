@@ -2,11 +2,11 @@
  * RELEVNT DESIGN SYSTEM
  *
  * Aesthetic: Luxury Correspondence / Premium Archive
- * Color Philosophy: Monochrome + Single Accent
+ * Color Philosophy: Monochrome + Terracotta Primary Accent (Sage support)
  *
  * This design system uses a refined palette inspired by:
- * - Aged leather-bound journals
- * - Luxury stationery and correspondence
+ * - Terracotta stationery warmth with sage as a calm complement
+ * - Luxury correspondence and refined paper textures
  * - Hand-drawn botanical engravings
  * - Premium manuscript aesthetics
  */
@@ -24,9 +24,9 @@ export const designTokens = {
     // Used for: backgrounds, cards, paper-like surfaces
     ivory: '#f5f1e8',
 
-    // Accent: Emerald Green
+    // Accent: Terracotta
     // Used for: interactive elements, highlights, calls-to-action
-    emerald: '#013E30',
+    emerald: '#A0715C',
 
     // Tertiary: Muted Gray
     // Used for: secondary text, disabled states, subtle borders
@@ -44,7 +44,7 @@ export const designTokens = {
   darkMode: {
     ink: '#f5f1e8',      // Swap: text becomes ivory
     ivory: '#1a1a1a',    // Swap: background becomes charcoal
-    emerald: '#013E30',  // Accent stays the same
+    emerald: '#A0715C',  // Accent stays the same (terracotta)
     gray: '#a8a8a8',     // Lighter gray for dark mode
   },
 
