@@ -67,12 +67,36 @@ export const handler: Handler = async (event) => {
             })
         }
 
+        // Fetch recent healing attempts (last 24 hours)
+        const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+        const { data: healingHistory, error: healingError } = await supabase
+            .from('ingestion_healing_log')
+            .select('*')
+            .gte('attempted_at', oneDayAgo)
+            .order('attempted_at', { ascending: false })
+            .limit(50)
+
+        if (healingError) {
+            console.warn('admin_ingestion_health: failed to fetch healing history', healingError)
+            // Don't fail the whole request, just exclude healing data
+        }
+
+        // Calculate healing stats
+        const healingStats = {
+            total24h: healingHistory?.length || 0,
+            successful: healingHistory?.filter((h: any) => h.healing_result === 'success').length || 0,
+            failed: healingHistory?.filter((h: any) => h.healing_result === 'failed').length || 0,
+            escalated: healingHistory?.filter((h: any) => h.healing_result === 'escalated').length || 0,
+        }
+
         return createResponse(200, {
             success: true,
             data: {
                 latestRun: latestRun || null,
                 sourceHealth: sourceHealth || [],
                 recentRuns: recentRuns || [],
+                healingHistory: healingHistory || [],
+                healingStats,
             },
         })
     } catch (err) {

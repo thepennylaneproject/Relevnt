@@ -86,6 +86,11 @@
 [functions."ingest_remaining_sources"]
   schedule = "0 */6 * * *"
 
+# Ingestion healer - runs every 15 minutes to auto-fix failures
+# Duration: <1 minute
+[functions."ingestion_healer-background"]
+  schedule = "*/15 * * * *"
+
 
 
 
