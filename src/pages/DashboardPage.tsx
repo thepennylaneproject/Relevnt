@@ -171,7 +171,7 @@ export default function DashboardPage(): JSX.Element {
           heading: 'Your next move:',
           title: 'Rest and reflect',
           description:
-            'You're caught up on immediate actions. This is the time to strengthen your profile, learn new skills, or explore the market.',
+            "You're caught up on immediate actions. This is the time to strengthen your profile, learn new skills, or explore the market.",
           cta: 'Explore your options',
           ctaLink: '/jobs',
         }
@@ -236,7 +236,7 @@ export default function DashboardPage(): JSX.Element {
           {
             icon: 'book',
             title: 'Research companies',
-            description: 'Understand each company's mission, culture, and challenges.',
+            description: "Understand each company's mission, culture, and challenges.",
             cta: 'Learn',
             ctaLink: '/jobs',
           },
