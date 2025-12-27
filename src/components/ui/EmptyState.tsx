@@ -21,7 +21,7 @@
 import React from 'react';
 import { Icon, IconName } from './Icon';
 import { PoeticVerseMinimal } from './PoeticVerse';
-import { getPoeticVerse, PoeticMoment } from '@/lib/poeticMoments';
+import { getPoeticVerse, getHaiku, PoeticMoment, HaikuTheme } from '@/lib/poeticMoments';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -54,8 +54,10 @@ export interface EmptyStateProps {
   action?: EmptyStateAction;
   /** Secondary action button */
   secondaryAction?: EmptyStateAction;
-  /** Show poetic verse below description */
-  includeVerse?: boolean;
+  /** Show poetic verse/haiku below description */
+  includePoetry?: boolean;
+  /** Explicit theme for Haiku (if searching/waiting/etc) */
+  haikuTheme?: HaikuTheme;
   /** Additional CSS classes */
   className?: string;
 }
@@ -85,35 +87,51 @@ const emptyStateToPoetic: Record<EmptyStateType, PoeticMoment | undefined> = {
   generic: undefined,
 };
 
+const emptyStateToHaiku: Record<EmptyStateType, HaikuTheme | undefined> = {
+  applications: 'searching',
+  jobs: 'waiting',
+  resumes: 'searching',
+  saved: 'waiting',
+  matches: 'waiting',
+  search: 'searching',
+  learn: 'waiting',
+  analysis: 'searching',
+  generic: 'searching',
+};
+
 const emptyStateContent: Record<EmptyStateType, EmptyStateContent> = {
   applications: {
     icon: 'paper-airplane',
     title: "Your story starts here",
     description: "When you apply to your first role, we'll track every step together — no spreadsheets required.",
+    poeticMoment: 'empty-applications'
   },
   
   jobs: {
     icon: 'briefcase',
     title: "Fresh opportunities await",
     description: "We haven't found jobs matching your criteria yet. Try adjusting your filters or check back soon.",
+    poeticMoment: 'empty-jobs'
   },
   
   resumes: {
     icon: 'scroll',
     title: "Your story, ready to unfold",
     description: "Upload a résumé to see how the system sees you — and how to make it see you better.",
+    poeticMoment: 'empty-resumes'
   },
   
   saved: {
     icon: 'anchor',
     title: "Nothing saved yet",
     description: "When you find a role worth holding onto, save it here. We'll keep it safe.",
+    poeticMoment: 'empty-saved'
   },
   
   matches: {
     icon: 'compass',
     title: "Finding your direction",
-    description: "Once we know more about you, we'll surface roles that actually fit. Upload a résumé to get started.",
+    description: "Once we know more about you, we'll surface roles that actually fit.",
   },
   
   search: {
@@ -151,7 +169,8 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   description,
   action,
   secondaryAction,
-  includeVerse = false,
+  includePoetry = true,
+  haikuTheme,
   className = '',
 }) => {
   const content = emptyStateContent[type] || emptyStateContent.generic;
@@ -159,8 +178,12 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   const displayTitle = title || content.title;
   const displayDescription = description || content.description;
 
-  const poeticMoment = emptyStateToPoetic[type];
-  const verse = includeVerse && poeticMoment ? getPoeticVerse(poeticMoment) : null;
+  // Decide whether to show a major poetic verse or a quiet haiku
+  const majorMoment = content.poeticMoment;
+  const hTheme = haikuTheme || emptyStateToHaiku[type];
+  
+  const haiku = hTheme ? getHaiku(hTheme) : null;
+  const verse = majorMoment ? getPoeticVerse(majorMoment) : null;
 
   return (
     <div className={`empty-state ${className}`}>
@@ -184,10 +207,18 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         {displayDescription}
       </p>
 
-      {/* Poetic Verse */}
-      {verse && (
-        <div className="empty-state__verse" style={{ marginTop: '1.5rem' }}>
-          <PoeticVerseMinimal verse={verse} />
+      {/* Poetic Moment */}
+      {includePoetry && (
+        <div className="empty-state__poetry">
+          {verse ? (
+            <PoeticVerseMinimal verse={verse} />
+          ) : haiku ? (
+            <div className="haiku-display">
+              {haiku.lines.map((line, i) => (
+                <div key={i} className="haiku-line">{line}</div>
+              ))}
+            </div>
+          ) : null}
         </div>
       )}
 
@@ -252,11 +283,32 @@ export const emptyStateStyles = `
   line-height: var(--leading-relaxed);
 }
 
+.empty-state__poetry {
+  margin-top: var(--space-8);
+  max-width: 320px;
+}
+
+.haiku-display {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-family: var(--font-poetic);
+  font-style: italic;
+  color: var(--color-accent);
+  opacity: 0.9;
+}
+
+.haiku-line {
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+}
+
 .empty-state__actions {
   display: flex;
   gap: var(--space-3);
   flex-wrap: wrap;
   justify-content: center;
+  margin-top: var(--space-8);
 }
 `;
 

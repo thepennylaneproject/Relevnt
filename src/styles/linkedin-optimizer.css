@@ -40,8 +40,7 @@
 
 .score-card__label {
   font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.04em;
   font-weight: 600;
   color: var(--color-text-secondary);
   margin-bottom: 1.25rem;
@@ -89,8 +88,7 @@
   font-family: var(--font-serif);
   font-size: 1.25rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.04em;
   margin-bottom: 1.5rem;
   color: var(--color-accent-primary);
   border-bottom: 1px solid var(--color-border);
@@ -119,7 +117,6 @@
 .suggestion-item__section {
   font-size: 0.7rem;
   font-weight: 800;
-  text-transform: uppercase;
   color: var(--color-accent-primary);
   display: block;
   margin-bottom: 0.5rem;
@@ -172,7 +169,6 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   cursor: pointer;
-  text-transform: uppercase;
   font-weight: 700;
   transition: all 0.2s;
 }

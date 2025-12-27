@@ -123,7 +123,7 @@ export function CoverLetterGenerator({ application }: CoverLetterGeneratorProps)
                         <div className="bg-surface border border-accent/20 rounded-lg p-3 space-y-2">
                             {strategy && (
                                 <div className="text-xs text-muted">
-                                    <span className="font-bold text-accent uppercase text-[10px] mr-2">Strategy</span>
+
                                     {strategy}
                                 </div>
                             )}

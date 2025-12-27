@@ -157,7 +157,7 @@ export default function ApplicationsPage() {
         <div className="apps-page">
           <header className="page-header">
             <div className="header-top">
-              <span className="label">TRACK</span>
+              <span className="label">Track</span>
             </div>
             <h1>Track where you're at in each process, without losing the plot.</h1>
             <p className="subtitle">Keep cada role, status, and timeline in one place. Future You has the receipts.</p>
@@ -184,7 +184,7 @@ export default function ApplicationsPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
             <div className="lg:col-span-2 space-y-6">
               <section className="surface-card">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-ink-tertiary mb-4">Filter by status</h3>
+                <h3 className="text-sm font-semibold tracking-wider text-ink-tertiary mb-4">Filter by status</h3>
 
                 <div className="filter-buttons">
                   {STATUS_TABS.map((statusKey) => {
@@ -275,7 +275,7 @@ export default function ApplicationsPage() {
                           return (
                             <div key={contactId} className="mt-3 p-3 bg-accent/5 border border-accent/20 rounded-lg animate-in fade-in slide-in-from-top-1">
                               <div className="flex justify-between items-center mb-2">
-                                <span className="text-[10px] font-bold uppercase text-accent">Drafted Outreach</span>
+                                <span className="text-[10px] font-bold text-accent">Drafted Outreach</span>
                                 <button 
                                   onClick={() => setNetworkingDrafts(prev => {
                                     const next = { ...prev };
@@ -305,7 +305,7 @@ export default function ApplicationsPage() {
 
                         <div className="flex items-center gap-4 py-2 border-b border-subtle">
                           <div className="status-field flex-1">
-                            <label className="muted text-[10px] uppercase font-bold" htmlFor={`status-${app.id}`}>
+                            <label className="muted text-[10px] font-bold" htmlFor={`status-${app.id}`}>
                               Change Status
                             </label>
                             <select
@@ -378,7 +378,7 @@ export default function ApplicationsPage() {
 
                             {expandedTab === 'timeline' && (
                               <div className="app-timeline">
-                                <h4 className="text-[10px] uppercase font-bold muted mb-2">History</h4>
+                                 <h4 className="text-[10px] font-bold muted mb-2">History</h4>
                                 <div className="space-y-3">
                                   {(app.events || []).map(event => (
                                     <div key={event.id} className="timeline-event flex gap-3 text-xs">

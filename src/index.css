@@ -91,8 +91,7 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.04em;
   line-height: var(--leading-tight);
   margin: 0;
   color: var(--text);
@@ -247,8 +246,7 @@ button {
   border: none;
   font-family: var(--font-display);
   font-size: var(--text-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   cursor: pointer;
   transition: all var(--transition-fast);
   background: var(--color-accent);
@@ -284,8 +282,7 @@ button:disabled {
   color: var(--color-ink-inverse);
   font-family: var(--font-display);
   font-size: var(--text-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
   cursor: pointer;
   transition: all var(--transition-fast);
 }
@@ -725,9 +722,8 @@ button:disabled {
 .icon-header .label {
   font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.04em;
   color: var(--color-accent);
-  text-transform: uppercase;
 }
 
 /* Page Tabs (Builder, Library, Letters) */
@@ -902,7 +898,6 @@ button:disabled {
 .form-label {
   font-size: 0.875rem;
   font-weight: 600;
-  text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--color-ink-secondary);
 }
@@ -1352,8 +1347,6 @@ button:disabled {
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.1em;
-  color: var(--accent);
-  text-transform: uppercase;
 }
 
 .page-hero__category-pill .icon {
@@ -1721,7 +1714,6 @@ input[type="range"]::-moz-range-track {
   font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0.02em;
-  text-transform: uppercase;
   border-radius: var(--radius-full);
   background: var(--accent-soft);
   color: var(--accent);
@@ -2526,7 +2518,6 @@ input[type="range"]::-moz-range-track {
   border-radius: var(--radius-full);
   font-size: 0.65rem;
   font-weight: 500;
-  text-transform: uppercase;
 }
 
 .ats-priority--high {
@@ -2840,7 +2831,6 @@ input[type="range"]::-moz-range-track {
   border-radius: var(--radius-sm);
   font-size: 0.6rem;
   font-weight: 600;
-  text-transform: uppercase;
 }
 
 .bullet-strength--strong {

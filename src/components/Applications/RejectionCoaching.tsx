@@ -183,7 +183,7 @@ export function RejectionCoaching({ application }: RejectionCoachingProps) {
                             {coaching.reason && <p className="text-xs muted">Reason: {coaching.reason}</p>}
                         </div>
                         {coaching.tone && (
-                            <span className="text-[10px] uppercase font-bold px-2 py-1 bg-surface-accent rounded text-muted">
+                            <span className="text-[10px] font-bold px-2 py-1 bg-surface-accent rounded text-muted">
                                 {coaching.tone} Logic
                             </span>
                         )}
@@ -199,13 +199,13 @@ export function RejectionCoaching({ application }: RejectionCoachingProps) {
 
                     {/* Poetic wisdom for the moment */}
                     <div className="pt-2 border-t border-danger/10">
-                        <p className="text-[10px] uppercase font-bold text-muted mb-2">Words for the moment</p>
+                        <p className="text-[10px] font-bold text-muted mb-2">Words for the moment</p>
                         <PoeticVerseMinimal verse={getPoeticVerse('rejection')} />
                     </div>
 
                     <div className="grid grid-cols-1 gap-4">
                         <div className="space-y-2">
-                            <label className="text-[10px] uppercase font-bold text-accent">Strategic Adjustments</label>
+                            <label className="text-[10px] font-bold text-accent">Strategic Adjustments</label>
                             <ul className="space-y-2">
                                 {(coaching.suggestions || []).map((step: string, i: number) => {
                                     const action = parseActionType(step)

@@ -15,7 +15,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { path: '/dashboard', label: 'Dashboard', icon: 'gauge' },
   { path: '/jobs', label: 'Jobs', icon: 'briefcase' },
-  { path: '/applications', label: 'Applications', icon: 'paper-airplane' },
+  { path: '/applications', label: 'Apply', icon: 'paper-airplane' },
   { path: '/resumes', label: 'Resume', icon: 'scroll' },
   { path: '/profile-analyzer', label: 'Profile', icon: 'stars' },
   { path: '/interview-prep', label: 'Interview', icon: 'microphone' },
@@ -36,8 +36,6 @@ export default function SidebarMarginNav() {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const active = (path: string) => pathname.startsWith(path)
-  const doodle =
-    DOODLES[Object.keys(DOODLES).find((p) => pathname.startsWith(p)) ?? '/dashboard']
 
   // Close mobile nav when route changes
   useEffect(() => {
@@ -78,14 +76,6 @@ export default function SidebarMarginNav() {
       )}
 
       <aside className={`margin-nav ${mobileOpen ? 'is-open' : ''}`}>
-        <div className="margin-nav__doodle">
-          <img src={doodle} alt="" />
-        </div>
-
-        <div className="margin-nav__notifications">
-          <NotificationCenter />
-        </div>
-
         <nav className="margin-nav__nav">
           <ul className="margin-nav__list">
             {NAV_ITEMS.map(({ path, label, icon }) => {

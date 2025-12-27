@@ -84,7 +84,7 @@ export function RangeSliderWithPresets({
                         justifyContent: 'space-between',
                         fontSize: 11,
                         color: 'var(--text-secondary)',
-                        textTransform: 'uppercase',
+
                         letterSpacing: '0.05em',
                     }}
                 >

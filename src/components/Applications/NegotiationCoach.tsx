@@ -78,7 +78,7 @@ export function NegotiationCoach({ application }: NegotiationCoachProps) {
 
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                    <label className="text-[10px] uppercase font-bold muted">Target Range (Min)</label>
+                    <label className="text-[10px] font-bold muted">Target Range (Min)</label>
                     <input
                         type="number"
                         value={targetMin}
@@ -88,7 +88,7 @@ export function NegotiationCoach({ application }: NegotiationCoachProps) {
                     />
                 </div>
                 <div className="space-y-2">
-                    <label className="text-[10px] uppercase font-bold muted">Target Range (Max)</label>
+                    <label className="text-[10px] font-bold muted">Target Range (Max)</label>
                     <input
                         type="number"
                         value={targetMax}
@@ -100,7 +100,7 @@ export function NegotiationCoach({ application }: NegotiationCoachProps) {
             </div>
 
             <div className="space-y-2">
-                <label className="text-[10px] uppercase font-bold muted">Current Offer Base</label>
+                <label className="text-[10px] font-bold muted">Current Offer Base</label>
                 <input
                     type="number"
                     value={offerDetails.salary}
@@ -113,14 +113,14 @@ export function NegotiationCoach({ application }: NegotiationCoachProps) {
             {strategy && (
                 <div className="space-y-4 animate-in fade-in duration-500">
                     <div className="space-y-2">
-                        <label className="text-[10px] uppercase font-bold text-accent">Strategic Approach</label>
+                        <label className="text-[10px] font-bold text-accent">Strategic Approach</label>
                         <div className="p-3 surface-card rounded-lg text-xs leading-relaxed border border-accent/20">
                             {strategy}
                         </div>
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-[10px] uppercase font-bold text-accent">Rebuttal Scripts</label>
+                        <label className="text-[10px] font-bold text-accent">Rebuttal Scripts</label>
                         <div className="space-y-2">
                             {responses.map((res, i) => (
                                 <div key={i} className="p-3 surface-card rounded-lg text-xs italic border-l-2 border-accent">
@@ -132,7 +132,7 @@ export function NegotiationCoach({ application }: NegotiationCoachProps) {
 
                     {/* Poetic moment: Offer negotiation */}
                     <div className="pt-3 border-t border-accent/10">
-                        <p className="text-[10px] uppercase font-bold text-muted mb-2">The road you take</p>
+                        <p className="text-[10px] font-bold text-muted mb-2">The road you take</p>
                         <PoeticVerseMinimal verse={getPoeticVerse('offer-negotiation')} />
                     </div>
                 </div>

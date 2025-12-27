@@ -32,9 +32,14 @@ export function DailyBriefing() {
     )
 
     if (error) return (
-        <div className="briefing-error">
-            <p>We couldn't load your matches right now. This is on us, not you.</p>
-            <button onClick={handleRetry} disabled={retrying}>
+        <div className="briefing-error p-6 rounded-xl bg-amber-50/50 dark:bg-amber-900/10 border border-amber-200/50 dark:border-amber-700/30 text-center">
+            <Icon name="heart" size="lg" className="text-amber-500/60 mb-3" />
+            <p className="text-sm text-amber-800 dark:text-amber-300">We couldn't load your matches right now. This is on us, not you.</p>
+            <button 
+                onClick={handleRetry} 
+                disabled={retrying}
+                className="mt-4 ghost-button text-xs"
+            >
                 {retrying ? 'Trying again...' : 'Try again'}
             </button>
         </div>

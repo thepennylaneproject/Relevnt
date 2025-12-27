@@ -84,10 +84,10 @@ export function QuickActionsPanel(): JSX.Element {
                                 <h4 className="text-sm font-bold flex items-center gap-2">
                                     {action.title}
                                     {action.badge === 'new' && (
-                                        <span className="text-[9px] uppercase tracking-widest bg-accent/20 text-accent px-1.5 py-0.5 rounded">NEW</span>
+                                        <span className="text-[9px] font-bold tracking-widest bg-accent/20 text-accent px-1.5 py-0.5 rounded">New</span>
                                     )}
                                     {action.badge === 'ai' && (
-                                        <span className="text-[9px] uppercase tracking-widest bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded">AI</span>
+                                        <span className="text-[9px] font-bold tracking-widest bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded">AI</span>
                                     )}
                                 </h4>
                                 <p className="text-xs text-secondary mt-1 leading-relaxed">{action.description}</p>

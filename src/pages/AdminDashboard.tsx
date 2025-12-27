@@ -1249,6 +1249,8 @@ function IngestionTab() {
     latestRun: any | null;
     sourceHealth: any[];
     recentRuns: any[];
+    healingHistory: any[];
+    healingStats: { total24h: number; successful: number; failed: number; escalated: number };
   } | null>(null);
   const [ingestionState, setIngestionState] = useState<{ source: string; cursor: any; last_run_at: string | null }[]>([])
   const [jobCounts, setJobCounts] = useState<Record<string, number>>({})
@@ -1631,6 +1633,77 @@ function IngestionTab() {
           </div>
         </div>
       )}
+
+      {/* Auto-Healing Activity */}
+      <div className="surface-card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <h4 style={{ fontSize: 14, fontWeight: 600 }}>Auto-Healing (24h)</h4>
+          {healthData?.healingStats && (
+            <div style={{ display: 'flex', gap: 16, fontSize: 12 }}>
+              <span style={{ color: 'var(--color-success)' }}>
+                ✓ {healthData.healingStats.successful} healed
+              </span>
+              <span style={{ color: 'var(--color-error)' }}>
+                ✗ {healthData.healingStats.failed} failed
+              </span>
+              <span style={{ color: 'var(--color-warning)' }}>
+                ⚡ {healthData.healingStats.escalated} escalated
+              </span>
+            </div>
+          )}
+        </div>
+        
+        {(!healthData?.healingHistory || healthData.healingHistory.length === 0) ? (
+          <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-secondary)', fontSize: 13 }}>
+            <div style={{ marginBottom: 8 }}>🩹 No healing activity in the last 24 hours</div>
+            <div style={{ fontSize: 11 }}>The healer runs every 15 minutes to auto-fix failures</div>
+          </div>
+        ) : (
+          <div style={{ overflow: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+              <thead style={{ background: 'var(--surface-hover)', borderBottom: '1px solid var(--border-subtle)' }}>
+                <tr>
+                  <th style={{ padding: '8px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>Time</th>
+                  <th style={{ padding: '8px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>Source</th>
+                  <th style={{ padding: '8px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>Issue</th>
+                  <th style={{ padding: '8px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>Action</th>
+                  <th style={{ padding: '8px 12px', textAlign: 'center', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>Result</th>
+                </tr>
+              </thead>
+              <tbody>
+                {healthData.healingHistory.slice(0, 10).map((heal: any, idx: number) => (
+                  <tr key={heal.id || idx} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                    <td style={{ padding: '8px 12px', fontSize: 12, color: 'var(--text-secondary)' }}>
+                      {new Date(heal.attempted_at).toLocaleTimeString()}
+                    </td>
+                    <td style={{ padding: '8px 12px' }}>
+                      <code style={{ fontSize: 11, background: 'var(--surface-hover)', padding: '2px 6px', borderRadius: 4 }}>
+                        {heal.source}
+                      </code>
+                    </td>
+                    <td style={{ padding: '8px 12px', fontSize: 12 }}>
+                      {heal.failure_type?.replace(/_/g, ' ')}
+                    </td>
+                    <td style={{ padding: '8px 12px', fontSize: 12 }}>
+                      {heal.healing_action?.replace(/_/g, ' ')}
+                    </td>
+                    <td style={{ padding: '8px 12px', textAlign: 'center' }}>
+                      <span style={{
+                        fontSize: 11,
+                        color: heal.healing_result === 'success' ? 'var(--color-success)' :
+                          heal.healing_result === 'escalated' ? 'var(--color-warning)' : 'var(--color-error)',
+                        fontWeight: 600,
+                      }}>
+                        {heal.healing_result === 'success' ? '✓' : heal.healing_result === 'escalated' ? '⚡' : '✗'} {heal.healing_result}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
       {/* Stats Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>

@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { useWellnessCheckin } from '../../hooks/useWellnessCheckin'
 import { Icon } from '../ui/Icon'
 import { PoeticVerseMinimal } from '../ui/PoeticVerse'
-import { getPoeticVerse } from '../../lib/poeticMoments'
+import { getPoeticVerse, PoeticMoment } from '../../lib/poeticMoments'
 
 const MOODS = [
     { score: 1, label: 'Exhausted', emoji: '😫' },
@@ -13,27 +13,13 @@ const MOODS = [
     { score: 10, label: 'Confident', emoji: '🚀' },
 ]
 
-const MOOD_TIPS: Record<number, { tip: string; quote: string }> = {
-    1: {
-        tip: "It's okay to take it slow today. Even small progress counts.",
-        quote: "Rest if you must, but don't quit."
-    },
-    3: {
-        tip: "Consider focusing on just one task. You don't have to do it all today.",
-        quote: "Searching is a marathon, not a sprint."
-    },
-    5: {
-        tip: "Steady wins the race. Keep moving forward at your pace.",
-        quote: "Consistency beats intensity over time."
-    },
-    7: {
-        tip: "Great energy! This is a good day to tackle that challenging application.",
-        quote: "Momentum is your friend — ride it."
-    },
-    10: {
-        tip: "You're in the zone. Consider reaching out directly to hiring managers.",
-        quote: "Confidence opens doors. Keep going."
-    },
+// Poetic Mapping for Wellness Scores
+const SCORE_TO_MOMENT: Record<number, PoeticMoment> = {
+    1: 'rejection', // Use Angelou's "Still I Rise" for lowest energy
+    3: 'wellness-resilience', // Use Angelou
+    5: 'wellness-resilience', 
+    7: 'wellness-small-win', // Use Dickinson
+    10: 'wellness-small-win',
 }
 
 export function WellnessCheckin() {
@@ -69,7 +55,8 @@ export function WellnessCheckin() {
             return c.created_at.split('T')[0] === today
         })
         const score = submitted ? selectedScore : todayCheckin?.mood_score
-        const moodData = MOOD_TIPS[score as number] || MOOD_TIPS[5]
+        const moment = SCORE_TO_MOMENT[score as number] || 'wellness-resilience'
+        const poeticData = getPoeticVerse(moment)
 
         return (
             <div className="card card--job-listing">
@@ -80,7 +67,10 @@ export function WellnessCheckin() {
                     </div>
                     <p className="text-xs text-secondary">Check-in captured for today.</p>
                 </div>
-                <p className="italic text-secondary text-xs border-t border-border pt-4 text-center">"{moodData.quote}"</p>
+                <div className="poetic-quote mt-4 pt-4 border-t border-border">
+                  <p className="poetic-verse text-xs italic text-center text-accent">"{poeticData.verse.split('\n')[0]}..."</p>
+                  <p className="text-[10px] text-secondary text-center mt-2">— {poeticData.attribution}</p>
+                </div>
             </div>
         )
     }
@@ -102,7 +92,7 @@ export function WellnessCheckin() {
                         saveCheckin(5, "Quick check-in");
                         setSubmitted(true);
                     }}
-                    className="btn btn-primary w-full text-xs py-2"
+                    className="btn btn--primary w-full text-xs py-2"
                 >
                     Capture daily reflection
                 </button>

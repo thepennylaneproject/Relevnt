@@ -20,9 +20,8 @@
 .icon-header .label {
   font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.04em;
   color: var(--color-accent);
-  text-transform: uppercase;
 }
 
 /* Persona Card Styling */
@@ -241,9 +240,8 @@
 .form-label {
   font-size: 0.875rem;
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   color: var(--color-ink-secondary);
-  text-transform: uppercase;
 }
 
 .slider-value {
@@ -285,8 +283,7 @@
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--color-ink-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
 }
 
 /* Confirmation Group */

@@ -79,48 +79,80 @@ interface RelevntThemeProviderProps {
 
 // Brand Colors (from your design system)
 const BRAND_COLORS = {
-  deepBlack: '#0B0B0B',
-  softChampagne: '#E7DCC8',
-  warmNeutral: '#F3F1ED',
-  accentGold: '#CDAA70',
-  supportTeal: '#009B9B',
+  deepBlack: '#0D0D0D',
+  softIvory: '#F5F1E8',
+  surfaceIvory: '#FDFCF9',
+  accentTerracotta: '#A0715C',
+  accentTerracottaHover: '#8A5A42',
+  supportSage: '#5C7A6A',
+  supportSageHover: '#3D5A4C',
 } as const
 
 // Light Mode Palette
 const LIGHT_COLORS: ThemeColors = {
   // Backgrounds
-  background: '#FFFFFF',
-  surface: '#F8F7F5',
-  surfaceHover: '#F0EEEA',
+  background: BRAND_COLORS.softIvory,
+  surface: BRAND_COLORS.surfaceIvory,
+  surfaceHover: '#F1ECE2',
 
   // Text
-  text: BRAND_COLORS.deepBlack,
+  text: '#0F0F0F',
   textSecondary: '#4A4A4A',
-  mutedText: '#999999',
+  mutedText: '#8A8378',
 
   // Borders
-  border: '#D9D6D1',
-  borderLight: '#E9E6E1',
+  border: 'rgba(13, 13, 13, 0.08)',
+  borderLight: 'rgba(13, 13, 13, 0.15)',
 
   // Interactive
-  primary: BRAND_COLORS.accentGold,
-  primaryHover: '#B89558',
-  secondary: BRAND_COLORS.supportTeal,
-  secondaryHover: '#007B7B',
+  primary: BRAND_COLORS.accentTerracotta,
+  primaryHover: BRAND_COLORS.accentTerracottaHover,
+  secondary: BRAND_COLORS.supportSage,
+  secondaryHover: BRAND_COLORS.supportSageHover,
 
   // Feedback
   success: '#10B981',
   warning: '#F59E0B',
   error: '#EF4444',
-  info: BRAND_COLORS.supportTeal,
+  info: BRAND_COLORS.supportSage,
 
   // Special
   overlay: 'rgba(11, 11, 11, 0.5)',
-  focus: 'rgba(205, 170, 112, 0.2)',
+  focus: 'rgba(160, 113, 92, 0.25)',
 }
 
 // Dark Mode Palette
-// Dark mode removed (light mode only)
+const DARK_COLORS: ThemeColors = {
+  // Backgrounds
+  background: BRAND_COLORS.deepBlack,
+  surface: '#161616',
+  surfaceHover: '#1F1F1F',
+
+  // Text
+  text: '#F7F3EA',
+  textSecondary: '#D7D0C5',
+  mutedText: '#B8B0A2',
+
+  // Borders
+  border: 'rgba(247, 243, 234, 0.12)',
+  borderLight: 'rgba(247, 243, 234, 0.24)',
+
+  // Interactive
+  primary: BRAND_COLORS.accentTerracotta,
+  primaryHover: '#B88A76',
+  secondary: BRAND_COLORS.supportSage,
+  secondaryHover: '#7A9A8A',
+
+  // Feedback
+  success: '#7AA28F',
+  warning: '#C48B73',
+  error: '#C18686',
+  info: BRAND_COLORS.supportSage,
+
+  // Special
+  overlay: 'rgba(13, 13, 13, 0.65)',
+  focus: 'rgba(184, 138, 118, 0.3)',
+}
 
 // ============================================================================
 // CONTEXT CREATION
@@ -151,7 +183,7 @@ export function RelevntThemeProvider({
     // If they have an explicit preference that is valid, use it
     if (stored === 'Dark' || stored === 'Light' || stored === 'DarkAcademia') return stored as ThemeMode;
 
-    // Default to Light mode to show the new Ink/Ivory/Emerald design system
+    // Default to Light mode to show the Terracotta/Sage on Ink/Ivory design system
     return 'Light';
   });
 
@@ -195,7 +227,7 @@ export function RelevntThemeProvider({
   }, []);
 
   // Colors come from CSS variables now, so we provide computed defaults
-  const colors = useMemo(() => LIGHT_COLORS, []);
+  const colors = useMemo(() => (mode === 'Dark' || mode === 'DarkAcademia' ? DARK_COLORS : LIGHT_COLORS), [mode]);
 
   // ========================================================================
   // CREATE CONTEXT VALUE

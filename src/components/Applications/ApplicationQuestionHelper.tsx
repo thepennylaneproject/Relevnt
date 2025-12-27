@@ -196,7 +196,7 @@ export const ApplicationQuestionHelper: React.FC = () => {
                 )}
 
                 <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
-                    <p className="text-xs font-semibold muted mb-3 uppercase tracking-wider">Quick Rewrite</p>
+                    <p className="text-xs font-semibold muted mb-3 tracking-wider">Quick Rewrite</p>
                     {renderModeSelector(true)}
                 </div>
             </div>
@@ -240,7 +240,7 @@ export const ApplicationQuestionHelper: React.FC = () => {
                     <div className="p-4 space-y-4 bg-bg-secondary rounded-lg border border-graphite-faint animate-in fade-in slide-in-from-top-2">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="label text-xs uppercase text-ink-tertiary">Target Role</label>
+                                <label className="label text-xs text-ink-tertiary">Target Role</label>
                                 <input
                                     type="text"
                                     className="input w-full"
@@ -250,7 +250,7 @@ export const ApplicationQuestionHelper: React.FC = () => {
                                 />
                             </div>
                             <div>
-                                <label className="label text-xs uppercase text-ink-tertiary">Company</label>
+                                <label className="label text-xs text-ink-tertiary">Company</label>
                                 <input
                                     type="text"
                                     className="input w-full"
@@ -262,7 +262,7 @@ export const ApplicationQuestionHelper: React.FC = () => {
                         </div>
 
                         <div>
-                            <label className="label text-xs uppercase text-ink-tertiary">Job Description Excerpt</label>
+                            <label className="label text-xs text-ink-tertiary">Job Description Excerpt</label>
                             <textarea
                                 className="input w-full min-h-[80px]"
                                 placeholder="Paste key requirements or duties..."
@@ -272,7 +272,7 @@ export const ApplicationQuestionHelper: React.FC = () => {
                         </div>
 
                         <div>
-                            <label className="label text-xs uppercase text-ink-tertiary">Resume / Experience Context</label>
+                            <label className="label text-xs text-ink-tertiary">Resume / Experience Context</label>
                             <textarea
                                 className="input w-full min-h-[80px]"
                                 placeholder="Paste relevant experience or resume summary..."
@@ -286,7 +286,7 @@ export const ApplicationQuestionHelper: React.FC = () => {
 
                         {personas.length > 0 && (
                             <div>
-                                <label className="label text-xs uppercase text-ink-tertiary">Persona</label>
+                                <label className="label text-xs text-ink-tertiary">Persona</label>
                                 <select
                                     className="input w-full"
                                     value={selectedPersonaId}

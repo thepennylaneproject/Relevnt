@@ -65,7 +65,10 @@ export function OutcomeMetricsCard({ className = '' }: OutcomeMetricsCardProps) 
                         <span className="stat-label">Response Rate</span>
                     </div>
                     <div className="stat-value text-accent">{responseRate}%</div>
-                    <div className="stat-context mt-2">
+                    <div className="progress-bar-mini mt-2 mb-2">
+                        <div className="progress-bar-fill" style={{ width: `${Math.min(responseRate * 5, 100)}%` }}></div>
+                    </div>
+                    <div className="stat-context">
                         {responseRate >= 15 ? (
                             <span className="text-success text-[10px]">Above average (market: 10-12%)</span>
                         ) : responseRate >= 8 ? (
@@ -215,6 +218,20 @@ export function OutcomeMetricsCard({ className = '' }: OutcomeMetricsCardProps) 
                     border-left: 3px solid var(--color-success);
                     padding: 10px 12px;
                     border-radius: 6px;
+                }
+                
+                .progress-bar-mini {
+                    height: 4px;
+                    background: var(--color-bg-tertiary);
+                    border-radius: 2px;
+                    overflow: hidden;
+                }
+                
+                .progress-bar-fill {
+                    height: 100%;
+                    background: linear-gradient(90deg, var(--color-accent-primary), var(--color-accent-secondary));
+                    border-radius: 2px;
+                    transition: width 0.5s ease;
                 }
             `}</style>
         </div>
