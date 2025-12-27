@@ -160,11 +160,11 @@
   --leading-loose: 2;
 
   /* Letter Spacing */
-  --tracking-tight: -0.02em;
+  --tracking-tight: -0.01em;
   --tracking-normal: 0;
-  --tracking-wide: 0.05em;
-  --tracking-wider: 0.1em;
-  --tracking-widest: 0.15em;
+  --tracking-wide: 0.02em;
+  --tracking-wider: 0.04em;
+  --tracking-widest: 0.06em;
 
   /* Font Weights */
   --font-normal: 400;
@@ -385,12 +385,11 @@ body {
    TYPOGRAPHY CLASSES
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* Display Headings — Bold, All Caps, Bebas Neue */
+/* Display Headings — Bold, Bebas Neue */
 .heading,
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-wider);
+  letter-spacing: var(--tracking-wide);
   line-height: var(--leading-tight);
   color: var(--color-ink);
   margin: 0;
@@ -441,7 +440,7 @@ code, pre {
 /* Text utilities */
 .font-display { font-family: var(--font-display); }
 .font-body { font-family: var(--font-body); }
-.uppercase { text-transform: uppercase; }
+
 .normal-case { text-transform: none; }
 
 
@@ -482,7 +481,6 @@ code, pre {
   padding: var(--space-3) var(--space-5);
   font-family: var(--font-display);
   font-size: var(--text-sm);
-  text-transform: uppercase;
   letter-spacing: var(--tracking-wide);
   line-height: 1;
   border-radius: var(--radius-md);
@@ -569,7 +567,6 @@ code, pre {
   margin-bottom: var(--space-2);
   font-family: var(--font-display);
   font-size: var(--text-xs);
-  text-transform: uppercase;
   letter-spacing: var(--tracking-wider);
   color: var(--color-ink-secondary);
 }
@@ -625,7 +622,6 @@ code, pre {
   text-decoration: none;
   font-family: var(--font-display);
   font-size: var(--text-xs);
-  text-transform: uppercase;
   letter-spacing: var(--tracking-wide);
   transition: all var(--transition-fast);
 }
@@ -676,7 +672,6 @@ code, pre {
 .empty-state__title {
   font-family: var(--font-display);
   font-size: var(--text-xl);
-  text-transform: uppercase;
   letter-spacing: var(--tracking-wide);
   color: var(--color-ink);
   margin-bottom: var(--space-2);
@@ -708,7 +703,6 @@ code, pre {
   border-radius: var(--radius-full);
   font-family: var(--font-display);
   font-size: var(--text-xs);
-  text-transform: uppercase;
   letter-spacing: var(--tracking-wide);
   border: 1px solid var(--ink-200);
   background: var(--ivory-200);

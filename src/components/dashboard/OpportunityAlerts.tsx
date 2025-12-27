@@ -40,12 +40,12 @@ export function OpportunityAlerts() {
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
                                 {isHighest && (
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-accent bg-accent/10 px-2 py-0.5 rounded">
+                                    <span className="text-[10px] font-bold tracking-wider text-accent bg-accent/10 px-2 py-0.5 rounded">
                                         Best Match
                                     </span>
                                 )}
                                 {isFresh && (
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-success bg-success/10 px-2 py-0.5 rounded">
+                                    <span className="text-[10px] font-bold tracking-wider text-success bg-success/10 px-2 py-0.5 rounded">
                                         Just Posted
                                     </span>
                                 )}

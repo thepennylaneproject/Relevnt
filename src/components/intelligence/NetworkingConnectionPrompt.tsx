@@ -263,7 +263,7 @@ export function NetworkingConnectionPrompt({
                     border-radius: 10px;
                     font-size: 10px;
                     font-weight: 600;
-                    text-transform: uppercase;
+
                 }
 
                 .status-connected {

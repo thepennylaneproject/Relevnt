@@ -15,6 +15,7 @@ import { SmallWins } from '../components/dashboard/SmallWins'
 import { OutcomeMetricsCard } from '../components/dashboard/OutcomeMetricsCard'
 import { QuickActionsPanel } from '../components/dashboard/QuickActionsPanel'
 import { OpportunityAlerts } from '../components/dashboard/OpportunityAlerts'
+import { getHaiku } from '../lib/poeticMoments'
 import '../styles/dashboard-clarity.css'
 
 export default function DashboardPage(): JSX.Element {
@@ -80,7 +81,7 @@ export default function DashboardPage(): JSX.Element {
             </p>
 
             <div className="stats-grid">
-              <div className={`card card-stat ${activeApplications.length === 0 ? 'is-empty' : ''}`}>
+              <div className={`card card-stat ${activeApplications.length === 0 ? 'is-empty' : 'is-active'}`}>
                 <span className="stat-label">Active applications</span>
                 <span className="stat-value">{activeApplications.length}</span>
                 <span className="stat-description">Roles you're currently in process for</span>
@@ -94,7 +95,7 @@ export default function DashboardPage(): JSX.Element {
                 )}
               </div>
 
-              <div className={`card card-stat ${interviewingCount === 0 ? 'is-empty' : ''}`}>
+              <div className={`card card-stat ${interviewingCount === 0 ? 'is-empty' : 'is-active'}`}>
                 <span className="stat-label">In interviews</span>
                 <span className="stat-value">{interviewingCount}</span>
                 <span className="stat-description">Active conversations with companies</span>
@@ -103,7 +104,7 @@ export default function DashboardPage(): JSX.Element {
                 )}
               </div>
 
-              <div className={`card card-stat ${(saved || 0) === 0 ? 'is-empty' : ''}`}>
+              <div className={`card card-stat ${(saved || 0) === 0 ? 'is-empty' : 'is-active'}`}>
                 <span className="stat-label">Saved opportunities</span>
                 <span className="stat-value">{saved || 0}</span>
                 <span className="stat-description">Jobs you've bookmarked for later</span>
@@ -170,6 +171,9 @@ export default function DashboardPage(): JSX.Element {
                       <Icon name="flower" size="lg" />
                       <h3>All clear for now</h3>
                       <p>You're up to date on all your high-priority actions. Nice work.</p>
+                      <p className="haiku text-sm italic text-muted mt-4 leading-relaxed">
+                        {getHaiku('resting').lines.join(' / ')}
+                      </p>
                       <Link to="/jobs" className="ghost-button mt-4">Find new opportunities</Link>
                     </div>
                   ) : (

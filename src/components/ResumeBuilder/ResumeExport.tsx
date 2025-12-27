@@ -128,7 +128,7 @@ function generateResumeHTML(draft: ResumeDraft): string {
                 h1 { margin: 0 0 4px; font-size: 24px; }
                 h2 { 
                     font-size: 14px; 
-                    text-transform: uppercase; 
+
                     border-bottom: 1px solid #333; 
                     padding-bottom: 4px;
                     margin: 20px 0 10px;

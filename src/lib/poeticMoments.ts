@@ -1,12 +1,14 @@
 /**
  * POETIC VOICE INTEGRATION
  *
- * Five-Poet Framework
- * - Poe: Darkness, melancholy, introspection, acceptance
- * - Frost: Choice, grounded wisdom, paths and journeys
- * - Shakespeare: Truth, humanity, boldness, self-awareness
- * - Angelou: Resilience, strength, rising up
- * - Mary Oliver: Self-trust, wonder, discovery
+ * Five-Poet Foundation + Supporting Voices
+ * - Poe: Darkness, melancholy, introspection
+ * - Frost: Choice, journeys, wisdom
+ * - Shakespeare: Truth, humanity, boldness
+ * - Angelou: Resilience, strength, dignity
+ * - Oliver: Self-trust, wonder, discovery
+ * - Hughes: Aspiration, persistence, hope
+ * - Dickinson: Quiet persistence, small victories
  */
 
 export type PoeticMoment =
@@ -18,13 +20,14 @@ export type PoeticMoment =
   | 'interview-prep'
   | 'application-submitted'
   | 'wellness-sleep'
+  | 'wellness-resilience'
+  | 'wellness-small-win'
+  | 'goal-setting'
   | 'feature-discovery'
   | 'offer-negotiation'
-  | 'admin-recovery'
-  | 'admin-milestone'
-  | 'admin-discovery'
+  | 'career-pivot'
 
-export type PoetName = 'Poe' | 'Frost' | 'Shakespeare' | 'Angelou' | 'Oliver'
+export type PoetName = 'Poe' | 'Frost' | 'Shakespeare' | 'Angelou' | 'Oliver' | 'Hughes' | 'Dickinson'
 
 export interface PoeticVerse {
   moment: PoeticMoment
@@ -32,7 +35,7 @@ export interface PoeticVerse {
   verse: string
   attribution: string
   reflection: string
-  tone: 'melancholic' | 'grounded' | 'bold' | 'resilient' | 'contemplative'
+  tone: 'melancholic' | 'grounded' | 'bold' | 'resilient' | 'contemplative' | 'aspirational' | 'persistent'
 }
 
 export const poeticMoments: Record<PoeticMoment, PoeticVerse> = {
@@ -41,17 +44,26 @@ export const poeticMoments: Record<PoeticMoment, PoeticVerse> = {
     poet: 'Frost',
     verse: 'Two roads diverged in a yellow wood,\nAnd sorry I could not travel both\nAnd be one traveler, long I stood\nAnd looked down one as far as I could\nTo where it bent in the undergrowth.',
     attribution: 'The Road Not Taken — Robert Frost',
-    reflection: 'Every journey begins with standing at a threshold. The absence of visible paths is where discovery happens. The road you take matters less than taking the first step.',
+    reflection: 'Every journey begins with standing at a threshold. The absence of visible paths is where discovery happens.',
     tone: 'grounded',
   },
 
   'rejection': {
     moment: 'rejection',
-    poet: 'Poe',
-    verse: 'Once upon a midnight dreary, as I pondered, weak and weary,\nOver many a quaint and curious volume of forgotten lore—\nWhile I nodded, napping suddenly, there came a tapping, gently rapping,\n"Sir or Madam," came the tapping, "know that this is not your floor."',
-    attribution: 'The Raven (adapted) — Edgar Allan Poe',
-    reflection: 'Not every door opens. Not every silence means stillness. The knock that closes one threshold often signals another is preparing to open.',
-    tone: 'melancholic',
+    poet: 'Angelou',
+    verse: 'You may write me down in history\nWith your bitter, twisted lies,\nYou may tread me in the very dirt\nBut still, like dust, I\'ll rise.',
+    attribution: 'Still I Rise — Maya Angelou',
+    reflection: 'Rejection is not a definition; it is a momentary shadow. You have been knocked down, but your capacity to rise is unchanged.',
+    tone: 'resilient',
+  },
+
+  'career-pivot': {
+    moment: 'career-pivot',
+    poet: 'Angelou',
+    verse: 'You may shoot me with your words,\nYou may cut me with your eyes,\nYou may kill me with your hatefulness,\nBut still, like air, I\'ll rise.',
+    attribution: 'Still I Rise — Maya Angelou',
+    reflection: 'Changing paths requires a profound act of rising. Do not apologize for your evolution.',
+    tone: 'resilient',
   },
 
   'interview-prep': {
@@ -59,7 +71,7 @@ export const poeticMoments: Record<PoeticMoment, PoeticVerse> = {
     poet: 'Shakespeare',
     verse: 'All the world\'s a stage,\nAnd all the men and women merely players;\nThey have their exits and their entrances,\nAnd one man in his time plays many parts.',
     attribution: 'As You Like It — William Shakespeare',
-    reflection: 'You are not auditioning. You are in conversation. The role you play is the authentic one—bring your full repertoire of experience, wisdom, and human truth.',
+    reflection: 'You are not auditioning. You are in conversation. Bring your full repertoire of human truth.',
     tone: 'bold',
   },
 
@@ -68,7 +80,7 @@ export const poeticMoments: Record<PoeticMoment, PoeticVerse> = {
     poet: 'Frost',
     verse: 'And miles to go before I sleep,\nAnd miles to go before I sleep.',
     attribution: 'Stopping by Woods on a Snowy Evening — Robert Frost',
-    reflection: 'You have taken the step. The path continues. Rest when you need to, but know the journey is long and worth every mile.',
+    reflection: 'You have taken the step. The path continues. Rest when you need to, but know the journey is worth every mile.',
     tone: 'grounded',
   },
 
@@ -77,62 +89,62 @@ export const poeticMoments: Record<PoeticMoment, PoeticVerse> = {
     poet: 'Poe',
     verse: 'A dim and shadowed land of sleep,\nWhere tired minds their vigil keep,\nAnd dreams like smoke drift soft and deep—\nIn rest, the soul its secrets keep.',
     attribution: 'The Sleeper (adapted) — Edgar Allan Poe',
-    reflection: 'Rest is not surrender. It is wisdom. The mind that rests is the mind that rises stronger.',
+    reflection: 'Rest is wisdom. The mind that rests is the mind that rises stronger.',
     tone: 'melancholic',
+  },
+
+  'wellness-resilience': {
+    moment: 'wellness-resilience',
+    poet: 'Angelou',
+    verse: 'Leaving behind nights of terror and fear\nI rise\nInto a daybreak that’s wondrously clear\nI rise',
+    attribution: 'Still I Rise — Maya Angelou',
+    reflection: 'You have endured the difficult cycles. Today is a clear dawn. Trust your strength.',
+    tone: 'resilient',
+  },
+
+  'wellness-small-win': {
+    moment: 'wellness-small-win',
+    poet: 'Dickinson',
+    verse: '"Hope" is the thing with feathers\nThat perches in the soul\nAnd sings the tune without the words\nAnd never stops - at all -',
+    attribution: 'Hope is the thing with feathers — Emily Dickinson',
+    reflection: 'Small acts compound. You are building momentum. Hope is a practice, not a destination.',
+    tone: 'persistent',
+  },
+
+  'goal-setting': {
+    moment: 'goal-setting',
+    poet: 'Hughes',
+    verse: 'Hold fast to dreams\nFor if dreams die\nLife is a broken-winged bird\nThat cannot fly.',
+    attribution: 'Dreams — Langston Hughes',
+    reflection: 'Your dream matters. Every intentional goal set today moves you closer to flight.',
+    tone: 'aspirational',
   },
 
   'feature-discovery': {
     moment: 'feature-discovery',
     poet: 'Shakespeare',
-    verse: 'Cowards die many times before their deaths;\nThe valiant never taste of death but once.\nOf all the wonders that I yet have heard,\nIt seems to me most strange that men should fear.',
+    verse: 'Of all the wonders that I yet have heard,\nIt seems to me most strange that men should fear.',
     attribution: 'Julius Caesar — William Shakespeare',
-    reflection: 'Each new tool in your hands is an act of courage. Using what you\'ve been given—without hesitation—is how you become unstoppable.',
+    reflection: 'Each new tool in your hands is an act of courage. Using what you\'ve been given is how you become unstoppable.',
     tone: 'bold',
   },
 
   'offer-negotiation': {
     moment: 'offer-negotiation',
-    poet: 'Frost',
-    verse: 'I took the one less traveled by,\nAnd that has made all the difference.',
-    attribution: 'The Road Not Taken — Robert Frost',
-    reflection: 'This offer is not the only path. Your choice—made thoughtfully, with full clarity of what you deserve—is the one that shapes your future.',
-    tone: 'grounded',
-  },
-
-  'admin-recovery': {
-    moment: 'admin-recovery',
-    poet: 'Angelou',
-    verse: 'There is no greater agony than bearing an untold story inside you.\nBut there is great triumph in rising anyway—\nWithout apology, without explanation,\nJust rising, again and again.',
-    attribution: 'I Know Why the Caged Bird Sings (adapted) — Maya Angelou',
-    reflection: 'Your system recovered. It fell, and it rose. This is not failure—this is resilience. The ingestion pipeline that can recover is stronger than one that never stumbles.',
-    tone: 'resilient',
-  },
-
-  'admin-milestone': {
-    moment: 'admin-milestone',
-    poet: 'Angelou',
-    verse: 'I\'ve learned over the years that whether a person is a christian,\nMoslem, Hindu, Buddhist, or whatever—\nWhen you embrace them with love, when you are trying to help them,\nThe message of love gets across.',
-    attribution: 'Letter to My Daughter (adapted) — Maya Angelou',
-    reflection: "You've built something that works. That endures. That helps people. This milestone isn't just a number—it's proof of care, consistency, and strength.",
-    tone: 'resilient',
-  },
-
-  'admin-discovery': {
-    moment: 'admin-discovery',
     poet: 'Oliver',
-    verse: 'Tell me, what is it you plan to do\nwith your one wild and precious life?\nI say, begin now to see the world—\nNotice it. All of it. Closely.',
-    attribution: 'The Journey (adapted) — Mary Oliver',
-    reflection: "You've discovered a new insight. A pattern. A truth about your data. This is wonder—the beginning of deeper understanding. Trust what you see.",
+    verse: 'One day you finally knew\nwhat you had to do, and began...',
+    attribution: 'The Journey — Mary Oliver',
+    reflection: 'This choice—made thoughtfully, with full clarity of what you deserve—is the one that shapes your future.',
     tone: 'contemplative',
   },
 
   'empty-applications': {
     moment: 'empty-applications',
-    poet: 'Angelou',
-    verse: 'There is no greater agony than bearing an untold story inside you.',
-    attribution: 'I Know Why the Caged Bird Sings — Maya Angelou',
-    reflection: 'Your story is waiting to be told. Each application is a chapter you write. Begin, and the story will find its shape.',
-    tone: 'resilient',
+    poet: 'Oliver',
+    verse: 'Tell me, what is it you plan to do\nwith your one wild and precious life?',
+    attribution: 'The Summer Day — Mary Oliver',
+    reflection: 'Your story is waiting to be told. Begin now to see the world—notice it closely.',
+    tone: 'contemplative',
   },
 
   'empty-saved': {
@@ -140,7 +152,7 @@ export const poeticMoments: Record<PoeticMoment, PoeticVerse> = {
     poet: 'Oliver',
     verse: 'Instructions for living a life:\nPay attention.\nBe astonished.\nTell about it.',
     attribution: 'Sometimes — Mary Oliver',
-    reflection: 'When you find something worth keeping, save it. The act of noticing is the first step toward having.',
+    reflection: 'When you find something worth keeping, save it. Look closer.',
     tone: 'contemplative',
   },
 
@@ -149,9 +161,38 @@ export const poeticMoments: Record<PoeticMoment, PoeticVerse> = {
     poet: 'Shakespeare',
     verse: 'This above all: to thine own self be true,\nAnd it must follow, as the night the day,\nThou canst not then be false to any man.',
     attribution: 'Hamlet — William Shakespeare',
-    reflection: 'Your résumé is your truth on paper. It is not embellishment—it is clarity. Tell your story plainly, and let your work speak.',
+    reflection: 'Your résumé is your truth on paper. Tell your story plainly, and let your work speak.',
     tone: 'bold',
   },
+}
+
+/**
+ * HAIKU SYSTEM
+ */
+export type HaikuTheme = 'searching' | 'waiting' | 'finding' | 'resting'
+
+export interface Haiku {
+  lines: [string, string, string]
+  theme: HaikuTheme
+}
+
+const HAIKUS: Haiku[] = [
+  { theme: 'searching', lines: ['Blank page waits for ink', 'A path unseen pulls me on', 'Silent steps forward'] },
+  { theme: 'searching', lines: ['Sifting through the tide', 'One shell among the many', 'Waiting for my hand'] },
+  { theme: 'waiting', lines: ['The deep winter wait', 'Roots are busy in the dark', 'Spring is not a lie'] },
+  { theme: 'waiting', lines: ['Mailbox empty still', 'Patience is a quiet room', 'Resting in the gap'] },
+  { theme: 'finding', lines: ['The key turns the lock', 'Light floods the forgotten hall', 'Home is where you start'] },
+  { theme: 'finding', lines: ['Clear sight through the mist', 'The map matches the mountain', 'Here is where I am'] },
+  { theme: 'resting', lines: ['Pen laid on the wood', 'Breath returns to its own rhythm', 'Quiet is enough'] },
+  { theme: 'resting', lines: ['Sun sinks in the glass', 'Labor yields to evening light', 'Tomorrow can wait'] },
+]
+
+/**
+ * Get a random haiku for a specific theme
+ */
+export function getHaiku(theme: HaikuTheme): Haiku {
+  const themedHaikus = HAIKUS.filter(h => h.theme === theme)
+  return themedHaikus[Math.floor(Math.random() * themedHaikus.length)]
 }
 
 /**
@@ -159,25 +200,4 @@ export const poeticMoments: Record<PoeticMoment, PoeticVerse> = {
  */
 export function getPoeticVerse(moment: PoeticMoment): PoeticVerse {
   return poeticMoments[moment]
-}
-
-/**
- * Get all verses for a specific poet
- */
-export function getVersesByPoet(poet: PoetName): PoeticVerse[] {
-  const verses: PoeticVerse[] = []
-  for (const moment of Object.keys(poeticMoments) as PoeticMoment[]) {
-    if (poeticMoments[moment].poet === poet) {
-      verses.push(poeticMoments[moment])
-    }
-  }
-  return verses
-}
-
-/**
- * Get random reflective text for a moment (for variation)
- */
-export function getReflectionForMoment(moment: PoeticMoment): string {
-  const verse = getPoeticVerse(moment)
-  return verse.reflection
 }

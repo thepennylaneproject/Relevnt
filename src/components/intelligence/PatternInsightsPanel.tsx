@@ -260,7 +260,6 @@ export function PatternInsightsPanel({ className = '', collapsed: initialCollaps
                 .pattern-stat-label {
                     font-size: 11px;
                     color: var(--text-muted, #888);
-                    text-transform: uppercase;
                     letter-spacing: 0.5px;
                 }
 
@@ -279,7 +278,6 @@ export function PatternInsightsPanel({ className = '', collapsed: initialCollaps
                     font-size: 12px;
                     font-weight: 600;
                     color: var(--text-secondary, #aaa);
-                    text-transform: uppercase;
                     letter-spacing: 0.5px;
                     margin-bottom: 8px;
                 }

@@ -126,7 +126,7 @@ export function SmallWins({ wins, className = '' }: SmallWinsProps) {
                 .small-win-label {
                     font-size: 11px;
                     color: var(--text-secondary, #aaa);
-                    text-transform: uppercase;
+
                     letter-spacing: 0.5px;
                     font-weight: 600;
                 }

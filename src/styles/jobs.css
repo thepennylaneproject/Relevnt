@@ -25,8 +25,7 @@
 .page-header .label {
   font-size: 0.75rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.04em;
   color: var(--color-ink-secondary);
 }
 
@@ -411,8 +410,7 @@
 .filter-section-title {
   font-size: 0.875rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.04em;
   color: var(--color-ink-secondary);
   margin-bottom: 12px;
 }
@@ -427,8 +425,7 @@
 .form-group label.form-label {
   font-size: 0.875rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.04em;
   color: var(--color-ink-secondary);
 }
 
@@ -464,8 +461,7 @@
   font-weight: 700;
   color: var(--color-accent);
   margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.04em;
 }
 
 .tuner-header__subtitle {
@@ -532,8 +528,7 @@
   color: var(--color-ink-tertiary);
   font-size: 0.75rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.08em;
   z-index: 2;
 }
 

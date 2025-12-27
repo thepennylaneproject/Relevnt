@@ -31,7 +31,7 @@ export default function NotificationCenter() {
                 onClick={() => setIsOpen(!isOpen)}
                 title="Notifications"
             >
-                <Icon name="stars" size="md" hideAccent={unreadCount === 0} />
+                <Icon name="mailbox" size="md" hideAccent={unreadCount === 0} />
                 {unreadCount > 0 && <span className="unread-badge">{unreadCount}</span>}
             </button>
 
@@ -65,7 +65,7 @@ export default function NotificationCenter() {
                                     >
                                         <div className="notification-item__icon">
                                             <Icon
-                                                name={n.type === 'job_alert' ? 'briefcase' : 'stars'}
+                                                name={n.type === 'job_alert' ? 'briefcase' : 'mailbox'}
                                                 size="sm"
                                                 hideAccent={n.is_read}
                                             />

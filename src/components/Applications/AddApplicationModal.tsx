@@ -78,7 +78,7 @@ export function AddApplicationModal({ isOpen, onClose }: AddApplicationModalProp
 
                 <form onSubmit={handleSubmit} className="p-4 space-y-4">
                     <div>
-                        <label className="text-xs font-bold uppercase muted block mb-1">Role</label>
+                        <label className="text-xs font-bold muted block mb-1">Role</label>
                         <input
                             required
                             className="w-full bg-surface-input border border-border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition-all"
@@ -88,7 +88,7 @@ export function AddApplicationModal({ isOpen, onClose }: AddApplicationModalProp
                         />
                     </div>
                     <div>
-                        <label className="text-xs font-bold uppercase muted block mb-1">Company</label>
+                        <label className="text-xs font-bold muted block mb-1">Company</label>
                         <input
                             required
                             className="w-full bg-surface-input border border-border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition-all"
@@ -100,7 +100,7 @@ export function AddApplicationModal({ isOpen, onClose }: AddApplicationModalProp
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="text-xs font-bold uppercase muted block mb-1">Location</label>
+                            <label className="text-xs font-bold muted block mb-1">Location</label>
                             <input
                                 className="w-full bg-surface-input border border-border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition-all"
                                 value={formData.location}
@@ -109,7 +109,7 @@ export function AddApplicationModal({ isOpen, onClose }: AddApplicationModalProp
                             />
                         </div>
                         <div>
-                            <label className="text-xs font-bold uppercase muted block mb-1">Date Applied</label>
+                            <label className="text-xs font-bold muted block mb-1">Date Applied</label>
                             <input
                                 type="date"
                                 required
@@ -121,7 +121,7 @@ export function AddApplicationModal({ isOpen, onClose }: AddApplicationModalProp
                     </div>
 
                     <div className="pt-2">
-                        <label className="text-xs font-bold uppercase muted block mb-1">Resume Used</label>
+                        <label className="text-xs font-bold muted block mb-1">Resume Used</label>
                         <select
                             className="w-full bg-surface-input border border-border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition-all"
                             value={formData.resume_id}

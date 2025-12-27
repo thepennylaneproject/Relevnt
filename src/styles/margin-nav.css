@@ -66,7 +66,6 @@
   text-decoration: none;
   font-family: var(--font-display);
   font-size: 9px;
-  text-transform: uppercase;
   letter-spacing: 0.08em;
   padding: 12px 10px;
   border-radius: var(--radius-lg);
@@ -174,11 +173,10 @@
   width: 100%;
 }
 
-/* Settings separator at bottom */
+/* Settings at bottom with no separator */
 .margin-nav__settings {
   margin-top: auto;
   padding-top: 16px;
-  border-top: 1px solid var(--color-graphite-faint);
 }
 
 /* ============================================================================

@@ -34,8 +34,7 @@
 .overall-score-large .label,
 .seniority-badge .label {
     font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.05em;
     font-weight: 700;
     color: var(--color-text-secondary);
     margin-bottom: 0.75rem;
@@ -53,8 +52,7 @@
     font-family: var(--font-display);
     font-size: 1.5rem;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.02em;
     color: var(--color-text-primary);
 }
 
@@ -98,8 +96,7 @@
 .metric-label {
     font-size: 0.75rem;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.04em;
     color: var(--color-text-secondary);
     display: block;
     margin-bottom: 0.75rem;
@@ -137,8 +134,7 @@
     font-family: var(--font-serif);
     font-size: 1.25rem;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.04em;
     margin-bottom: 2rem;
     color: var(--color-accent-primary);
     border-bottom: 1px solid var(--color-border);
@@ -186,7 +182,6 @@
 .portfolio-suggestion-card .category {
     font-size: 0.65rem;
     font-weight: 800;
-    text-transform: uppercase;
     background: rgba(212, 165, 116, 0.1);
     color: var(--color-accent-primary);
     padding: 2px 8px;
@@ -196,7 +191,6 @@
 .portfolio-suggestion-card .impact-tag {
     font-size: 0.65rem;
     font-weight: 700;
-    text-transform: uppercase;
     color: var(--color-text-secondary);
     letter-spacing: 0.05em;
 }
@@ -234,8 +228,7 @@
 
 .portfolio-optimizer__tagline h2 {
     font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.1em;
     margin-bottom: 1.5rem;
     color: var(--color-text-secondary);
 }

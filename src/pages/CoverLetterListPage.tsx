@@ -34,7 +34,7 @@ export default function CoverLetterListPage({ embedded = false }: { embedded?: b
                             <div className="card-header">
                                 <h3 className="text-sm font-semibold truncate pr-4">{letter.title}</h3>
                                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                    <span className="text-[10px] muted uppercase font-bold">{letter.company_name || 'General'}</span>
+
                                     <span className="meta">
                                         {new Date(letter.created_at).toLocaleDateString()}
                                     </span>

@@ -44,7 +44,7 @@ export function SkillsTrajectoryCard() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* IN-DEMAND SKILLS */}
                 <div>
-                    <h3 className="text-xs font-bold uppercase tracking-wider muted mb-4">Top Skills in Demand</h3>
+                    <h3 className="text-xs font-bold tracking-wider muted mb-4">Top Skills in Demand</h3>
                     <div className="space-y-4">
                         {topSkills.slice(0, 5).map((item) => (
                             <div key={item.skill} className="group">
@@ -65,7 +65,7 @@ export function SkillsTrajectoryCard() {
 
                 {/* SKILL GAPS */}
                 <div>
-                    <h3 className="text-xs font-bold uppercase tracking-wider muted mb-4">Trending Gaps</h3>
+                    <h3 className="text-xs font-bold tracking-wider muted mb-4">Trending Gaps</h3>
                     <div className="space-y-3">
                         {skillGaps.length > 0 ? (
                             skillGaps.map((item) => (

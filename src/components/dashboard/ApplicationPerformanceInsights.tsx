@@ -44,7 +44,7 @@ export function ApplicationPerformanceInsights() {
                 {/* TOP PERFORMER */}
                 <div className="p-4 bg-accent/5 rounded-xl border border-accent/20">
                     <div className="flex justify-between items-start mb-2">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-accent">Top Performing Version</span>
+                        <span className="text-[10px] font-bold tracking-wider text-accent">Top Performing Version</span>
                         <span className="text-xs font-bold text-accent">
                             {topPerformer.interviewRate}% Interview Rate
                         </span>
@@ -59,7 +59,7 @@ export function ApplicationPerformanceInsights() {
                 {/* COMPARISON */}
                 {others.length > 0 && (
                     <div className="space-y-4">
-                        <h3 className="text-xs font-bold uppercase tracking-wider muted">Other Versions</h3>
+                        <h3 className="text-xs font-bold tracking-wider muted">Other Versions</h3>
                         {others.slice(0, 2).map((item) => {
                             const diff = topPerformer.interviewRate - item.interviewRate
                             return (

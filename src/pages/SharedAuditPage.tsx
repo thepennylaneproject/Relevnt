@@ -145,7 +145,7 @@ function LinkedInResults({ results }: { results: LinkedInAnalysis }) {
                     <div className="space-y-6">
                         {results.suggestions.map((s, i) => (
                             <div key={i} className="border-l-4 border-amber-500/30 pl-4 py-1">
-                                <div className="text-xs font-bold text-amber-500 uppercase tracking-wider mb-1">
+                                <div className="text-xs font-bold text-amber-500 tracking-wider mb-1">
                                     {s.section}
                                 </div>
                                 <p className="font-bold text-lg mb-1">{s.improvement}</p>
@@ -183,11 +183,11 @@ function PortfolioResults({ results }: { results: PortfolioAnalysis }) {
         <div className="portfolio-optimizer__results">
             <div className="flex flex-col md:flex-row gap-6 mb-8">
                 <div className="flex-1 surface-card p-8 text-center bg-accent-soft/10">
-                    <span className="text-sm muted uppercase tracking-widest font-bold">Overall Impact</span>
+                    <span className="text-sm muted tracking-widest font-bold">Overall Impact</span>
                     <div className="text-6xl font-display text-accent mt-2">{results.overall_score}</div>
                 </div>
                 <div className="flex-1 surface-card p-8 text-center">
-                    <span className="text-sm muted uppercase tracking-widest font-bold">Perceived Seniority</span>
+                    <span className="text-sm muted tracking-widest font-bold">Perceived Seniority</span>
                     <div className="text-4xl font-display mt-4">{results.perceived_seniority}</div>
                 </div>
             </div>
@@ -208,8 +208,8 @@ function PortfolioResults({ results }: { results: PortfolioAnalysis }) {
                             'border-slate-500 bg-slate-500/5'
                         }`}>
                             <div className="flex justify-between items-center mb-1">
-                                <span className="text-xs font-bold uppercase tracking-wider">{s.category}</span>
-                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-black/10 font-bold uppercase">
+                                <span className="text-xs font-bold tracking-wider">{s.category}</span>
+                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-black/10 font-bold">
                                     {s.impact} Impact
                                 </span>
                             </div>
@@ -233,7 +233,7 @@ function ScoreCard({ label, score }: { label: string, score: number }) {
     return (
         <div className="surface-card p-4 text-center">
             <div className={`text-3xl font-display ${getScoreColor(score)}`}>{score}</div>
-            <div className="text-xs muted font-bold uppercase mt-1">{label}</div>
+            <div className="text-xs muted font-bold mt-1">{label}</div>
             <div className="h-1.5 bg-border-subtle rounded-full mt-3 overflow-hidden">
                 <div 
                     className={`h-full opacity-50 ${
@@ -252,7 +252,7 @@ function MetricBox({ label, score, icon }: { label: string, score: number, icon:
             <Icon name={icon} size="sm" className="text-accent" />
             <div className="flex-1">
                 <div className="flex justify-between items-center mb-1">
-                    <span className="text-xs font-bold uppercase tracking-wider">{label}</span>
+                    <span className="text-xs font-bold tracking-wider">{label}</span>
                     <span className="text-sm font-bold">{score}</span>
                 </div>
                 <div className="h-1 bg-border-subtle rounded-full overflow-hidden">
