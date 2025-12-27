@@ -117,8 +117,8 @@ export function useRelevntColors(): RelevntColors {
       status,
 
       // Brand accent
-      accent: '#D4A574',
-      accentHover: '#B89558',
+      accent: colors.primary,
+      accentHover: colors.primaryHover,
     };
   }, [colors, isDark]);
 }

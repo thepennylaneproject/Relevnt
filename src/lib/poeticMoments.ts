@@ -9,6 +9,8 @@
  * - Oliver: Self-trust, wonder, discovery
  * - Hughes: Aspiration, persistence, hope
  * - Dickinson: Quiet persistence, small victories
+ * - Lorde: Visibility, authenticity, refusal to disappear
+ * - Giovanni: Confidence, pride, celebratory power
  */
 
 export type PoeticMoment =
@@ -26,8 +28,19 @@ export type PoeticMoment =
   | 'feature-discovery'
   | 'offer-negotiation'
   | 'career-pivot'
+  | 'authenticity'
+  | 'confidence-boost'
 
-export type PoetName = 'Poe' | 'Frost' | 'Shakespeare' | 'Angelou' | 'Oliver' | 'Hughes' | 'Dickinson'
+export type PoetName =
+  | 'Poe'
+  | 'Frost'
+  | 'Shakespeare'
+  | 'Angelou'
+  | 'Oliver'
+  | 'Hughes'
+  | 'Dickinson'
+  | 'Lorde'
+  | 'Giovanni'
 
 export interface PoeticVerse {
   moment: PoeticMoment
@@ -64,6 +77,24 @@ export const poeticMoments: Record<PoeticMoment, PoeticVerse> = {
     attribution: 'Still I Rise — Maya Angelou',
     reflection: 'Changing paths requires a profound act of rising. Do not apologize for your evolution.',
     tone: 'resilient',
+  },
+
+  'authenticity': {
+    moment: 'authenticity',
+    poet: 'Lorde',
+    verse: 'And when we speak we are afraid\nour words will not be heard\nnor welcomed—but when we are silent\nwe are still afraid.\nSo it is better to speak\nremembering\nwe were never meant to survive.',
+    attribution: 'A Litany for Survival — Audre Lorde',
+    reflection: 'Your voice is not a risk; it is a right. Showing up as yourself is the strategy, not the gamble.',
+    tone: 'resilient',
+  },
+
+  'confidence-boost': {
+    moment: 'confidence-boost',
+    poet: 'Giovanni',
+    verse: 'I sat on the throne\ndrinking nectar with Allah\nI got hot and sent an ice age to Europe\nto cool my thirst.',
+    attribution: 'Ego Tripping — Nikki Giovanni',
+    reflection: 'Before you walk in, remember the room needs your energy. Let your worth take up space.',
+    tone: 'bold',
   },
 
   'interview-prep': {
