@@ -75,12 +75,12 @@
   --terracotta-100: #f5e5dc;   /* Barely there tint */
 
   /* ─────────────────────────────────────────────────────────────────────────
-     SAGE GREEN — Dark Mode Accent
-     Growth, calm, sophisticated complement to ink
+     SAGE GREEN — Supporting Accent
+     Growth, calm, sophisticated complement to terracotta
      ───────────────────────────────────────────────────────────────────────── */
 
   --sage-600: #3d5a4c;         /* Darker hover state */
-  --sage-500: #5c7a6a;         /* Primary accent (dark mode) */
+  --sage-500: #5c7a6a;         /* Support accent */
   --sage-400: #7a9a8a;         /* Lighter variant */
   --sage-300: #a8c4b4;         /* Soft backgrounds */
   --sage-200: #d4e5dc;         /* Very soft tint */
@@ -115,6 +115,8 @@
   --color-accent-hover: var(--terracotta-600);
   --color-accent-glow: rgba(160, 113, 92, 0.15);
   --color-accent-soft: var(--terracotta-100);
+  --color-support: var(--sage-500);
+  --color-support-hover: var(--sage-600);
 
   /* Semantic Status Colors (monochrome-friendly) */
   --color-success: #5c7a6a;           /* Muted sage */
@@ -270,11 +272,13 @@
     --color-graphite-light: var(--ivory-500);
     --color-graphite-faint: #3a3a3a;
 
-    /* Sage green accent for dark mode personality */
-    --color-accent: var(--sage-400);
-    --color-accent-hover: var(--sage-300);
-    --color-accent-glow: rgba(122, 154, 138, 0.25);
-    --color-accent-soft: rgba(92, 122, 106, 0.15);
+    /* Terracotta primary accent, sage support */
+    --color-accent: var(--terracotta-400);
+    --color-accent-hover: var(--terracotta-500);
+    --color-accent-glow: rgba(184, 138, 118, 0.25);
+    --color-accent-soft: rgba(184, 138, 118, 0.15);
+    --color-support: var(--sage-400);
+    --color-support-hover: var(--sage-500);
 
     /* Semantic status colors (dark mode variants) */
     --color-success: var(--sage-400);
@@ -283,8 +287,8 @@
     /* Borders with subtle visibility */
     --border-default: 1px solid #3a3a3a;
     --border-strong: 1px solid #4a4a4a;
-    --border-accent: 2px solid var(--sage-400);
-    --border-accent-soft: 1px solid var(--sage-500);
+    --border-accent: 2px solid var(--color-accent);
+    --border-accent-soft: 1px solid var(--color-support);
 
     /* Deeper shadows for true dark */
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
@@ -318,11 +322,13 @@
   --color-graphite-light: var(--ivory-500);
   --color-graphite-faint: #3a3a3a;
 
-  /* Sage green accent */
-  --color-accent: var(--sage-400);
-  --color-accent-hover: var(--sage-300);
-  --color-accent-glow: rgba(122, 154, 138, 0.25);
-  --color-accent-soft: rgba(92, 122, 106, 0.15);
+  /* Terracotta primary accent, sage support */
+  --color-accent: var(--terracotta-400);
+  --color-accent-hover: var(--terracotta-500);
+  --color-accent-glow: rgba(184, 138, 118, 0.25);
+  --color-accent-soft: rgba(184, 138, 118, 0.15);
+  --color-support: var(--sage-400);
+  --color-support-hover: var(--sage-500);
 
   /* Status colors */
   --color-success: var(--sage-400);
@@ -331,8 +337,8 @@
   /* Borders */
   --border-default: 1px solid #3a3a3a;
   --border-strong: 1px solid #4a4a4a;
-  --border-accent: 2px solid var(--sage-400);
-  --border-accent-soft: 1px solid var(--sage-500);
+  --border-accent: 2px solid var(--color-accent);
+  --border-accent-soft: 1px solid var(--color-support);
 
   /* Shadows */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
