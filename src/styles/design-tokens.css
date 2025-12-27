@@ -191,10 +191,23 @@
   --space-20: 80px;
   --space-24: 96px;
 
-  /* Semantic Layout Spacing */
-  --layout-gap-hero: var(--space-8);
-  --layout-gap-section: var(--space-6);
-  --layout-gap-elements: var(--space-4);
+  /* Semantic Layout Spacing — Golden Ratio Aligned */
+  /* Component internal spacing */
+  --space-component-inner: var(--space-4); /* 16px — internal padding */
+  --space-component-pad: var(--space-6); /* 24px — standard padding */
+
+  /* Gap between elements */
+  --space-element-gap: var(--space-4); /* 16px — items in a row */
+  --space-row-gap: var(--space-6); /* 24px — gaps between rows */
+
+  /* Major section spacing (golden ratio proportions) */
+  --space-section-gap: var(--space-10); /* 40px — between sections (16 × φ ≈ 26, use 24 or 40) */
+  --space-section-gap-large: var(--space-16); /* 64px — major section breaks */
+
+  /* Legacy semantic spacing (maintained for compatibility) */
+  --layout-gap-hero: var(--space-8); /* 32px */
+  --layout-gap-section: var(--space-6); /* 24px */
+  --layout-gap-elements: var(--space-4); /* 16px */
 
   /* ─────────────────────────────────────────────────────────────────────────
      BORDERS & SHADOWS

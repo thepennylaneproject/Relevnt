@@ -39,8 +39,6 @@ export type IconName =
   // Accents
   | 'key'
   | 'stars'
-  | 'lighthouse'
-  | 'anchor'
   | 'check'
   | 'search'
   | 'alert-triangle'
@@ -312,44 +310,6 @@ const iconDefinitions: Record<IconName, IconDefinition> = {
     dotPosition: { cx: 32, cy: 20 },
   },
 
-  lighthouse: {
-    paths: [
-      // Tower body (tapered)
-      'M24 52l4-36h8l4 36',
-      // Top platform
-      'M20 52h24',
-      // Light housing
-      'M26 16h12v-8H26z',
-      // Dome
-      'M28 8h8a4 4 0 0 0-8 0z',
-      // Light beams
-      'M16 12l8 2M48 12l-8 2M32 4v4',
-      // Windows
-      'M30 24h4M30 34h4M30 44h4',
-      // Base rocks
-      'M16 52c0 4 6 6 16 6s16-2 16-6',
-    ],
-    dotPosition: { cx: 32, cy: 12 },
-  },
-
-  anchor: {
-    paths: [
-      // Ring at top
-      'M32 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z',
-      // Shank (vertical bar)
-      'M32 16v32',
-      // Stock (horizontal bar at top)
-      'M24 20h16',
-      // Arms/flukes
-      'M32 48c-12 0-20-8-20-16M32 48c12 0 20-8 20-16',
-      // Fluke tips
-      'M14 36l-4-4M50 36l4-4',
-      // Crown
-      'M28 48h8',
-    ],
-    dotPosition: { cx: 32, cy: 12 },
-  },
-
   check: {
     paths: [
       'M14 32l12 12 24-24',
@@ -549,8 +509,6 @@ export const STATE_ICONS: IconName[] = [
 export const ACCENT_ICONS: IconName[] = [
   'key',
   'stars',
-  'lighthouse',
-  'anchor',
 ];
 
 export default Icon;

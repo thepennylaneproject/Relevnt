@@ -1,0 +1,53 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   VERSE CONTAINER STYLES
+   ═══════════════════════════════════════════════════════════════════════════
+
+   Poetic framing for hero moments in the dashboard.
+   Provides emotional resonance and acknowledges the human journey.
+*/
+
+.verse-container {
+  /* Layout */
+  padding: var(--space-component-pad) 0; /* 24px vertical, no horizontal */
+  margin: 0 auto;
+  margin-bottom: var(--space-section-gap); /* 40px below hero section */
+
+  /* Typography — Poetic */
+  font-family: var(--font-serif-poetic); /* Crimson Text */
+  font-size: 1rem;
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.8;
+  letter-spacing: 0.02em;
+
+  /* Color — Secondary, not dominant */
+  color: var(--color-ink-secondary);
+
+  /* Alignment */
+  text-align: center;
+  max-width: 40rem;
+
+  /* Responsiveness */
+  @media (max-width: 768px) {
+    font-size: 0.875rem;
+    padding: var(--space-component-inner) 0; /* 16px vertical */
+    margin-bottom: var(--space-section-gap); /* 40px */
+  }
+}
+
+/* White space handling — don't add extra margins to paragraph content */
+.verse-container p {
+  margin: 0;
+}
+
+.verse-container strong {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+/* Optional: Can use line breaks or explicit line structure in markup */
+.verse-container br {
+  content: '';
+  display: block;
+  height: var(--space-sm); /* 8px between lines for visual breathing */
+}
