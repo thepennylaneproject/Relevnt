@@ -1,88 +1,22 @@
-/* ============================================================================
-   RELEVNT DESIGN SYSTEM — INK & IVORY
-   Single source of truth for all styling and theme tokens
-   ============================================================================ */
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * RELEVNT APPLICATION ROOT STYLES
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * This file provides application-specific styles and third-party integrations.
+ *
+ * ⚠️ ALL STYLING is now defined in: src/styles/global.css
+ *
+ * To modify colors, typography, spacing, components, or tokens:
+ *   → Edit src/styles/global.css
+ *
+ * That file is the SINGLE SOURCE OF TRUTH for all design.
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
 
-/* Import design tokens and texture system */
-@import "./styles/design-tokens.css";
-@import "./styles/textures.css";
-@import "./styles/settings-hub.css";
-@import "./styles/jobs.css";
-
-/* Fonts are imported in design-tokens.css (Bebas Neue, Lora, Crimson Text, JetBrains Mono) */
-
-/* ============================================================================
-   LEGACY THEME TOKENS (for backward compatibility)
-   These map to the new design token system
-   ============================================================================ */
-
-:root {
-  /* Legacy font mappings */
-  --font-sans: var(--font-body);
-  --font-serif: var(--font-display);
-
-  /* Legacy background mapping */
-  --bg: var(--color-bg);
-
-  /* Legacy surface mappings */
-  --surface: var(--color-surface);
-  --surface-soft: var(--color-bg-alt);
-  --surface-elevated: var(--color-bg-alt);
-
-  /* Legacy text mappings */
-  --text: var(--color-ink);
-  --text-muted: var(--color-ink-secondary);
-  --text-subtle: var(--color-ink-tertiary);
-  --ink: var(--color-ink);
-  --muted: var(--color-ink-secondary);
-
-  /* Legacy accent mappings */
-  --accent-soft: var(--color-accent-glow);
-  --accent-dot: var(--color-accent);
-
-  /* Legacy danger mappings */
-  --danger: var(--color-error);
-  --danger-soft: var(--color-error-bg);
-
-  /* Legacy border mappings */
-  --border: var(--color-graphite-faint);
-  --border-subtle: var(--color-graphite-faint);
-  --border-strong: var(--color-graphite-light);
-
-  /* Legacy shadow mappings */
-  --shadow-soft: var(--shadow-sm);
-  --shadow-card: var(--shadow-md);
-  --shadow-hover: var(--shadow-lg);
-
-  /* Legacy focus ring */
-  --focus-ring: var(--color-focus-ring);
-
-  /* Legacy radius (keep as-is, already defined in tokens) */
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-
-  --stack-page: 32px;
-  --stack-section: 24px;
-  --stack-tight: 16px;
-}
-
-/* ============================================================================
-   BASE STYLES
-   ============================================================================ */
-
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
-  font-family: var(--font-sans);
-  color: var(--text);
-  background: var(--bg);
-}
-
-* {
-  box-sizing: border-box;
-}
+/* Import the unified global design system */
+@import "./styles/global.css";
 
 /* ============================================================================
    TYPOGRAPHY — INK & IVORY
