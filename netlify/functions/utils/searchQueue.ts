@@ -127,6 +127,7 @@ export async function seedDefaultSearches(
     }
 
     const defaultSearches = [
+        // Marketing & Social Media
         { keywords: 'social media marketing', location: 'remote' },
         { keywords: 'content strategy', location: 'remote' },
         { keywords: 'marketing manager', location: 'US' },
@@ -137,9 +138,109 @@ export async function seedDefaultSearches(
         { keywords: 'copywriter', location: 'remote' },
         { keywords: 'marketing director', location: 'US' },
         { keywords: 'creative director', location: 'remote' },
+        { keywords: 'SEO specialist', location: 'remote' },
+        { keywords: 'email marketing', location: 'US' },
+        { keywords: 'influencer marketing', location: 'remote' },
+        { keywords: 'content creator', location: 'remote' },
+        { keywords: 'brand manager', location: 'US' },
+        { keywords: 'communications manager', location: 'US' },
+        { keywords: 'public relations', location: 'remote' },
+        
+        // Creative & Design
+        { keywords: 'graphic designer', location: 'remote' },
+        { keywords: 'UI/UX designer', location: 'remote' },
+        { keywords: 'video editor', location: 'remote' },
+        { keywords: 'motion graphics', location: 'remote' },
+        { keywords: 'photographer', location: 'US' },
+        { keywords: 'art director', location: 'US' },
+        { keywords: 'illustrator', location: 'remote' },
+        
+        // Beauty & Cosmetology
+        { keywords: 'cosmetology instructor', location: 'US' },
+        { keywords: 'beauty school', location: 'US' },
+        { keywords: 'esthetician', location: 'US' },
+        { keywords: 'beauty educator', location: 'US' },
+        { keywords: 'salon manager', location: 'US' },
+        { keywords: 'hair stylist', location: 'US' },
+        { keywords: 'makeup artist', location: 'US' },
+        { keywords: 'nail technician', location: 'US' },
+        { keywords: 'spa manager', location: 'US' },
+        { keywords: 'beauty consultant', location: 'US' },
+        
+        // Healthcare
+        { keywords: 'registered nurse', location: 'US' },
+        { keywords: 'healthcare administrator', location: 'US' },
+        { keywords: 'medical assistant', location: 'US' },
+        { keywords: 'physical therapist', location: 'US' },
+        { keywords: 'mental health counselor', location: 'remote' },
+        { keywords: 'pharmacy technician', location: 'US' },
+        
+        // Education
+        { keywords: 'teacher', location: 'US' },
+        { keywords: 'instructional designer', location: 'remote' },
+        { keywords: 'curriculum developer', location: 'remote' },
+        { keywords: 'academic advisor', location: 'US' },
+        { keywords: 'education coordinator', location: 'US' },
+        { keywords: 'training specialist', location: 'remote' },
+        
+        // Tech (diverse roles, not just engineering)
+        { keywords: 'software engineer', location: 'remote' },
+        { keywords: 'data analyst', location: 'remote' },
+        { keywords: 'product manager', location: 'remote' },
+        { keywords: 'project manager', location: 'remote' },
+        { keywords: 'scrum master', location: 'remote' },
+        { keywords: 'technical writer', location: 'remote' },
+        { keywords: 'QA engineer', location: 'remote' },
+        { keywords: 'devops engineer', location: 'remote' },
+        { keywords: 'cybersecurity analyst', location: 'remote' },
+        { keywords: 'customer success', location: 'remote' },
+        { keywords: 'sales engineer', location: 'US' },
+        
+        // Business & Finance
+        { keywords: 'accountant', location: 'US' },
+        { keywords: 'financial analyst', location: 'remote' },
+        { keywords: 'business analyst', location: 'remote' },
+        { keywords: 'human resources', location: 'US' },
+        { keywords: 'recruiter', location: 'remote' },
+        { keywords: 'operations manager', location: 'US' },
+        { keywords: 'executive assistant', location: 'remote' },
+        { keywords: 'office manager', location: 'US' },
+        
+        // Hospitality & Retail
+        { keywords: 'hotel manager', location: 'US' },
+        { keywords: 'restaurant manager', location: 'US' },
+        { keywords: 'event coordinator', location: 'US' },
+        { keywords: 'retail manager', location: 'US' },
+        { keywords: 'customer service', location: 'remote' },
+        
+        // Trades & Skilled Labor
+        { keywords: 'electrician', location: 'US' },
+        { keywords: 'plumber', location: 'US' },
+        { keywords: 'HVAC technician', location: 'US' },
+        { keywords: 'maintenance technician', location: 'US' },
+        { keywords: 'automotive technician', location: 'US' },
+        
+        // Remote-first general
+        { keywords: 'work from home', location: 'remote' },
+        { keywords: 'remote', location: 'remote' },
+        { keywords: 'hybrid', location: 'US' },
     ]
 
-    const sources = ['careerjet', 'remoteok', 'remotive', 'himalayas', 'jobicy']
+    // All sources that support keyword-based searches
+    const sources = [
+        'jooble',       // Global aggregator with POST search
+        'reed_uk',      // UK jobs with keyword search
+        'careerjet',    // Global aggregator
+        'remoteok',     // Remote jobs
+        'remotive',     // Remote jobs
+        'himalayas',    // Remote jobs
+        'jobicy',       // Remote jobs
+        'arbeitnow',    // European jobs
+        'themuse',      // US jobs
+        'adzuna_us',    // US aggregator
+        'usajobs',      // Federal jobs
+        'careeronestop', // US government aggregator
+    ]
 
     const tasks: Partial<SearchTask>[] = []
 
@@ -154,6 +255,7 @@ export async function seedDefaultSearches(
             })
         }
     }
+
 
     const { error } = await supabase
         .from('search_queue')
@@ -188,7 +290,11 @@ export async function seedFromUserInterests(
         return 0
     }
 
-    const sources = ['careerjet', 'remoteok', 'remotive', 'himalayas']
+    const sources = [
+        'jooble', 'reed_uk', 'careerjet', 'remoteok', 'remotive',
+        'himalayas', 'jobicy', 'arbeitnow', 'themuse', 'adzuna_us',
+        'usajobs', 'careeronestop'
+    ]
     const tasks: any[] = []
 
     for (const interest of interests) {

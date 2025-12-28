@@ -1334,5 +1334,153 @@
   {
     "companyName": "Icarus",
     "boardToken": "icarus"
+  },
+  {
+    "companyName": "HubSpot",
+    "boardToken": "hubspot"
+  },
+  {
+    "companyName": "Hootsuite",
+    "boardToken": "hootsuite"
+  },
+  {
+    "companyName": "Mailchimp",
+    "boardToken": "mailchimp"
+  },
+  {
+    "companyName": "Sprout Social",
+    "boardToken": "sproutsocial"
+  },
+  {
+    "companyName": "Buffer",
+    "boardToken": "buffer"
+  },
+  {
+    "companyName": "Canva",
+    "boardToken": "canva"
+  },
+  {
+    "companyName": "Later",
+    "boardToken": "latermedia"
+  },
+  {
+    "companyName": "Buzzfeed",
+    "boardToken": "buzzfeed"
+  },
+  {
+    "companyName": "Vox Media",
+    "boardToken": "voxmedia"
+  },
+  {
+    "companyName": "Vice Media",
+    "boardToken": "vice"
+  },
+  {
+    "companyName": "The Atlantic",
+    "boardToken": "theatlantic"
+  },
+  {
+    "companyName": "Condé Nast",
+    "boardToken": "condenast"
+  },
+  {
+    "companyName": "Shutterstock",
+    "boardToken": "shutterstock"
+  },
+  {
+    "companyName": "Squarespace",
+    "boardToken": "squarespace"
+  },
+  {
+    "companyName": "Wix",
+    "boardToken": "wix"
+  },
+  {
+    "companyName": "Adobe",
+    "boardToken": "adobe"
+  },
+  {
+    "companyName": "Figma",
+    "boardToken": "figma"
+  },
+  {
+    "companyName": "InVision",
+    "boardToken": "invision"
+  },
+  {
+    "companyName": "Dribbble",
+    "boardToken": "dribbble"
+  },
+  {
+    "companyName": "Behance",
+    "boardToken": "behance"
+  },
+  {
+    "companyName": "Gartner",
+    "boardToken": "gartner"
+  },
+  {
+    "companyName": "Nielsen",
+    "boardToken": "nielsen"
+  },
+  {
+    "companyName": "Ipsos",
+    "boardToken": "ipsos"
+  },
+  {
+    "companyName": "Edelman",
+    "boardToken": "edelman"
+  },
+  {
+    "companyName": "Ogilvy",
+    "boardToken": "ogilvy"
+  },
+  {
+    "companyName": "TBWA",
+    "boardToken": "tbwa"
+  },
+  {
+    "companyName": "Leo Burnett",
+    "boardToken": "leoburnett"
+  },
+  {
+    "companyName": "Dentsu",
+    "boardToken": "dentsu"
+  },
+  {
+    "companyName": "Publicis",
+    "boardToken": "publicis"
+  },
+  {
+    "companyName": "WPP",
+    "boardToken": "wpp"
+  },
+  {
+    "companyName": "IPG",
+    "boardToken": "interpublicgroup"
+  },
+  {
+    "companyName": "Sephora",
+    "boardToken": "sephora"
+  },
+  {
+    "companyName": "Ulta Beauty",
+    "boardToken": "ultabeauty"
+  },
+  {
+    "companyName": "L'Oréal",
+    "boardToken": "loreal"
+  },
+  {
+    "companyName": "Estée Lauder",
+    "boardToken": "elcompanies"
+  },
+  {
+    "companyName": "Glossier",
+    "boardToken": "glossier"
+  },
+  {
+    "companyName": "Fenty Beauty",
+    "boardToken": "fenty"
   }
 ]

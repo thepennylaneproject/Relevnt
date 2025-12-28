@@ -47,5 +47,33 @@
         "defaultCompany": "HubSpot",
         "defaultLocation": null,
         "trustLevel": "high"
+    },
+    {
+        "name": "Mediabistro",
+        "feedUrl": "https://www.mediabistro.com/rss-feeds/",
+        "defaultCompany": "Various",
+        "defaultLocation": "US",
+        "trustLevel": "medium"
+    },
+    {
+        "name": "Built In Marketing",
+        "feedUrl": "https://builtin.com/jobs/marketing/feed",
+        "defaultCompany": "Various",
+        "defaultLocation": "US",
+        "trustLevel": "high"
+    },
+    {
+        "name": "Marketing Jobs",
+        "feedUrl": "https://www.marketingjobs.com/feed/",
+        "defaultCompany": "Various",
+        "defaultLocation": "US",
+        "trustLevel": "medium"
+    },
+    {
+        "name": "Content Marketing Institute",
+        "feedUrl": "https://contentmarketinginstitute.com/jobs/feed/",
+        "defaultCompany": "Various",
+        "defaultLocation": "Remote",
+        "trustLevel": "medium"
     }
 ]

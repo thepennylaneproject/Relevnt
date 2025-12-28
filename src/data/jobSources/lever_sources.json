@@ -646,5 +646,129 @@
   {
     "companyName": "Poll Everywhere",
     "leverSlug": "polleverywhere"
+  },
+  {
+    "companyName": "VaynerMedia",
+    "leverSlug": "vaynermedia"
+  },
+  {
+    "companyName": "Mediavine",
+    "leverSlug": "mediavine"
+  },
+  {
+    "companyName": "The Knot Worldwide",
+    "leverSlug": "theknotww"
+  },
+  {
+    "companyName": "Wpromote",
+    "leverSlug": "wpromote"
+  },
+  {
+    "companyName": "Meltwater",
+    "leverSlug": "meltwater"
+  },
+  {
+    "companyName": "Cision",
+    "leverSlug": "cision"
+  },
+  {
+    "companyName": "Sprinklr",
+    "leverSlug": "sprinklr"
+  },
+  {
+    "companyName": "Brandwatch",
+    "leverSlug": "brandwatch"
+  },
+  {
+    "companyName": "Mention",
+    "leverSlug": "mention"
+  },
+  {
+    "companyName": "Semrush",
+    "leverSlug": "semrush"
+  },
+  {
+    "companyName": "Ahrefs",
+    "leverSlug": "ahrefs"
+  },
+  {
+    "companyName": "Moz",
+    "leverSlug": "moz"
+  },
+  {
+    "companyName": "BrightEdge",
+    "leverSlug": "brightedge"
+  },
+  {
+    "companyName": "Conductor",
+    "leverSlug": "conductor"
+  },
+  {
+    "companyName": "Contently",
+    "leverSlug": "contently"
+  },
+  {
+    "companyName": "Percolate",
+    "leverSlug": "percolate"
+  },
+  {
+    "companyName": "NewsCred",
+    "leverSlug": "newscred"
+  },
+  {
+    "companyName": "Brafton",
+    "leverSlug": "brafton"
+  },
+  {
+    "companyName": "Skyword",
+    "leverSlug": "skyword"
+  },
+  {
+    "companyName": "CoSchedule",
+    "leverSlug": "coschedule"
+  },
+  {
+    "companyName": "Kapost",
+    "leverSlug": "kapost"
+  },
+  {
+    "companyName": "Curalate",
+    "leverSlug": "curalate"
+  },
+  {
+    "companyName": "Dash Hudson",
+    "leverSlug": "dashhudson"
+  },
+  {
+    "companyName": "Pixlee",
+    "leverSlug": "pixlee"
+  },
+  {
+    "companyName": "Stackla",
+    "leverSlug": "stackla"
+  },
+  {
+    "companyName": "GRIN",
+    "leverSlug": "grin"
+  },
+  {
+    "companyName": "AspireIQ",
+    "leverSlug": "aspireiq"
+  },
+  {
+    "companyName": "Creator.co",
+    "leverSlug": "creator"
+  },
+  {
+    "companyName": "Upfluence",
+    "leverSlug": "upfluence"
+  },
+  {
+    "companyName": "Traackr",
+    "leverSlug": "traackr"
+  },
+  {
+    "companyName": "Tagger Media",
+    "leverSlug": "taggermedia"
   }
 ]
