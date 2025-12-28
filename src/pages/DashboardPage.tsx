@@ -1,6 +1,7 @@
 import React from 'react'
 import { Navigate } from 'react-router-dom'
 import PageBackground from '../components/shared/PageBackground'
+import { IconName } from '../components/ui/Icon'
 import { Container } from '../components/shared/Container'
 import { useAuth } from '../contexts/AuthContext'
 import { useApplications } from '../hooks/useApplications'
@@ -139,7 +140,7 @@ export default function DashboardPage(): JSX.Element {
   }
 
   // Primary action (the focal point of the page)
-  const getPrimaryAction = () => {
+  const getPrimaryAction = (): { icon: IconName; heading: string; title: string; description: string; cta: string; ctaLink: string } => {
     switch (userState) {
       case UserState.ZERO_APPLICATIONS:
         return {
@@ -193,7 +194,7 @@ export default function DashboardPage(): JSX.Element {
   }
 
   // Supporting actions (what to do while waiting or in between)
-  const getSupportingActions = () => {
+  const getSupportingActions = (): { icon: IconName; title: string; description: string; cta: string; ctaLink: string }[] => {
     switch (userState) {
       case UserState.ZERO_APPLICATIONS:
         return [
@@ -269,7 +270,7 @@ export default function DashboardPage(): JSX.Element {
   }
 
   // Pipeline status items
-  const getPipelineItems = () => [
+  const getPipelineItems = (): { icon: IconName; label: string; value: number; subtext: string }[] => [
     {
       icon: 'seeds',
       label: 'Discovered',
@@ -341,49 +342,6 @@ export default function DashboardPage(): JSX.Element {
               {getHeroVerse()}
             </VerseContainer>
           </section>
-            <h1 className="font-serif">Clarity Hub</h1>
-            <p className={`hero-subhead ${wellnessMode === 'gentle' ? 'text-accent-primary' : ''}`}>
-              {guidance.greeting}
-            </p>
-
-            <div className="stats-grid">
-              <div className={`card card-stat ${activeApplications.length === 0 ? 'is-empty' : 'is-active'}`}>
-                <span className="stat-label">Active applications</span>
-                <span className="stat-value">{activeApplications.length}</span>
-                <span className="stat-description">Roles you're currently in process for</span>
-                {activeApplications.length === 0 && (
-                  <>
-                    <span className="stat-empty-help">You haven't started any applications yet.</span>
-                    <Link to="/jobs" className="btn btn-ghost btn-sm btn-with-icon">
-                      Find opportunities <Icon name="chevron-right" size="sm" />
-                    </Link>
-                  </>
-                )}
-              </div>
-
-              <div className={`card card-stat ${interviewingCount === 0 ? 'is-empty' : 'is-active'}`}>
-                <span className="stat-label">In interviews</span>
-                <span className="stat-value">{interviewingCount}</span>
-                <span className="stat-description">Active conversations with companies</span>
-                {interviewingCount === 0 && activeApplications.length > 0 && (
-                  <span className="stat-empty-help">Keep applying — interviews will come.</span>
-                )}
-              </div>
-
-              <div className={`card card-stat ${(saved || 0) === 0 ? 'is-empty' : 'is-active'}`}>
-                <span className="stat-label">Saved opportunities</span>
-                <span className="stat-value">{saved || 0}</span>
-                <span className="stat-description">Jobs you've bookmarked for later</span>
-                {(saved || 0) === 0 && (
-                  <>
-                    <span className="stat-empty-help">Save jobs you're interested in to review later.</span>
-                    <Link to="/jobs" className="btn btn-ghost btn-sm btn-with-icon">
-                      Browse jobs <Icon name="chevron-right" size="sm" />
-                    </Link>
-                  </>
-                )}
-              </div>
-            </div>
 
           {/* SECTION 2: PRIMARY ACTION — Focal Point */}
           <section className="dashboard-section">
@@ -430,46 +388,6 @@ export default function DashboardPage(): JSX.Element {
 
           {/* SECTION 4: HAIKU (optional, strategic) */}
           {getSupportingHaiku()}
-              {activeTab === 'triage' ? (
-                <div className="triage-grid animate-in fade-in slide-in-from-bottom-4">
-                  {triageLoading ? (
-                    <p className="muted p-8">Loading your next steps...</p>
-                  ) : actions.length === 0 ? (
-                    <div className="all-clear">
-                      <Icon name="flower" size="lg" />
-                      <h3>All clear for now</h3>
-                      <p>You're up to date on all your high-priority actions. Nice work.</p>
-                      <p className="haiku text-sm italic text-muted mt-4 leading-relaxed">
-                        {getHaiku('resting').lines.join(' / ')}
-                      </p>
-                      <Link to="/jobs" className="ghost-button mt-4">Find new opportunities</Link>
-                    </div>
-                  ) : (
-                    actions.map(renderTriageCard)
-                  )}
-                </div>
-              ) : (
-                <div className="pipeline-view animate-in fade-in slide-in-from-bottom-4 space-y-8">
-                  <div className="p-6 surface-card rounded-2xl">
-                    <h2 className="section-title">Your funnel</h2>
-                    <div className="funnel-container">
-                      <div className="funnel-stage">
-                        <div className="stage-bar" style={{ height: '100%', opacity: 0.9 }}>
-                          <span>Discovered: {total || 0}</span>
-                        </div>
-                      </div>
-                      <div className="funnel-stage">
-                        <div className="stage-bar" style={{ height: '70%', opacity: 0.7 }}>
-                          <span>Applied: {applications.filter(a => a.status === 'applied').length}</span>
-                        </div>
-                      </div>
-                      <div className="funnel-stage">
-                        <div className="stage-bar" style={{ height: '40%', opacity: 0.5 }}>
-                          <span>Interviews: {interviewingCount}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
 
           {/* SECTION 5: PIPELINE STATUS — Informational */}
           <section className="dashboard-section">
