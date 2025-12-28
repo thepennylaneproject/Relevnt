@@ -435,22 +435,72 @@ body {
    SECTION 5: TYPOGRAPHY CLASSES
    ════════════════════════════════════════════════════════════════════════════ */
 
-/* Display Headings — Bold, Bebas Neue */
+/* Page Titles — Bebas Neue, elegant proportions */
 .heading,
-h1, h2, h3, h4, h5, h6 {
+h1 {
   font-family: var(--font-display);
-  letter-spacing: var(--tracking-wide);
+  font-size: var(--text-5xl);
+  letter-spacing: var(--tracking-normal);
   line-height: var(--leading-tight);
+  color: var(--color-ink);
+  margin: 0;
+  text-transform: none;
+  font-weight: 400;
+}
+
+/* Section Headings — Bebas Neue, still prominent but restrained */
+h2, .text-4xl {
+  font-family: var(--font-display);
+  font-size: var(--text-4xl);
+  letter-spacing: 0.01em;
+  line-height: var(--leading-tight);
+  color: var(--color-ink);
+  margin: 0;
+  text-transform: none;
+  font-weight: 400;
+}
+
+/* Subsection Headings — Lora serif, warm and sophisticated */
+h3, .text-3xl {
+  font-family: var(--font-body);
+  font-size: var(--text-3xl);
+  font-weight: 600;
+  letter-spacing: var(--tracking-normal);
+  line-height: var(--leading-snug);
   color: var(--color-ink);
   margin: 0;
 }
 
-h1, .text-5xl { font-size: var(--text-5xl); }
-h2, .text-4xl { font-size: var(--text-4xl); }
-h3, .text-3xl { font-size: var(--text-3xl); }
-h4, .text-2xl { font-size: var(--text-2xl); }
-h5, .text-xl { font-size: var(--text-xl); }
-h6, .text-lg { font-size: var(--text-lg); }
+/* Smaller Headings — Lora, standard weight */
+h4, .text-2xl {
+  font-family: var(--font-body);
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  letter-spacing: var(--tracking-normal);
+  line-height: var(--leading-snug);
+  color: var(--color-ink);
+  margin: 0;
+}
+
+h5, .text-xl {
+  font-family: var(--font-body);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  letter-spacing: var(--tracking-normal);
+  line-height: var(--leading-snug);
+  color: var(--color-ink);
+  margin: 0;
+}
+
+h6, .text-lg {
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  letter-spacing: var(--tracking-normal);
+  line-height: var(--leading-snug);
+  color: var(--color-ink);
+  margin: 0;
+}
 
 /* Body Text — Lyrical Lora */
 .body-text,
@@ -508,6 +558,24 @@ code, pre {
   padding: var(--space-6);
   box-shadow: var(--shadow-sm);
   transition: box-shadow var(--transition-base), border-color var(--transition-base);
+  /* Subtle paper grain texture */
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 2px,
+      rgba(26, 26, 26, 0.015) 2px,
+      rgba(26, 26, 26, 0.015) 4px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 1px,
+      rgba(26, 26, 26, 0.008) 1px,
+      rgba(26, 26, 26, 0.008) 2px
+    );
+  background-size: 4px 100%, 100% 2px;
+  background-color: var(--color-surface);
 }
 
 .card:hover {
@@ -555,15 +623,17 @@ code, pre {
   justify-content: center;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-5);
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--text-sm);
-  letter-spacing: var(--tracking-wide);
+  font-weight: 600;
+  letter-spacing: var(--tracking-normal);
   line-height: 1;
   border-radius: var(--radius-md);
   border: none;
   cursor: pointer;
   transition: all var(--transition-fast);
   text-decoration: none;
+  text-transform: none;
 }
 
 .btn:disabled {
@@ -659,12 +729,14 @@ code, pre {
   gap: var(--space-1);
   padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-full);
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--text-xs);
-  letter-spacing: var(--tracking-wide);
+  font-weight: 500;
+  letter-spacing: var(--tracking-normal);
   border: 1px solid var(--ink-200);
   background: var(--ivory-200);
   color: var(--ink-600);
+  text-transform: none;
 }
 
 .badge--accent {
@@ -818,9 +890,11 @@ code, pre {
   border-radius: var(--radius-lg);
   color: var(--color-ink-secondary);
   text-decoration: none;
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--text-xs);
-  letter-spacing: var(--tracking-wide);
+  font-weight: 500;
+  letter-spacing: var(--tracking-normal);
+  text-transform: none;
   transition: all var(--transition-fast);
 }
 
@@ -867,9 +941,10 @@ code, pre {
 }
 
 .empty-state__title {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--text-xl);
-  letter-spacing: var(--tracking-wide);
+  font-weight: 600;
+  letter-spacing: var(--tracking-normal);
   color: var(--color-ink);
   margin-bottom: var(--space-2);
 }
@@ -896,12 +971,14 @@ code, pre {
   gap: var(--space-1);
   padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-full);
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--text-xs);
-  letter-spacing: var(--tracking-wide);
+  font-weight: 500;
+  letter-spacing: var(--tracking-normal);
   border: 1px solid var(--ink-200);
   background: var(--ivory-200);
   color: var(--ink-600);
+  text-transform: none;
 }
 
 .pill--accent {
@@ -934,19 +1011,22 @@ code, pre {
 .texture-bg--watercolor {
   position: relative;
   background-image:
+    /* Warm terracotta wash */
     radial-gradient(
       ellipse 900px 450px at 15% 25%,
-      rgba(160, 113, 92, 0.04) 0%,
+      rgba(160, 113, 92, 0.07) 0%,
       transparent 60%
     ),
+    /* Terracotta accent */
     radial-gradient(
       ellipse 700px 550px at 85% 75%,
-      rgba(160, 113, 92, 0.03) 0%,
+      rgba(176, 138, 118, 0.06) 0%,
       transparent 55%
     ),
+    /* Subtle dusty rose undertone */
     radial-gradient(
       ellipse 500px 400px at 45% 55%,
-      rgba(139, 92, 92, 0.02) 0%,
+      rgba(139, 92, 92, 0.04) 0%,
       transparent 50%
     );
   background-attachment: fixed;
@@ -1016,25 +1096,25 @@ code, pre {
       90deg,
       transparent,
       transparent 2px,
-      rgba(26, 26, 26, 0.015) 2px,
-      rgba(26, 26, 26, 0.015) 4px
+      rgba(26, 26, 26, 0.025) 2px,
+      rgba(26, 26, 26, 0.025) 4px
     ),
     repeating-linear-gradient(
       0deg,
       transparent,
       transparent 1px,
-      rgba(26, 26, 26, 0.008) 1px,
-      rgba(26, 26, 26, 0.008) 2px
+      rgba(26, 26, 26, 0.015) 1px,
+      rgba(26, 26, 26, 0.015) 2px
     ),
     /* Subtle aging marks */
     radial-gradient(
       circle at 25% 45%,
-      rgba(26, 26, 26, 0.012) 0%,
+      rgba(26, 26, 26, 0.02) 0%,
       transparent 40%
     ),
     radial-gradient(
       circle at 75% 70%,
-      rgba(26, 26, 26, 0.008) 0%,
+      rgba(26, 26, 26, 0.015) 0%,
       transparent 35%
     );
   background-size:
@@ -1050,22 +1130,22 @@ code, pre {
       45deg,
       transparent,
       transparent 2px,
-      rgba(26, 26, 26, 0.018) 2px,
-      rgba(26, 26, 26, 0.018) 4px
+      rgba(26, 26, 26, 0.025) 2px,
+      rgba(26, 26, 26, 0.025) 4px
     ),
     repeating-linear-gradient(
       -45deg,
       transparent,
       transparent 2px,
-      rgba(26, 26, 26, 0.012) 2px,
-      rgba(26, 26, 26, 0.012) 4px
+      rgba(26, 26, 26, 0.018) 2px,
+      rgba(26, 26, 26, 0.018) 4px
     ),
     repeating-linear-gradient(
       90deg,
       transparent,
       transparent 1px,
-      rgba(26, 26, 26, 0.006) 1px,
-      rgba(26, 26, 26, 0.006) 2px
+      rgba(26, 26, 26, 0.01) 1px,
+      rgba(26, 26, 26, 0.01) 2px
     );
   background-size:
     6px 6px,
@@ -1080,23 +1160,23 @@ code, pre {
       90deg,
       transparent,
       transparent 2px,
-      rgba(26, 26, 26, 0.012) 2px,
-      rgba(26, 26, 26, 0.012) 4px
+      rgba(26, 26, 26, 0.02) 2px,
+      rgba(26, 26, 26, 0.02) 4px
     ),
     repeating-linear-gradient(
       0deg,
       transparent,
       transparent 1px,
-      rgba(26, 26, 26, 0.006) 1px,
-      rgba(26, 26, 26, 0.006) 2px
+      rgba(26, 26, 26, 0.012) 1px,
+      rgba(26, 26, 26, 0.012) 2px
     ),
     /* Canvas weave overlay for depth */
     repeating-linear-gradient(
       45deg,
       transparent,
       transparent 3px,
-      rgba(26, 26, 26, 0.008) 3px,
-      rgba(26, 26, 26, 0.008) 6px
+      rgba(26, 26, 26, 0.012) 3px,
+      rgba(26, 26, 26, 0.012) 6px
     );
   background-size:
     4px 100%,
@@ -1111,27 +1191,27 @@ code, pre {
 .dark .texture-bg--watercolor,
 [data-theme="dark"] .texture-bg--watercolor {
   background-image:
-    /* Sage green accent wash for dark mode */
+    /* Warm terracotta wash for dark mode */
     radial-gradient(
       ellipse 900px 450px at 15% 25%,
-      rgba(92, 122, 106, 0.06) 0%,
+      rgba(184, 138, 118, 0.08) 0%,
       transparent 60%
     ),
     radial-gradient(
       ellipse 700px 550px at 85% 75%,
-      rgba(122, 154, 138, 0.04) 0%,
+      rgba(160, 113, 92, 0.06) 0%,
       transparent 55%
     ),
     radial-gradient(
       ellipse 500px 400px at 45% 55%,
-      rgba(92, 122, 106, 0.03) 0%,
+      rgba(139, 92, 92, 0.05) 0%,
       transparent 50%
     ),
     /* Subtle vignette for depth */
     radial-gradient(
       ellipse at center,
       transparent 0%,
-      rgba(0, 0, 0, 0.08) 100%
+      rgba(0, 0, 0, 0.1) 100%
     );
 }
 
@@ -1151,24 +1231,24 @@ code, pre {
       90deg,
       transparent,
       transparent 2px,
-      rgba(245, 241, 232, 0.02) 2px,
-      rgba(245, 241, 232, 0.02) 4px
+      rgba(245, 241, 232, 0.035) 2px,
+      rgba(245, 241, 232, 0.035) 4px
     ),
     repeating-linear-gradient(
       0deg,
       transparent,
       transparent 1px,
-      rgba(245, 241, 232, 0.01) 1px,
-      rgba(245, 241, 232, 0.01) 2px
+      rgba(245, 241, 232, 0.02) 1px,
+      rgba(245, 241, 232, 0.02) 2px
     ),
     radial-gradient(
       circle at 25% 45%,
-      rgba(245, 241, 232, 0.015) 0%,
+      rgba(245, 241, 232, 0.025) 0%,
       transparent 40%
     ),
     radial-gradient(
       circle at 75% 70%,
-      rgba(245, 241, 232, 0.01) 0%,
+      rgba(245, 241, 232, 0.015) 0%,
       transparent 35%
     );
 }
@@ -1180,23 +1260,45 @@ code, pre {
       45deg,
       transparent,
       transparent 2px,
-      rgba(245, 241, 232, 0.022) 2px,
-      rgba(245, 241, 232, 0.022) 4px
+      rgba(245, 241, 232, 0.035) 2px,
+      rgba(245, 241, 232, 0.035) 4px
     ),
     repeating-linear-gradient(
       -45deg,
       transparent,
       transparent 2px,
-      rgba(245, 241, 232, 0.015) 2px,
-      rgba(245, 241, 232, 0.015) 4px
+      rgba(245, 241, 232, 0.025) 2px,
+      rgba(245, 241, 232, 0.025) 4px
     ),
     repeating-linear-gradient(
       90deg,
       transparent,
       transparent 1px,
-      rgba(245, 241, 232, 0.008) 1px,
-      rgba(245, 241, 232, 0.008) 2px
+      rgba(245, 241, 232, 0.015) 1px,
+      rgba(245, 241, 232, 0.015) 2px
     );
+}
+
+/* Dark mode card with warm texture */
+.dark .card,
+[data-theme="dark"] .card {
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 2px,
+      rgba(245, 241, 232, 0.025) 2px,
+      rgba(245, 241, 232, 0.025) 4px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 1px,
+      rgba(245, 241, 232, 0.015) 1px,
+      rgba(245, 241, 232, 0.015) 2px
+    );
+  background-size: 4px 100%, 100% 2px;
+  background-color: var(--color-surface);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
