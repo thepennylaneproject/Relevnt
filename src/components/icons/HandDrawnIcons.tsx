@@ -7,7 +7,8 @@ type IconProps = {
 }
 
 const base = { fill: 'none', strokeLinecap: 'round', strokeLinejoin: 'round' } as const
-const stroke = (color?: string) => color || '#C7A56A'
+// Use CSS variable for terracotta accent color, fallback to the actual value
+const stroke = (color?: string) => color || 'currentColor'
 const sw = (strokeWidth?: number) => strokeWidth || 2
 
 const Placeholder: React.FC<IconProps> = ({ size = 24, strokeWidth, color }) => (
