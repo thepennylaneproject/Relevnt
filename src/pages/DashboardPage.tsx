@@ -381,7 +381,7 @@ export default function DashboardPage(): JSX.Element {
                   <span className="pipeline-stat-label">Discovered</span>
                   {discoveredCount === 0 ? (
                     <Link to="/jobs" className="pipeline-empty-cta">
-                      Start with 5 picks →
+                      Ready to start? Discover your first 5 picks →
                     </Link>
                   ) : (
                     <>
@@ -399,7 +399,7 @@ export default function DashboardPage(): JSX.Element {
                 <div className="pipeline-stat-content">
                   <span className="pipeline-stat-label">Applied</span>
                   {appliedCount === 0 ? (
-                    <span className="pipeline-empty-hint">Ready when you are</span>
+                    <span className="pipeline-empty-hint">Waiting for your signal—ready when you are.</span>
                   ) : (
                     <>
                       <span className="pipeline-stat-value">{appliedCount}</span>
@@ -433,7 +433,7 @@ export default function DashboardPage(): JSX.Element {
                 <div className="pipeline-stat-content">
                   <span className="pipeline-stat-label">Interviews</span>
                   {interviewingCount === 0 ? (
-                    <span className="pipeline-empty-hint">Your next milestone</span>
+                    <span className="pipeline-empty-hint">Rest is productive—your next milestone awaits.</span>
                   ) : (
                     <>
                       <span className="pipeline-stat-value">{interviewingCount}</span>

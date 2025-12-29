@@ -21,7 +21,7 @@
 .dashboard-enhanced {
   max-width: 900px;
   margin: 0 auto;
-  padding-bottom: 4rem;
+  padding-bottom: var(--space-6);
 }
 
 /* Loading state */
@@ -54,11 +54,11 @@
 
 .hero-section {
   text-align: center;
-  padding: var(--space-8) 0 var(--space-12);
+  padding: var(--space-5) 0 var(--space-6);
 }
 
 .hero-content {
-  margin-bottom: var(--space-8);
+  margin-bottom: var(--space-5);
 }
 
 .hero-greeting {
@@ -103,15 +103,13 @@
 /* Primary CTA Card — Elevated, prominent */
 .primary-cta-card {
   background: var(--color-surface);
-  border: 2px solid var(--color-accent);
-  border-radius: var(--radius-xl);
-  padding: var(--space-8);
-  max-width: 560px;
+  border: 1px solid var(--color-accent-secondary);
+  border-radius: var(--radius-card);
+  padding: var(--space-5);
+  max-width: 580px;
   margin: 0 auto;
-  box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.08),
-    0 0 0 1px var(--color-accent-glow);
-  transition: all 0.3s ease;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-base);
 }
 
 .primary-cta-card:hover {
@@ -253,13 +251,13 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  font-family: var(--font-display);
-  font-size: var(--text-sm);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-ink);
-  margin: 0 0 var(--space-5);
+  letter-spacing: 0.1em;
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-4);
 }
 
 .section-header svg {
@@ -271,7 +269,7 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .todays-priority-section {
-  margin-bottom: var(--space-12);
+  margin-bottom: var(--space-5);
 }
 
 .priority-cards {
@@ -364,7 +362,7 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .foundation-section {
-  margin-bottom: var(--space-12);
+  margin-bottom: var(--space-5);
 }
 
 .foundation-grid {
@@ -461,7 +459,7 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .pipeline-section {
-  margin-bottom: var(--space-12);
+  margin-bottom: var(--space-5);
 }
 
 .pipeline-grid {
@@ -536,7 +534,7 @@
 
 .pipeline-stat-label {
   display: block;
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--text-xs);
   font-weight: 600;
   text-transform: uppercase;
@@ -548,7 +546,7 @@
 .pipeline-stat-value {
   display: block;
   font-family: var(--font-display);
-  font-size: var(--text-2xl);
+  font-size: var(--text-lg);
   font-weight: 700;
   color: var(--color-ink);
   line-height: 1.1;
@@ -589,7 +587,7 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .quick-actions-section {
-  margin-bottom: var(--space-12);
+  margin-bottom: var(--space-5);
 }
 
 .quick-actions-row {
@@ -636,7 +634,7 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .progress-section {
-  margin-bottom: var(--space-12);
+  margin-bottom: var(--space-5);
 }
 
 .progress-card {
@@ -702,7 +700,7 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .wellness-section {
-  margin-bottom: var(--space-8);
+  margin-bottom: var(--space-5);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
