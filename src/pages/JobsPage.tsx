@@ -6,6 +6,7 @@ import PageBackground from '../components/shared/PageBackground'
 import { Container } from '../components/shared/Container'
 import { Icon } from '../components/ui/Icon'
 import { EmptyState } from '../components/ui/EmptyState'
+import { useToast } from '../components/ui/Toast'
 import { copy } from '../lib/copy'
 import type { JobRow } from '../shared/types'
 import { usePersonas } from '../hooks/usePersonas'
@@ -44,6 +45,7 @@ export default function JobsPage() {
   const [activeTab, setActiveTab] = useState<'feed' | 'browse'>('feed')
   const { user } = useAuth()
   const { activePersona, personas, setActivePersona } = usePersonas()
+  const { showToast } = useToast()
 
   // browse side (jobs list from Supabase)
   const [jobs, setJobs] = useState<JobRow[]>([])
@@ -285,7 +287,7 @@ export default function JobsPage() {
   const toggleSavedJob = useCallback(
     async (jobId: string) => {
       if (!user) {
-        // future: open sign in prompt
+        showToast('Sign in to save jobs', 'warning', 3000)
         return
       }
 
@@ -301,10 +303,12 @@ export default function JobsPage() {
 
           if (error) {
             console.warn('Failed to unsave job', error)
+            showToast('Failed to remove job', 'error', 3000)
             return
           }
 
           setSavedJobIds((prev) => prev.filter((id) => id !== jobId))
+          showToast('Removed from saved jobs', 'info', 2500)
         } else {
           const { error } = await supabase.from('saved_jobs').insert({
             user_id: user.id,
@@ -313,16 +317,19 @@ export default function JobsPage() {
 
           if (error) {
             console.warn('Failed to save job', error)
+            showToast('Failed to save job', 'error', 3000)
             return
           }
 
           setSavedJobIds((prev) => (prev.includes(jobId) ? prev : [...prev, jobId]))
+          showToast('Saved to My Jobs → Discovered', 'success', 3000)
         }
       } catch (err) {
         console.warn('Unexpected error toggling saved job', err)
+        showToast('Something went wrong', 'error', 3000)
       }
     },
-    [user, savedJobIds]
+    [user, savedJobIds, showToast]
   )
 
   const handleClearFilters = useCallback(() => {
