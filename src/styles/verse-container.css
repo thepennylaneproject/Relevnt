@@ -13,7 +13,7 @@
   margin-bottom: var(--space-section-gap); /* 40px below hero section */
 
   /* Typography — Poetic */
-  font-family: var(--font-serif-poetic); /* Crimson Text */
+  font-family: var(--font-poetic, 'Crimson Text', Georgia, serif);
   font-size: 1rem;
   font-weight: 400;
   font-style: italic;
@@ -26,12 +26,28 @@
   /* Alignment */
   text-align: center;
   max-width: 40rem;
+}
 
-  /* Responsiveness */
-  @media (max-width: 768px) {
+@media (max-width: 768px) {
+  .verse-container {
     font-size: 0.875rem;
     padding: var(--space-component-inner) 0; /* 16px vertical */
     margin-bottom: var(--space-section-gap); /* 40px */
+  }
+}
+
+/* Compact mode — for single-line verses in centered hero */
+.verse-container--compact {
+  font-size: var(--text-lg, 1.125rem);
+  padding: var(--space-2) 0;
+  margin-bottom: 0;
+  max-width: 480px;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .verse-container--compact {
+    font-size: var(--text-base, 1rem);
   }
 }
 
@@ -49,5 +65,11 @@
 .verse-container br {
   content: '';
   display: block;
-  height: var(--space-sm); /* 8px between lines for visual breathing */
+  height: var(--space-sm, 8px); /* 8px between lines for visual breathing */
+}
+
+/* Dark mode adjustments */
+:root.dark .verse-container,
+[data-theme="dark"] .verse-container {
+  color: var(--ivory-400);
 }

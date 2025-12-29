@@ -85,6 +85,8 @@ export default function SidebarMarginNav() {
                   <Link
                     to={path}
                     className={`margin-nav__item nav-item${isActive ? ' nav-item--active active' : ''}`}
+                    data-tooltip={label}
+                    aria-label={label}
                   >
                     <span className="margin-nav__icon icon-nav">
                       <Icon
@@ -105,6 +107,8 @@ export default function SidebarMarginNav() {
             <Link
               to="/settings"
               className={`margin-nav__item nav-item${active('/settings') ? ' nav-item--active active' : ''}`}
+              data-tooltip={copy.nav.settings}
+              aria-label={copy.nav.settings}
             >
               <span className="margin-nav__icon icon-nav">
                 <Icon name="pocket-watch" size="md" hideAccent={!active('/settings')} />

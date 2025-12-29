@@ -1,23 +1,14 @@
 import React from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, Link } from 'react-router-dom'
 import PageBackground from '../components/shared/PageBackground'
-import { IconName } from '../components/ui/Icon'
+import { IconName, Icon } from '../components/ui/Icon'
 import { Container } from '../components/shared/Container'
 import { useAuth } from '../contexts/AuthContext'
 import { useApplications } from '../hooks/useApplications'
 import { useJobStats } from '../hooks/useJobStats'
 import { useWellnessMode } from '../hooks/useWellnessMode'
 import { VerseContainer } from '../components/dashboard/VerseContainer'
-import { HaikuContainer } from '../components/dashboard/HaikuContainer'
-import { PrimaryActionCard } from '../components/dashboard/PrimaryActionCard'
-import { ActionCard } from '../components/dashboard/ActionCard'
-import { PipelineStatus } from '../components/dashboard/PipelineStatus'
 import { WellnessCheckin } from '../components/dashboard/WellnessCheckin'
-import { SmallWins } from '../components/dashboard/SmallWins'
-import { OutcomeMetricsCard } from '../components/dashboard/OutcomeMetricsCard'
-import { QuickActionsPanel } from '../components/dashboard/QuickActionsPanel'
-import { OpportunityAlerts } from '../components/dashboard/OpportunityAlerts'
-import { getHaiku } from '../lib/poeticMoments'
 import '../styles/dashboard-clarity.css'
 
 // User state enum for adaptive UI
@@ -30,18 +21,17 @@ enum UserState {
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * DASHBOARD PAGE — Revolutionary Redesign
+ * DASHBOARD PAGE — Enhanced UX Redesign
  * ═══════════════════════════════════════════════════════════════════════════
  *
- * A single narrative flow that guides users through their job search journey:
- * 1. Greeting + Hero Verse (emotional context)
- * 2. Primary Action (what matters now)
- * 3. Supporting Actions (optional depth)
- * 4. Pipeline Status (informational context)
- * 5. Wellness Check (optional reflection)
- *
- * Content adapts based on user state (applications, interviews, etc.)
- * and emotional/wellness state.
+ * Key improvements:
+ * 1. Centered hero with prominent CTA
+ * 2. Today's Priority micro-module for immediate engagement
+ * 3. Two-column foundation cards with actionable sublabels
+ * 4. Multi-column pipeline stats (no more sprawling zeros)
+ * 5. Quick actions row for momentum
+ * 6. Progress tracker for engagement loops
+ * 7. Celebratory microcopy and momentum cues
  */
 
 export default function DashboardPage(): JSX.Element {
@@ -54,7 +44,10 @@ export default function DashboardPage(): JSX.Element {
     return (
       <PageBackground>
         <Container maxWidth="lg" padding="md">
-          <div className="dashboard-loading">Loading your dashboard...</div>
+          <div className="dashboard-loading">
+            <div className="loading-spinner" />
+            <span>Loading your dashboard...</span>
+          </div>
         </Container>
       </PageBackground>
     )
@@ -75,6 +68,7 @@ export default function DashboardPage(): JSX.Element {
     (a) => a.status === 'interviewing'
   ).length
   const appliedCount = applications.filter((a) => a.status === 'applied').length
+  const discoveredCount = total || 0
 
   // Determine user state for adaptive content
   let userState = UserState.ZERO_APPLICATIONS
@@ -86,50 +80,12 @@ export default function DashboardPage(): JSX.Element {
     userState = UserState.ALL_CAUGHT_UP
   }
 
+  // Calculate profile completion (mock - would be from profile data)
+  const profileCompletion = 60 // Would come from actual profile data
+
   // ───────────────────────────────────────────────────────────────────────────
   // ADAPTIVE CONTENT BASED ON USER STATE
   // ───────────────────────────────────────────────────────────────────────────
-
-  // Hero verse (changes based on state)
-  const getHeroVerse = () => {
-    switch (userState) {
-      case UserState.ZERO_APPLICATIONS:
-        return (
-          <>
-            Every journey begins <br />
-            with a single brave step. <br />
-            Today, let that be yours.
-          </>
-        )
-      case UserState.ACTIVE_APPLICATIONS:
-        return (
-          <>
-            You've sent your signal. <br />
-            Now comes the listening— <br />
-            rest is part of the rhythm.
-          </>
-        )
-      case UserState.IN_INTERVIEWS:
-        return (
-          <>
-            The conversation has begun. <br />
-            You belong at this table. <br />
-            Everything you've prepared for <br />
-            is ready.
-          </>
-        )
-      case UserState.ALL_CAUGHT_UP:
-        return (
-          <>
-            You've done the hard thing. <br />
-            The pause is not weakness— <br />
-            it's the breath between chapters.
-          </>
-        )
-      default:
-        return <>Every step forward matters.</>
-    }
-  }
 
   // Time-adaptive greeting
   const getGreeting = () => {
@@ -139,190 +95,171 @@ export default function DashboardPage(): JSX.Element {
     return 'Good evening'
   }
 
-  // Primary action (the focal point of the page)
-  const getPrimaryAction = (): { icon: IconName; heading: string; title: string; description: string; cta: string; ctaLink: string } => {
+  // Hero verse (shorter, more impactful)
+  const getHeroVerse = () => {
+    switch (userState) {
+      case UserState.ZERO_APPLICATIONS:
+        return 'Every journey begins with a single brave step.'
+      case UserState.ACTIVE_APPLICATIONS:
+        return "You've sent your signal. Now comes the listening."
+      case UserState.IN_INTERVIEWS:
+        return 'The conversation has begun. You belong at this table.'
+      case UserState.ALL_CAUGHT_UP:
+        return 'The pause is not weakness—it\'s the breath between chapters.'
+      default:
+        return 'Every step forward matters.'
+    }
+  }
+
+  // Primary CTA content
+  const getPrimaryCTA = () => {
     switch (userState) {
       case UserState.ZERO_APPLICATIONS:
         return {
-          icon: 'compass',
-          heading: 'Your next move:',
+          heading: 'Your next move',
           title: 'Start your search',
-          description:
-            'Find roles aligned with your skills and goals. The more applications you send, the more conversations will start.',
+          description: 'Find roles aligned with your skills and goals.',
           cta: 'Search roles',
           ctaLink: '/jobs',
+          secondaryCta: 'Import resume',
+          secondaryLink: '/resumes',
         }
       case UserState.ACTIVE_APPLICATIONS:
         return {
-          icon: 'compass',
-          heading: 'Your next move:',
-          title: 'Keep the momentum',
-          description: `You've applied to ${appliedCount} ${appliedCount === 1 ? 'role' : 'roles'}. Responses typically arrive in 5–10 days. Send 2–3 more applications this week.`,
+          heading: 'Keep momentum',
+          title: `${appliedCount} application${appliedCount !== 1 ? 's' : ''} in progress`,
+          description: 'Responses typically arrive in 5–10 days. Send 2–3 more this week.',
           cta: 'Find more roles',
           ctaLink: '/jobs',
+          secondaryCta: 'Track applications',
+          secondaryLink: '/applications',
         }
       case UserState.IN_INTERVIEWS:
         return {
-          icon: 'flower',
-          heading: 'Your next move:',
-          title: 'Prepare for interviews',
-          description:
-            'You have conversations in progress. Practice your responses, research each company, and prepare thoughtful questions.',
+          heading: 'Prepare to shine',
+          title: `${interviewingCount} interview${interviewingCount !== 1 ? 's' : ''} scheduled`,
+          description: 'Practice your responses and research each company.',
           cta: 'Practice interviews',
           ctaLink: '/interview-prep',
-        }
-      case UserState.ALL_CAUGHT_UP:
-        return {
-          icon: 'candle',
-          heading: 'Your next move:',
-          title: 'Rest and reflect',
-          description:
-            "You're caught up on immediate actions. This is the time to strengthen your profile, learn new skills, or explore the market.",
-          cta: 'Explore your options',
-          ctaLink: '/jobs',
+          secondaryCta: 'View schedule',
+          secondaryLink: '/applications',
         }
       default:
         return {
-          icon: 'compass',
-          heading: 'Your next move:',
-          title: 'Take action',
-          description: 'Find opportunities that match your skills and goals.',
-          cta: 'Get started',
+          heading: 'Rest and reflect',
+          title: "You're caught up",
+          description: 'Strengthen your profile or explore new opportunities.',
+          cta: 'Explore roles',
           ctaLink: '/jobs',
+          secondaryCta: 'Improve profile',
+          secondaryLink: '/profile-analyzer',
         }
     }
   }
 
-  // Supporting actions (what to do while waiting or in between)
-  const getSupportingActions = (): { icon: IconName; title: string; description: string; cta: string; ctaLink: string }[] => {
-    switch (userState) {
-      case UserState.ZERO_APPLICATIONS:
-        return [
-          {
-            icon: 'book',
-            title: 'Learn your market',
-            description: 'Understand industry trends and company needs.',
-            cta: 'Explore insights',
-            ctaLink: '/jobs',
-          },
-          {
-            icon: 'scroll',
-            title: 'Polish your resume',
-            description: 'Make sure your resume stands out to recruiters.',
-            cta: 'Build resume',
-            ctaLink: '/resumes',
-          },
-        ]
-      case UserState.ACTIVE_APPLICATIONS:
-        return [
-          {
-            icon: 'microphone',
-            title: 'Practice interviews',
-            description: 'Stay sharp. Practice with AI-generated questions.',
-            cta: 'Practice',
-            ctaLink: '/interview-prep',
-          },
-          {
-            icon: 'stars',
-            title: 'Strengthen your profile',
-            description: 'Get AI-powered feedback on your LinkedIn and resume.',
-            cta: 'Analyze',
-            ctaLink: '/profile-analyzer',
-          },
-        ]
-      case UserState.IN_INTERVIEWS:
-        return [
-          {
-            icon: 'scroll',
-            title: 'Update your resume',
-            description: 'Tailor your resume to highlight relevant experience.',
-            cta: 'Edit',
-            ctaLink: '/resumes',
-          },
-          {
-            icon: 'book',
-            title: 'Research companies',
-            description: "Understand each company's mission, culture, and challenges.",
-            cta: 'Learn',
-            ctaLink: '/jobs',
-          },
-        ]
-      case UserState.ALL_CAUGHT_UP:
-        return [
-          {
-            icon: 'stars',
-            title: 'Strengthen your profile',
-            description: 'Improve your online presence and professional brand.',
-            cta: 'Analyze',
-            ctaLink: '/profile-analyzer',
-          },
-          {
-            icon: 'microphone',
-            title: 'Practice speaking',
-            description: 'Stay interview-ready even while you wait.',
-            cta: 'Practice',
-            ctaLink: '/interview-prep',
-          },
-        ]
-      default:
-        return []
+  // Today's Priority items
+  const getTodaysPriorities = (): { icon: IconName; label: string; action: string; link: string; badge?: string }[] => {
+    const priorities: { icon: IconName; label: string; action: string; link: string; badge?: string }[] = []
+
+    if (userState === UserState.ZERO_APPLICATIONS) {
+      priorities.push({
+        icon: 'search',
+        label: 'Discover roles',
+        action: '5 AI-curated picks',
+        link: '/jobs',
+        badge: 'Suggested',
+      })
+      priorities.push({
+        icon: 'scroll',
+        label: 'Resume check',
+        action: 'Quick optimization tips',
+        link: '/resumes',
+      })
+    } else if (userState === UserState.ACTIVE_APPLICATIONS) {
+      priorities.push({
+        icon: 'briefcase',
+        label: 'Follow up',
+        action: `${appliedCount} pending responses`,
+        link: '/applications',
+      })
+      priorities.push({
+        icon: 'microphone',
+        label: 'Stay sharp',
+        action: 'Practice top questions',
+        link: '/interview-prep',
+      })
+    } else if (userState === UserState.IN_INTERVIEWS) {
+      priorities.push({
+        icon: 'microphone',
+        label: 'Interview prep',
+        action: 'Review company research',
+        link: '/interview-prep',
+        badge: 'Priority',
+      })
+      priorities.push({
+        icon: 'book',
+        label: 'Company intel',
+        action: 'Key talking points',
+        link: '/jobs',
+      })
     }
+
+    // Always suggest profile improvement if not complete
+    if (profileCompletion < 100) {
+      priorities.push({
+        icon: 'stars',
+        label: 'Profile strength',
+        action: `${profileCompletion}% → Improve`,
+        link: '/profile-analyzer',
+      })
+    }
+
+    return priorities.slice(0, 3)
   }
 
-  // Pipeline status items
-  const getPipelineItems = (): { icon: IconName; label: string; value: number; subtext: string }[] => [
+  // Foundation cards
+  const getFoundationCards = (): { icon: IconName; title: string; description: string; cta: string; ctaLink: string; sublabel?: string }[] => [
     {
-      icon: 'seeds',
-      label: 'Discovered',
-      value: total || 0,
-      subtext: 'roles explored',
+      icon: 'book',
+      title: 'Learn your market',
+      description: 'Understand industry trends and company needs.',
+      cta: 'Explore insights',
+      ctaLink: '/jobs',
+      sublabel: 'Suggested for you',
     },
     {
-      icon: 'compass',
-      label: 'Applied to',
-      value: appliedCount,
-      subtext: 'applications sent',
-    },
-    {
-      icon: 'candle',
-      label: 'Awaiting responses',
-      value: appliedCount - interviewingCount,
-      subtext: 'avg 7 days',
-    },
-    {
-      icon: 'flower',
-      label: 'In interviews',
-      value: interviewingCount,
-      subtext: 'conversations',
+      icon: 'scroll',
+      title: 'Polish your resume',
+      description: 'Make sure your resume stands out to recruiters.',
+      cta: 'Build resume',
+      ctaLink: '/resumes',
+      sublabel: profileCompletion < 80 ? `Resume strength: ${profileCompletion}/100` : 'Looking good',
     },
   ]
 
-  // Optional haiku based on user state and wellness mode
-  const getSupportingHaiku = () => {
-    if (userState === UserState.ZERO_APPLICATIONS) {
-      return (
-        <HaikuContainer>
-          Three hundred roles posted <br />
-          before your coffee cools— <br />
-          you're still in the running
-        </HaikuContainer>
-      )
+  // Quick actions
+  const getQuickActions = (): { icon: IconName; label: string; link: string }[] => [
+    { icon: 'search', label: 'Search saved filters', link: '/jobs' },
+    { icon: 'scroll', label: 'Upload resume', link: '/resumes' },
+    { icon: 'microphone', label: 'Mock interview', link: '/interview-prep' },
+  ]
+
+  // Momentum message
+  const getMomentumMessage = () => {
+    if (discoveredCount > 0 && appliedCount === 0) {
+      return `You explored ${discoveredCount} role${discoveredCount !== 1 ? 's' : ''} yesterday—ready to apply?`
     }
-    if (userState === UserState.ALL_CAUGHT_UP) {
-      return (
-        <HaikuContainer>
-          Algorithm sorts <br />
-          your worth in seconds flat— <br />
-          you are still human
-        </HaikuContainer>
-      )
+    if (appliedCount > 0) {
+      return `${appliedCount} application${appliedCount !== 1 ? 's' : ''} sent—keep the momentum going!`
     }
     return null
   }
 
-  const primaryAction = getPrimaryAction()
-  const supportingActions = getSupportingActions()
-  const pipelineItems = getPipelineItems()
+  const primaryCTA = getPrimaryCTA()
+  const todaysPriorities = getTodaysPriorities()
+  const foundationCards = getFoundationCards()
+  const quickActions = getQuickActions()
+  const momentumMessage = getMomentumMessage()
 
   // ───────────────────────────────────────────────────────────────────────────
   // RENDER
@@ -331,85 +268,227 @@ export default function DashboardPage(): JSX.Element {
   return (
     <PageBackground>
       <Container maxWidth="lg" padding="md">
-        <div className="clarity-hub-dashboard">
-          {/* SECTION 1: HERO & GREETING */}
-          <section className="clarity-hero">
-            <h1 className="clarity-hero__title">
-              {getGreeting()}
-            </h1>
+        <div className="dashboard-enhanced">
+          {/* ═══════════════════════════════════════════════════════════════════
+              SECTION 1: CENTERED HERO + PRIMARY CTA
+          ═══════════════════════════════════════════════════════════════════ */}
+          <section className="hero-section">
+            <div className="hero-content">
+              <h1 className="hero-greeting">{getGreeting()}</h1>
+              <VerseContainer compact>{getHeroVerse()}</VerseContainer>
 
-            <VerseContainer>
-              {getHeroVerse()}
-            </VerseContainer>
+              {/* Momentum message */}
+              {momentumMessage && (
+                <p className="momentum-message">
+                  <Icon name="zap" size="sm" />
+                  {momentumMessage}
+                </p>
+              )}
+            </div>
+
+            {/* Primary CTA Card - Elevated, centered */}
+            <div className="primary-cta-card">
+              <div className="primary-cta-header">
+                <span className="primary-cta-label">{primaryCTA.heading}</span>
+                <h2 className="primary-cta-title">{primaryCTA.title}</h2>
+                <p className="primary-cta-description">{primaryCTA.description}</p>
+              </div>
+              <div className="primary-cta-actions">
+                <Link to={primaryCTA.ctaLink} className="btn-primary-glow">
+                  {primaryCTA.cta}
+                  <Icon name="chevron-right" size="sm" />
+                </Link>
+                <Link to={primaryCTA.secondaryLink} className="btn-secondary-subtle">
+                  {primaryCTA.secondaryCta}
+                </Link>
+              </div>
+            </div>
           </section>
 
-          {/* SECTION 2: PRIMARY ACTION — Focal Point */}
-          <section className="dashboard-section">
-            <PrimaryActionCard
-              icon={primaryAction.icon}
-              iconSize="lg"
-              heading={primaryAction.heading}
-              title={primaryAction.title}
-              description={primaryAction.description}
-              cta={primaryAction.cta}
-              ctaLink={primaryAction.ctaLink}
-            />
-          </section>
-
-          {/* SECTION 3: SUPPORTING ACTIONS */}
-          {supportingActions.length > 0 && (
-            <section className="dashboard-section">
-              <div className="supporting-actions">
-                <h2 className="supporting-actions__heading">
-                  {userState === UserState.ZERO_APPLICATIONS
-                    ? 'Build your foundation'
-                    : userState === UserState.ACTIVE_APPLICATIONS
-                      ? 'While you wait'
-                      : userState === UserState.IN_INTERVIEWS
-                        ? 'Prepare and strengthen'
-                        : 'Keep building'}
-                </h2>
-                <div className="supporting-actions__grid">
-                  {supportingActions.map((action) => (
-                    <ActionCard
-                      key={action.cta}
-                      icon={action.icon}
-                      title={action.title}
-                      description={action.description}
-                      cta={action.cta}
-                      ctaLink={action.ctaLink}
-                      ctaVariant="secondary"
-                    />
-                  ))}
-                </div>
+          {/* ═══════════════════════════════════════════════════════════════════
+              SECTION 2: TODAY'S PRIORITY MICRO-MODULE
+          ═══════════════════════════════════════════════════════════════════ */}
+          {todaysPriorities.length > 0 && (
+            <section className="todays-priority-section">
+              <h3 className="section-header">
+                <Icon name="compass" size="sm" />
+                Today's priorities
+              </h3>
+              <div className="priority-cards">
+                {todaysPriorities.map((item, idx) => (
+                  <Link key={idx} to={item.link} className="priority-card">
+                    <div className="priority-card-icon">
+                      <Icon name={item.icon} size="md" />
+                    </div>
+                    <div className="priority-card-content">
+                      <span className="priority-card-label">{item.label}</span>
+                      <span className="priority-card-action">{item.action}</span>
+                    </div>
+                    {item.badge && (
+                      <span className="priority-badge">{item.badge}</span>
+                    )}
+                    <Icon name="chevron-right" size="sm" className="priority-arrow" />
+                  </Link>
+                ))}
               </div>
             </section>
           )}
 
-          {/* SECTION 4: HAIKU (optional, strategic) */}
-          {getSupportingHaiku()}
-
-          {/* SECTION 5: PIPELINE STATUS — Informational */}
-          <section className="dashboard-section">
-            <PipelineStatus
-              title="Where you are in your search"
-              items={pipelineItems}
-              marketContext={
-                appliedCount > 0
-                  ? {
-                      metric: 'Response Rate',
-                      userValue: '12%',
-                      benchmarkValue: '12%',
-                      interpretation: 'On par with industry average',
-                    }
-                  : undefined
-              }
-            />
+          {/* ═══════════════════════════════════════════════════════════════════
+              SECTION 3: FOUNDATION CARDS (Two-column grid)
+          ═══════════════════════════════════════════════════════════════════ */}
+          <section className="foundation-section">
+            <h3 className="section-header">
+              <Icon name="seeds" size="sm" />
+              Build your foundation
+            </h3>
+            <div className="foundation-grid">
+              {foundationCards.map((card, idx) => (
+                <div key={idx} className="foundation-card">
+                  <div className="foundation-card-header">
+                    <div className="foundation-card-icon">
+                      <Icon name={card.icon} size="md" />
+                    </div>
+                    {card.sublabel && (
+                      <span className="foundation-sublabel">{card.sublabel}</span>
+                    )}
+                  </div>
+                  <h4 className="foundation-card-title">{card.title}</h4>
+                  <p className="foundation-card-description">{card.description}</p>
+                  <Link to={card.ctaLink} className="foundation-card-cta">
+                    {card.cta}
+                    <Icon name="chevron-right" size="sm" />
+                  </Link>
+                </div>
+              ))}
+            </div>
           </section>
 
-          {/* SECTION 6: WELLNESS CHECK (if gentle mode) */}
+          {/* ═══════════════════════════════════════════════════════════════════
+              SECTION 4: PIPELINE STATUS (Multi-column, guided empty states)
+          ═══════════════════════════════════════════════════════════════════ */}
+          <section className="pipeline-section">
+            <h3 className="section-header">
+              <Icon name="gauge" size="sm" />
+              Where you are in your search
+            </h3>
+            <div className="pipeline-grid">
+              <div className={`pipeline-stat ${discoveredCount === 0 ? 'is-empty' : ''}`}>
+                <div className="pipeline-stat-icon">
+                  <Icon name="seeds" size="sm" />
+                </div>
+                <div className="pipeline-stat-content">
+                  <span className="pipeline-stat-label">Discovered</span>
+                  {discoveredCount === 0 ? (
+                    <Link to="/jobs" className="pipeline-empty-cta">
+                      Start with 5 picks →
+                    </Link>
+                  ) : (
+                    <>
+                      <span className="pipeline-stat-value">{discoveredCount}</span>
+                      <span className="pipeline-stat-subtext">roles explored</span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div className={`pipeline-stat ${appliedCount === 0 ? 'is-empty' : ''}`}>
+                <div className="pipeline-stat-icon">
+                  <Icon name="paper-airplane" size="sm" />
+                </div>
+                <div className="pipeline-stat-content">
+                  <span className="pipeline-stat-label">Applied</span>
+                  {appliedCount === 0 ? (
+                    <span className="pipeline-empty-hint">Ready when you are</span>
+                  ) : (
+                    <>
+                      <span className="pipeline-stat-value">{appliedCount}</span>
+                      <span className="pipeline-stat-subtext">applications sent</span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div className={`pipeline-stat ${appliedCount - interviewingCount === 0 ? 'is-empty' : ''}`}>
+                <div className="pipeline-stat-icon">
+                  <Icon name="candle" size="sm" />
+                </div>
+                <div className="pipeline-stat-content">
+                  <span className="pipeline-stat-label">Awaiting</span>
+                  {appliedCount - interviewingCount === 0 ? (
+                    <span className="pipeline-empty-hint">—</span>
+                  ) : (
+                    <>
+                      <span className="pipeline-stat-value">{appliedCount - interviewingCount}</span>
+                      <span className="pipeline-stat-subtext">avg 7 days</span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div className={`pipeline-stat ${interviewingCount === 0 ? 'is-empty' : 'is-active'}`}>
+                <div className="pipeline-stat-icon">
+                  <Icon name="flower" size="sm" />
+                </div>
+                <div className="pipeline-stat-content">
+                  <span className="pipeline-stat-label">Interviews</span>
+                  {interviewingCount === 0 ? (
+                    <span className="pipeline-empty-hint">Your next milestone</span>
+                  ) : (
+                    <>
+                      <span className="pipeline-stat-value">{interviewingCount}</span>
+                      <span className="pipeline-stat-subtext">conversations</span>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* ═══════════════════════════════════════════════════════════════════
+              SECTION 5: QUICK ACTIONS ROW
+          ═══════════════════════════════════════════════════════════════════ */}
+          <section className="quick-actions-section">
+            <h3 className="section-header">
+              <Icon name="zap" size="sm" />
+              Quick actions
+            </h3>
+            <div className="quick-actions-row">
+              {quickActions.map((action, idx) => (
+                <Link key={idx} to={action.link} className="quick-action-btn">
+                  <Icon name={action.icon} size="sm" />
+                  <span>{action.label}</span>
+                </Link>
+              ))}
+            </div>
+          </section>
+
+          {/* ═══════════════════════════════════════════════════════════════════
+              SECTION 6: PROGRESS TRACKER
+          ═══════════════════════════════════════════════════════════════════ */}
+          <section className="progress-section">
+            <div className="progress-card">
+              <div className="progress-header">
+                <span className="progress-label">Profile completeness</span>
+                <span className="progress-value">{profileCompletion}%</span>
+              </div>
+              <div className="progress-bar">
+                <div
+                  className="progress-fill"
+                  style={{ width: `${profileCompletion}%` }}
+                />
+              </div>
+              <Link to="/profile-analyzer" className="progress-cta">
+                Complete your profile →
+              </Link>
+            </div>
+          </section>
+
+          {/* ═══════════════════════════════════════════════════════════════════
+              SECTION 7: WELLNESS CHECK (if gentle mode)
+          ═══════════════════════════════════════════════════════════════════ */}
           {wellnessMode === 'gentle' && (
-            <section className="dashboard-section">
+            <section className="wellness-section">
               <WellnessCheckin />
             </section>
           )}

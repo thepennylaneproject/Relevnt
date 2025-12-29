@@ -5,6 +5,8 @@ interface VerseContainerProps {
   children: React.ReactNode
   /** Optional additional classes */
   className?: string
+  /** Compact mode for single-line verses */
+  compact?: boolean
 }
 
 /**
@@ -22,11 +24,22 @@ interface VerseContainerProps {
  *   Now comes the listening—
  *   rest is part of the rhythm.
  * </VerseContainer>
+ *
+ * // Compact mode for shorter verses
+ * <VerseContainer compact>
+ *   Every journey begins with a single brave step.
+ * </VerseContainer>
  * ```
  */
-export function VerseContainer({ children, className }: VerseContainerProps) {
+export function VerseContainer({ children, className, compact }: VerseContainerProps) {
+  const classes = [
+    'verse-container',
+    compact && 'verse-container--compact',
+    className
+  ].filter(Boolean).join(' ')
+
   return (
-    <div className={`verse-container ${className || ''}`}>
+    <div className={classes}>
       {children}
     </div>
   )
