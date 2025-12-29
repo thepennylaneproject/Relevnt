@@ -435,29 +435,27 @@ body {
    SECTION 5: TYPOGRAPHY CLASSES
    ════════════════════════════════════════════════════════════════════════════ */
 
-/* Page Titles — Bebas Neue, elegant proportions */
+/* Page Titles — Lora serif, large and bold for elegant hierarchy */
 .heading,
 h1 {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--text-5xl);
+  font-weight: 700;
   letter-spacing: var(--tracking-normal);
   line-height: var(--leading-tight);
   color: var(--color-ink);
   margin: 0;
-  text-transform: none;
-  font-weight: 400;
 }
 
-/* Section Headings — Bebas Neue, still prominent but restrained */
+/* Section Headings — Lora serif, prominent and warm */
 h2, .text-4xl {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--text-4xl);
-  letter-spacing: 0.01em;
+  font-weight: 700;
+  letter-spacing: var(--tracking-normal);
   line-height: var(--leading-tight);
   color: var(--color-ink);
   margin: 0;
-  text-transform: none;
-  font-weight: 400;
 }
 
 /* Subsection Headings — Lora serif, warm and sophisticated */
