@@ -1033,3 +1033,173 @@
     margin-right: 0;
   }
 }
+
+/* ============================================================================
+   NOT INTERESTED BUTTON — Subtle feedback action
+   ============================================================================ */
+
+.btn-not-interested {
+  opacity: 0.7;
+  font-size: 0.8125rem;
+}
+
+.btn-not-interested:hover {
+  opacity: 1;
+  color: var(--color-error);
+}
+
+.btn-not-interested svg {
+  transition: transform 0.15s ease;
+}
+
+.btn-not-interested:hover svg {
+  transform: scale(1.1);
+}
+
+/* ============================================================================
+   MOBILE CARD ACTION HIERARCHY (#6)
+   Prioritize primary actions, collapse secondary to icons
+   ============================================================================ */
+
+@media (max-width: 600px) {
+  /* Feed cards: stack actions vertically */
+  .card-job-feed .card-footer {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .card-job-feed .card-footer .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Primary action (View posting) gets full emphasis */
+  .card-job-feed .card-footer .btn-secondary {
+    order: -1;
+  }
+
+  /* Secondary actions in a row */
+  .card-job-feed .card-footer .btn-ghost,
+  .card-job-feed .card-footer .btn-saved {
+    flex: 1;
+  }
+
+  /* Grid cards: simplify footer */
+  .card-job-grid .card-footer {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .card-job-grid .card-footer .btn {
+    width: 100%;
+    justify-content: center;
+    padding: 10px;
+  }
+
+  /* Hide Not Interested text on mobile, show icon only */
+  .btn-not-interested span:not(.sr-only) {
+    display: none;
+  }
+
+  /* Adjust card padding for mobile */
+  .card-job-feed,
+  .card-job-grid {
+    padding: 16px;
+  }
+
+  /* Reduce meta item gaps */
+  .card-meta {
+    gap: 8px;
+  }
+
+  .meta-item {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+  }
+}
+
+/* ============================================================================
+   FINAL VISUAL POLISH (#9)
+   Consistent spacing, typography, and color refinements
+   ============================================================================ */
+
+/* Jobs page container */
+.jobs-page {
+  padding-bottom: var(--space-8, 32px);
+}
+
+/* Feed stack spacing */
+.feed-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 16px);
+}
+
+/* Improved card shadows on hover */
+.card-job-feed:hover,
+.card-job-grid:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+:root.dark .card-job-feed:hover,
+:root.dark .card-job-grid:hover,
+[data-theme="dark"] .card-job-feed:hover,
+[data-theme="dark"] .card-job-grid:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* Consistent border radius */
+.card-job-feed,
+.card-job-grid,
+.relevance-tuner,
+.feed-filters {
+  border-radius: var(--radius-lg, 12px);
+}
+
+/* Card title truncation for long titles */
+.card-job-feed .card-header h3,
+.card-job-grid .card-header h3 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Improved meta item icons */
+.meta-item svg {
+  flex-shrink: 0;
+}
+
+/* Transparency line styling */
+.jobs-transparency-line {
+  font-size: 0.8125rem;
+  color: var(--color-ink-tertiary);
+  font-style: italic;
+  margin-bottom: var(--space-4, 16px);
+  padding: 8px 12px;
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-md, 8px);
+  border-left: 3px solid var(--color-accent);
+}
+
+/* Improved filter section spacing */
+.jobs-sidebar > div:not(:last-child) {
+  padding-bottom: var(--space-4, 16px);
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: var(--space-4, 16px);
+}
+
+/* Empty state improvements */
+.empty-state {
+  text-align: center;
+  padding: var(--space-8, 32px) var(--space-4, 16px);
+}
+
+.empty-state .empty-icon {
+  margin-bottom: var(--space-4, 16px);
+  opacity: 0.5;
+}
+
+.empty-state__description {
+  max-width: 400px;
+  margin: 0 auto var(--space-4, 16px);
+}

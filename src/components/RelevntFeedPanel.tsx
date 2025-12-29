@@ -7,6 +7,7 @@ import { NetworkingOverlay } from './networking/NetworkingOverlay'
 import type { MatchJobsResult } from '../hooks/useMatchJobs'
 import type { MatchFactors } from '../lib/matchJobs'
 import Icon from './ui/Icon'
+import { useToast } from './ui/Toast'
 import { copy } from '../lib/copy'
 
 type JobLike = {
@@ -46,6 +47,7 @@ export function RelevntFeedPanel({
     useMatchJobs()
   const { trackInteraction } = useJobInteractions()
   const { companies: networkingCompanies, companyCounts } = useNetworkingCompanies()
+  const { showToast } = useToast()
 
   const [dismissedJobIds, setDismissedJobIds] = useState<Set<string>>(new Set())
   const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set())
@@ -59,12 +61,13 @@ export function RelevntFeedPanel({
   const handleDismissJob = useCallback((jobId: string, matchScore: number, matchFactors?: MatchFactors) => {
     setRecentlyDismissed(jobId)
     trackInteraction(jobId, 'dismiss', matchScore, matchFactors || null, activePersona?.id || null)
+    showToast("Thanks, we'll adjust your future matches.", 'info', 3000)
     // Delay removal to show animation
     setTimeout(() => {
       setDismissedJobIds(prev => new Set(prev).add(jobId))
       setRecentlyDismissed(null)
     }, 400)
-  }, [trackInteraction, activePersona?.id])
+  }, [trackInteraction, activePersona?.id, showToast])
 
   // Handle saving a job with visual feedback
   const handleSaveJob = useCallback((jobId: string, matchScore: number, matchFactors?: MatchFactors) => {
@@ -75,13 +78,15 @@ export function RelevntFeedPanel({
         next.delete(jobId)
         return next
       })
+      showToast('Removed from saved jobs', 'info', 2500)
     } else {
       setSavedJobIds(prev => new Set(prev).add(jobId))
       setRecentlySaved(jobId)
       setTimeout(() => setRecentlySaved(null), 1500)
+      showToast('Saved to My Jobs → Discovered', 'success', 3000)
     }
     trackInteraction(jobId, isAlreadySaved ? 'unsave' : 'save', matchScore, matchFactors || null, activePersona?.id || null)
-  }, [trackInteraction, activePersona?.id, savedJobIds])
+  }, [trackInteraction, activePersona?.id, savedJobIds, showToast])
 
   // run matching whenever active persona changes
   useEffect(() => {
@@ -286,10 +291,11 @@ export function RelevntFeedPanel({
                   </button>
                   <button
                     type="button"
-                    className="btn btn-ghost btn-with-icon"
+                    className="btn btn-ghost btn-with-icon btn-not-interested"
                     onClick={() => handleDismissJob(m.job_id, m.score)}
+                    aria-label="Not interested in this job"
                   >
-                    <Icon name="x" size="sm" /> Dismiss
+                    <Icon name="x" size="sm" /> Not Interested
                   </button>
                   {/* Keep "Why this match" as a ghost button? The prompt didn't include it in the template, 
                       but it's good functionality. I'll omit it to strictly follow the template unless it's critical. 
