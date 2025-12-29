@@ -1,6 +1,12 @@
 /* ============================================================================
-   MARGIN NAVIGATION STYLES — INK & IVORY
+   MARGIN NAVIGATION STYLES — Enhanced UX
    Uses design tokens from design-tokens.css
+
+   Improvements:
+   - Better contrast for accessibility (WCAG AA)
+   - Enhanced hover/active states
+   - Tooltips on hover
+   - Larger touch targets (44px min)
    ============================================================================ */
 
 .margin-nav {
@@ -15,17 +21,17 @@
   padding: 16px 8px;
   z-index: var(--z-sticky, 100);
   pointer-events: none;
-  
+
   /* Elevated container with gradient and subtle texture */
   background: linear-gradient(
     to bottom,
     var(--color-surface) 0%,
     var(--color-bg-alt) 100%
   );
-  
+
   /* Refined border with inner glow */
   border-right: 1px solid var(--color-graphite-faint);
-  box-shadow: 
+  box-shadow:
     inset -8px 0 24px -12px rgba(0, 0, 0, 0.04),
     4px 0 20px rgba(0, 0, 0, 0.03);
 }
@@ -61,22 +67,55 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  /* Improved contrast - darker text for better readability */
   color: var(--color-ink-secondary);
   text-decoration: none;
   font-family: var(--font-display);
-  font-size: 9px;
-  letter-spacing: 0.08em;
-  padding: 12px 10px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  /* Larger touch target (44px min) */
+  padding: 14px 12px;
+  min-height: 44px;
+  min-width: 72px;
   border-radius: var(--radius-lg);
   position: relative;
-  
+
   /* Smooth, elevated transitions */
-  transition: 
+  transition:
     color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
     background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
     box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
     transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Tooltip on hover */
+.margin-nav__item::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 6px 12px;
+  background: var(--color-ink);
+  color: var(--color-ink-inverse);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  border-radius: var(--radius-md);
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  pointer-events: none;
+  z-index: 100;
+  box-shadow: var(--shadow-md);
+}
+
+.margin-nav__item:hover::after {
+  opacity: 1;
+  visibility: visible;
 }
 
 .margin-nav__item.active,
@@ -115,8 +154,19 @@
 .margin-nav__item:hover {
   color: var(--color-ink);
   background-color: var(--color-surface-hover);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transform: translateX(2px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transform: translateX(3px);
+}
+
+/* Focus state for keyboard navigation */
+.margin-nav__item:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Increase icon visibility on hover */
+.margin-nav__item:hover .margin-nav__icon {
+  color: var(--color-ink);
 }
 
 .margin-nav__icon {
@@ -304,5 +354,80 @@
 
   .margin-nav__label {
     font-size: 9px;
+  }
+}
+
+/* ============================================================================
+   DARK MODE ENHANCEMENTS
+   Better contrast for accessibility
+   ============================================================================ */
+
+:root.dark .margin-nav,
+[data-theme="dark"] .margin-nav {
+  background: linear-gradient(
+    to bottom,
+    var(--color-bg-secondary) 0%,
+    var(--color-bg) 100%
+  );
+  border-right-color: var(--color-graphite-faint);
+}
+
+:root.dark .margin-nav__item,
+[data-theme="dark"] .margin-nav__item {
+  color: var(--ivory-400);
+}
+
+:root.dark .margin-nav__item:hover,
+[data-theme="dark"] .margin-nav__item:hover {
+  color: var(--ivory-100);
+  background-color: var(--color-bg-tertiary);
+}
+
+:root.dark .margin-nav__item.active,
+:root.dark .margin-nav__item.nav-item--active,
+[data-theme="dark"] .margin-nav__item.active,
+[data-theme="dark"] .margin-nav__item.nav-item--active {
+  color: var(--color-accent);
+  background-color: rgba(184, 138, 118, 0.15);
+}
+
+:root.dark .margin-nav__item::after,
+[data-theme="dark"] .margin-nav__item::after {
+  background: var(--ivory-100);
+  color: var(--ink-900);
+}
+
+/* ============================================================================
+   ACCESSIBILITY
+   ============================================================================ */
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .margin-nav__item {
+    transition: none;
+  }
+
+  .margin-nav__item::after {
+    transition: none;
+  }
+
+  .margin-nav {
+    transition: none;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .margin-nav__item {
+    border: 1px solid transparent;
+  }
+
+  .margin-nav__item:hover {
+    border-color: var(--color-ink);
+  }
+
+  .margin-nav__item.active,
+  .margin-nav__item.nav-item--active {
+    border-color: var(--color-accent);
   }
 }
