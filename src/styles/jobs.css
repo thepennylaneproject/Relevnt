@@ -734,3 +734,708 @@
   gap: 10px;
   font-size: 0.875rem;
 }
+
+/* ============================================================================
+   MATCH SCORE BADGE — Redesigned
+   Clear percentage display with color-coded tiers
+   ============================================================================ */
+
+.badge-match-score {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  cursor: help;
+  position: relative;
+}
+
+.badge-match-score .match-score-value {
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: var(--font-mono, monospace);
+}
+
+.badge-match-score .match-score-label {
+  font-size: 0.6875rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+/* High match (70%+) — Green/Success */
+.badge-match-score.high {
+  background: linear-gradient(135deg, #059669 0%, #10B981 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+/* Medium match (50-69%) — Amber/Warning */
+.badge-match-score.medium {
+  background: linear-gradient(135deg, #D97706 0%, #F59E0B 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+/* Low match (<50%) — Muted Gray */
+.badge-match-score.low {
+  background: var(--color-bg-tertiary);
+  color: var(--color-ink-secondary);
+  border: 1px solid var(--border);
+}
+
+/* Hover state to hint at tooltip */
+.badge-match-score:hover {
+  transform: scale(1.05);
+}
+
+/* Modal match pill — same color coding */
+.feed-match-pill.high {
+  background: linear-gradient(135deg, #059669 0%, #10B981 100%);
+  color: white;
+}
+
+.feed-match-pill.medium {
+  background: linear-gradient(135deg, #D97706 0%, #F59E0B 100%);
+  color: white;
+}
+
+.feed-match-pill.low {
+  background: var(--color-bg-tertiary);
+  color: var(--color-ink-secondary);
+}
+
+/* ============================================================================
+   SAVE/DISMISS FEEDBACK ANIMATIONS
+   ============================================================================ */
+
+/* Card dismiss animation */
+.card-job-feed.is-dismissing {
+  opacity: 0;
+  transform: translateX(-20px) scale(0.95);
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Card save confirmation flash */
+.card-job-feed.just-saved {
+  animation: saveFlash 0.6s ease-out;
+}
+
+@keyframes saveFlash {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+  }
+  100% {
+    box-shadow: var(--shadow-md);
+  }
+}
+
+/* Saved button state */
+.btn-saved {
+  background: rgba(16, 185, 129, 0.1) !important;
+  color: #059669 !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+}
+
+.btn-saved:hover {
+  background: rgba(16, 185, 129, 0.15) !important;
+}
+
+.btn-saved svg {
+  fill: #059669;
+}
+
+/* ============================================================================
+   TAB ENHANCEMENTS — Tooltips and clarity
+   ============================================================================ */
+
+.tabs {
+  position: relative;
+}
+
+.tab {
+  position: relative;
+}
+
+/* Tab tooltip on hover */
+.tab[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(100% + 8px);
+  padding: 8px 12px;
+  background: var(--color-ink);
+  color: var(--color-ink-inverse);
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  pointer-events: none;
+  z-index: 100;
+  box-shadow: var(--shadow-md);
+  max-width: 250px;
+  white-space: normal;
+  text-align: center;
+}
+
+.tab[data-tooltip]:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Tab icons for better recognition */
+.tab .tab-icon {
+  width: 16px;
+  height: 16px;
+  opacity: 0.7;
+}
+
+.tab.active .tab-icon {
+  opacity: 1;
+}
+
+/* ============================================================================
+   HEADER REFINEMENTS — Remove undefined TRACK label
+   ============================================================================ */
+
+.page-header .label {
+  display: none; /* Hide undefined TRACK label for now */
+}
+
+/* ============================================================================
+   DARK MODE ADJUSTMENTS
+   ============================================================================ */
+
+:root.dark .badge-match-score.low,
+[data-theme="dark"] .badge-match-score.low {
+  background: var(--color-bg-tertiary);
+  color: var(--ivory-400);
+  border-color: var(--border);
+}
+
+:root.dark .btn-saved,
+[data-theme="dark"] .btn-saved {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #34D399 !important;
+  border-color: rgba(16, 185, 129, 0.25) !important;
+}
+
+:root.dark .tab[data-tooltip]::after,
+[data-theme="dark"] .tab[data-tooltip]::after {
+  background: var(--ivory-100);
+  color: var(--ink-900);
+}
+
+/* ============================================================================
+   CARD GRID IMPROVEMENTS
+   ============================================================================ */
+
+/* Small badge variant for grid cards */
+.badge-match-score.badge-sm {
+  padding: 4px 8px;
+  font-size: 0.6875rem;
+}
+
+.badge-match-score.badge-sm .match-score-value {
+  font-size: 0.8125rem;
+}
+
+.badge-match-score.badge-sm .match-score-label {
+  display: none;
+}
+
+/* Card header flex layout */
+.card-job-grid .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.card-job-grid .card-header h3 {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Remote tag styling */
+.tag-remote {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+:root.dark .tag-remote,
+[data-theme="dark"] .tag-remote {
+  background: rgba(52, 211, 153, 0.15);
+  color: #34D399;
+  border-color: rgba(52, 211, 153, 0.2);
+}
+
+/* Card footer improvements */
+.card-job-grid .card-footer {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.card-job-grid .card-footer .btn {
+  flex: 1;
+}
+
+.card-job-grid .card-footer .btn:last-child {
+  flex: 0 0 auto;
+}
+
+/* ============================================================================
+   ACCESSIBILITY — Focus states
+   ============================================================================ */
+
+.badge-match-score:focus-visible,
+.btn:focus-visible,
+.tab:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ============================================================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  .badge-match-score {
+    padding: 4px 10px;
+  }
+
+  .badge-match-score .match-score-value {
+    font-size: 0.875rem;
+  }
+
+  .badge-match-score .match-score-label {
+    display: none;
+  }
+
+  .tab[data-tooltip]::after {
+    display: none;
+  }
+
+  .tab .tab-icon {
+    margin-right: 0;
+  }
+}
+
+/* ============================================================================
+   NOT INTERESTED BUTTON — Subtle feedback action
+   ============================================================================ */
+
+.btn-not-interested {
+  opacity: 0.7;
+  font-size: 0.8125rem;
+}
+
+.btn-not-interested:hover {
+  opacity: 1;
+  color: var(--color-error);
+}
+
+.btn-not-interested svg {
+  transition: transform 0.15s ease;
+}
+
+.btn-not-interested:hover svg {
+  transform: scale(1.1);
+}
+
+/* ============================================================================
+   MOBILE CARD ACTION HIERARCHY (#6)
+   Prioritize primary actions, collapse secondary to icons
+   ============================================================================ */
+
+@media (max-width: 600px) {
+  /* Feed cards: stack actions vertically */
+  .card-job-feed .card-footer {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .card-job-feed .card-footer .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Primary action (View posting) gets full emphasis */
+  .card-job-feed .card-footer .btn-secondary {
+    order: -1;
+  }
+
+  /* Secondary actions in a row */
+  .card-job-feed .card-footer .btn-ghost,
+  .card-job-feed .card-footer .btn-saved {
+    flex: 1;
+  }
+
+  /* Grid cards: simplify footer */
+  .card-job-grid .card-footer {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .card-job-grid .card-footer .btn {
+    width: 100%;
+    justify-content: center;
+    padding: 10px;
+  }
+
+  /* Hide Not Interested text on mobile, show icon only */
+  .btn-not-interested span:not(.sr-only) {
+    display: none;
+  }
+
+  /* Adjust card padding for mobile */
+  .card-job-feed,
+  .card-job-grid {
+    padding: 16px;
+  }
+
+  /* Reduce meta item gaps */
+  .card-meta {
+    gap: 8px;
+  }
+
+  .meta-item {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+  }
+}
+
+/* ============================================================================
+   FINAL VISUAL POLISH (#9)
+   Consistent spacing, typography, and color refinements
+   ============================================================================ */
+
+/* Jobs page container */
+.jobs-page {
+  padding-bottom: var(--space-8, 32px);
+}
+
+/* Feed stack spacing */
+.feed-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 16px);
+}
+
+/* Improved card shadows on hover */
+.card-job-feed:hover,
+.card-job-grid:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+:root.dark .card-job-feed:hover,
+:root.dark .card-job-grid:hover,
+[data-theme="dark"] .card-job-feed:hover,
+[data-theme="dark"] .card-job-grid:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* Consistent border radius */
+.card-job-feed,
+.card-job-grid,
+.relevance-tuner,
+.feed-filters {
+  border-radius: var(--radius-lg, 12px);
+}
+
+/* Card title truncation for long titles */
+.card-job-feed .card-header h3,
+.card-job-grid .card-header h3 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Improved meta item icons */
+.meta-item svg {
+  flex-shrink: 0;
+}
+
+/* Transparency line styling */
+.jobs-transparency-line {
+  font-size: 0.8125rem;
+  color: var(--color-ink-tertiary);
+  font-style: italic;
+  margin-bottom: var(--space-4, 16px);
+  padding: 8px 12px;
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-md, 8px);
+  border-left: 3px solid var(--color-accent);
+}
+
+/* Improved filter section spacing */
+.jobs-sidebar > div:not(:last-child) {
+  padding-bottom: var(--space-4, 16px);
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: var(--space-4, 16px);
+}
+
+/* Empty state improvements */
+.empty-state {
+  text-align: center;
+  padding: var(--space-8, 32px) var(--space-4, 16px);
+}
+
+.empty-state .empty-icon {
+  margin-bottom: var(--space-4, 16px);
+  opacity: 0.5;
+}
+
+.empty-state__description {
+  max-width: 400px;
+  margin: 0 auto var(--space-4, 16px);
+}
+
+/* ============================================================================
+   QUICK APPLY MODAL (#4)
+   One-click application with Light Profile preview
+   ============================================================================ */
+
+.quick-apply-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.quick-apply-modal {
+  background: var(--color-surface, #fff);
+  border-radius: var(--radius-lg, 12px);
+  max-width: 480px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.25s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.quick-apply-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border-subtle, #eee);
+}
+
+.quick-apply-title {
+  font-family: var(--font-display, 'Crimson Text', serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  margin: 0 0 4px 0;
+}
+
+.quick-apply-subtitle {
+  font-size: 0.875rem;
+  color: var(--color-ink-secondary);
+  margin: 0;
+}
+
+.quick-apply-close {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  color: var(--color-ink-tertiary);
+  border-radius: var(--radius-md);
+  transition: all 0.15s ease;
+}
+
+.quick-apply-close:hover {
+  background: var(--color-bg-tertiary);
+  color: var(--color-ink);
+}
+
+.quick-apply-body {
+  padding: 24px;
+}
+
+.quick-apply-loading,
+.quick-apply-error {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--color-ink-secondary);
+}
+
+.quick-apply-loading svg,
+.quick-apply-error svg {
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.quick-apply-error {
+  color: var(--color-error);
+}
+
+.quick-apply-section {
+  margin-bottom: 20px;
+}
+
+.quick-apply-section:last-child {
+  margin-bottom: 0;
+}
+
+.quick-apply-section-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-ink-tertiary);
+  margin: 0 0 8px 0;
+}
+
+.quick-apply-profile {
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+}
+
+.profile-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.875rem;
+  color: var(--color-ink);
+  padding: 4px 0;
+}
+
+.profile-row svg {
+  color: var(--color-ink-tertiary);
+  flex-shrink: 0;
+}
+
+.quick-apply-resume {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+}
+
+.quick-apply-resume svg {
+  color: var(--color-accent);
+}
+
+.quick-apply-resume.no-resume {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.quick-apply-resume .resume-warning {
+  font-size: 0.75rem;
+  color: var(--color-warning);
+  margin-top: 4px;
+}
+
+.quick-apply-persona {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+}
+
+.quick-apply-persona svg {
+  color: var(--color-accent);
+}
+
+.quick-apply-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-subtle, #eee);
+}
+
+.quick-apply-footer .btn-primary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Quick Apply Button on Cards */
+.btn-quick-apply {
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover, #C39463) 100%);
+  color: white;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.btn-quick-apply:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(var(--color-accent-rgb, 195, 148, 99), 0.3);
+}
+
+.btn-quick-apply:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Applied state */
+.btn-applied {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  cursor: default;
+}
+
+.btn-applied:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Dark mode adjustments */
+:root.dark .quick-apply-modal,
+[data-theme="dark"] .quick-apply-modal {
+  background: var(--color-surface);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+:root.dark .quick-apply-overlay,
+[data-theme="dark"] .quick-apply-overlay {
+  background: rgba(0, 0, 0, 0.7);
+}

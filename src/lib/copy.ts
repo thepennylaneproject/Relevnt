@@ -75,8 +75,8 @@ export const copy = {
     pageSubtitle: "Browse your ranked feed or explore the full stream when you're in that mood.",
     transparencyLine: "These jobs are ranked based on your persona, résumé, and filters — no mystery scoring.",
     tabs: {
-      feed: "Relevnt Feed",
-      all: "All jobs",
+      feed: "For You",
+      all: "Browse All",
     },
     feedContext: {
       title: "Your personalized feed",

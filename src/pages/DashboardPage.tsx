@@ -316,7 +316,7 @@ export default function DashboardPage(): JSX.Element {
               </h3>
               <div className="priority-cards">
                 {todaysPriorities.map((item, idx) => (
-                  <Link key={idx} to={item.link} className="priority-card">
+                  <Link key={idx} to={item.link} className={`priority-card ${item.badge ? 'has-badge' : ''}`}>
                     <div className="priority-card-icon">
                       <Icon name={item.icon} size="md" />
                     </div>
@@ -325,7 +325,9 @@ export default function DashboardPage(): JSX.Element {
                       <span className="priority-card-action">{item.action}</span>
                     </div>
                     {item.badge && (
-                      <span className="priority-badge">{item.badge}</span>
+                      <span className={`priority-badge ${item.badge === 'Priority' ? 'priority-badge--urgent' : ''}`}>
+                        {item.badge}
+                      </span>
                     )}
                     <Icon name="chevron-right" size="sm" className="priority-arrow" />
                   </Link>
@@ -333,6 +335,24 @@ export default function DashboardPage(): JSX.Element {
               </div>
             </section>
           )}
+
+          {/* ═══════════════════════════════════════════════════════════════════
+              SECTION 3: QUICK ACTIONS ROW (moved up for visibility)
+          ═══════════════════════════════════════════════════════════════════ */}
+          <section className="quick-actions-section quick-actions-section--prominent">
+            <h3 className="section-header">
+              <Icon name="zap" size="sm" />
+              Quick actions
+            </h3>
+            <div className="quick-actions-row">
+              {quickActions.map((action, idx) => (
+                <Link key={idx} to={action.link} className="quick-action-btn">
+                  <Icon name={action.icon} size="sm" />
+                  <span>{action.label}</span>
+                </Link>
+              ))}
+            </div>
+          </section>
 
           {/* ═══════════════════════════════════════════════════════════════════
               SECTION 3: FOUNDATION CARDS (Two-column grid)
@@ -365,7 +385,7 @@ export default function DashboardPage(): JSX.Element {
           </section>
 
           {/* ═══════════════════════════════════════════════════════════════════
-              SECTION 4: PIPELINE STATUS (Multi-column, guided empty states)
+              SECTION 4: PIPELINE STATUS (Multi-column, interactive, guided empty states)
           ═══════════════════════════════════════════════════════════════════ */}
           <section className="pipeline-section">
             <h3 className="section-header">
@@ -373,16 +393,19 @@ export default function DashboardPage(): JSX.Element {
               Where you are in your search
             </h3>
             <div className="pipeline-grid">
-              <div className={`pipeline-stat ${discoveredCount === 0 ? 'is-empty' : ''}`}>
+              <Link
+                to="/jobs"
+                className={`pipeline-stat pipeline-stat--clickable ${discoveredCount === 0 ? 'is-empty' : ''}`}
+              >
                 <div className="pipeline-stat-icon">
                   <Icon name="seeds" size="sm" />
                 </div>
                 <div className="pipeline-stat-content">
                   <span className="pipeline-stat-label">Discovered</span>
                   {discoveredCount === 0 ? (
-                    <Link to="/jobs" className="pipeline-empty-cta">
-                      Ready to start? Discover your first 5 picks →
-                    </Link>
+                    <span className="pipeline-empty-cta">
+                      Start with 5 picks →
+                    </span>
                   ) : (
                     <>
                       <span className="pipeline-stat-value">{discoveredCount}</span>
@@ -390,9 +413,12 @@ export default function DashboardPage(): JSX.Element {
                     </>
                   )}
                 </div>
-              </div>
+              </Link>
 
-              <div className={`pipeline-stat ${appliedCount === 0 ? 'is-empty' : ''}`}>
+              <Link
+                to="/applications"
+                className={`pipeline-stat pipeline-stat--clickable ${appliedCount === 0 ? 'is-empty' : ''}`}
+              >
                 <div className="pipeline-stat-icon">
                   <Icon name="paper-airplane" size="sm" />
                 </div>
@@ -407,9 +433,12 @@ export default function DashboardPage(): JSX.Element {
                     </>
                   )}
                 </div>
-              </div>
+              </Link>
 
-              <div className={`pipeline-stat ${appliedCount - interviewingCount === 0 ? 'is-empty' : ''}`}>
+              <Link
+                to="/applications?status=awaiting"
+                className={`pipeline-stat pipeline-stat--clickable ${appliedCount - interviewingCount === 0 ? 'is-empty' : ''}`}
+              >
                 <div className="pipeline-stat-icon">
                   <Icon name="candle" size="sm" />
                 </div>
@@ -424,9 +453,12 @@ export default function DashboardPage(): JSX.Element {
                     </>
                   )}
                 </div>
-              </div>
+              </Link>
 
-              <div className={`pipeline-stat ${interviewingCount === 0 ? 'is-empty' : 'is-active'}`}>
+              <Link
+                to="/applications?status=interviewing"
+                className={`pipeline-stat pipeline-stat--clickable ${interviewingCount === 0 ? 'is-empty' : 'is-active'}`}
+              >
                 <div className="pipeline-stat-icon">
                   <Icon name="flower" size="sm" />
                 </div>
@@ -441,46 +473,47 @@ export default function DashboardPage(): JSX.Element {
                     </>
                   )}
                 </div>
-              </div>
+              </Link>
             </div>
           </section>
 
           {/* ═══════════════════════════════════════════════════════════════════
-              SECTION 5: QUICK ACTIONS ROW
-          ═══════════════════════════════════════════════════════════════════ */}
-          <section className="quick-actions-section">
-            <h3 className="section-header">
-              <Icon name="zap" size="sm" />
-              Quick actions
-            </h3>
-            <div className="quick-actions-row">
-              {quickActions.map((action, idx) => (
-                <Link key={idx} to={action.link} className="quick-action-btn">
-                  <Icon name={action.icon} size="sm" />
-                  <span>{action.label}</span>
-                </Link>
-              ))}
-            </div>
-          </section>
-
-          {/* ═══════════════════════════════════════════════════════════════════
-              SECTION 6: PROGRESS TRACKER
+              SECTION 5: PROGRESS TRACKER
           ═══════════════════════════════════════════════════════════════════ */}
           <section className="progress-section">
             <div className="progress-card">
               <div className="progress-header">
-                <span className="progress-label">Profile completeness</span>
-                <span className="progress-value">{profileCompletion}%</span>
+                <span className="progress-label">
+                  Profile completeness
+                  <span
+                    className="progress-tooltip-trigger"
+                    title="Your profile strength is calculated based on resume completeness, skills listed, work history, and profile photo."
+                  >
+                    <Icon name="alert-triangle" size="sm" />
+                  </span>
+                </span>
+                <span className={`progress-value ${profileCompletion < 80 ? 'progress-value--warning' : 'progress-value--good'}`}>
+                  {profileCompletion}%
+                </span>
               </div>
               <div className="progress-bar">
                 <div
-                  className="progress-fill"
+                  className={`progress-fill ${profileCompletion < 50 ? 'progress-fill--low' : profileCompletion < 80 ? 'progress-fill--medium' : 'progress-fill--high'}`}
                   style={{ width: `${profileCompletion}%` }}
                 />
               </div>
-              <Link to="/profile-analyzer" className="progress-cta">
-                Complete your profile →
-              </Link>
+              <div className="progress-footer">
+                <span className="progress-hint">
+                  {profileCompletion < 50
+                    ? 'Add more details to stand out'
+                    : profileCompletion < 80
+                      ? 'Almost there! A few more tweaks'
+                      : 'Looking great!'}
+                </span>
+                <Link to="/profile-analyzer" className="progress-cta">
+                  {profileCompletion < 80 ? 'Improve profile' : 'View profile'} →
+                </Link>
+              </div>
             </div>
           </section>
 

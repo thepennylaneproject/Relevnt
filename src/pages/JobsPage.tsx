@@ -6,6 +6,7 @@ import PageBackground from '../components/shared/PageBackground'
 import { Container } from '../components/shared/Container'
 import { Icon } from '../components/ui/Icon'
 import { EmptyState } from '../components/ui/EmptyState'
+import { useToast } from '../components/ui/Toast'
 import { copy } from '../lib/copy'
 import type { JobRow } from '../shared/types'
 import { usePersonas } from '../hooks/usePersonas'
@@ -44,6 +45,7 @@ export default function JobsPage() {
   const [activeTab, setActiveTab] = useState<'feed' | 'browse'>('feed')
   const { user } = useAuth()
   const { activePersona, personas, setActivePersona } = usePersonas()
+  const { showToast } = useToast()
 
   // browse side (jobs list from Supabase)
   const [jobs, setJobs] = useState<JobRow[]>([])
@@ -285,7 +287,7 @@ export default function JobsPage() {
   const toggleSavedJob = useCallback(
     async (jobId: string) => {
       if (!user) {
-        // future: open sign in prompt
+        showToast('Sign in to save jobs', 'warning', 3000)
         return
       }
 
@@ -301,10 +303,12 @@ export default function JobsPage() {
 
           if (error) {
             console.warn('Failed to unsave job', error)
+            showToast('Failed to remove job', 'error', 3000)
             return
           }
 
           setSavedJobIds((prev) => prev.filter((id) => id !== jobId))
+          showToast('Removed from saved jobs', 'info', 2500)
         } else {
           const { error } = await supabase.from('saved_jobs').insert({
             user_id: user.id,
@@ -313,16 +317,19 @@ export default function JobsPage() {
 
           if (error) {
             console.warn('Failed to save job', error)
+            showToast('Failed to save job', 'error', 3000)
             return
           }
 
           setSavedJobIds((prev) => (prev.includes(jobId) ? prev : [...prev, jobId]))
+          showToast('Saved to My Jobs → Discovered', 'success', 3000)
         }
       } catch (err) {
         console.warn('Unexpected error toggling saved job', err)
+        showToast('Something went wrong', 'error', 3000)
       }
     },
-    [user, savedJobIds]
+    [user, savedJobIds, showToast]
   )
 
   const handleClearFilters = useCallback(() => {
@@ -667,6 +674,14 @@ export default function JobsPage() {
                   <div key={job.id} className="card card-job-grid">
                     <div className="card-header">
                       <h3>{job.title}</h3>
+                      {matchScore !== null && (
+                        <span
+                          className={`badge badge-match-score badge-sm ${matchScore >= 70 ? 'high' : matchScore >= 50 ? 'medium' : 'low'}`}
+                          title="AI-calculated match score based on your profile"
+                        >
+                          <span className="match-score-value">{matchScore}%</span>
+                        </span>
+                      )}
                     </div>
 
                     <div className="card-company">
@@ -674,6 +689,12 @@ export default function JobsPage() {
                     </div>
 
                     <div className="card-meta">
+                      {salaryLabel && (
+                        <span className="meta-item">
+                          <Icon name="dollar" size="sm" hideAccent />
+                          {salaryLabel}
+                        </span>
+                      )}
                       {job.employment_type && (
                         <span className="meta-item">
                           <Icon name="briefcase" size="sm" hideAccent />
@@ -683,13 +704,13 @@ export default function JobsPage() {
                       {postedLabel && (
                         <span className="meta-item">
                           <Icon name="pocket-watch" size="sm" hideAccent />
-                          Posted {postedLabel}
+                          {postedLabel}
                         </span>
                       )}
                     </div>
 
                     <div className="card-tags">
-                      {isRemote && <span className="tag">remote</span>}
+                      {isRemote && <span className="tag tag-remote">Remote</span>}
                       {job.source_slug && <span className="tag">{job.source_slug}</span>}
                     </div>
 
@@ -707,9 +728,11 @@ export default function JobsPage() {
                       <button
                         type="button"
                         onClick={() => toggleSavedJob(job.id)}
-                        className={`btn btn-ghost btn-sm btn-with-icon ${isSaved ? 'is-active' : ''}`}
+                        className={`btn btn-sm btn-with-icon ${isSaved ? 'btn-saved is-active' : 'btn-ghost'}`}
+                        aria-label={isSaved ? 'Remove from saved' : 'Save job'}
                       >
                         <Icon name="bookmark" size="sm" hideAccent />
+                        {isSaved ? 'Saved' : 'Save'}
                       </button>
                     </div>
                   </div>
@@ -753,14 +776,20 @@ export default function JobsPage() {
                 type="button"
                 className={`tab ${activeTab === 'feed' ? 'active' : ''}`}
                 onClick={() => setActiveTab('feed')}
+                data-tooltip="AI-ranked jobs based on your persona, resume, and preferences"
+                aria-label="View your personalized Relevnt Feed"
               >
+                <Icon name="wand" size="sm" className="tab-icon" />
                 {copy.jobs.tabs.feed}
               </button>
               <button
                 type="button"
                 className={`tab ${activeTab === 'browse' ? 'active' : ''}`}
                 onClick={() => setActiveTab('browse')}
+                data-tooltip="Browse all available jobs with filters — no AI ranking applied"
+                aria-label="Browse all jobs"
               >
+                <Icon name="list" size="sm" className="tab-icon" />
                 {copy.jobs.tabs.all}
               </button>
             </div>
