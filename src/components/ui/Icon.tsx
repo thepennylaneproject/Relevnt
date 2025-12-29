@@ -52,7 +52,9 @@ export type IconName =
   | 'zap'
   | 'bookmark'
   | 'x'
-  | 'map-pin';
+  | 'map-pin'
+  | 'wand'
+  | 'list';
 
 export type IconSize = 'sm' | 'md' | 'lg' | 'xl' | 'hero';
 
@@ -420,6 +422,30 @@ const iconDefinitions: Record<IconName, IconDefinition> = {
       'M32 30a6 6 0 1 0 0-12 6 6 0 0 0 0 12z',
     ],
     dotPosition: { cx: 32, cy: 24 },
+  },
+  wand: {
+    paths: [
+      // Wand body
+      'M12 52L44 20',
+      // Wand tip sparkles
+      'M48 16l4-8M52 16l8 4M56 20l-4 8M52 24l-8-4',
+      // Sparkle at tip
+      'M52 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z',
+      // Star sparkles
+      'M28 28l-4-4M20 32l-4 0M24 40l-4 4',
+    ],
+    dotPosition: { cx: 52, cy: 12 },
+  },
+  list: {
+    paths: [
+      // Bullet points
+      'M12 16a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
+      'M12 35a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
+      'M12 54a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
+      // Lines
+      'M22 13h30M22 32h30M22 51h30',
+    ],
+    dotPosition: { cx: 37, cy: 32 },
   },
 };
 
