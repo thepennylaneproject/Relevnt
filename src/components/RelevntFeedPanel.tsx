@@ -4,6 +4,7 @@ import { usePersonas } from '../hooks/usePersonas'
 import { useJobInteractions } from '../hooks/useJobInteractions'
 import { useNetworkingCompanies, checkCompanyMatch } from '../hooks/useNetworkLookup'
 import { NetworkingOverlay } from './networking/NetworkingOverlay'
+import { QuickApplyModal } from './jobs/QuickApplyModal'
 import type { MatchJobsResult } from '../hooks/useMatchJobs'
 import type { MatchFactors } from '../lib/matchJobs'
 import Icon from './ui/Icon'
@@ -51,11 +52,18 @@ export function RelevntFeedPanel({
 
   const [dismissedJobIds, setDismissedJobIds] = useState<Set<string>>(new Set())
   const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set())
+  const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set())
   const [recentlySaved, setRecentlySaved] = useState<string | null>(null)
   const [recentlyDismissed, setRecentlyDismissed] = useState<string | null>(null)
 
   const [selectedMatch, setSelectedMatch] = useState<MatchJobsResult | null>(null)
   const [showWhyModal, setShowWhyModal] = useState(false)
+  const [quickApplyJob, setQuickApplyJob] = useState<{ id: string; title: string; company: string; external_url?: string | null } | null>(null)
+
+  // Handle successful Quick Apply
+  const handleQuickApplied = useCallback((jobId: string) => {
+    setAppliedJobIds(prev => new Set(prev).add(jobId))
+  }, [])
 
   // Handle dismissing a job with visual feedback
   const handleDismissJob = useCallback((jobId: string, matchScore: number, matchFactors?: MatchFactors) => {
@@ -218,6 +226,7 @@ export function RelevntFeedPanel({
               : []
 
             const isSaved = savedJobIds.has(m.job_id)
+            const isApplied = appliedJobIds.has(m.job_id)
             const isBeingDismissed = recentlyDismissed === m.job_id
             const wasJustSaved = recentlySaved === m.job_id
 
@@ -271,6 +280,29 @@ export function RelevntFeedPanel({
                 )}
 
                 <div className="card-footer">
+                  {/* Quick Apply / Applied button */}
+                  {isApplied ? (
+                    <button
+                      type="button"
+                      className="btn btn-applied btn-with-icon"
+                      disabled
+                    >
+                      <Icon name="check" size="sm" /> Applied
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="btn btn-quick-apply btn-with-icon"
+                      onClick={() => setQuickApplyJob({
+                        id: m.job_id,
+                        title: job.title || 'Job',
+                        company: job.company || 'Company',
+                        external_url: job.external_url,
+                      })}
+                    >
+                      <Icon name="paper-airplane" size="sm" /> Quick Apply
+                    </button>
+                  )}
                   {job.external_url && (
                     <a
                       href={job.external_url}
@@ -278,7 +310,7 @@ export function RelevntFeedPanel({
                       rel="noreferrer"
                       className="btn btn-secondary btn-with-icon"
                     >
-                      View posting <Icon name="chevron-right" size="sm" />
+                      View <Icon name="chevron-right" size="sm" />
                     </a>
                   )}
                   <button
@@ -414,6 +446,17 @@ export function RelevntFeedPanel({
             )}
           </div>
         </div>
+      )}
+
+      {/* Quick Apply Modal */}
+      {quickApplyJob && (
+        <QuickApplyModal
+          job={quickApplyJob}
+          persona={activePersona}
+          isOpen={!!quickApplyJob}
+          onClose={() => setQuickApplyJob(null)}
+          onApplied={handleQuickApplied}
+        />
       )}
     </>
   )

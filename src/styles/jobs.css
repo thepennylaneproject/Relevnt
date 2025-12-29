@@ -1203,3 +1203,239 @@
   max-width: 400px;
   margin: 0 auto var(--space-4, 16px);
 }
+
+/* ============================================================================
+   QUICK APPLY MODAL (#4)
+   One-click application with Light Profile preview
+   ============================================================================ */
+
+.quick-apply-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.quick-apply-modal {
+  background: var(--color-surface, #fff);
+  border-radius: var(--radius-lg, 12px);
+  max-width: 480px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.25s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.quick-apply-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border-subtle, #eee);
+}
+
+.quick-apply-title {
+  font-family: var(--font-display, 'Crimson Text', serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  margin: 0 0 4px 0;
+}
+
+.quick-apply-subtitle {
+  font-size: 0.875rem;
+  color: var(--color-ink-secondary);
+  margin: 0;
+}
+
+.quick-apply-close {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  color: var(--color-ink-tertiary);
+  border-radius: var(--radius-md);
+  transition: all 0.15s ease;
+}
+
+.quick-apply-close:hover {
+  background: var(--color-bg-tertiary);
+  color: var(--color-ink);
+}
+
+.quick-apply-body {
+  padding: 24px;
+}
+
+.quick-apply-loading,
+.quick-apply-error {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--color-ink-secondary);
+}
+
+.quick-apply-loading svg,
+.quick-apply-error svg {
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.quick-apply-error {
+  color: var(--color-error);
+}
+
+.quick-apply-section {
+  margin-bottom: 20px;
+}
+
+.quick-apply-section:last-child {
+  margin-bottom: 0;
+}
+
+.quick-apply-section-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-ink-tertiary);
+  margin: 0 0 8px 0;
+}
+
+.quick-apply-profile {
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+}
+
+.profile-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.875rem;
+  color: var(--color-ink);
+  padding: 4px 0;
+}
+
+.profile-row svg {
+  color: var(--color-ink-tertiary);
+  flex-shrink: 0;
+}
+
+.quick-apply-resume {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+}
+
+.quick-apply-resume svg {
+  color: var(--color-accent);
+}
+
+.quick-apply-resume.no-resume {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.quick-apply-resume .resume-warning {
+  font-size: 0.75rem;
+  color: var(--color-warning);
+  margin-top: 4px;
+}
+
+.quick-apply-persona {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+}
+
+.quick-apply-persona svg {
+  color: var(--color-accent);
+}
+
+.quick-apply-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border-subtle, #eee);
+}
+
+.quick-apply-footer .btn-primary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Quick Apply Button on Cards */
+.btn-quick-apply {
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover, #C39463) 100%);
+  color: white;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.btn-quick-apply:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(var(--color-accent-rgb, 195, 148, 99), 0.3);
+}
+
+.btn-quick-apply:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Applied state */
+.btn-applied {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  cursor: default;
+}
+
+.btn-applied:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Dark mode adjustments */
+:root.dark .quick-apply-modal,
+[data-theme="dark"] .quick-apply-modal {
+  background: var(--color-surface);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+:root.dark .quick-apply-overlay,
+[data-theme="dark"] .quick-apply-overlay {
+  background: rgba(0, 0, 0, 0.7);
+}
