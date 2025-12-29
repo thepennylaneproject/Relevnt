@@ -48,20 +48,40 @@ export function RelevntFeedPanel({
   const { companies: networkingCompanies, companyCounts } = useNetworkingCompanies()
 
   const [dismissedJobIds, setDismissedJobIds] = useState<Set<string>>(new Set())
+  const [savedJobIds, setSavedJobIds] = useState<Set<string>>(new Set())
+  const [recentlySaved, setRecentlySaved] = useState<string | null>(null)
+  const [recentlyDismissed, setRecentlyDismissed] = useState<string | null>(null)
 
   const [selectedMatch, setSelectedMatch] = useState<MatchJobsResult | null>(null)
   const [showWhyModal, setShowWhyModal] = useState(false)
 
-  // Handle dismissing a job
+  // Handle dismissing a job with visual feedback
   const handleDismissJob = useCallback((jobId: string, matchScore: number, matchFactors?: MatchFactors) => {
-    setDismissedJobIds(prev => new Set(prev).add(jobId))
+    setRecentlyDismissed(jobId)
     trackInteraction(jobId, 'dismiss', matchScore, matchFactors || null, activePersona?.id || null)
+    // Delay removal to show animation
+    setTimeout(() => {
+      setDismissedJobIds(prev => new Set(prev).add(jobId))
+      setRecentlyDismissed(null)
+    }, 400)
   }, [trackInteraction, activePersona?.id])
 
-  // Handle saving a job (track the interaction)
+  // Handle saving a job with visual feedback
   const handleSaveJob = useCallback((jobId: string, matchScore: number, matchFactors?: MatchFactors) => {
-    trackInteraction(jobId, 'save', matchScore, matchFactors || null, activePersona?.id || null)
-  }, [trackInteraction, activePersona?.id])
+    const isAlreadySaved = savedJobIds.has(jobId)
+    if (isAlreadySaved) {
+      setSavedJobIds(prev => {
+        const next = new Set(prev)
+        next.delete(jobId)
+        return next
+      })
+    } else {
+      setSavedJobIds(prev => new Set(prev).add(jobId))
+      setRecentlySaved(jobId)
+      setTimeout(() => setRecentlySaved(null), 1500)
+    }
+    trackInteraction(jobId, isAlreadySaved ? 'unsave' : 'save', matchScore, matchFactors || null, activePersona?.id || null)
+  }, [trackInteraction, activePersona?.id, savedJobIds])
 
   // run matching whenever active persona changes
   useEffect(() => {
@@ -192,12 +212,23 @@ export function RelevntFeedPanel({
               ? m.reasons.slice(0, 3)
               : []
 
+            const isSaved = savedJobIds.has(m.job_id)
+            const isBeingDismissed = recentlyDismissed === m.job_id
+            const wasJustSaved = recentlySaved === m.job_id
+
             return (
-              <div key={m.job_id} className="card card-job-feed">
+              <div
+                key={m.job_id}
+                className={`card card-job-feed ${isBeingDismissed ? 'is-dismissing' : ''} ${wasJustSaved ? 'just-saved' : ''}`}
+              >
                 <div className="card-header">
                   <h3>{job.title}</h3>
-                  <span className={`badge badge-match ${m.score < 50 ? 'weak' : ''}`}>
-                    {m.score < 50 ? 'Weak Match' : 'Match'} {Math.round(m.score)}
+                  <span
+                    className={`badge badge-match-score ${m.score >= 70 ? 'high' : m.score >= 50 ? 'medium' : 'low'}`}
+                    title={`Match score based on your ${activePersona?.name || 'profile'} preferences, skills alignment, and market data`}
+                  >
+                    <span className="match-score-value">{Math.round(m.score)}%</span>
+                    <span className="match-score-label">Match</span>
                   </span>
                 </div>
 
@@ -247,10 +278,11 @@ export function RelevntFeedPanel({
                   )}
                   <button
                     type="button"
-                    className="btn btn-ghost btn-with-icon"
+                    className={`btn btn-with-icon ${isSaved ? 'btn-saved is-active' : 'btn-ghost'}`}
                     onClick={() => handleSaveJob(m.job_id, m.score)}
+                    aria-label={isSaved ? 'Remove from saved jobs' : 'Save job'}
                   >
-                    <Icon name="bookmark" size="sm" /> Save
+                    <Icon name="bookmark" size="sm" /> {isSaved ? 'Saved' : 'Save'}
                   </button>
                   <button
                     type="button"
@@ -301,8 +333,8 @@ export function RelevntFeedPanel({
             </div>
 
             <div className="feed-modal-score">
-              <span className="feed-match-pill">
-                Match {Math.round(selectedMatch.score)}
+              <span className={`feed-match-pill ${selectedMatch.score >= 70 ? 'high' : selectedMatch.score >= 50 ? 'medium' : 'low'}`}>
+                {Math.round(selectedMatch.score)}% Match
               </span>
             </div>
 

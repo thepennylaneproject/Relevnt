@@ -734,3 +734,302 @@
   gap: 10px;
   font-size: 0.875rem;
 }
+
+/* ============================================================================
+   MATCH SCORE BADGE — Redesigned
+   Clear percentage display with color-coded tiers
+   ============================================================================ */
+
+.badge-match-score {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  cursor: help;
+  position: relative;
+}
+
+.badge-match-score .match-score-value {
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: var(--font-mono, monospace);
+}
+
+.badge-match-score .match-score-label {
+  font-size: 0.6875rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+/* High match (70%+) — Green/Success */
+.badge-match-score.high {
+  background: linear-gradient(135deg, #059669 0%, #10B981 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+/* Medium match (50-69%) — Amber/Warning */
+.badge-match-score.medium {
+  background: linear-gradient(135deg, #D97706 0%, #F59E0B 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+/* Low match (<50%) — Muted Gray */
+.badge-match-score.low {
+  background: var(--color-bg-tertiary);
+  color: var(--color-ink-secondary);
+  border: 1px solid var(--border);
+}
+
+/* Hover state to hint at tooltip */
+.badge-match-score:hover {
+  transform: scale(1.05);
+}
+
+/* Modal match pill — same color coding */
+.feed-match-pill.high {
+  background: linear-gradient(135deg, #059669 0%, #10B981 100%);
+  color: white;
+}
+
+.feed-match-pill.medium {
+  background: linear-gradient(135deg, #D97706 0%, #F59E0B 100%);
+  color: white;
+}
+
+.feed-match-pill.low {
+  background: var(--color-bg-tertiary);
+  color: var(--color-ink-secondary);
+}
+
+/* ============================================================================
+   SAVE/DISMISS FEEDBACK ANIMATIONS
+   ============================================================================ */
+
+/* Card dismiss animation */
+.card-job-feed.is-dismissing {
+  opacity: 0;
+  transform: translateX(-20px) scale(0.95);
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Card save confirmation flash */
+.card-job-feed.just-saved {
+  animation: saveFlash 0.6s ease-out;
+}
+
+@keyframes saveFlash {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+  }
+  100% {
+    box-shadow: var(--shadow-md);
+  }
+}
+
+/* Saved button state */
+.btn-saved {
+  background: rgba(16, 185, 129, 0.1) !important;
+  color: #059669 !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+}
+
+.btn-saved:hover {
+  background: rgba(16, 185, 129, 0.15) !important;
+}
+
+.btn-saved svg {
+  fill: #059669;
+}
+
+/* ============================================================================
+   TAB ENHANCEMENTS — Tooltips and clarity
+   ============================================================================ */
+
+.tabs {
+  position: relative;
+}
+
+.tab {
+  position: relative;
+}
+
+/* Tab tooltip on hover */
+.tab[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(100% + 8px);
+  padding: 8px 12px;
+  background: var(--color-ink);
+  color: var(--color-ink-inverse);
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  pointer-events: none;
+  z-index: 100;
+  box-shadow: var(--shadow-md);
+  max-width: 250px;
+  white-space: normal;
+  text-align: center;
+}
+
+.tab[data-tooltip]:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Tab icons for better recognition */
+.tab .tab-icon {
+  width: 16px;
+  height: 16px;
+  opacity: 0.7;
+}
+
+.tab.active .tab-icon {
+  opacity: 1;
+}
+
+/* ============================================================================
+   HEADER REFINEMENTS — Remove undefined TRACK label
+   ============================================================================ */
+
+.page-header .label {
+  display: none; /* Hide undefined TRACK label for now */
+}
+
+/* ============================================================================
+   DARK MODE ADJUSTMENTS
+   ============================================================================ */
+
+:root.dark .badge-match-score.low,
+[data-theme="dark"] .badge-match-score.low {
+  background: var(--color-bg-tertiary);
+  color: var(--ivory-400);
+  border-color: var(--border);
+}
+
+:root.dark .btn-saved,
+[data-theme="dark"] .btn-saved {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #34D399 !important;
+  border-color: rgba(16, 185, 129, 0.25) !important;
+}
+
+:root.dark .tab[data-tooltip]::after,
+[data-theme="dark"] .tab[data-tooltip]::after {
+  background: var(--ivory-100);
+  color: var(--ink-900);
+}
+
+/* ============================================================================
+   CARD GRID IMPROVEMENTS
+   ============================================================================ */
+
+/* Small badge variant for grid cards */
+.badge-match-score.badge-sm {
+  padding: 4px 8px;
+  font-size: 0.6875rem;
+}
+
+.badge-match-score.badge-sm .match-score-value {
+  font-size: 0.8125rem;
+}
+
+.badge-match-score.badge-sm .match-score-label {
+  display: none;
+}
+
+/* Card header flex layout */
+.card-job-grid .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.card-job-grid .card-header h3 {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Remote tag styling */
+.tag-remote {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+:root.dark .tag-remote,
+[data-theme="dark"] .tag-remote {
+  background: rgba(52, 211, 153, 0.15);
+  color: #34D399;
+  border-color: rgba(52, 211, 153, 0.2);
+}
+
+/* Card footer improvements */
+.card-job-grid .card-footer {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.card-job-grid .card-footer .btn {
+  flex: 1;
+}
+
+.card-job-grid .card-footer .btn:last-child {
+  flex: 0 0 auto;
+}
+
+/* ============================================================================
+   ACCESSIBILITY — Focus states
+   ============================================================================ */
+
+.badge-match-score:focus-visible,
+.btn:focus-visible,
+.tab:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ============================================================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  .badge-match-score {
+    padding: 4px 10px;
+  }
+
+  .badge-match-score .match-score-value {
+    font-size: 0.875rem;
+  }
+
+  .badge-match-score .match-score-label {
+    display: none;
+  }
+
+  .tab[data-tooltip]::after {
+    display: none;
+  }
+
+  .tab .tab-icon {
+    margin-right: 0;
+  }
+}
