@@ -2,12 +2,38 @@
  * ═══════════════════════════════════════════════════════════════════════════
  * RELEVNT TAILWIND CONFIGURATION
  * ═══════════════════════════════════════════════════════════════════════════
- * 
+ *
  * This config extends Tailwind with Relevnt's design tokens.
  * Use these classes instead of arbitrary values to maintain consistency.
- * 
- * Usage: Merge this into your existing tailwind.config.ts
- * 
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * DESIGN CONSTITUTION RULE 2: ARBITRARY VALUE POLICY
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * IMPORTANT: Arbitrary values (e.g., `text-[14px]`, `bg-[#fff]`) are TEMPORARY.
+ *
+ * Current Status:
+ * - Arbitrary values are NOT disabled (would break too much existing code)
+ * - They are flagged for audit and eventual removal
+ * - New arbitrary values SHOULD NOT be introduced
+ *
+ * Guidelines:
+ * 1. PREFER semantic classes: `text-sm` over `text-[14px]`
+ * 2. PREFER CSS variables in arbitrary values: `text-[var(--text-sm)]`
+ * 3. If you must use arbitrary values, add a comment explaining why
+ * 4. See /docs/design-token-escape.md for the escape hatch policy
+ *
+ * Future Plans:
+ * - Phase 1 (current): Document and warn - this file
+ * - Phase 2: ESLint rule to warn on new arbitrary value usage
+ * - Phase 3: Audit and migrate existing arbitrary values
+ * - Phase 4: Consider disabling arbitrary values in specific categories
+ *
+ * Migration Example:
+ *   BEFORE: className="text-[14px] p-[20px] bg-[#C7A56A]"
+ *   AFTER:  className="text-sm p-5 bg-champagne"
+ *
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
