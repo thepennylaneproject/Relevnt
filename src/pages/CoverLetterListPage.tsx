@@ -71,7 +71,7 @@ export default function CoverLetterListPage({ embedded = false }: { embedded?: b
                                 onClick={() => setViewingLetter(null)}
                                 className="p-2 hover:bg-surface-accent rounded-full"
                             >
-                                <Icon name="anchor" size="sm" />
+                                <Icon name="x" size="sm" />
                             </button>
                         </header>
                         <div className="p-8 max-h-[70vh] overflow-y-auto">

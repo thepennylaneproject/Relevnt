@@ -1,0 +1,48 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   RELEVNT THEME AUTOMATION
+   Implementation of the "Sketchbook to Chalkboard" Inversion Logic
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* 1. Base Image Inversion (for hand-drawn charcoal assets) */
+.dark img.relevnt-asset,
+.dark .hand-drawn-wrapper img {
+  /* 
+     Invert(1): Turns charcoal (#333) into white/chalk
+     Hue-rotate(180): Keeps the warm ivory-shifted tones consistent
+     Contrast/Brightness: Fine-tunes the "chalk" visibility on dark charcoal
+  */
+  filter: invert(1) hue-rotate(180deg) brightness(1.2) contrast(0.9);
+  transition: filter var(--transition-base);
+}
+
+/* 2. Sacred Gold Preservation 
+   If an icon has a Sacred Gold accent that MUST NOT be inverted,
+   use a secondary filter on a specific selector or use a mask.
+*/
+.dark .sacred-gold-accent {
+  /* Re-invert ONLY the gold part if generated as separate layer, 
+     OR use CSS mix-blend-mode for complex overlays.
+  */
+}
+
+/* 3. Global CSS Variable Shifting 
+   Ensuring all system components use the unified tokens.
+*/
+:root {
+  --app-bg: var(--color-bg);
+  --app-text: var(--color-ink);
+  --app-accent: var(--color-accent);
+}
+
+.dark {
+  --app-bg: var(--color-bg); /* Already shifted in design-tokens.css */
+  --app-text: var(--color-ink);
+}
+
+/* 4. Utility for Poetic Text */
+.poetic-serif {
+  font-family: var(--font-display);
+  font-style: italic;
+  letter-spacing: 0.02em;
+  color: var(--color-accent);
+}

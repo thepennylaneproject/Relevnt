@@ -1,227 +1,16 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * RELEVNT GLOBAL STYLES — PRO ASCENT DESIGN SYSTEM
+ * RELEVNT GLOBAL STYLES
  * ═══════════════════════════════════════════════════════════════════════════
  *
- * "Authentic intelligence for real people navigating broken systems."
- *
- * Pro Ascent: Refined, intelligent, sophisticated design system with:
- * - Modern system font stack (sans-serif)
- * - Precise color tokens (dark/light mode parity)
- * - Three-accent system for balance and clarity
- * - Clear layering hierarchy (bg-1, bg-2, bg-3)
- * - Comprehensive typography scale
- * - Consistent spacing, shadows, and radius
+ * Base styles, typography, and component patterns.
+ * Design tokens are defined in design-tokens.css (Champagne Gold system).
  *
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-/* ════════════════════════════════════════════════════════════════════════════
-   SECTION 1: DESIGN TOKENS — COLOR PALETTE
-   ════════════════════════════════════════════════════════════════════════════ */
-
-:root {
-  /* ─────────────────────────────────────────────────────────────────────────
-     LIGHT MODE (Default)
-     ───────────────────────────────────────────────────────────────────────── */
-
-  /* Backgrounds & Surfaces */
-  --bg-1: #E8EBE8;           /* Brightest background */
-  --bg-2: #D9DED9;           /* Primary card/surface */
-  --bg-3: #D2D7CB;           /* Elevated surfaces */
-
-  /* Text Colors */
-  --text-primary: rgba(12, 15, 18, 0.9);    /* #0C0F12 at 90% */
-  --text-secondary: rgba(26, 32, 36, 0.68); /* #1A2024 at 68% */
-
-  /* Accent Colors — Consistent across modes */
-  --accent-1: #4E808D;       /* Primary accent (teal) */
-  --accent-2: #81B5B6;       /* Secondary accent (soft blue) */
-  --accent-3: #A8C3A2;       /* Tertiary accent (sage green) */
-
-  /* ─────────────────────────────────────────────────────────────────────────
-     DARK MODE
-     ───────────────────────────────────────────────────────────────────────── */
-
-  --dark-bg-1: #0C0F12;           /* Deepest background */
-  --dark-bg-2: #1A2024;           /* Primary card/surface */
-  --dark-bg-3: #242A2F;           /* Elevated surfaces */
-  --dark-text-primary: rgba(232, 235, 232, 0.9);   /* #E8EBE8 at 90% */
-  --dark-text-secondary: rgba(217, 222, 217, 0.68); /* #D9DED9 at 68% */
-
-  /* ─────────────────────────────────────────────────────────────────────────
-     SEMANTIC MAPPINGS
-     ───────────────────────────────────────────────────────────────────────── */
-
-  --color-bg: var(--bg-1);
-  --color-surface: var(--bg-2);
-  --color-surface-elevated: var(--bg-3);
-  --color-text: var(--text-primary);
-  --color-text-secondary: var(--text-secondary);
-
-  --color-accent-primary: var(--accent-1);
-  --color-accent-secondary: var(--accent-2);
-  --color-accent-tertiary: var(--accent-3);
-
-  /* Status colors */
-  --color-success: var(--accent-3);  /* Sage green */
-  --color-warning: #D97706;
-  --color-error: #DC2626;
-  --color-info: var(--accent-1);
-
-  /* Interaction states */
-  --color-focus: var(--accent-1);
-  --color-disabled: rgba(26, 32, 36, 0.4);
-
-  /* ─────────────────────────────────────────────────────────────────────────
-     TYPOGRAPHY SCALE
-     ───────────────────────────────────────────────────────────────────────── */
-
-  /* Font families */
-  --font-display: "Fraunces", serif;
-  --font-body: "Source Sans 3", system-ui, -apple-system, sans-serif;
-  --font-mono: "Monaco", "Courier New", monospace;
-  --font-poetic: var(--font-display);
-
-  /* Font sizes */
-  --text-hero: 64px;
-  --text-h1: 48px;
-  --text-h2: 32px;
-  --text-lg: 20px;
-  --text-base: 17px;
-  --text-sm: 14px;
-  --text-xs: 12px;
-
-  /* Line heights */
-  --leading-hero: 1.1;
-  --leading-h1: 1.15;
-  --leading-h2: 1.25;
-  --leading-normal: 1.6;
-  --leading-snug: 1.4;
-  --leading-tight: 1.2;
-
-  /* Letter spacing */
-  --tracking-hero: -0.02em;
-  --tracking-h1: -0.01em;
-  --tracking-h2: -0.005em;
-  --tracking-normal: 0;
-  --tracking-caption: 0.01em;
-
-  /* Font weights */
-  --font-regular: 400;
-  --font-medium: 500;
-  --font-semibold: 600;
-  --font-bold: 700;
-
-  /* ─────────────────────────────────────────────────────────────────────────
-     SPACING SCALE (Fibonacci-based)
-     ───────────────────────────────────────────────────────────────────────── */
-
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 16px;
-  --space-4: 24px;
-  --space-5: 40px;
-  --space-6: 64px;
-  --space-7: 104px;
-
-  /* Semantic spacing */
-  --gap-xs: var(--space-2);
-  --gap-sm: var(--space-3);
-  --gap-md: var(--space-4);
-  --gap-lg: var(--space-5);
-  --gap-xl: var(--space-6);
-  --gap-2xl: var(--space-7);
-
-  /* ─────────────────────────────────────────────────────────────────────────
-     RADIUS & ELEVATION
-     ───────────────────────────────────────────────────────────────────────── */
-
-  /* Border radius */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-card: 20px;
-  --radius-full: 9999px;
-
-  /* Shadows */
-  --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 6px 24px rgba(0, 0, 0, 0.14);
-  --shadow-lg: 0 12px 48px rgba(0, 0, 0, 0.18);
-
-  /* ─────────────────────────────────────────────────────────────────────────
-     BORDERS & DIVIDERS
-     ───────────────────────────────────────────────────────────────────────── */
-
-  --border-width: 1px;
-  --border-default: 1px solid rgba(26, 32, 36, 0.1);
-  --border-accent: 2px solid var(--accent-2);
-  --border-focus: 2px solid var(--accent-1);
-
-  /* ─────────────────────────────────────────────────────────────────────────
-     TRANSITIONS & ANIMATIONS
-     ───────────────────────────────────────────────────────────────────────── */
-
-  --transition-fast: 150ms ease;
-  --transition-base: 200ms ease;
-  --transition-slow: 300ms ease;
-
-  --z-base: 0;
-  --z-dropdown: 100;
-  --z-sticky: 200;
-  --z-modal: 1000;
-  --z-tooltip: 1100;
-
-  /* ─────────────────────────────────────────────────────────────────────────
-     LEGACY ALIASES (for backward compatibility)
-     ───────────────────────────────────────────────────────────────────────── */
-  --color-ink: var(--color-text);
-  --color-ink-secondary: var(--color-text-secondary);
-  --muted: var(--color-text-secondary);
-  --text: var(--color-text);
-  --tier-accent: var(--accent-1);
-}
-
-/* ════════════════════════════════════════════════════════════════════════════
-   SECTION 2: DARK MODE OVERRIDES
-   ════════════════════════════════════════════════════════════════════════════ */
-
-@media (prefers-color-scheme: dark) {
-  :root:not(.light):not([data-theme="light"]) {
-    --color-bg: var(--dark-bg-1);
-    --color-surface: var(--dark-bg-2);
-    --color-surface-elevated: var(--dark-bg-3);
-    --color-text: var(--dark-text-primary);
-    --color-text-secondary: var(--dark-text-secondary);
-
-    --color-disabled: rgba(232, 235, 232, 0.3);
-    --border-default: 1px solid rgba(232, 235, 232, 0.1);
-
-    /* Legacy aliases */
-    --color-ink: var(--color-text);
-    --color-ink-secondary: var(--color-text-secondary);
-    --muted: var(--color-text-secondary);
-    --text: var(--color-text);
-  }
-}
-
-:root.dark,
-:root[data-theme="dark"] {
-  --color-bg: var(--dark-bg-1);
-  --color-surface: var(--dark-bg-2);
-  --color-surface-elevated: var(--dark-bg-3);
-  --color-text: var(--dark-text-primary);
-  --color-text-secondary: var(--dark-text-secondary);
-
-  --color-disabled: rgba(232, 235, 232, 0.3);
-  --border-default: 1px solid rgba(232, 235, 232, 0.1);
-
-  /* Legacy aliases */
-  --color-ink: var(--color-text);
-  --color-ink-secondary: var(--color-text-secondary);
-  --muted: var(--color-text-secondary);
-  --text: var(--color-text);
-}
+/* Import design tokens FIRST - this is the source of truth for all colors */
+@import "./design-tokens.css";
 
 /* ════════════════════════════════════════════════════════════════════════════
    SECTION 3: BASE STYLES
@@ -254,8 +43,8 @@ body {
 
 /* Selection styling */
 ::selection {
-  background-color: rgba(78, 128, 141, 0.2);
-  color: var(--color-text);
+  background-color: var(--color-accent-glow);
+  color: var(--color-ink);
 }
 
 /* Focus states */

@@ -108,7 +108,17 @@ a {
 }
 
 a:hover {
-  color: var(--accent);
+  color: var(--color-ink-secondary);
+  text-decoration: underline;
+}
+
+/* Gold links for explicit accent - use class .link-accent */
+.link-accent {
+  color: var(--color-accent);
+}
+
+.link-accent:hover {
+  color: var(--color-accent-hover);
 }
 
 /* ============================================================================
@@ -167,7 +177,15 @@ select:focus {
 }
 
 /* ============================================================================
-   BUTTONS — INK & IVORY
+   BUTTONS — VISUAL HIERARCHY
+   ============================================================================ 
+   
+   Button hierarchy (most → least prominent):
+   1. .primary-button → Gold background, white text (CTAs, "Apply", "Save")
+   2. .secondary-button → Dark/ink button, clean look
+   3. button (default) → Neutral, subtle 
+   4. .ghost-button → Transparent with border, least intrusive
+   
    ============================================================================ */
 
 button {
@@ -177,20 +195,19 @@ button {
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
   border-radius: var(--radius-md);
-  border: none;
-  font-family: var(--font-display);
+  border: 1px solid var(--border);
+  font-family: var(--font-body);
   font-size: var(--text-sm);
-  letter-spacing: 0.04em;
+  font-weight: 500;
   cursor: pointer;
   transition: all var(--transition-fast);
-  background: var(--color-accent);
-  color: var(--color-ink-inverse);
+  background: var(--color-surface);
+  color: var(--text);
 }
 
 button:hover:not(:disabled) {
-  background: var(--color-accent-hover);
-  box-shadow: var(--shadow-glow);
-  transform: translateY(-1px);
+  background: var(--color-bg-alt);
+  border-color: var(--border-strong);
 }
 
 button:focus-visible {
@@ -224,6 +241,30 @@ button:disabled {
 .primary-button:hover:not(:disabled) {
   background: var(--color-accent-hover);
   box-shadow: var(--shadow-glow);
+  transform: translateY(-1px);
+}
+
+/* Secondary button - dark/ink background, for important but not primary actions */
+.secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: var(--color-ink);
+  color: var(--color-ink-inverse);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.secondary-button:hover:not(:disabled) {
+  background: var(--color-ink-secondary);
+  transform: translateY(-1px);
 }
 
 .ghost-button {
@@ -243,13 +284,15 @@ button:disabled {
 }
 
 .ghost-button:hover:not(:disabled) {
-  background: var(--color-accent-glow);
-  border-color: var(--color-accent);
+  background: var(--color-bg-alt);
+  border-color: var(--border-strong);
 }
 
+/* Gold styling reserved for active/selected state */
 .ghost-button.is-active {
   background: var(--color-accent-glow);
   border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 
 .button-sm {

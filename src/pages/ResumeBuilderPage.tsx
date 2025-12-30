@@ -33,12 +33,14 @@ import { ResumePerformancePanel } from '../components/ResumeBuilder/ResumePerfor
 
 // UI components
 import { Icon, IconName } from '../components/ui/Icon'
+import HandDrawnIcon, { ResumeIconName } from '../components/ui/HandDrawnIcon'
 
 // Hooks and utilities
 import { copy } from '../lib/copy'
 import { useResumeBuilder } from '../hooks/useResumeBuilder'
 import { useResumeAnalysis } from '../hooks/useResumeAnalysis'
 import type { ResumeDraft } from '../types/resume-builder.types'
+import '../styles/resume-builder.css'
 
 // ============================================================================
 // TYPES
@@ -58,16 +60,16 @@ type ActivePanel = 'preview' | 'ats' | 'targeting'
 const SECTION_META: {
   id: ActiveSection
   label: string
-  icon: IconName
+  resumeIconName: ResumeIconName
 }[] = [
-    { id: 'contact', label: 'Contact', icon: 'compass' },
-    { id: 'summary', label: 'Summary', icon: 'scroll' },
-    { id: 'skills', label: 'Skills', icon: 'stars' },
-    { id: 'experience', label: 'Experience', icon: 'briefcase' },
-    { id: 'education', label: 'Education', icon: 'book' },
-    { id: 'certifications', label: 'Certifications', icon: 'key' },
-    { id: 'projects', label: 'Projects', icon: 'lighthouse' },
-  ]
+  { id: 'contact', label: 'Contact', resumeIconName: 'contact' },
+  { id: 'summary', label: 'Summary', resumeIconName: 'summary' },
+  { id: 'skills', label: 'Skills', resumeIconName: 'skills' },
+  { id: 'experience', label: 'Experience', resumeIconName: 'experience' },
+  { id: 'education', label: 'Education', resumeIconName: 'education' },
+  { id: 'certifications', label: 'Certifications', resumeIconName: 'certifications' },
+  { id: 'projects', label: 'Projects', resumeIconName: 'projects' },
+]
 
 // ============================================================================
 // HELPER: Convert draft to text for job targeting
@@ -232,7 +234,7 @@ const ResumeBuilderPage: React.FC<ResumeBuilderPageProps> = ({ embedded = false 
                     onClick={() => setShowWizard(true)}
                     className="btn btn-secondary btn-sm"
                   >
-                    <Icon name="stars" size="sm" />
+                    <HandDrawnIcon name="stars" size="sm" />
                     New Resume
                   </button>
 
@@ -263,7 +265,7 @@ const ResumeBuilderPage: React.FC<ResumeBuilderPageProps> = ({ embedded = false 
                       onClick={() => setActiveSection(section.id)}
                       className={`builder-tab ${isActive ? 'active' : ''}`}
                     >
-                      <Icon name={section.icon} size="sm" hideAccent={!isActive} className="tab-icon" />
+                      <HandDrawnIcon resumeName={section.resumeIconName} size="sm" className="tab-icon" />
                       {section.label}
                     </button>
                   )
@@ -284,7 +286,7 @@ const ResumeBuilderPage: React.FC<ResumeBuilderPageProps> = ({ embedded = false 
                         onClick={() => setActiveSection(section.id)}
                         className={`builder-tab ${isActive ? 'active' : ''}`}
                       >
-                        <Icon name={section.icon} size="sm" hideAccent={!isActive} className="tab-icon" />
+                        <HandDrawnIcon resumeName={section.resumeIconName} size="sm" className="tab-icon" />
                         {section.label}
                       </button>
                     )
@@ -335,7 +337,7 @@ const ResumeBuilderPage: React.FC<ResumeBuilderPageProps> = ({ embedded = false 
                   onClick={() => setActivePanel('ats')}
                   className={`btn btn-sm ${activePanel === 'ats' ? 'btn-primary' : 'btn-ghost'}`}
                 >
-                  <Icon name="stars" size="sm" />
+                  <HandDrawnIcon name="stars" size="sm" />
                   ATS Score
                   {analysis && (
                     <span className="panel-tab-badge" style={{ marginLeft: '4px', opacity: 0.8 }}>{analysis.overallScore}</span>
@@ -346,7 +348,7 @@ const ResumeBuilderPage: React.FC<ResumeBuilderPageProps> = ({ embedded = false 
                   onClick={() => setActivePanel('targeting')}
                   className={`btn btn-sm ${activePanel === 'targeting' ? 'btn-primary' : 'btn-ghost'}`}
                 >
-                  <Icon name="briefcase" size="sm" />
+                  <HandDrawnIcon name="briefcase" size="sm" />
                   Job Match
                 </button>
               </div>
@@ -377,7 +379,7 @@ const ResumeBuilderPage: React.FC<ResumeBuilderPageProps> = ({ embedded = false 
                     <JobTargetingPanel resumeText={resumeText} />
                     <div className="card-info" style={{ marginTop: '16px' }}>
                       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                         <Icon name="lighthouse" size="sm" />
+                         <HandDrawnIcon name="lighthouse" size="sm" />
                          <p className="text-xs muted">
                            Paste a job description above to see how well your resume matches
                            and get tailoring suggestions.

@@ -68,7 +68,7 @@ const renderStatusIcon = (status: ApplicationStatus | null | undefined) => {
     case 'rejected':
       return <Icon name="compass-cracked" size="sm" hideAccent />
     case 'withdrawn':
-      return <Icon name="anchor" size="sm" hideAccent />
+      return <Icon name="x" size="sm" hideAccent />
     default:
       return null
   }
@@ -339,7 +339,7 @@ export default function ApplicationsPage() {
                             }}
                           >
                             {expandedId === app.id ? 'Collapse' : 'Details'}
-                            <Icon name={expandedId === app.id ? 'anchor' : 'scroll'} size="sm" hideAccent className="ml-2" />
+                            <Icon name={expandedId === app.id ? 'chevron-up' : 'scroll'} size="sm" hideAccent className="ml-2" />
                           </button>
                         </div>
 

@@ -281,51 +281,65 @@
 .priority-card {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
-  padding: var(--space-4) var(--space-5);
+  gap: var(--space-6);
+  padding: var(--space-5) var(--space-6);
   background: var(--color-surface);
   border: 1px solid var(--color-graphite-faint);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: all var(--transition-base);
 }
 
 .priority-card:hover {
   background: var(--color-surface-hover);
   border-color: var(--color-accent);
-  box-shadow: var(--shadow-md);
-  transform: translateX(4px);
-}
-
-.priority-card:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
+  box-shadow: var(--shadow-sm);
+  transform: translateX(8px);
 }
 
 .priority-card-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-md);
-  background: var(--color-accent-soft);
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-alt);
   color: var(--color-accent);
   flex-shrink: 0;
+  border: 1px solid var(--color-graphite-faint);
 }
 
-.priority-card-content {
-  flex: 1;
-  min-width: 0;
+.priority-card-icon img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.priority-card-icon .hand-drawn-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.priority-card-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.dark .priority-card-icon img {
+  filter: invert(1) hue-rotate(180deg) brightness(1.2) contrast(0.9);
 }
 
 .priority-card-label {
   display: block;
-  font-family: var(--font-serif);
-  font-size: var(--text-base);
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 500;
   color: var(--color-ink);
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 
 .priority-card-action {
@@ -380,49 +394,38 @@
 .foundation-card {
   background: var(--color-surface);
   border: 1px solid var(--color-graphite-faint);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6);
-  transition: all 0.2s ease;
+  border-radius: var(--radius-xl);
+  padding: var(--space-10);
+  transition: all var(--transition-base);
+  display: flex;
+  flex-direction: column;
 }
 
 .foundation-card:hover {
   border-color: var(--color-accent);
-  box-shadow: var(--shadow-md);
-}
-
-.foundation-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--space-4);
+  box-shadow: var(--shadow-glow);
+  transform: translateY(-4px);
 }
 
 .foundation-card-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-md);
-  background: var(--color-accent-soft);
+  width: 64px;
+  height: 64px;
+  margin-bottom: var(--space-6);
   color: var(--color-accent);
 }
 
-.foundation-sublabel {
-  font-size: var(--text-xs);
-  font-weight: 500;
-  color: var(--color-accent);
-  background: var(--color-accent-soft);
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-sm);
+.foundation-card-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .foundation-card-title {
-  font-family: var(--font-serif);
-  font-size: var(--text-lg);
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 500;
   color: var(--color-ink);
-  margin: 0 0 var(--space-2);
+  margin: 0 0 var(--space-4);
 }
 
 .foundation-card-description {
@@ -465,7 +468,7 @@
 .pipeline-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-4);
+  gap: var(--space-6);
 }
 
 @media (min-width: 768px) {
@@ -476,17 +479,20 @@
 
 .pipeline-stat {
   display: flex;
-  align-items: flex-start;
-  gap: var(--space-3);
-  padding: var(--space-4);
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-6);
   background: var(--color-surface);
   border: 1px solid var(--color-graphite-faint);
-  border-radius: var(--radius-lg);
-  transition: all 0.2s ease;
+  border-radius: var(--radius-xl);
+  transition: all var(--transition-base);
+  position: relative;
 }
 
 .pipeline-stat:hover {
-  border-color: var(--color-graphite-light);
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-2px);
 }
 
 /* Empty state styling */
@@ -599,25 +605,24 @@
 .quick-action-btn {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
-  font-family: var(--font-display);
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-6);
+  font-family: var(--font-body);
   font-size: var(--text-sm);
-  font-weight: 500;
+  font-weight: 600;
   color: var(--color-ink-secondary);
-  background: var(--color-surface);
+  background: var(--color-bg-alt);
   border: 1px solid var(--color-graphite-faint);
   border-radius: var(--radius-full);
   text-decoration: none;
-  transition: all 0.2s ease;
-  /* Minimum touch target */
-  min-height: 44px;
+  transition: all var(--transition-base);
+  min-height: 48px;
 }
 
 .quick-action-btn:hover {
   color: var(--color-ink);
   background: var(--color-surface-hover);
-  border-color: var(--color-graphite-light);
+  border-color: var(--color-accent);
 }
 
 .quick-action-btn:focus-visible {
@@ -856,19 +861,19 @@ button:focus-visible {
 [data-theme="dark"] .btn-primary-glow {
   background: linear-gradient(
     135deg,
-    var(--terracotta-400) 0%,
-    var(--terracotta-500) 100%
+    var(--color-accent) 0%,
+    var(--color-accent-hover) 100%
   );
   box-shadow:
-    0 4px 20px rgba(184, 138, 118, 0.4),
-    0 0 0 0 rgba(184, 138, 118, 0.2);
+    0 4px 20px var(--color-accent-glow),
+    0 0 0 0 var(--color-accent-glow);
 }
 
 :root.dark .btn-primary-glow:hover,
 [data-theme="dark"] .btn-primary-glow:hover {
   box-shadow:
-    0 6px 28px rgba(184, 138, 118, 0.5),
-    0 0 40px rgba(184, 138, 118, 0.3);
+    0 6px 28px var(--color-accent-glow),
+    0 0 40px var(--color-accent-glow);
 }
 
 
@@ -1273,12 +1278,12 @@ button:focus-visible {
 
 :root.dark .foundation-card-cta,
 [data-theme="dark"] .foundation-card-cta {
-  background: var(--terracotta-400);
+  background: var(--color-accent);
 }
 
 :root.dark .foundation-card-cta:hover,
 [data-theme="dark"] .foundation-card-cta:hover {
-  background: var(--terracotta-500);
+  background: var(--color-accent-hover);
 }
 
 /* Ensure progress colors work in dark mode */

@@ -1,0 +1,142 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * RESUME BUILDER STYLES — MIDNIGHT JOURNAL
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+.resume-builder {
+  padding-top: var(--space-8);
+  animation: fade-in 0.5s ease-out;
+}
+
+.builder-header {
+  margin-bottom: var(--space-8);
+}
+
+.builder-header h2 {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  color: var(--color-ink);
+  margin-bottom: var(--space-1);
+}
+
+.action-group {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+/* Tabs for Section Navigation */
+.builder-tabs {
+  display: flex;
+  gap: var(--space-4);
+  margin-top: var(--space-8);
+  border-bottom: 2px solid var(--color-graphite-faint);
+  padding-bottom: 2px;
+  overflow-x: auto;
+  scrollbar-width: none; /* Hide scrollbar for clean look */
+}
+
+.builder-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.builder-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-6);
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  color: var(--color-ink-tertiary);
+  min-width: 100px;
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-wide);
+  position: relative;
+}
+
+.builder-tab:hover {
+  color: var(--color-ink);
+  background: var(--color-surface-hover);
+}
+
+.builder-tab.active {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+}
+
+.tab-icon {
+  width: 40px;
+  height: 40px;
+  opacity: 0.7;
+  transition: transform var(--transition-base), opacity var(--transition-base);
+}
+
+.builder-tab.active .tab-icon {
+  opacity: 1;
+  transform: scale(1.1) rotate(-3deg);
+}
+
+/* Layout Grid */
+.builder-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-8);
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .builder-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.builder-form {
+  background: var(--color-surface);
+  border: var(--border-default);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  box-shadow: var(--shadow-md);
+  min-height: 600px;
+}
+
+.builder-preview {
+  position: sticky;
+  top: var(--space-8);
+}
+
+.panel-tabs {
+  margin-bottom: var(--space-4);
+}
+
+.at-panel-content {
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-xl);
+  min-height: 700px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  border: var(--border-default);
+}
+
+.panel-tab-badge {
+  background: var(--color-accent);
+  color: var(--color-ink-inverse);
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+  font-size: 10px;
+}
+
+/* Form Content */
+.resume-editor-content {
+  animation: slide-up 0.3s ease-out;
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

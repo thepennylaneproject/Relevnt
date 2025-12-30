@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, useTransition } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Container } from '../components/shared/Container'
 import { Icon } from '../components/ui/Icon'
@@ -25,6 +25,8 @@ export default function Settings(): JSX.Element {
     const location = useLocation()
     const navigate = useNavigate()
 
+
+    const [isPending, startTransition] = useTransition()
     const [activeTab, setActiveTab] = useState<SettingsTab>(() =>
         getTabFromHash(location.hash)
     )
@@ -37,7 +39,9 @@ export default function Settings(): JSX.Element {
     }, [location.hash])
 
     const handleTabChange = useCallback((tab: SettingsTab) => {
-        setActiveTab(tab)
+        startTransition(() => {
+            setActiveTab(tab)
+        })
         navigate(`#${tab}`, { replace: true })
     }, [navigate])
 
@@ -80,11 +84,16 @@ export default function Settings(): JSX.Element {
                 <SettingsTabNav activeTab={activeTab} onTabChange={handleTabChange} />
 
                 <div
-                    className="page-stack"
+                    className={`page-stack ${isPending ? 'is-pending' : ''}`}
                     role="tabpanel"
                     id={`panel-${activeTab}`}
                     aria-labelledby={`tab-${activeTab}`}
-                    style={{ marginTop: 24 }}
+                    style={{ 
+                        marginTop: 24,
+                        opacity: isPending ? 0.6 : 1,
+                        transition: 'opacity 0.2s ease',
+                        pointerEvents: isPending ? 'none' : 'auto'
+                    }}
                 >
                     {renderTabContent()}
                 </div>

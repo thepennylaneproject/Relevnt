@@ -9,6 +9,7 @@ import { useJobStats } from '../hooks/useJobStats'
 import { useWellnessMode } from '../hooks/useWellnessMode'
 import { VerseContainer } from '../components/dashboard/VerseContainer'
 import { WellnessCheckin } from '../components/dashboard/WellnessCheckin'
+import HandDrawnIcon from '../components/ui/HandDrawnIcon'
 import '../styles/dashboard-clarity.css'
 
 // User state enum for adaptive UI
@@ -265,14 +266,15 @@ export default function DashboardPage(): JSX.Element {
   // RENDER
   // ───────────────────────────────────────────────────────────────────────────
 
+
   return (
     <PageBackground>
       <Container maxWidth="lg" padding="md">
-        <div className="dashboard-enhanced">
+        <div className="dashboard-enhanced selection-gold">
           {/* ═══════════════════════════════════════════════════════════════════
               SECTION 1: CENTERED HERO + PRIMARY CTA
           ═══════════════════════════════════════════════════════════════════ */}
-          <section className="hero-section">
+          <section className="hero-section gold-dust">
             <div className="hero-content">
               <h1 className="hero-greeting">{getGreeting()}</h1>
               <VerseContainer compact>{getHeroVerse()}</VerseContainer>
@@ -280,7 +282,7 @@ export default function DashboardPage(): JSX.Element {
               {/* Momentum message */}
               {momentumMessage && (
                 <p className="momentum-message">
-                  <Icon name="zap" size="sm" />
+                  <HandDrawnIcon name="zap" size="sm" />
                   {momentumMessage}
                 </p>
               )}
@@ -311,14 +313,14 @@ export default function DashboardPage(): JSX.Element {
           {todaysPriorities.length > 0 && (
             <section className="todays-priority-section">
               <h3 className="section-header">
-                <Icon name="compass" size="sm" />
+                <HandDrawnIcon name="compass" size="sm" />
                 Today's priorities
               </h3>
               <div className="priority-cards">
                 {todaysPriorities.map((item, idx) => (
                   <Link key={idx} to={item.link} className={`priority-card ${item.badge ? 'has-badge' : ''}`}>
                     <div className="priority-card-icon">
-                      <Icon name={item.icon} size="md" />
+                      <HandDrawnIcon name={item.icon} size="md" />
                     </div>
                     <div className="priority-card-content">
                       <span className="priority-card-label">{item.label}</span>
@@ -337,17 +339,17 @@ export default function DashboardPage(): JSX.Element {
           )}
 
           {/* ═══════════════════════════════════════════════════════════════════
-              SECTION 3: QUICK ACTIONS ROW (moved up for visibility)
+              SECTION 3: QUICK ACTIONS ROW
           ═══════════════════════════════════════════════════════════════════ */}
           <section className="quick-actions-section quick-actions-section--prominent">
             <h3 className="section-header">
-              <Icon name="zap" size="sm" />
+              <HandDrawnIcon name="zap" size="sm" />
               Quick actions
             </h3>
             <div className="quick-actions-row">
               {quickActions.map((action, idx) => (
                 <Link key={idx} to={action.link} className="quick-action-btn">
-                  <Icon name={action.icon} size="sm" />
+                  <HandDrawnIcon name={action.icon} size="sm" />
                   <span>{action.label}</span>
                 </Link>
               ))}
@@ -355,23 +357,18 @@ export default function DashboardPage(): JSX.Element {
           </section>
 
           {/* ═══════════════════════════════════════════════════════════════════
-              SECTION 3: FOUNDATION CARDS (Two-column grid)
+              SECTION 4: FOUNDATION CARDS (Two-column grid)
           ═══════════════════════════════════════════════════════════════════ */}
           <section className="foundation-section">
             <h3 className="section-header">
-              <Icon name="seeds" size="sm" />
+              <HandDrawnIcon name="seeds" size="sm" />
               Build your foundation
             </h3>
             <div className="foundation-grid">
               {foundationCards.map((card, idx) => (
                 <div key={idx} className="foundation-card">
-                  <div className="foundation-card-header">
-                    <div className="foundation-card-icon">
-                      <Icon name={card.icon} size="md" />
-                    </div>
-                    {card.sublabel && (
-                      <span className="foundation-sublabel">{card.sublabel}</span>
-                    )}
+                  <div className="foundation-card-icon">
+                    <HandDrawnIcon name={card.icon} size="lg" />
                   </div>
                   <h4 className="foundation-card-title">{card.title}</h4>
                   <p className="foundation-card-description">{card.description}</p>
@@ -385,20 +382,21 @@ export default function DashboardPage(): JSX.Element {
           </section>
 
           {/* ═══════════════════════════════════════════════════════════════════
-              SECTION 4: PIPELINE STATUS (Multi-column, interactive, guided empty states)
+              SECTION 5: PIPELINE STATUS
           ═══════════════════════════════════════════════════════════════════ */}
           <section className="pipeline-section">
             <h3 className="section-header">
-              <Icon name="gauge" size="sm" />
+              <HandDrawnIcon name="gauge" size="sm" />
               Where you are in your search
             </h3>
             <div className="pipeline-grid">
+              {/* Pipeline stats would be refactored here to use HandDrawnIcon as well */}
               <Link
                 to="/jobs"
                 className={`pipeline-stat pipeline-stat--clickable ${discoveredCount === 0 ? 'is-empty' : ''}`}
               >
                 <div className="pipeline-stat-icon">
-                  <Icon name="seeds" size="sm" />
+                  <HandDrawnIcon name="seeds" size="sm" />
                 </div>
                 <div className="pipeline-stat-content">
                   <span className="pipeline-stat-label">Discovered</span>
@@ -420,12 +418,12 @@ export default function DashboardPage(): JSX.Element {
                 className={`pipeline-stat pipeline-stat--clickable ${appliedCount === 0 ? 'is-empty' : ''}`}
               >
                 <div className="pipeline-stat-icon">
-                  <Icon name="paper-airplane" size="sm" />
+                  <HandDrawnIcon name="paper-airplane" size="sm" />
                 </div>
                 <div className="pipeline-stat-content">
                   <span className="pipeline-stat-label">Applied</span>
                   {appliedCount === 0 ? (
-                    <span className="pipeline-empty-hint">Waiting for your signal—ready when you are.</span>
+                    <span className="pipeline-empty-hint">Waiting for your signal.</span>
                   ) : (
                     <>
                       <span className="pipeline-stat-value">{appliedCount}</span>
@@ -440,7 +438,7 @@ export default function DashboardPage(): JSX.Element {
                 className={`pipeline-stat pipeline-stat--clickable ${appliedCount - interviewingCount === 0 ? 'is-empty' : ''}`}
               >
                 <div className="pipeline-stat-icon">
-                  <Icon name="candle" size="sm" />
+                  <HandDrawnIcon name="candle" size="sm" />
                 </div>
                 <div className="pipeline-stat-content">
                   <span className="pipeline-stat-label">Awaiting</span>
@@ -449,7 +447,7 @@ export default function DashboardPage(): JSX.Element {
                   ) : (
                     <>
                       <span className="pipeline-stat-value">{appliedCount - interviewingCount}</span>
-                      <span className="pipeline-stat-subtext">avg 7 days</span>
+                      <span className="pipeline-stat-subtext">responses pending</span>
                     </>
                   )}
                 </div>
@@ -460,16 +458,16 @@ export default function DashboardPage(): JSX.Element {
                 className={`pipeline-stat pipeline-stat--clickable ${interviewingCount === 0 ? 'is-empty' : 'is-active'}`}
               >
                 <div className="pipeline-stat-icon">
-                  <Icon name="flower" size="sm" />
+                  <HandDrawnIcon name="flower" size="sm" />
                 </div>
                 <div className="pipeline-stat-content">
                   <span className="pipeline-stat-label">Interviews</span>
                   {interviewingCount === 0 ? (
-                    <span className="pipeline-empty-hint">Rest is productive—your next milestone awaits.</span>
+                    <span className="pipeline-empty-hint">Milestones await.</span>
                   ) : (
                     <>
                       <span className="pipeline-stat-value">{interviewingCount}</span>
-                      <span className="pipeline-stat-subtext">conversations</span>
+                      <span className="pipeline-stat-subtext">active conversations</span>
                     </>
                   )}
                 </div>
@@ -478,19 +476,13 @@ export default function DashboardPage(): JSX.Element {
           </section>
 
           {/* ═══════════════════════════════════════════════════════════════════
-              SECTION 5: PROGRESS TRACKER
+              SECTION 6: PROGRESS TRACKER
           ═══════════════════════════════════════════════════════════════════ */}
           <section className="progress-section">
             <div className="progress-card">
               <div className="progress-header">
                 <span className="progress-label">
                   Profile completeness
-                  <span
-                    className="progress-tooltip-trigger"
-                    title="Your profile strength is calculated based on resume completeness, skills listed, work history, and profile photo."
-                  >
-                    <Icon name="alert-triangle" size="sm" />
-                  </span>
                 </span>
                 <span className={`progress-value ${profileCompletion < 80 ? 'progress-value--warning' : 'progress-value--good'}`}>
                   {profileCompletion}%
@@ -507,7 +499,7 @@ export default function DashboardPage(): JSX.Element {
                   {profileCompletion < 50
                     ? 'Add more details to stand out'
                     : profileCompletion < 80
-                      ? 'Almost there! A few more tweaks'
+                      ? 'Almost there!'
                       : 'Looking great!'}
                 </span>
                 <Link to="/profile-analyzer" className="progress-cta">

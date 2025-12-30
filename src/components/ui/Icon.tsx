@@ -54,7 +54,8 @@ export type IconName =
   | 'x'
   | 'map-pin'
   | 'wand'
-  | 'list';
+  | 'list'
+  | 'lighthouse';
 
 export type IconSize = 'sm' | 'md' | 'lg' | 'xl' | 'hero';
 
@@ -136,6 +137,16 @@ const iconDefinitions: Record<IconName, IconDefinition> = {
       'M4 28h8M4 36h6M6 32h4',
     ],
     dotPosition: { cx: 40, cy: 24 },
+  },
+
+  lighthouse: {
+    paths: [
+      'M32 8v4', // Top light beam
+      'M28 16h8v8h-8z', // Lantern room
+      'M24 24h16l-4 32h-8z', // Tower body
+      'M20 56h24', // Base
+    ],
+    dotPosition: { cx: 32, cy: 20 },
   },
 
   scroll: {

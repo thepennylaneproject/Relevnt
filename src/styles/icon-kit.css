@@ -21,6 +21,44 @@
     color 0.2s ease;
 }
 
+/* Hand Drawn Icon Wrappers */
+.hand-drawn-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  transition: transform var(--transition-base);
+}
+
+.hand-drawn-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  /* Premium blending for Ivory backgrounds */
+  mix-blend-mode: multiply;
+  /* Texture preservation */
+  filter: contrast(1.1) brightness(1.05);
+}
+
+.dark .hand-drawn-wrapper img {
+  /* Dark mode inversion (Chalk style) */
+  mix-blend-mode: screen;
+  filter: invert(1) brightness(0.9) contrast(1.2);
+}
+
+.hand-drawn-icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-1);
+}
+
+.hand-drawn-icon-wrapper .rlv-icon {
+  /* Slight rotation for sketch feel */
+  transform: rotate(-1.5deg);
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    COLOR VARIANTS
    ═══════════════════════════════════════════════════════════════════════════ */
@@ -85,7 +123,7 @@
 
 /* ═══════════════════════════════════════════════════════════════════════════
    ACCENT DOT GLOW EFFECTS
-   For the custom Icon component's terracotta/sage accent dots
+   For the custom Icon component's champagne gold accent dots
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .accent-dot {
