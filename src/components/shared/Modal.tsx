@@ -10,7 +10,8 @@
 
 import { useRelevntTheme } from '../../contexts/RelevntThemeProvider'
 import { CSSProperties, ReactNode } from 'react'
-import { Button } from './Button'
+import { Button } from '../ui/Button'
+import { PrimaryActionRegistryProvider } from '../ui/PrimaryActionRegistry'
 
 // ============================================================================
 // TYPES
@@ -81,49 +82,51 @@ export function Modal({
                 aria-hidden="true"
             />
 
-            {/* Modal dialog */}
-            <div
-                style={styles.modal}
-                className={className}
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby={title ? 'modal-title' : undefined}
-            >
-                {/* Header with title and close button */}
-                {(title || showCloseButton) && (
-                    <div style={styles.header}>
-                        {title && (
-                            <h2 id="modal-title" style={styles.title}>
-                                {title}
-                            </h2>
-                        )}
-                        {showCloseButton && (
-                            <button
-                                style={styles.closeButton}
-                                onClick={onClose}
-                                aria-label="Close modal"
-                            >
-                                ✕
-                            </button>
-                        )}
-                    </div>
-                )}
+            {/* Modal dialog - wrapped with PrimaryActionRegistry for Rule 1 enforcement */}
+            <PrimaryActionRegistryProvider scopeId={`modal-${title || 'dialog'}`}>
+                <div
+                    style={styles.modal}
+                    className={className}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby={title ? 'modal-title' : undefined}
+                >
+                    {/* Header with title and close button */}
+                    {(title || showCloseButton) && (
+                        <div style={styles.header}>
+                            {title && (
+                                <h2 id="modal-title" style={styles.title}>
+                                    {title}
+                                </h2>
+                            )}
+                            {showCloseButton && (
+                                <button
+                                    style={styles.closeButton}
+                                    onClick={onClose}
+                                    aria-label="Close modal"
+                                >
+                                    ✕
+                                </button>
+                            )}
+                        </div>
+                    )}
 
-                {/* Content */}
-                <div style={styles.content}>{children}</div>
+                    {/* Content */}
+                    <div style={styles.content}>{children}</div>
 
-                {/* Footer with buttons */}
-                {onConfirm && (
-                    <div style={styles.footer}>
-                        <Button variant="primary" onClick={onClose}>
-                            Cancel
-                        </Button>
-                        <Button variant={'ghost'} onClick={onConfirm}>
-                            {confirmLabel}
-                        </Button>
-                    </div>
-                )}
-            </div>
+                    {/* Footer with buttons - Primary Action Monogamy: only confirm is primary */}
+                    {onConfirm && (
+                        <div style={styles.footer}>
+                            <Button variant="ghost" onClick={onClose}>
+                                Cancel
+                            </Button>
+                            <Button variant="primary" onClick={onConfirm}>
+                                {confirmLabel}
+                            </Button>
+                        </div>
+                    )}
+                </div>
+            </PrimaryActionRegistryProvider>
         </>
     )
 }

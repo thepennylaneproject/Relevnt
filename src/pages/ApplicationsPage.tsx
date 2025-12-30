@@ -5,6 +5,8 @@ import { Plus } from 'lucide-react'
 import PageBackground from '../components/shared/PageBackground'
 import { Container } from '../components/shared/Container'
 import { Icon } from '../components/ui/Icon'
+import { Button } from '../components/ui/Button'
+import { PrimaryActionRegistryProvider } from '../components/ui/PrimaryActionRegistry'
 import { PageHero } from '../components/ui/PageHero'
 import { EmptyState } from '../components/ui/EmptyState'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
@@ -153,6 +155,8 @@ export default function ApplicationsPage() {
 
   return (
     <PageBackground>
+      {/* PrimaryActionRegistryProvider: Enforces single primary action per page view */}
+      <PrimaryActionRegistryProvider scopeId="applications-page">
       <Container maxWidth="xl" padding="md">
         <div className="apps-page">
           <header className="page-header">
@@ -174,10 +178,10 @@ export default function ApplicationsPage() {
             </div>
 
             <div className="mt-8">
-              <button className="btn btn--primary" onClick={handleAddApplication}>
+              <Button variant="primary" onClick={handleAddApplication} primaryLabel="Log a new application">
                 <Plus size={16} aria-hidden="true" className="mr-2" />
                 Log a new application
-              </button>
+              </Button>
             </div>
           </header>
 
@@ -216,7 +220,8 @@ export default function ApplicationsPage() {
                     <Icon name="paper-airplane" size="xl" className="empty-icon" />
                     <h2>Your story starts here</h2>
                     <p>When you apply to your first role, we'll track every step together — no spreadsheets required.</p>
-                    <button className="btn btn--primary" onClick={handleAddApplication}>Log your first application</button>
+                    {/* Primary Action Monogamy: use secondary here since header already has primary CTA */}
+                    <Button variant="secondary" onClick={handleAddApplication}>Log your first application</Button>
                   </div>
                 ) : (
                   <div className="item-grid">
@@ -429,6 +434,7 @@ export default function ApplicationsPage() {
           </div>
         </div>
       </Container>
+      </PrimaryActionRegistryProvider>
 
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog
