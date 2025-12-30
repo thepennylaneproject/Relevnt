@@ -9,6 +9,7 @@ import { Button } from '../components/ui/Button'
 import { PrimaryActionRegistryProvider } from '../components/ui/PrimaryActionRegistry'
 import { PageHero } from '../components/ui/PageHero'
 import { EmptyState } from '../components/ui/EmptyState'
+import { CollectionEmptyGuard } from '../components/ui/CollectionEmptyGuard'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { useToast } from '../components/ui/Toast'
 import { copy } from '../lib/copy'
@@ -215,14 +216,24 @@ export default function ApplicationsPage() {
                 {loading && <p className="muted text-sm">Loading applications…</p>}
                 {error && <p className="muted text-sm text-danger">{error}</p>}
 
+                {/* DEV: Validate empty state compliance */}
+                <CollectionEmptyGuard
+                  itemsCount={applications.length}
+                  hasEmptyState={true}
+                  scopeId="applications-list"
+                  expectedAction="Log first application"
+                />
+
                 {!loading && applications.length === 0 ? (
-                  <div className="empty-state">
-                    <Icon name="paper-airplane" size="xl" className="empty-icon" />
-                    <h2>Your story starts here</h2>
-                    <p>When you apply to your first role, we'll track every step together — no spreadsheets required.</p>
-                    {/* Primary Action Monogamy: use secondary here since header already has primary CTA */}
-                    <Button variant="secondary" onClick={handleAddApplication}>Log your first application</Button>
-                  </div>
+                  <EmptyState
+                    type="applications"
+                    action={{
+                      label: 'Log your first application',
+                      onClick: handleAddApplication,
+                      variant: 'secondary', // Primary Action Monogamy: header already has primary CTA
+                    }}
+                    includePoetry={true}
+                  />
                 ) : (
                   <div className="item-grid">
                     {applications.map((app) => (
