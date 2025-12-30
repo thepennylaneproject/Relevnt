@@ -21,7 +21,7 @@
 
 import React, { useState } from 'react';
 import { Card } from '../../components/shared/Card';
-import { Button } from '../../components/shared/Button';
+import { Button } from '../../components/ui/Button';
 
 export interface TransparencyData {
   score: number;
@@ -303,11 +303,12 @@ export function TransparencyModal({
 
         <TransparencyCard data={data} expandedByDefault={true} />
 
+        {/* Primary Action Monogamy: informational modal has no primary action */}
         <div className="mt-6 flex gap-3 justify-end">
-          <Button variant="secondary" onClick={onClose}>
+          <Button variant="ghost" onClick={onClose}>
             Close
           </Button>
-          <Button variant="primary">Send feedback</Button>
+          <Button variant="secondary">Send feedback</Button>
         </div>
       </div>
     </div>

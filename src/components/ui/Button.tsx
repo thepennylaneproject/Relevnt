@@ -1,22 +1,35 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * RELEVNT BUTTON COMPONENT
+ * RELEVNT BUTTON COMPONENT (CANONICAL)
  * ═══════════════════════════════════════════════════════════════════════════
- * 
- * Button component with primary, secondary, and ghost variants.
+ *
+ * The single source of truth for buttons in Relevnt.
  * Uses design tokens for consistent styling.
- * 
+ *
+ * DESIGN CONSTITUTION RULE 1 - Primary Action Monogamy:
+ * Each page/modal may have exactly ONE primary action. When variant="primary",
+ * this button automatically registers with the PrimaryActionRegistry in DEV mode.
+ *
+ * Variants:
+ *   - primary:     Gold/accent background - the dominant CTA (use sparingly!)
+ *   - secondary:   Outlined, transparent - good for secondary actions
+ *   - tertiary:    Subtle, transparent - minimal visual weight
+ *   - ghost:       Text-only appearance - for low-emphasis actions
+ *   - destructive: Red/danger styling - for delete, remove actions
+ *
  * Usage:
- *   <Button variant="primary" onClick={handleClick}>Save</Button>
- *   <Button variant="secondary" size="sm">Cancel</Button>
- *   <Button variant="ghost" disabled>Loading...</Button>
- * 
+ *   <Button variant="primary" onClick={handleSave}>Save</Button>
+ *   <Button variant="secondary">Cancel</Button>
+ *   <Button variant="ghost" size="sm">Learn more</Button>
+ *   <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+ *
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
 import React from 'react';
+import { useRegisterPrimaryAction } from './PrimaryActionRegistry';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost';
+export type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'ghost' | 'destructive';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -25,6 +38,11 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
     loading?: boolean;
     fullWidth?: boolean;
     children: React.ReactNode;
+    /**
+     * Label for PrimaryActionRegistry tracking (DEV only).
+     * If not provided, derived from aria-label or children text.
+     */
+    primaryLabel?: string;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -35,12 +53,25 @@ export const Button: React.FC<ButtonProps> = ({
     children,
     className = '',
     disabled,
+    primaryLabel,
     ...props
 }) => {
+    // Derive label for primary action registry
+    const derivedLabel = primaryLabel
+        || props['aria-label']
+        || (typeof children === 'string' ? children : undefined)
+        || 'primary-button';
+
+    // Register with PrimaryActionRegistry when variant is "primary"
+    // This hook is a no-op in production and when not inside a Provider
+    useRegisterPrimaryAction(variant === 'primary' ? derivedLabel : undefined);
+
     const variantClasses: Record<ButtonVariant, string> = {
         primary: 'btn--primary',
         secondary: 'btn--secondary',
+        tertiary: 'btn--ghost', // Tertiary maps to ghost styling (quiet)
         ghost: 'btn--ghost',
+        destructive: 'btn--ghost btn--destructive', // Uses ghost base + destructive modifier
     };
 
     const sizeClasses: Record<ButtonSize, string> = {
@@ -58,10 +89,16 @@ export const Button: React.FC<ButtonProps> = ({
         className,
     ].filter(Boolean).join(' ');
 
+    // Inline destructive styles (color override)
+    const destructiveStyle: React.CSSProperties = variant === 'destructive'
+        ? { color: 'var(--color-error, #c44a4a)' }
+        : {};
+
     return (
         <button
             className={classes}
             disabled={disabled || loading}
+            style={destructiveStyle}
             {...props}
         >
             {loading ? (

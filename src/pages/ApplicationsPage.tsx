@@ -5,8 +5,11 @@ import { Plus } from 'lucide-react'
 import PageBackground from '../components/shared/PageBackground'
 import { Container } from '../components/shared/Container'
 import { Icon } from '../components/ui/Icon'
+import { Button } from '../components/ui/Button'
+import { PrimaryActionRegistryProvider } from '../components/ui/PrimaryActionRegistry'
 import { PageHero } from '../components/ui/PageHero'
 import { EmptyState } from '../components/ui/EmptyState'
+import { CollectionEmptyGuard } from '../components/ui/CollectionEmptyGuard'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { useToast } from '../components/ui/Toast'
 import { copy } from '../lib/copy'
@@ -153,6 +156,8 @@ export default function ApplicationsPage() {
 
   return (
     <PageBackground>
+      {/* PrimaryActionRegistryProvider: Enforces single primary action per page view */}
+      <PrimaryActionRegistryProvider scopeId="applications-page">
       <Container maxWidth="xl" padding="md">
         <div className="apps-page">
           <header className="page-header">
@@ -174,10 +179,10 @@ export default function ApplicationsPage() {
             </div>
 
             <div className="mt-8">
-              <button className="btn btn--primary" onClick={handleAddApplication}>
+              <Button variant="primary" onClick={handleAddApplication} primaryLabel="Log a new application">
                 <Plus size={16} aria-hidden="true" className="mr-2" />
                 Log a new application
-              </button>
+              </Button>
             </div>
           </header>
 
@@ -211,13 +216,24 @@ export default function ApplicationsPage() {
                 {loading && <p className="muted text-sm">Loading applications…</p>}
                 {error && <p className="muted text-sm text-danger">{error}</p>}
 
+                {/* DEV: Validate empty state compliance */}
+                <CollectionEmptyGuard
+                  itemsCount={applications.length}
+                  hasEmptyState={true}
+                  scopeId="applications-list"
+                  expectedAction="Log first application"
+                />
+
                 {!loading && applications.length === 0 ? (
-                  <div className="empty-state">
-                    <Icon name="paper-airplane" size="xl" className="empty-icon" />
-                    <h2>Your story starts here</h2>
-                    <p>When you apply to your first role, we'll track every step together — no spreadsheets required.</p>
-                    <button className="btn btn--primary" onClick={handleAddApplication}>Log your first application</button>
-                  </div>
+                  <EmptyState
+                    type="applications"
+                    action={{
+                      label: 'Log your first application',
+                      onClick: handleAddApplication,
+                      variant: 'secondary', // Primary Action Monogamy: header already has primary CTA
+                    }}
+                    includePoetry={true}
+                  />
                 ) : (
                   <div className="item-grid">
                     {applications.map((app) => (
@@ -429,6 +445,7 @@ export default function ApplicationsPage() {
           </div>
         </div>
       </Container>
+      </PrimaryActionRegistryProvider>
 
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog

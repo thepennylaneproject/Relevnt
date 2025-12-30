@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import PageBackground from '../components/shared/PageBackground'
 import { Container } from '../components/shared/Container'
 import { Icon } from '../components/ui/Icon'
+import { EmptyState } from '../components/ui/EmptyState'
+import { CollectionEmptyGuard } from '../components/ui/CollectionEmptyGuard'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import type { Database } from '../lib/database.types'
@@ -132,20 +134,28 @@ export default function ResumeListPage({ embedded = false }: { embedded?: boolea
           <div className="mb-4 text-sm text-slate-600">{statusText}</div>
         )}
 
+        {/* DEV: Validate empty state compliance */}
+        <CollectionEmptyGuard
+          itemsCount={resumes.length}
+          hasEmptyState={true}
+          scopeId="resume-list"
+          expectedAction="Create first resume"
+        />
+
         {resumes.length === 0 && !loading ? (
-          <div className="rounded-lg border border-dashed border-slate-200 p-8 text-center">
-            <p className="text-sm text-slate-600 mb-3">
-              No resumes yet. Create your first resume to get started.
-            </p>
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={createResume}
-              disabled={creating}
-            >
-              {creating ? 'Creating…' : 'Create Resume'}
-            </button>
-          </div>
+          <EmptyState
+            type="resumes"
+            action={{
+              label: creating ? 'Creating…' : 'Create your first resume',
+              onClick: createResume,
+            }}
+            secondaryAction={{
+              label: 'Open Builder',
+              onClick: () => navigate('/resumes/builder'),
+              variant: 'secondary',
+            }}
+            includePoetry={false}
+          />
         ) : (
           <div className="resume-list">
             {resumes.map((resume) => (

@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { Icon } from '../components/ui/Icon'
+import { EmptyState } from '../components/ui/EmptyState'
+import { CollectionEmptyGuard } from '../components/ui/CollectionEmptyGuard'
 import { Container } from '../components/shared/Container'
 import { useToast } from '../components/ui/Toast'
 import { PoeticEpigraph } from '../components/ui/PoeticVerse'
@@ -154,12 +156,23 @@ export default function InterviewPrepCenter() {
                             <h3>Your Prep Templates</h3>
                         </div>
 
+                        {/* DEV: Validate empty state compliance */}
+                        <CollectionEmptyGuard
+                            itemsCount={preps.length}
+                            hasEmptyState={true}
+                            scopeId="interview-prep-templates"
+                            expectedAction="Use form to generate first template"
+                        />
+
                         {loading ? (
                             <div className="loading-state">Loading templates...</div>
                         ) : preps.length === 0 ? (
-                            <div className="empty-state">
-                                <p>Generate a template to start practicing.</p>
-                            </div>
+                            <EmptyState
+                                type="analysis"
+                                title="No prep templates yet"
+                                description="Use the form to generate your first interview prep session. We'll create tailored questions based on the role."
+                                includePoetry={false}
+                            />
                         ) : (
                             <div className="prep-list">
                                 {preps.map(prep => (
@@ -184,13 +197,27 @@ export default function InterviewPrepCenter() {
                         <h3>Practice History</h3>
                     </div>
 
+                    {/* DEV: Validate empty state compliance */}
+                    <CollectionEmptyGuard
+                        itemsCount={sessions.length}
+                        hasEmptyState={true}
+                        scopeId="interview-practice-history"
+                        expectedAction="Complete a practice session"
+                    />
+
                     {loading ? (
                         <div className="loading-state">Loading history...</div>
                     ) : sessions.length === 0 ? (
-                        <div className="empty-state">
-                            <Icon name="pocket-watch" size="lg" />
-                            <p>Your practice runs will appear here.</p>
-                        </div>
+                        <EmptyState
+                            type="generic"
+                            title="No practice sessions yet"
+                            description="Once you complete a practice run, your history and scores will appear here."
+                            action={preps.length > 0 ? {
+                                label: 'Start practicing',
+                                onClick: () => navigate(`/interview-practice/${preps[0].id}`),
+                            } : undefined}
+                            includePoetry={false}
+                        />
                     ) : (
                         <div className="history-grid">
                             {sessions.map(session => {

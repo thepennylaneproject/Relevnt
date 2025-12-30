@@ -1,10 +1,14 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Icon } from '../components/ui/Icon'
+import { EmptyState } from '../components/ui/EmptyState'
+import { CollectionEmptyGuard } from '../components/ui/CollectionEmptyGuard'
 import { useCoverLetters, type CoverLetter } from '../hooks/useCoverLetters'
 import { Container } from '../components/shared/Container'
 import PageBackground from '../components/shared/PageBackground'
 
 export default function CoverLetterListPage({ embedded = false }: { embedded?: boolean }) {
+    const navigate = useNavigate()
     const { coverLetters, loading, error, deleteCoverLetter } = useCoverLetters()
     const [viewingLetter, setViewingLetter] = useState<CoverLetter | null>(null)
 
@@ -19,14 +23,30 @@ export default function CoverLetterListPage({ embedded = false }: { embedded?: b
 
             {error && <div className="card-info animate-in fade-in" style={{ borderColor: 'var(--color-error)' }}>{error}</div>}
 
+            {/* DEV: Validate empty state compliance */}
+            <CollectionEmptyGuard
+                itemsCount={coverLetters.length}
+                hasEmptyState={true}
+                scopeId="cover-letter-list"
+                expectedAction="Go to Applications to generate"
+            />
+
             {coverLetters.length === 0 && !loading ? (
-                <div className="rounded-lg border border-dashed border-slate-200 p-12 text-center">
-                    <Icon name="scroll" size="lg" className="mx-auto mb-4 muted opacity-20" />
-                    <p className="text-sm text-slate-600 mb-2 font-bold">No letters yet</p>
-                    <p className="text-xs text-slate-500 max-w-xs mx-auto">
-                        Generate cover letters directly from your Applications or the Jobs page to see them here.
-                    </p>
-                </div>
+                <EmptyState
+                    type="generic"
+                    title="No letters yet"
+                    description="Cover letters are generated from your Applications page. Start tracking an application to create tailored letters."
+                    action={{
+                        label: 'Go to Applications',
+                        onClick: () => navigate('/applications'),
+                    }}
+                    secondaryAction={{
+                        label: 'Browse Jobs',
+                        onClick: () => navigate('/jobs'),
+                        variant: 'secondary',
+                    }}
+                    includePoetry={false}
+                />
             ) : (
                 <div className="resume-list">
                     {coverLetters.map((letter) => (

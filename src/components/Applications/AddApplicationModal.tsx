@@ -3,6 +3,8 @@ import { X } from 'lucide-react'
 import { useApplications, type ApplicationStatus } from '../../hooks/useApplications'
 import { useResumes } from '../../hooks/useResumes'
 import { useAuth } from '../../hooks/useAuth'
+import { Button } from '../ui/Button'
+import { PrimaryActionRegistryProvider } from '../ui/PrimaryActionRegistry'
 import { PoeticVerseMinimal } from '../ui/PoeticVerse'
 import { getPoeticVerse } from '../../lib/poeticMoments'
 
@@ -63,6 +65,7 @@ export function AddApplicationModal({ isOpen, onClose }: AddApplicationModalProp
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
+            <PrimaryActionRegistryProvider scopeId="add-application-modal">
             <div className="bg-surface border border-border rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95">
                 <header className="flex items-center justify-between p-4 border-b border-border bg-surface-accent/50">
                     <h2 className="text-lg font-semibold">Log Application</h2>
@@ -139,16 +142,17 @@ export function AddApplicationModal({ isOpen, onClose }: AddApplicationModalProp
                     </div>
 
                     <div className="flex justify-end pt-4 border-t border-border mt-2">
-                        <button
+                        <Button
                             type="submit"
+                            variant="primary"
                             disabled={loading}
-                            className="primary-button"
                         >
                             {loading ? 'Saving...' : 'Log Application'}
-                        </button>
+                        </Button>
                     </div>
                 </form>
             </div>
+            </PrimaryActionRegistryProvider>
         </div>
     )
 }
