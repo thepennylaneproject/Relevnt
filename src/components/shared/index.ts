@@ -4,4 +4,3 @@ export { Card, type CardProps } from './Card';
 export { Container, type ContainerProps } from './Container';
 export { Modal, type ModalProps } from './Modal';
 export { LoadingSpinner, type LoadingSpinnerProps } from './Spinner';
-export { Badge, type BadgeProps } from './Badge';

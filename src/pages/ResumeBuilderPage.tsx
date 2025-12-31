@@ -32,8 +32,8 @@ import { NewResumeWizard } from '../components/ResumeBuilder/NewResumeWizard'
 import { ResumePerformancePanel } from '../components/ResumeBuilder/ResumePerformancePanel'
 
 // UI components
-import { Icon, IconName } from '../components/ui/Icon'
-import HandDrawnIcon, { ResumeIconName } from '../components/ui/HandDrawnIcon'
+import { IconName } from '../components/ui/Icon'
+import { ResumeIconName } from '../components/ui/HandDrawnIcon'
 
 // Hooks and utilities
 import { copy } from '../lib/copy'
@@ -234,7 +234,6 @@ const ResumeBuilderPage: React.FC<ResumeBuilderPageProps> = ({ embedded = false 
                     onClick={() => setShowWizard(true)}
                     className="btn btn-secondary btn-sm"
                   >
-                    <HandDrawnIcon name="stars" size="sm" />
                     New Resume
                   </button>
 
@@ -265,7 +264,6 @@ const ResumeBuilderPage: React.FC<ResumeBuilderPageProps> = ({ embedded = false 
                       onClick={() => setActiveSection(section.id)}
                       className={`builder-tab ${isActive ? 'active' : ''}`}
                     >
-                      <HandDrawnIcon resumeName={section.resumeIconName} size="sm" className="tab-icon" />
                       {section.label}
                     </button>
                   )
@@ -286,7 +284,6 @@ const ResumeBuilderPage: React.FC<ResumeBuilderPageProps> = ({ embedded = false 
                         onClick={() => setActiveSection(section.id)}
                         className={`builder-tab ${isActive ? 'active' : ''}`}
                       >
-                        <HandDrawnIcon resumeName={section.resumeIconName} size="sm" className="tab-icon" />
                         {section.label}
                       </button>
                     )
@@ -329,7 +326,6 @@ const ResumeBuilderPage: React.FC<ResumeBuilderPageProps> = ({ embedded = false 
                   onClick={() => setActivePanel('preview')}
                   className={`btn btn-sm ${activePanel === 'preview' ? 'btn-primary' : 'btn-ghost'}`}
                 >
-                  <Icon name="scroll" size="sm" />
                   Preview
                 </button>
                 <button
@@ -337,10 +333,9 @@ const ResumeBuilderPage: React.FC<ResumeBuilderPageProps> = ({ embedded = false 
                   onClick={() => setActivePanel('ats')}
                   className={`btn btn-sm ${activePanel === 'ats' ? 'btn-primary' : 'btn-ghost'}`}
                 >
-                  <HandDrawnIcon name="stars" size="sm" />
                   ATS Score
                   {analysis && (
-                    <span className="panel-tab-badge" style={{ marginLeft: '4px', opacity: 0.8 }}>{analysis.overallScore}</span>
+                    <span style={{ marginLeft: '4px', opacity: 0.8 }}>{analysis.overallScore}</span>
                   )}
                 </button>
                 <button
@@ -348,7 +343,6 @@ const ResumeBuilderPage: React.FC<ResumeBuilderPageProps> = ({ embedded = false 
                   onClick={() => setActivePanel('targeting')}
                   className={`btn btn-sm ${activePanel === 'targeting' ? 'btn-primary' : 'btn-ghost'}`}
                 >
-                  <HandDrawnIcon name="briefcase" size="sm" />
                   Job Match
                 </button>
               </div>
@@ -378,13 +372,10 @@ const ResumeBuilderPage: React.FC<ResumeBuilderPageProps> = ({ embedded = false 
                   <div className="targeting-panel">
                     <JobTargetingPanel resumeText={resumeText} />
                     <div className="card-info" style={{ marginTop: '16px' }}>
-                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                         <HandDrawnIcon name="lighthouse" size="sm" />
-                         <p className="text-xs muted">
-                           Paste a job description above to see how well your resume matches
-                           and get tailoring suggestions.
-                         </p>
-                      </div>
+                      <p className="text-xs muted">
+                        Paste a job description above to see how well your resume matches
+                        and get tailoring suggestions.
+                      </p>
                     </div>
                   </div>
                 )}

@@ -92,7 +92,7 @@ export default function SidebarMarginNav() {
                       <Icon
                         name={icon}
                         size="md"
-                        hideAccent={!isActive}
+                        hideAccent
                       />
                     </span>
                     <span className="margin-nav__label">{label}</span>
@@ -111,7 +111,7 @@ export default function SidebarMarginNav() {
               aria-label={copy.nav.settings}
             >
               <span className="margin-nav__icon icon-nav">
-                <Icon name="pocket-watch" size="md" hideAccent={!active('/settings')} />
+                <Icon name="pocket-watch" size="md" hideAccent />
               </span>
               <span className="margin-nav__label">{copy.nav.settings}</span>
             </Link>
@@ -121,4 +121,3 @@ export default function SidebarMarginNav() {
     </>
   )
 }
-

@@ -41,11 +41,6 @@
   border: 3px solid var(--color-graphite-faint);
   border-top-color: var(--color-accent);
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -82,23 +77,12 @@
   font-size: var(--text-sm);
   font-weight: 500;
   color: var(--color-accent);
-  animation: fadeInUp 0.5s ease;
 }
 
 .momentum-message svg {
   color: var(--color-accent);
 }
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
 /* Primary CTA Card — Elevated, prominent */
 .primary-cta-card {
@@ -128,8 +112,6 @@
   font-family: var(--font-display);
   font-size: var(--text-xs);
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
   color: var(--color-accent);
   margin-bottom: var(--space-2);
 }
@@ -254,8 +236,6 @@
   font-family: var(--font-body);
   font-size: var(--text-xs);
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
   color: var(--color-text-secondary);
   margin: 0 0 var(--space-4);
 }
@@ -346,18 +326,6 @@
   display: block;
   font-size: var(--text-sm);
   color: var(--color-ink-secondary);
-}
-
-.priority-badge {
-  padding: var(--space-1) var(--space-2);
-  font-family: var(--font-display);
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-accent);
-  background: var(--color-accent-soft);
-  border-radius: var(--radius-sm);
 }
 
 .priority-arrow {
@@ -543,8 +511,6 @@
   font-family: var(--font-body);
   font-size: var(--text-xs);
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
   color: var(--color-ink-secondary);
   margin-bottom: var(--space-1);
 }
@@ -706,16 +672,6 @@
 
 .wellness-section {
   margin-bottom: var(--space-5);
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   VERSE CONTAINER COMPACT MODE
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-.verse-container--compact {
-  font-size: var(--text-lg);
-  max-width: 480px;
-  margin: 0 auto;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -1051,37 +1007,6 @@ button:focus-visible {
   border: 1px solid var(--color-graphite-faint);
 }
 
-/* ENHANCED BADGES — More prominent and visible */
-
-.priority-badge {
-  padding: var(--space-1) var(--space-3);
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #ffffff;
-  background: var(--color-accent);
-  border-radius: var(--radius-full);
-  animation: badgePulse 2s ease-in-out infinite;
-}
-
-.priority-badge--urgent {
-  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
-  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.3);
-}
-
-@keyframes badgePulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.85; }
-}
-
-/* Cards with badges get highlighted border */
-.priority-card.has-badge {
-  border-color: var(--color-accent);
-  background: var(--color-accent-soft);
-}
-
 /* QUICK ACTIONS — Prominent styling */
 
 .quick-actions-section--prominent {
@@ -1269,11 +1194,6 @@ button:focus-visible {
 :root.dark .pipeline-section,
 [data-theme="dark"] .pipeline-section {
   background: var(--color-bg-secondary);
-}
-
-:root.dark .priority-card.has-badge,
-[data-theme="dark"] .priority-card.has-badge {
-  background: rgba(184, 138, 118, 0.15);
 }
 
 :root.dark .foundation-card-cta,

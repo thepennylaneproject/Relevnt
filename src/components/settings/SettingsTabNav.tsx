@@ -1,25 +1,14 @@
-import {
-    Target as IconTarget,
-    FileText as IconProfile,
-    Mic2 as IconVoice,
-    Settings as IconGear,
-    Bot as IconRobot
-} from 'lucide-react'
-
-export type SettingsTab = 'targeting' | 'profile' | 'voice' | 'system' | 'auto-apply'
+export type SettingsTab = 'targeting' | 'profile' | 'system'
 
 interface TabConfig {
     id: SettingsTab
     label: string
-    Icon: any
 }
 
 const TABS: TabConfig[] = [
-    { id: 'targeting', label: 'Targeting', Icon: IconTarget },
-    { id: 'profile', label: 'Profile', Icon: IconProfile },
-    { id: 'voice', label: 'Voice & Style', Icon: IconVoice },
-    { id: 'system', label: 'System', Icon: IconGear },
-    { id: 'auto-apply', label: 'Auto-Apply', Icon: IconRobot },
+    { id: 'targeting', label: 'Targeting' },
+    { id: 'profile', label: 'Profile & Voice' },
+    { id: 'system', label: 'System & Auto-Apply' },
 ]
 
 interface SettingsTabNavProps {
@@ -32,7 +21,6 @@ export function SettingsTabNav({ activeTab, onTabChange }: SettingsTabNavProps) 
         <nav className="tabs" role="tablist" aria-label="Settings sections">
             {TABS.map((tab) => {
                 const isActive = activeTab === tab.id
-                const { Icon } = tab
                 return (
                     <button
                         key={tab.id}
@@ -43,7 +31,6 @@ export function SettingsTabNav({ activeTab, onTabChange }: SettingsTabNavProps) 
                         className={`tab ${isActive ? 'active' : ''}`}
                         onClick={() => onTabChange(tab.id)}
                     >
-                        <Icon className="tab-icon" size={16} />
                         <span>{tab.label}</span>
                     </button>
                 )

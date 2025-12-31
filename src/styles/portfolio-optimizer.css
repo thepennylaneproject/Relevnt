@@ -11,8 +11,7 @@
 }
 
 /* Stat Cards - Refactored for Dark Academia */
-.overall-score-large,
-.seniority-badge {
+.overall-score-large {
     flex: 1;
     background: var(--color-bg-secondary);
     border: 1px solid var(--color-border);
@@ -25,14 +24,12 @@
     transition: transform 0.3s ease;
 }
 
-.overall-score-large:hover,
-.seniority-badge:hover {
+.overall-score-large:hover {
     transform: translateY(-4px);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
-.overall-score-large .label,
-.seniority-badge .label {
+.overall-score-large .label {
     font-size: 0.7rem;
     letter-spacing: 0.05em;
     font-weight: 700;
@@ -46,14 +43,6 @@
     font-weight: 400;
     line-height: 1;
     color: var(--color-accent-primary);
-}
-
-.seniority-badge .value {
-    font-family: var(--font-display);
-    font-size: 1.5rem;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    color: var(--color-text-primary);
 }
 
 /* Metric Grid */

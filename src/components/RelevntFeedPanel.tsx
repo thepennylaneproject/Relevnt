@@ -237,13 +237,6 @@ export function RelevntFeedPanel({
               >
                 <div className="card-header">
                   <h3>{job.title}</h3>
-                  <span
-                    className={`badge badge-match-score ${m.score >= 70 ? 'high' : m.score >= 50 ? 'medium' : 'low'}`}
-                    title={`Match score based on your ${activePersona?.name || 'profile'} preferences, skills alignment, and market data`}
-                  >
-                    <span className="match-score-value">{Math.round(m.score)}%</span>
-                    <span className="match-score-label">Match</span>
-                  </span>
                 </div>
 
                 <div className="card-meta">
@@ -371,9 +364,7 @@ export function RelevntFeedPanel({
             </div>
 
             <div className="feed-modal-score">
-              <span className={`feed-match-pill ${selectedMatch.score >= 70 ? 'high' : selectedMatch.score >= 50 ? 'medium' : 'low'}`}>
-                {Math.round(selectedMatch.score)}% Match
-              </span>
+              <span>{Math.round(selectedMatch.score)}% Match</span>
             </div>
 
             <div className="feed-modal-section">

@@ -29,10 +29,6 @@ export type { InputProps } from './Input';
 export { Card } from './Card';
 export type { CardProps } from './Card';
 
-// Badge component
-export { Badge } from './Badge';
-export type { BadgeVariant, BadgeProps } from './Badge';
-
 // Alert component
 export { Alert } from './Alert';
 export type { AlertVariant, AlertProps } from './Alert';

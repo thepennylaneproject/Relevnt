@@ -2,21 +2,18 @@ import React, { useEffect, useState } from 'react'
 import { supabase } from '../../../lib/supabase'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useSettingsAutoSave, type AutoSaveStatus } from '../../../hooks/useSettingsAutoSave'
-import { Icon } from '../../ui/Icon'
 import { useToast } from '../../ui/Toast'
-import { RangeSliderWithPresets } from '../RangeSliderWithPresets'
 
 interface VoiceStyleTabProps {
     onAutoSaveStatusChange: (status: AutoSaveStatus) => void
 }
 
-type VoicePreset = 'direct' | 'warm' | 'strategic' | 'technical'
+type VoicePreset = 'direct' | 'warm' | 'strategic'
 
-const VOICE_PRESETS: { id: VoicePreset; label: string; description: string }[] = [
-    { id: 'direct', label: 'Direct & confident', description: 'Clear, assertive, no fluff' },
-    { id: 'warm', label: 'Warm & human', description: 'Approachable and personable' },
-    { id: 'strategic', label: 'Strategic & concise', description: 'Business-focused, efficient' },
-    { id: 'technical', label: 'Technical & precise', description: 'Detail-oriented, specific' },
+const VOICE_PRESETS: { id: VoicePreset; label: string }[] = [
+    { id: 'warm', label: 'Natural' },
+    { id: 'strategic', label: 'Professional' },
+    { id: 'direct', label: 'Direct' },
 ]
 
 import { useProfessionalProfile } from '../../../hooks/useProfessionalProfile'
@@ -45,7 +42,6 @@ export function VoiceStyleTab({ onAutoSaveStatusChange }: VoiceStyleTabProps) {
             direct: 'direct',
             warm: 'professional_warm',
             strategic: 'direct',
-            technical: 'academic',
         }
 
         const { error } = await supabase
@@ -127,7 +123,6 @@ export function VoiceStyleTab({ onAutoSaveStatusChange }: VoiceStyleTabProps) {
         <div className="tab-pane">
             <div className="card">
                 <h3>Choose your voice</h3>
-                <p className="card-description">This sets the base tone for all AI-generated content. Pick what feels most like you.</p>
                 <div className="radio-card-group">
                     {VOICE_PRESETS.map((vp) => (
                         <label key={vp.id} className="radio-card">
@@ -139,7 +134,6 @@ export function VoiceStyleTab({ onAutoSaveStatusChange }: VoiceStyleTabProps) {
                             />
                             <div className="radio-card-content">
                                 <h4>{vp.label}</h4>
-                                <p>{vp.description}</p>
                             </div>
                         </label>
                     ))}
@@ -151,7 +145,6 @@ export function VoiceStyleTab({ onAutoSaveStatusChange }: VoiceStyleTabProps) {
                 <div className="form-group">
                     <div className="slider-header">
                         <label className="form-label">Formality</label>
-                        <span className="slider-value">{formality}%</span>
                     </div>
                     <input 
                         type="range" 
@@ -172,7 +165,6 @@ export function VoiceStyleTab({ onAutoSaveStatusChange }: VoiceStyleTabProps) {
                 <div className="form-group" style={{ marginTop: 24 }}>
                     <div className="slider-header">
                         <label className="form-label">Boldness</label>
-                        <span className="slider-value">{boldness}%</span>
                     </div>
                     <input 
                         type="range" 
@@ -184,10 +176,6 @@ export function VoiceStyleTab({ onAutoSaveStatusChange }: VoiceStyleTabProps) {
                             triggerSave()
                         }}
                     />
-                    <div className="slider-labels">
-                        <span>Conservative</span>
-                        <span>Bold</span>
-                    </div>
                 </div>
             </div>
 

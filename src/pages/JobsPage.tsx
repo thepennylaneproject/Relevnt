@@ -4,7 +4,6 @@ import { RelevntFeedPanel } from '../components/RelevntFeedPanel'
 import { useAuth } from '../contexts/AuthContext'
 import PageBackground from '../components/shared/PageBackground'
 import { Container } from '../components/shared/Container'
-import { Icon } from '../components/ui/Icon'
 import { EmptyState } from '../components/ui/EmptyState'
 import { useToast } from '../components/ui/Toast'
 import { copy } from '../lib/copy'
@@ -399,7 +398,6 @@ export default function JobsPage() {
         <div className="jobs-section-stack">
           <section className="surface-card jobs-context">
             <div className="jobs-context-main">
-              <Icon name="compass" size="md" />
               <div>
                 <h2 className="text-sm font-medium">No Active Persona</h2>
                 <p className="muted text-xs">
@@ -620,21 +618,9 @@ export default function JobsPage() {
               description={
                 search || locationFilter || sourceKey || employmentType || postedSince || minSalaryBrowse > 0 || remoteOnlyBrowse
                   ? "Try adjusting your filters to see more opportunities."
-                  : "\"Two roads diverged in a yellow wood...\" Your perfect role may be on its way. We're continuously searching."
+                  : "Your perfect role may be on its way. We're continuously searching."
               }
-              action={{
-                label: search || locationFilter || sourceKey || employmentType || postedSince || minSalaryBrowse > 0 || remoteOnlyBrowse
-                  ? "Clear filters"
-                  : "Refresh",
-                onClick: () => {
-                  if (search || locationFilter || sourceKey || employmentType || postedSince || minSalaryBrowse > 0 || remoteOnlyBrowse) {
-                    handleClearFilters()
-                  } else {
-                    fetchJobs()
-                  }
-                },
-                variant: 'secondary'
-              }}
+              includePoetry={false}
             />
           )}
 
@@ -674,14 +660,6 @@ export default function JobsPage() {
                   <div key={job.id} className="card card-job-grid">
                     <div className="card-header">
                       <h3>{job.title}</h3>
-                      {matchScore !== null && (
-                        <span
-                          className={`badge badge-match-score badge-sm ${matchScore >= 70 ? 'high' : matchScore >= 50 ? 'medium' : 'low'}`}
-                          title="AI-calculated match score based on your profile"
-                        >
-                          <span className="match-score-value">{matchScore}%</span>
-                        </span>
-                      )}
                     </div>
 
                     <div className="card-company">
@@ -691,19 +669,16 @@ export default function JobsPage() {
                     <div className="card-meta">
                       {salaryLabel && (
                         <span className="meta-item">
-                          <Icon name="dollar" size="sm" hideAccent />
                           {salaryLabel}
                         </span>
                       )}
                       {job.employment_type && (
                         <span className="meta-item">
-                          <Icon name="briefcase" size="sm" hideAccent />
                           {job.employment_type.replace('_', ' ')}
                         </span>
                       )}
                       {postedLabel && (
                         <span className="meta-item">
-                          <Icon name="pocket-watch" size="sm" hideAccent />
                           {postedLabel}
                         </span>
                       )}
@@ -720,18 +695,17 @@ export default function JobsPage() {
                           href={job.external_url}
                           target="_blank"
                           rel="noreferrer"
-                          className="btn btn-secondary btn-sm btn-with-icon"
+                          className="btn btn-secondary btn-sm"
                         >
-                          View <Icon name="chevron-right" size="sm" hideAccent />
+                          View
                         </a>
                       )}
                       <button
                         type="button"
                         onClick={() => toggleSavedJob(job.id)}
-                        className={`btn btn-sm btn-with-icon ${isSaved ? 'btn-saved is-active' : 'btn-ghost'}`}
+                        className={`btn btn-sm ${isSaved ? 'btn-saved is-active' : 'btn-ghost'}`}
                         aria-label={isSaved ? 'Remove from saved' : 'Save job'}
                       >
-                        <Icon name="bookmark" size="sm" hideAccent />
                         {isSaved ? 'Saved' : 'Save'}
                       </button>
                     </div>
@@ -753,7 +727,6 @@ export default function JobsPage() {
           <div className="page-header">
             <div className="header-top">
               <h1>Discover</h1>
-              <span className="label">TRACK</span>
             </div>
             <p>Let Relevnt bring the right roles to you.</p>
           </div>
@@ -779,7 +752,6 @@ export default function JobsPage() {
                 data-tooltip="AI-ranked jobs based on your persona, resume, and preferences"
                 aria-label="View your personalized Relevnt Feed"
               >
-                <Icon name="wand" size="sm" className="tab-icon" />
                 {copy.jobs.tabs.feed}
               </button>
               <button
@@ -789,7 +761,6 @@ export default function JobsPage() {
                 data-tooltip="Browse all available jobs with filters — no AI ranking applied"
                 aria-label="Browse all jobs"
               >
-                <Icon name="list" size="sm" className="tab-icon" />
                 {copy.jobs.tabs.all}
               </button>
             </div>
@@ -808,4 +779,3 @@ export default function JobsPage() {
     </PageBackground>
   )
 }
-

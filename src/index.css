@@ -72,26 +72,6 @@ p {
   font-weight: 600;
 }
 
-/* Poetic voice styling */
-.poetic-verse {
-  font-family: var(--font-poetic);
-  font-style: italic;
-  font-size: var(--text-lg);
-  color: var(--color-accent);
-  line-height: var(--leading-relaxed);
-  letter-spacing: 0.02em;
-}
-
-.poetic-epigraph {
-  font-family: var(--font-poetic);
-  font-style: italic;
-  font-size: var(--text-base);
-  color: var(--color-accent);
-  border-left: 3px solid var(--color-accent);
-  padding-left: var(--space-4);
-  margin: var(--space-4) 0;
-}
-
 code,
 pre {
   font-family: var(--font-mono);
@@ -1650,20 +1630,6 @@ input[type="range"]::-moz-range-track {
   flex: 1;
 }
 
-.count-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
-  border-radius: var(--radius-full);
-  background: var(--surface-soft);
-  border: 1px solid var(--border);
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
 /* ============================================================================
    ENHANCED PAGE LAYOUT
    ============================================================================ */
@@ -1682,27 +1648,6 @@ input[type="range"]::-moz-range-track {
 /* ============================================================================
    HERO SECTIONS
    ============================================================================ */
-
-.hero__badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 14px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  border-radius: var(--radius-full);
-  background: var(--accent-soft);
-  color: var(--accent);
-  margin-bottom: 16px;
-}
-
-.hero__badge-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--accent);
-}
 
 /* ============================================================================
    AUTH PAGES
@@ -2419,28 +2364,6 @@ input[type="range"]::-moz-range-track {
   margin-bottom: 16px;
 }
 
-.ats-suggestions-counts {
-  display: flex;
-  gap: 8px;
-}
-
-.ats-count-badge {
-  padding: 2px 8px;
-  border-radius: var(--radius-full);
-  font-size: 0.7rem;
-  font-weight: 500;
-}
-
-.ats-count-badge--high {
-  background: rgba(196, 74, 74, 0.1);
-  color: var(--danger, #c44a4a);
-}
-
-.ats-count-badge--medium {
-  background: rgba(199, 165, 106, 0.1);
-  color: var(--warning, #c7a56a);
-}
-
 .ats-suggestions-list {
   display: flex;
   flex-direction: column;
@@ -2488,28 +2411,6 @@ input[type="range"]::-moz-range-track {
 
 .ats-suggestion-title {
   color: var(--text);
-}
-
-.ats-priority-badge {
-  padding: 2px 8px;
-  border-radius: var(--radius-full);
-  font-size: 0.65rem;
-  font-weight: 500;
-}
-
-.ats-priority--high {
-  background: rgba(196, 74, 74, 0.1);
-  color: var(--danger, #c44a4a);
-}
-
-.ats-priority--medium {
-  background: rgba(199, 165, 106, 0.1);
-  color: var(--warning, #c7a56a);
-}
-
-.ats-priority--low {
-  background: var(--surface-soft);
-  color: var(--text-muted);
 }
 
 .ats-suggestion-chevron {
@@ -2575,14 +2476,6 @@ input[type="range"]::-moz-range-track {
   align-items: center;
   gap: 8px;
   flex: 1;
-}
-
-.job-match-badge {
-  padding: 4px 10px;
-  border-radius: var(--radius-full);
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: white;
 }
 
 .job-targeting-chevron {

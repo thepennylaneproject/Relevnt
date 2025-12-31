@@ -8,9 +8,7 @@
  */
 
 import React from 'react'
-import { Sparkles, CheckCircle2, Zap } from 'lucide-react'
-import { PoeticVerseMinimal } from '../ui/PoeticVerse'
-import { getPoeticVerse } from '../../lib/poeticMoments'
+import { Sparkles } from 'lucide-react'
 
 const UPDATES = [
     {
@@ -51,19 +49,10 @@ export function WhatIsNew() {
                 <h3 className="sidebar-card-title m-0">What's New</h3>
             </div>
 
-            {/* Poetic moment: Feature discovery */}
-            <div className="mb-4 p-3 rounded-lg bg-ivory/30 dark:bg-ink/30 border border-emerald/10">
-                <PoeticVerseMinimal verse={getPoeticVerse('feature-discovery')} />
-            </div>
-
             <div className="updates-list">
                 {UPDATES.map((u) => (
                     <div key={u.id} className="update-item group">
                         <div className="update-header">
-                            <span className={`update-badge update-badge--${u.type}`}>
-                                {u.type === 'feature' ? <Zap size={8} /> : <CheckCircle2 size={8} />}
-                                {u.type}
-                            </span>
                             <span className="update-date">{u.date}</span>
                         </div>
                         <h4 className="update-title">{u.title}</h4>
@@ -90,25 +79,6 @@ export function WhatIsNew() {
                     align-items: center;
                     justify-content: space-between;
                     margin-bottom: 4px;
-                }
-                .update-badge {
-                    display: flex;
-                    align-items: center;
-                    gap: 4px;
-                    font-size: 8px;
-
-                    font-weight: 700;
-                    letter-spacing: 0.5px;
-                    padding: 2px 6px;
-                    border-radius: 4px;
-                }
-                .update-badge--feature {
-                    background: var(--surface-primary, rgba(99, 102, 241, 0.1));
-                    color: var(--accent-primary, #6366f1);
-                }
-                .update-badge--improvement {
-                    background: var(--surface-success, rgba(34, 197, 94, 0.1));
-                    color: var(--accent-success, #22c55e);
                 }
                 .update-date {
                     font-size: 10px;

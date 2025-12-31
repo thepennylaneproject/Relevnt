@@ -29,29 +29,6 @@ function getCategoryIcon(category: ATSSuggestion['category']): IconName {
     }
 }
 
-function getPriorityStyles(priority: ATSSuggestion['priority']) {
-    switch (priority) {
-        case 'high':
-            return {
-                badge: 'ats-priority--high',
-                label: 'High Priority',
-                color: 'var(--danger, #c44a4a)'
-            }
-        case 'medium':
-            return {
-                badge: 'ats-priority--medium',
-                label: 'Medium',
-                color: 'var(--warning, #c7a56a)'
-            }
-        case 'low':
-            return {
-                badge: 'ats-priority--low',
-                label: 'Low',
-                color: 'var(--text-muted)'
-            }
-    }
-}
-
 // ============================================================================
 // COMPONENT
 // ============================================================================
@@ -67,9 +44,6 @@ export const ATSSuggestions: React.FC<Props> = ({ suggestions, onApplyFix, onDis
             const priorityOrder = { high: 0, medium: 1, low: 2 }
             return priorityOrder[a.priority] - priorityOrder[b.priority]
         })
-
-    const highCount = sortedSuggestions.filter(s => s.priority === 'high').length
-    const mediumCount = sortedSuggestions.filter(s => s.priority === 'medium').length
 
     const handleDismiss = (id: string) => {
         setDismissedIds(prev => new Set([...prev, id]))
@@ -90,25 +64,11 @@ export const ATSSuggestions: React.FC<Props> = ({ suggestions, onApplyFix, onDis
         <div className="ats-suggestions">
             <div className="ats-suggestions-header">
                 <h3 className="text-sm font-semibold">Improvement Suggestions</h3>
-                <div className="ats-suggestions-counts">
-                    {highCount > 0 && (
-                        <span className="ats-count-badge ats-count-badge--high">
-                            {highCount} urgent
-                        </span>
-                    )}
-                    {mediumCount > 0 && (
-                        <span className="ats-count-badge ats-count-badge--medium">
-                            {mediumCount} recommended
-                        </span>
-                    )}
-                </div>
             </div>
 
             <div className="ats-suggestions-list">
                 {sortedSuggestions.map((suggestion) => {
                     const isExpanded = expandedId === suggestion.id
-                    const priorityStyles = getPriorityStyles(suggestion.priority)
-
                     return (
                         <div
                             key={suggestion.id}
@@ -125,9 +85,6 @@ export const ATSSuggestions: React.FC<Props> = ({ suggestions, onApplyFix, onDis
                                 <div className="ats-suggestion-main">
                                     <span className="ats-suggestion-title text-sm font-medium">
                                         {suggestion.title}
-                                    </span>
-                                    <span className={`ats-priority-badge ${priorityStyles.badge}`}>
-                                        {priorityStyles.label}
                                     </span>
                                 </div>
                                 <span className={`ats-suggestion-chevron ${isExpanded ? 'rotated' : ''}`}>

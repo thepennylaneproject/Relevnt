@@ -74,9 +74,6 @@ export function ResumePerformancePanel({ resumeId, resumeName }: ResumePerforman
                 <div className="performance-stat primary">
                     <div className="stat-header">
                         <span className="stat-label">This Resume</span>
-                        {isTopPerformer && (
-                            <span className="badge success">★ Top Performer</span>
-                        )}
                     </div>
                     <div className="stat-value">
                         <span className="rate">{thisResume.interviewRate}%</span>
@@ -209,18 +206,6 @@ const panelStyles = `
 
     letter-spacing: 0.5px;
     color: var(--color-text-muted, #666);
-}
-
-.badge {
-    font-size: 10px;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 4px;
-}
-
-.badge.success {
-    background: rgba(45, 90, 74, 0.2);
-    color: var(--color-success, #2d5a4a);
 }
 
 .stat-value {

@@ -19,9 +19,6 @@
  */
 
 import React from 'react';
-import { Icon, IconName } from './Icon';
-import { PoeticVerseMinimal } from './PoeticVerse';
-import { getPoeticVerse, getHaiku, PoeticMoment, HaikuTheme } from '@/lib/poeticMoments';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -54,10 +51,6 @@ export interface EmptyStateProps {
   action?: EmptyStateAction;
   /** Secondary action button */
   secondaryAction?: EmptyStateAction;
-  /** Show poetic verse/haiku below description */
-  includePoetry?: boolean;
-  /** Explicit theme for Haiku (if searching/waiting/etc) */
-  haikuTheme?: HaikuTheme;
   /** Additional CSS classes */
   className?: string;
 }
@@ -68,92 +61,52 @@ export interface EmptyStateProps {
 // ═══════════════════════════════════════════════════════════════════════════
 
 interface EmptyStateContent {
-  icon: IconName;
   title: string;
   description: string;
-  poeticMoment?: PoeticMoment;
 }
-
-// Map empty state types to poetic moments
-const emptyStateToPoetic: Record<EmptyStateType, PoeticMoment | undefined> = {
-  applications: 'empty-applications',
-  jobs: 'empty-jobs',
-  resumes: 'empty-resumes',
-  saved: 'empty-saved',
-  matches: undefined,
-  search: undefined,
-  learn: undefined,
-  analysis: undefined,
-  generic: undefined,
-};
-
-const emptyStateToHaiku: Record<EmptyStateType, HaikuTheme | undefined> = {
-  applications: 'searching',
-  jobs: 'waiting',
-  resumes: 'searching',
-  saved: 'waiting',
-  matches: 'waiting',
-  search: 'searching',
-  learn: 'waiting',
-  analysis: 'searching',
-  generic: 'searching',
-};
 
 const emptyStateContent: Record<EmptyStateType, EmptyStateContent> = {
   applications: {
-    icon: 'paper-airplane',
     title: "Your story starts here",
     description: "When you apply to your first role, we'll track every step together — no spreadsheets required.",
-    poeticMoment: 'empty-applications'
   },
   
   jobs: {
-    icon: 'briefcase',
     title: "Fresh opportunities await",
     description: "We haven't found jobs matching your criteria yet. Try adjusting your filters or check back soon.",
-    poeticMoment: 'empty-jobs'
   },
   
   resumes: {
-    icon: 'scroll',
     title: "Your story, ready to unfold",
     description: "Upload a résumé to see how the system sees you — and how to make it see you better.",
-    poeticMoment: 'empty-resumes'
   },
   
   saved: {
-    icon: 'anchor',
     title: "Nothing saved yet",
     description: "When you find a role worth holding onto, save it here. We'll keep it safe.",
-    poeticMoment: 'empty-saved'
   },
   
   matches: {
-    icon: 'compass',
     title: "Finding your direction",
     description: "Once we know more about you, we'll surface roles that actually fit.",
   },
   
   search: {
-    icon: 'lighthouse',
     title: "No results found",
     description: "We couldn't find what you're looking for. Try different keywords or broaden your search.",
   },
   
   learn: {
-    icon: 'book',
     title: "Coming soon",
     description: "We're building resources to close the gaps the market cares about — without signing your life away to another bootcamp.",
   },
   
   analysis: {
-    icon: 'seeds',
     title: "No analyses yet",
     description: "Paste a job post or upload a résumé to see how the system sees you. We'll show our work.",
   },
   
   generic: {
-    icon: 'seeds',
     title: "Nothing here yet",
     description: "This space is waiting for you. Let's get started.",
   },
@@ -169,8 +122,6 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   description,
   action,
   secondaryAction,
-  includePoetry = true,
-  haikuTheme,
   className = '',
 }) => {
   const content = emptyStateContent[type] || emptyStateContent.generic;
@@ -178,25 +129,8 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   const displayTitle = title || content.title;
   const displayDescription = description || content.description;
 
-  // Decide whether to show a major poetic verse or a quiet haiku
-  const majorMoment = content.poeticMoment;
-  const hTheme = haikuTheme || emptyStateToHaiku[type];
-  
-  const haiku = hTheme ? getHaiku(hTheme) : null;
-  const verse = majorMoment ? getPoeticVerse(majorMoment) : null;
-
   return (
     <div className={`empty-state ${className}`}>
-      {/* Illustration */}
-      <div className="empty-state__illustration">
-        <Icon
-          name={content.icon}
-          size="hero"
-          className="text-graphite-light"
-          label={displayTitle}
-        />
-      </div>
-
       {/* Title */}
       <h3 className="empty-state__title">
         {displayTitle}
@@ -206,21 +140,6 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       <p className="empty-state__description">
         {displayDescription}
       </p>
-
-      {/* Poetic Moment */}
-      {includePoetry && (
-        <div className="empty-state__poetry">
-          {verse ? (
-            <PoeticVerseMinimal verse={verse} />
-          ) : haiku ? (
-            <div className="haiku-display">
-              {haiku.lines.map((line, i) => (
-                <div key={i} className="haiku-line">{line}</div>
-              ))}
-            </div>
-          ) : null}
-        </div>
-      )}
 
       {/* Actions */}
       {(action || secondaryAction) && (
@@ -263,11 +182,6 @@ export const emptyStateStyles = `
   margin: 0 auto;
 }
 
-.empty-state__illustration {
-  margin-bottom: var(--space-6);
-  opacity: 0.8;
-}
-
 .empty-state__title {
   font-family: var(--font-display);
   font-size: var(--text-xl);
@@ -281,26 +195,6 @@ export const emptyStateStyles = `
   color: var(--color-ink-secondary);
   margin: 0 0 var(--space-6);
   line-height: var(--leading-relaxed);
-}
-
-.empty-state__poetry {
-  margin-top: var(--space-8);
-  max-width: 320px;
-}
-
-.haiku-display {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  font-family: var(--font-poetic);
-  font-style: italic;
-  color: var(--color-accent);
-  opacity: 0.9;
-}
-
-.haiku-line {
-  font-size: var(--text-sm);
-  line-height: var(--leading-snug);
 }
 
 .empty-state__actions {

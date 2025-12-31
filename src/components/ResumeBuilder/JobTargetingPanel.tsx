@@ -143,14 +143,6 @@ export const JobTargetingPanel: React.FC<Props> = ({ resumeText, onOptimize }) =
                     <Icon name="briefcase" size="sm" />
                     <h3 className="text-sm font-semibold">Target a Job</h3>
                 </div>
-                {analysis && (
-                    <span
-                        className="job-match-badge"
-                        style={{ background: getMatchColor(analysis.matchPercentage) }}
-                    >
-                        {analysis.matchPercentage}% match
-                    </span>
-                )}
                 <span className={`job-targeting-chevron ${isExpanded ? 'rotated' : ''}`}>
                     ▼
                 </span>

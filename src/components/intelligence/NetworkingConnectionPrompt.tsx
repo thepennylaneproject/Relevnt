@@ -15,7 +15,7 @@ import type { Contact } from '../../hooks/useNetworking'
 interface NetworkingConnectionPromptProps {
     company: string | null | undefined
     className?: string
-    variant?: 'inline' | 'card' | 'badge'
+    variant?: 'inline' | 'card'
     onGenerateMessage?: (contact: Contact) => void
 }
 
@@ -33,29 +33,6 @@ export function NetworkingConnectionPrompt({
 
     const primaryContact = contacts[0]
     const additionalContacts = contacts.slice(1)
-
-    // Badge variant - minimal inline indicator
-    if (variant === 'badge') {
-        return (
-            <span className={`networking-badge ${className}`} title={`You know ${primaryContact.name} at ${company}`}>
-                <Users size={12} />
-                <span>Connection</span>
-                <style>{`
-                    .networking-badge {
-                        display: inline-flex;
-                        align-items: center;
-                        gap: 4px;
-                        padding: 2px 8px;
-                        background: var(--accent-success-subtle, rgba(34, 197, 94, 0.15));
-                        color: var(--accent-success, #22c55e);
-                        font-size: 11px;
-                        font-weight: 600;
-                        border-radius: 12px;
-                    }
-                `}</style>
-            </span>
-        )
-    }
 
     // Inline variant - single line with name
     if (variant === 'inline') {

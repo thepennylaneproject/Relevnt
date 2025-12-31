@@ -2,8 +2,6 @@
 import React, { useState } from 'react'
 import { useWellnessCheckin } from '../../hooks/useWellnessCheckin'
 import { Icon } from '../ui/Icon'
-import { PoeticVerseMinimal } from '../ui/PoeticVerse'
-import { getPoeticVerse, PoeticMoment } from '../../lib/poeticMoments'
 
 const MOODS = [
     { score: 1, label: 'Exhausted', emoji: '😫' },
@@ -12,15 +10,6 @@ const MOODS = [
     { score: 7, label: 'Motivated', emoji: '💪' },
     { score: 10, label: 'Confident', emoji: '🚀' },
 ]
-
-// Poetic Mapping for Wellness Scores
-const SCORE_TO_MOMENT: Record<number, PoeticMoment> = {
-    1: 'rejection', // Use Angelou's "Still I Rise" for lowest energy
-    3: 'wellness-resilience', // Use Angelou
-    5: 'wellness-resilience', 
-    7: 'wellness-small-win', // Use Dickinson
-    10: 'wellness-small-win',
-}
 
 export function WellnessCheckin() {
     const { checkins, saveCheckin, loading } = useWellnessCheckin()
@@ -55,9 +44,6 @@ export function WellnessCheckin() {
             return c.created_at.split('T')[0] === today
         })
         const score = submitted ? selectedScore : todayCheckin?.mood_score
-        const moment = SCORE_TO_MOMENT[score as number] || 'wellness-resilience'
-        const poeticData = getPoeticVerse(moment)
-
         return (
             <div className="card card--job-listing">
                 <h3 className="card-title text-sm mb-4">How you're feeling</h3>
@@ -66,10 +52,6 @@ export function WellnessCheckin() {
                         <Icon name="check" size="sm" />
                     </div>
                     <p className="text-xs text-secondary">Check-in captured for today.</p>
-                </div>
-                <div className="poetic-quote mt-4 pt-4 border-t border-border">
-                  <p className="poetic-verse text-xs italic text-center text-accent">"{poeticData.verse.split('\n')[0]}..."</p>
-                  <p className="text-[10px] text-secondary text-center mt-2">— {poeticData.attribution}</p>
                 </div>
             </div>
         )

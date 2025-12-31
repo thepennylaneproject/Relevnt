@@ -30,7 +30,6 @@ export function AutoTuneSuggestions({ className = '' }: AutoTuneSuggestionsProps
                     <Sparkles size={18} className="autotune-icon" />
                     <h3 className="autotune-title">Concierge Suggestions</h3>
                 </div>
-                <span className="autotune-badge">{suggestions.length}</span>
             </div>
             
             <p className="autotune-subtitle">
@@ -105,15 +104,6 @@ export function AutoTuneSuggestions({ className = '' }: AutoTuneSuggestionsProps
                     font-weight: 700;
                     color: var(--text-primary, #fff);
                     margin: 0;
-                }
-                
-                .autotune-badge {
-                    background: var(--accent-primary, #6366f1);
-                    color: white;
-                    font-size: 11px;
-                    font-weight: 700;
-                    padding: 3px 8px;
-                    border-radius: 12px;
                 }
                 
                 .autotune-subtitle {

@@ -73,11 +73,6 @@ export function PatternInsightsPanel({ className = '', collapsed: initialCollaps
                 <div className="pattern-insights-header-left">
                     <Lightbulb size={16} className="pattern-insights-icon" />
                     <span className="pattern-insights-title">Pattern Insights</span>
-                    {hasContent && (
-                        <span className="pattern-insights-badge">
-                            {insights.length + dismissalPatterns.length}
-                        </span>
-                    )}
                 </div>
                 {isCollapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
             </button>
@@ -212,15 +207,6 @@ export function PatternInsightsPanel({ className = '', collapsed: initialCollaps
                 .pattern-insights-title {
                     font-weight: 600;
                     font-size: 14px;
-                }
-
-                .pattern-insights-badge {
-                    background: var(--accent-primary, #6366f1);
-                    color: white;
-                    font-size: 11px;
-                    font-weight: 600;
-                    padding: 2px 6px;
-                    border-radius: 10px;
                 }
 
                 .pattern-insights-content {

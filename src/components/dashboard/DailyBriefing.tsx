@@ -69,7 +69,6 @@ export function DailyBriefing() {
                         Top opportunities for <span className="font-semibold text-foreground">{personaName}</span>
                     </p>
                 </div>
-                <span className="badge badge-success text-[8px] px-2 py-0.5">Verified</span>
             </div>
 
             <div className="space-y-4">

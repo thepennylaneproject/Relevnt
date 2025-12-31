@@ -7,7 +7,6 @@ import { useAuth } from '../contexts/AuthContext'
 import { useApplications } from '../hooks/useApplications'
 import { useJobStats } from '../hooks/useJobStats'
 import { useWellnessMode } from '../hooks/useWellnessMode'
-import { VerseContainer } from '../components/dashboard/VerseContainer'
 import { WellnessCheckin } from '../components/dashboard/WellnessCheckin'
 import HandDrawnIcon from '../components/ui/HandDrawnIcon'
 import '../styles/dashboard-clarity.css'
@@ -96,22 +95,6 @@ export default function DashboardPage(): JSX.Element {
     return 'Good evening'
   }
 
-  // Hero verse (shorter, more impactful)
-  const getHeroVerse = () => {
-    switch (userState) {
-      case UserState.ZERO_APPLICATIONS:
-        return 'Every journey begins with a single brave step.'
-      case UserState.ACTIVE_APPLICATIONS:
-        return "You've sent your signal. Now comes the listening."
-      case UserState.IN_INTERVIEWS:
-        return 'The conversation has begun. You belong at this table.'
-      case UserState.ALL_CAUGHT_UP:
-        return 'The pause is not weakness—it\'s the breath between chapters.'
-      default:
-        return 'Every step forward matters.'
-    }
-  }
-
   // Primary CTA content
   const getPrimaryCTA = () => {
     switch (userState) {
@@ -159,8 +142,8 @@ export default function DashboardPage(): JSX.Element {
   }
 
   // Today's Priority items
-  const getTodaysPriorities = (): { icon: IconName; label: string; action: string; link: string; badge?: string }[] => {
-    const priorities: { icon: IconName; label: string; action: string; link: string; badge?: string }[] = []
+  const getTodaysPriorities = (): { icon: IconName; label: string; action: string; link: string }[] => {
+    const priorities: { icon: IconName; label: string; action: string; link: string }[] = []
 
     if (userState === UserState.ZERO_APPLICATIONS) {
       priorities.push({
@@ -168,7 +151,6 @@ export default function DashboardPage(): JSX.Element {
         label: 'Discover roles',
         action: '5 AI-curated picks',
         link: '/jobs',
-        badge: 'Suggested',
       })
       priorities.push({
         icon: 'scroll',
@@ -195,7 +177,6 @@ export default function DashboardPage(): JSX.Element {
         label: 'Interview prep',
         action: 'Review company research',
         link: '/interview-prep',
-        badge: 'Priority',
       })
       priorities.push({
         icon: 'book',
@@ -277,7 +258,6 @@ export default function DashboardPage(): JSX.Element {
           <section className="hero-section gold-dust">
             <div className="hero-content">
               <h1 className="hero-greeting">{getGreeting()}</h1>
-              <VerseContainer compact>{getHeroVerse()}</VerseContainer>
 
               {/* Momentum message */}
               {momentumMessage && (
@@ -318,7 +298,7 @@ export default function DashboardPage(): JSX.Element {
               </h3>
               <div className="priority-cards">
                 {todaysPriorities.map((item, idx) => (
-                  <Link key={idx} to={item.link} className={`priority-card ${item.badge ? 'has-badge' : ''}`}>
+                  <Link key={idx} to={item.link} className="priority-card">
                     <div className="priority-card-icon">
                       <HandDrawnIcon name={item.icon} size="md" />
                     </div>
@@ -326,11 +306,6 @@ export default function DashboardPage(): JSX.Element {
                       <span className="priority-card-label">{item.label}</span>
                       <span className="priority-card-action">{item.action}</span>
                     </div>
-                    {item.badge && (
-                      <span className={`priority-badge ${item.badge === 'Priority' ? 'priority-badge--urgent' : ''}`}>
-                        {item.badge}
-                      </span>
-                    )}
                     <Icon name="chevron-right" size="sm" className="priority-arrow" />
                   </Link>
                 ))}

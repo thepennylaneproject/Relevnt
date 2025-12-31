@@ -5,8 +5,6 @@ import { useResumes } from '../../hooks/useResumes'
 import { useAuth } from '../../hooks/useAuth'
 import { Button } from '../ui/Button'
 import { PrimaryActionRegistryProvider } from '../ui/PrimaryActionRegistry'
-import { PoeticVerseMinimal } from '../ui/PoeticVerse'
-import { getPoeticVerse } from '../../lib/poeticMoments'
 
 interface AddApplicationModalProps {
     isOpen: boolean
@@ -73,11 +71,6 @@ export function AddApplicationModal({ isOpen, onClose }: AddApplicationModalProp
                         <X size={20} />
                     </button>
                 </header>
-
-                {/* Poetic moment: Application submitted */}
-                <div className="px-4 pt-4 pb-2 border-b border-border/50 bg-ivory/30 dark:bg-ink/30">
-                    <PoeticVerseMinimal verse={getPoeticVerse('application-submitted')} />
-                </div>
 
                 <form onSubmit={handleSubmit} className="p-4 space-y-4">
                     <div>

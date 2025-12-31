@@ -43,12 +43,6 @@ export function OutcomeMetricsCard({ className = '' }: OutcomeMetricsCardProps) 
         <div className={`outcome-metrics-card ${className}`}>
             <div className="outcome-header">
                 <h3 className="outcome-title">Your Success Rates</h3>
-                {isImproving && (
-                    <span className="improvement-badge">
-                        <TrendingUp size={12} />
-                        Improving
-                    </span>
-                )}
             </div>
             
             <p className="outcome-subtitle">
@@ -168,18 +162,6 @@ export function OutcomeMetricsCard({ className = '' }: OutcomeMetricsCardProps) 
                     font-family: var(--font-display);
                     color: var(--color-text-primary);
                     margin: 0;
-                }
-                
-                .improvement-badge {
-                    display: flex;
-                    align-items: center;
-                    gap: 4px;
-                    font-size: 11px;
-                    font-weight: 600;
-                    color: var(--color-success);
-                    background: var(--color-success-bg);
-                    padding: 4px 10px;
-                    border-radius: 12px;
                 }
                 
                 .outcome-subtitle {

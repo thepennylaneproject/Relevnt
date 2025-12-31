@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
-import { Icon } from '../components/ui/Icon'
 import { useToast } from '../components/ui/Toast'
 import { Container } from '../components/shared/Container'
 import PageBackground from '../components/shared/PageBackground'
@@ -176,10 +175,6 @@ export default function ProfileAnalyzer() {
             <Container maxWidth="xl" padding="md">
                 <div className="profile-analyzer">
                     <div className="page-header">
-                        <div className="icon-header">
-                            <Icon name="stars" className="header-icon" />
-                            <span className="label">OPTIMIZE YOUR PRESENCE</span>
-                        </div>
                         <h1>Profile Analyzer</h1>
                         <p>Get AI-powered feedback on your LinkedIn profile and portfolio. Optimize for recruiters, improve your narrative, and stand out.</p>
                     </div>
@@ -190,14 +185,12 @@ export default function ProfileAnalyzer() {
                             className={`tab ${activeTab === 'linkedin' ? 'active' : ''}`}
                             onClick={() => setActiveTab('linkedin')}
                         >
-                            <Icon name="stars" size="sm" hideAccent className="tab-icon" />
                             <span>LinkedIn</span>
                         </button>
                         <button
                             className={`tab ${activeTab === 'portfolio' ? 'active' : ''}`}
                             onClick={() => setActiveTab('portfolio')}
                         >
-                            <Icon name="briefcase" size="sm" hideAccent className="tab-icon" />
                             <span>Portfolio</span>
                         </button>
                     </div>
@@ -234,7 +227,6 @@ export default function ProfileAnalyzer() {
 
                             {linkedinAnalyzing && (
                                 <div className="linkedin-optimizer__analysis-loading">
-                                    <div className="pulse-loader"></div>
                                     <p>Our AI is reviewing your profile experience, headline, and summary...</p>
                                 </div>
                             )}
@@ -243,7 +235,6 @@ export default function ProfileAnalyzer() {
                                 <div className="linkedin-optimizer__results animate-fade-in">
                                     <ShareSection 
                                         type="linkedin" 
-                                        id={linkedinProfile!.id} 
                                         shareToken={linkedinProfile!.share_token || linkedinProfile!.id}
                                         isPublic={!!linkedinProfile!.is_public}
                                         onTogglePublic={(pub) => handleToggleShare('linkedin', linkedinProfile!.id, pub)}
@@ -277,12 +268,6 @@ export default function ProfileAnalyzer() {
                                                     <h2>AI-Optimized Headline</h2>
                                                     <div className="optimized-box">
                                                         {linkedinAnalysis.optimized_headline}
-                                                        <button
-                                                            className="copy-button"
-                                                            onClick={() => navigator.clipboard.writeText(linkedinAnalysis.optimized_headline!)}
-                                                        >
-                                                            Copy
-                                                        </button>
                                                     </div>
                                                 </div>
                                             )}
@@ -292,12 +277,6 @@ export default function ProfileAnalyzer() {
                                                     <h2>AI-Optimized Summary</h2>
                                                     <div className="optimized-box optimized-box--multiline">
                                                         {linkedinAnalysis.optimized_summary}
-                                                        <button
-                                                            className="copy-button"
-                                                            onClick={() => navigator.clipboard.writeText(linkedinAnalysis.optimized_summary!)}
-                                                        >
-                                                            Copy
-                                                        </button>
                                                     </div>
                                                 </div>
                                             )}
@@ -340,9 +319,6 @@ export default function ProfileAnalyzer() {
 
                             {portfolioAnalyzing && (
                                 <div className="portfolio-optimizer__analysis-loading">
-                                    <div className="wave-loader">
-                                        <span></span><span></span><span></span>
-                                    </div>
                                     <p>Scanning your portfolio and assessing visual narratives...</p>
                                 </div>
                             )}
@@ -351,7 +327,6 @@ export default function ProfileAnalyzer() {
                                 <div className="portfolio-optimizer__results animate-fade-in">
                                     <ShareSection 
                                         type="portfolio" 
-                                        id={portfolioAnalysis!.id} 
                                         shareToken={portfolioAnalysis!.share_token || portfolioAnalysis!.id}
                                         isPublic={!!portfolioAnalysis!.is_public}
                                         onTogglePublic={(pub) => handleToggleShare('portfolio', portfolioAnalysis!.id, pub)}
@@ -361,16 +336,16 @@ export default function ProfileAnalyzer() {
                                             <span className="label">Overall Impact</span>
                                             <span className="value">{portfolioResults.overall_score}</span>
                                         </div>
-                                        <div className="seniority-badge">
+                                        <div>
                                             <span className="label">Perceived Seniority</span>
                                             <span className="value">{portfolioResults.perceived_seniority}</span>
                                         </div>
                                     </div>
 
                                     <div className="portfolio-optimizer__scores">
-                                        <MetricBox label="Visual" score={portfolioResults.visual_score} icon="stars" />
-                                        <MetricBox label="Usability" score={portfolioResults.usability_score} icon="compass" />
-                                        <MetricBox label="Content" score={portfolioResults.content_score} icon="book" />
+                                        <MetricBox label="Visual" score={portfolioResults.visual_score} />
+                                        <MetricBox label="Usability" score={portfolioResults.usability_score} />
+                                        <MetricBox label="Content" score={portfolioResults.content_score} />
                                     </div>
 
                                     <div className="portfolio-optimizer__suggestions">
@@ -380,7 +355,6 @@ export default function ProfileAnalyzer() {
                                                 <div key={i} className={`portfolio-suggestion-card impact--${s.impact}`}>
                                                     <div className="card-header">
                                                         <span className="category">{s.category}</span>
-                                                        <span className="impact-tag">{s.impact} impact</span>
                                                     </div>
                                                     <p className="improvement">{s.improvement}</p>
                                                 </div>
@@ -391,9 +365,7 @@ export default function ProfileAnalyzer() {
                                     {portfolioResults.suggested_tagline && (
                                         <div className="portfolio-optimizer__tagline">
                                             <h2>Suggested Narrative Tagline</h2>
-                                            <div className="tagline-box">
-                                                "{portfolioResults.suggested_tagline}"
-                                            </div>
+                                            <div>{portfolioResults.suggested_tagline}</div>
                                         </div>
                                     )}
                                 </div>
@@ -424,10 +396,9 @@ function ScoreCard({ label, score }: { label: string, score: number }) {
     )
 }
 
-function MetricBox({ label, score, icon }: { label: string, score: number, icon: any }) {
+function MetricBox({ label, score }: { label: string, score: number }) {
     return (
         <div className="metric-box">
-            <Icon name={icon} size="sm" hideAccent />
             <div className="metric-box__data">
                 <span className="metric-label">{label}</span>
                 <div className="metric-progress-container">
@@ -439,9 +410,8 @@ function MetricBox({ label, score, icon }: { label: string, score: number, icon:
     )
 }
 
-function ShareSection({ type, id, shareToken, isPublic, onTogglePublic }: { 
+function ShareSection({ type, shareToken, isPublic, onTogglePublic }: { 
     type: 'linkedin' | 'portfolio', 
-    id: string, 
     shareToken: string, 
     isPublic: boolean,
     onTogglePublic: (isPublic: boolean) => void
@@ -457,14 +427,9 @@ function ShareSection({ type, id, shareToken, isPublic, onTogglePublic }: {
 
     return (
         <div className="surface-card p-4 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-accent-soft border">
-            <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isPublic ? 'bg-emerald-500/10 text-emerald-500' : 'bg-slate-500/10 text-slate-500'}`}>
-                    <Icon name={isPublic ? 'lighthouse' : 'candle'} size="sm" />
-                </div>
-                <div className="text-left">
-                    <h3 className="font-bold text-sm">{isPublic ? 'Publicly Shared' : 'Private Analysis'}</h3>
-                    <p className="text-xs muted">{isPublic ? 'Anyone with the link can view your audit.' : 'Only you can see these results.'}</p>
-                </div>
+            <div className="text-left">
+                <h3 className="font-bold text-sm">{isPublic ? 'Publicly Shared' : 'Private Analysis'}</h3>
+                <p className="text-xs muted">{isPublic ? 'Anyone with the link can view your audit.' : 'Only you can see these results.'}</p>
             </div>
             
             <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -473,7 +438,6 @@ function ShareSection({ type, id, shareToken, isPublic, onTogglePublic }: {
                         onClick={() => onTogglePublic(true)}
                         className="btn btn--primary btn--sm flex-1 sm:flex-none"
                     >
-                        <Icon name="paper-airplane" size="sm" className="mr-2" />
                         Enable Sharing
                     </button>
                 ) : (
@@ -482,7 +446,6 @@ function ShareSection({ type, id, shareToken, isPublic, onTogglePublic }: {
                             onClick={handleCopy}
                             className={`btn btn--sm flex-1 sm:flex-none justify-center ${copied ? 'btn--success' : 'btn--outline'}`}
                         >
-                            <Icon name={copied ? 'check' : 'book'} size="sm" className="mr-2" />
                             {copied ? 'Copied!' : 'Copy Link'}
                         </button>
                         <button 
@@ -490,7 +453,7 @@ function ShareSection({ type, id, shareToken, isPublic, onTogglePublic }: {
                             className="p-2 text-rose-500 hover:bg-rose-500/10 rounded transition-colors"
                             title="Make Private"
                         >
-                            <Icon name="candle" size="sm" />
+                            Make Private
                         </button>
                     </>
                 )}

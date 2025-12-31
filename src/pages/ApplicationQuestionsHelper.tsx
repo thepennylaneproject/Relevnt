@@ -8,7 +8,6 @@
 import { useState } from 'react';
 import { usePrepareInterview } from '../hooks/usePrepareInterview';
 import { Container } from '../components/shared/Container';
-import { Icon } from '../components/ui/Icon';
 
 export default function ApplicationQuestionsHelper(): JSX.Element {
   const { prepare, loading, error } = usePrepareInterview();
@@ -55,10 +54,6 @@ export default function ApplicationQuestionsHelper(): JSX.Element {
         <header className="hero-shell">
           <div className="hero-header">
             <div className="hero-header-main">
-              <div className="hero__badge">
-                <Icon name="microphone" size="sm" hideAccent />
-                <span>Interview Prep</span>
-              </div>
               <h1>Application Questions Helper</h1>
               <p className="hero-subtitle">
                 Generate practice questions and talking points based on your resume and the role you're applying for. Powered by your authentic voice.

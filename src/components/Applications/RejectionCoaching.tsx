@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { Icon } from '../ui/Icon'
-import { PoeticVerseMinimal } from '../ui/PoeticVerse'
-import { getPoeticVerse } from '../../lib/poeticMoments'
 import { supabase } from '../../lib/supabase'
 import { type Application } from '../../hooks/useApplications'
 import { useAuth } from '../../hooks/useAuth'
@@ -142,9 +140,6 @@ export function RejectionCoaching({ application }: RejectionCoachingProps) {
         <div className="rejection-coaching p-4 surface-accent rounded-xl border border-danger/10">
             {!coaching && !loading && (
                 <div className="text-center py-6">
-                    <div className="dashboard-hero-icon mx-auto mb-4 bg-danger/10 text-danger">
-                        <Icon name="compass-cracked" size="md" />
-                    </div>
                     <h3 className="text-sm font-bold">The "All Clear" Briefing</h3>
                     <p className="muted text-xs max-w-sm mx-auto mt-2">
                         Paste the rejection email below. We'll extract the signal from the noise and help you pivot.
@@ -182,11 +177,6 @@ export function RejectionCoaching({ application }: RejectionCoachingProps) {
                             <h3 className="text-sm font-bold">Operational De-brief</h3>
                             {coaching.reason && <p className="text-xs muted">Reason: {coaching.reason}</p>}
                         </div>
-                        {coaching.tone && (
-                            <span className="text-[10px] font-bold px-2 py-1 bg-surface-accent rounded text-muted">
-                                {coaching.tone} Logic
-                            </span>
-                        )}
                     </div>
 
                     {coaching.silver_lining && (
@@ -196,12 +186,6 @@ export function RejectionCoaching({ application }: RejectionCoachingProps) {
                             </p>
                         </div>
                     )}
-
-                    {/* Poetic wisdom for the moment */}
-                    <div className="pt-2 border-t border-danger/10">
-                        <p className="text-[10px] font-bold text-muted mb-2">Words for the moment</p>
-                        <PoeticVerseMinimal verse={getPoeticVerse('rejection')} />
-                    </div>
 
                     <div className="grid grid-cols-1 gap-4">
                         <div className="space-y-2">

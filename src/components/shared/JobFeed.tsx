@@ -146,35 +146,18 @@ export function JobFeed({
                                     )}
                                 </div>
                             </div>
-                            <div
-                                style={{
-                                    ...styles.matchBadge,
-                                    ...getScoreBadgeStyle(match.match_score),
-                                }}
-                            >
-                                {Math.round(match.match_score)}%
-                            </div>
                         </div>
 
                         {/* Job Details */}
                         <div style={styles.jobDetails}>
                             {match.job.remote_type && (
-                                <span style={styles.badge}>
-                                    <Icon name="compass" size="sm" hideAccent />
-                                    {match.job.remote_type}
-                                </span>
+                                <span>{match.job.remote_type}</span>
                             )}
                             {match.job.employment_type && (
-                                <span style={styles.badge}>
-                                    <Icon name="briefcase" size="sm" hideAccent />
-                                    {match.job.employment_type}
-                                </span>
+                                <span>{match.job.employment_type}</span>
                             )}
                             {(match.job.salary_min || match.job.salary_max) && (
-                                <span style={styles.badge}>
-                                    <Icon name="dollar" size="sm" hideAccent />
-                                    {formatSalary(match.job.salary_min, match.job.salary_max)}
-                                </span>
+                                <span>{formatSalary(match.job.salary_min, match.job.salary_max)}</span>
                             )}
                         </div>
 

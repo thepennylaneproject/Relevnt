@@ -54,12 +54,6 @@ const HomePage: React.FC = () => {
       <Container maxWidth="lg" padding="md">
         <div className="card-shell" style={{ maxWidth: 800, margin: '0 auto', position: 'relative', zIndex: 1 }}>
 
-          {/* Badge */}
-          <div className="hero__badge">
-            <div className="hero__badge-dot" />
-            <span>Authentic intelligence for real people</span>
-          </div>
-
           {/* Headline */}
           <h1 style={{ marginBottom: 16 }}>
             Job search tools that tell you the truth

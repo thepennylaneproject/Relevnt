@@ -19,7 +19,6 @@ interface QuickAction {
     description: string
     icon: IconName
     route: string
-    badge?: 'new' | 'ai'
 }
 
 const QUICK_ACTIONS: QuickAction[] = [
@@ -29,7 +28,6 @@ const QUICK_ACTIONS: QuickAction[] = [
         description: 'Practice with AI-generated questions tailored to your target role',
         icon: 'microphone',
         route: '/interview-prep',
-        badge: 'ai',
     },
     {
         id: 'profile-analyzer',
@@ -37,7 +35,6 @@ const QUICK_ACTIONS: QuickAction[] = [
         description: "Get AI-powered feedback on your LinkedIn profile and portfolio's impact",
         icon: 'stars',
         route: '/profile-analyzer',
-        badge: 'ai',
     },
     {
         id: 'resume-builder',
@@ -52,7 +49,6 @@ const QUICK_ACTIONS: QuickAction[] = [
         description: 'Let AI submit applications for you — save 2–3 hours per week',
         icon: 'paper-airplane',
         route: '/settings#auto-apply',
-        badge: 'ai',
     },
 ]
 
@@ -83,12 +79,6 @@ export function QuickActionsPanel(): JSX.Element {
                             <div className="flex-1 min-width-0">
                                 <h4 className="text-sm font-bold flex items-center gap-2">
                                     {action.title}
-                                    {action.badge === 'new' && (
-                                        <span className="text-[9px] font-bold tracking-widest bg-accent/20 text-accent px-1.5 py-0.5 rounded">New</span>
-                                    )}
-                                    {action.badge === 'ai' && (
-                                        <span className="text-[9px] font-bold tracking-widest bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded">AI</span>
-                                    )}
                                 </h4>
                                 <p className="text-xs text-secondary mt-1 leading-relaxed">{action.description}</p>
                             </div>

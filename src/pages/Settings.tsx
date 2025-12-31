@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback, useTransition } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Container } from '../components/shared/Container'
-import { Icon } from '../components/ui/Icon'
 import { SettingsTabNav, type SettingsTab } from '../components/settings/SettingsTabNav'
 import { AutoSaveIndicator } from '../components/settings/AutoSaveIndicator'
 import { TargetingTab } from '../components/settings/tabs/TargetingTab'
@@ -11,12 +10,14 @@ import { SystemAutomationTab } from '../components/settings/tabs/SystemAutomatio
 import { AutoApplyTab } from '../components/settings/tabs/AutoApplyTab'
 import type { AutoSaveStatus } from '../hooks/useSettingsAutoSave'
 
-const VALID_TABS: SettingsTab[] = ['targeting', 'profile', 'voice', 'system', 'auto-apply']
+const VALID_TABS: SettingsTab[] = ['targeting', 'profile', 'system']
 
 function getTabFromHash(hash: string): SettingsTab {
     const tab = hash.replace('#', '')
     // Handle legacy tab names
     if (tab === 'persona' || tab === 'career') return 'targeting'
+    if (tab === 'voice') return 'profile'
+    if (tab === 'auto-apply') return 'system'
     return VALID_TABS.includes(tab as SettingsTab) ? (tab as SettingsTab) : 'targeting'
 }
 
@@ -54,13 +55,19 @@ export default function Settings(): JSX.Element {
             case 'targeting':
                 return <TargetingTab onAutoSaveStatusChange={handleAutoSaveStatusChange} />
             case 'profile':
-                return <ProfileTab onAutoSaveStatusChange={handleAutoSaveStatusChange} />
-            case 'voice':
-                return <VoiceStyleTab onAutoSaveStatusChange={handleAutoSaveStatusChange} />
+                return (
+                    <>
+                        <ProfileTab onAutoSaveStatusChange={handleAutoSaveStatusChange} />
+                        <VoiceStyleTab onAutoSaveStatusChange={handleAutoSaveStatusChange} />
+                    </>
+                )
             case 'system':
-                return <SystemAutomationTab onAutoSaveStatusChange={handleAutoSaveStatusChange} />
-            case 'auto-apply':
-                return <AutoApplyTab onAutoSaveStatusChange={handleAutoSaveStatusChange} />
+                return (
+                    <>
+                        <SystemAutomationTab onAutoSaveStatusChange={handleAutoSaveStatusChange} />
+                        <AutoApplyTab onAutoSaveStatusChange={handleAutoSaveStatusChange} />
+                    </>
+                )
             default:
                 return null
         }
@@ -70,12 +77,8 @@ export default function Settings(): JSX.Element {
         <div className="page-wrapper">
             <Container maxWidth="lg" padding="md">
                 <div className="page-header">
-                    <div className="icon-header">
-                        <Icon name="pocket-watch" size="sm" />
-                        <span className="label">SETTINGS</span>
-                        <div style={{ marginLeft: 'auto' }}>
-                            <AutoSaveIndicator status={autoSaveStatus} />
-                        </div>
+                    <div style={{ marginLeft: 'auto' }}>
+                        <AutoSaveIndicator status={autoSaveStatus} />
                     </div>
                     <h1>Preferences</h1>
                     <p>Customize how Relevnt matches and applies for you.</p>

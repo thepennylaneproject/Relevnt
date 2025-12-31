@@ -112,12 +112,12 @@ export default function AdminDashboard(): JSX.Element {
   }
 
   const tabs = [
-    { id: 'overview', label: 'Overview', icon: 'lighthouse' },
-    { id: 'users', label: 'Users', icon: 'seeds' },
-    { id: 'sources', label: 'Sources & APIs', icon: 'briefcase' },
-    { id: 'ingestion', label: 'Ingestion', icon: 'refresh-cw' },
-    { id: 'system', label: 'System', icon: 'compass' },
-  ] as { id: TabKey; label: string; icon: any }[]
+    { id: 'overview', label: 'Overview' },
+    { id: 'users', label: 'Users' },
+    { id: 'sources', label: 'Sources & APIs' },
+    { id: 'ingestion', label: 'Ingestion' },
+    { id: 'system', label: 'System' },
+  ] as { id: TabKey; label: string }[]
 
   return (
     <PageBackground>
@@ -128,10 +128,6 @@ export default function AdminDashboard(): JSX.Element {
             <div className="hero-shell">
               <div className="hero-header">
                 <div className="hero-header-main">
-                  <div className="hero__badge">
-                    <div className="hero__badge-dot" />
-                    <span>Super Admin</span>
-                  </div>
                   <h1 style={{ fontSize: 24, fontWeight: 700 }}>Admin dashboard</h1>
                   <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
                     Manage users, job sources, and system health.
@@ -163,7 +159,6 @@ export default function AdminDashboard(): JSX.Element {
                       transition: 'all 0.2s'
                     }}
                   >
-                    <Icon name={tab.icon} size="sm" hideAccent className={activeTab === tab.id ? 'color-accent' : ''} />
                     {tab.label}
                   </button>
                 ))}
@@ -635,8 +630,8 @@ function UsersTab() {
                     <option value="admin">Admin</option>
                   </select>
                 </td>
-                <td style={{ padding: '12px 16px' }}>
-                  <span className="rl-badge" style={{ fontSize: 11 }}>{u.tier}</span>
+                <td style={{ padding: '12px 16px', fontSize: 11 }}>
+                  {u.tier}
                 </td>
                 <td style={{ padding: '12px 16px' }}>
                   <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, cursor: 'pointer' }}>
@@ -1171,11 +1166,11 @@ function SourcesTab() {
                     {source.slug || '—'}
                   </code>
                 </td>
-                <td style={{ padding: '12px 16px' }}>
-                  <span className="rl-badge" style={{ fontSize: 11 }}>{source.mode || 'api'}</span>
+                <td style={{ padding: '12px 16px', fontSize: 11 }}>
+                  {source.mode || 'api'}
                 </td>
                 <td style={{ padding: '12px 16px' }}>
-                  <span style={{ fontSize: 11, padding: '2px 6px', borderRadius: 4, background: source.trust_level === 'high' ? 'var(--surface-success)' : source.trust_level === 'medium' ? 'var(--surface-warning)' : 'var(--surface-error)', color: source.trust_level === 'high' ? 'var(--color-success)' : source.trust_level === 'medium' ? 'var(--color-warning)' : 'var(--color-error)', fontWeight: 600 }}>
+                  <span style={{ fontSize: 11, fontWeight: 600 }}>
                     {source.trust_level || 'medium'}
                   </span>
                 </td>
@@ -1483,14 +1478,8 @@ function IngestionTab() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
             <div>
               <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4 }}>Status</div>
-              <span className="rl-badge" style={{
-                fontSize: 12,
-                background: healthData.latestRun.status === 'success' ? 'var(--surface-success)' :
-                  healthData.latestRun.status === 'partial' ? 'var(--surface-warning)' : 'var(--surface-error)',
-                color: healthData.latestRun.status === 'success' ? 'var(--color-success)' :
-                  healthData.latestRun.status === 'partial' ? 'var(--color-warning)' : 'var(--color-error)',
-              }}>
-                {healthData.latestRun.status.toUpperCase()}
+              <span style={{ fontSize: 12, fontWeight: 600 }}>
+                {healthData.latestRun.status}
               </span>
             </div>
             <div>
@@ -1607,15 +1596,7 @@ function IngestionTab() {
                       {new Date(run.started_at).toLocaleString()}
                     </td>
                     <td style={{ padding: '8px 12px' }}>
-                      <span className="rl-badge" style={{
-                        fontSize: 11,
-                        background: run.status === 'success' ? 'var(--surface-success)' :
-                          run.status === 'partial' ? 'var(--surface-warning)' :
-                            run.status === 'running' ? 'var(--surface-info)' : 'var(--surface-error)',
-                        color: run.status === 'success' ? 'var(--color-success)' :
-                          run.status === 'partial' ? 'var(--color-warning)' :
-                            run.status === 'running' ? 'var(--color-info)' : 'var(--color-error)',
-                      }}>
+                      <span style={{ fontSize: 11, fontWeight: 600 }}>
                         {run.status}
                       </span>
                     </td>

@@ -32,7 +32,6 @@ export default function NotificationCenter() {
                 title="Notifications"
             >
                 <Icon name="mailbox" size="md" hideAccent={unreadCount === 0} />
-                {unreadCount > 0 && <span className="unread-badge">{unreadCount}</span>}
             </button>
 
             {isOpen && (
@@ -77,7 +76,6 @@ export default function NotificationCenter() {
                                                 {formatRelativeTime(n.created_at)}
                                             </span>
                                         </div>
-                                        {!n.is_read && <div className="unread-dot" />}
                                     </article>
                                 ))
                             )}

@@ -1,7 +1,4 @@
 import React, { useState } from 'react'
-import { Icon } from '../ui/Icon'
-import { PoeticVerseMinimal } from '../ui/PoeticVerse'
-import { getPoeticVerse } from '../../lib/poeticMoments'
 import { useAITask } from '../../hooks/useAITask'
 import { useApplications, type Application } from '../../hooks/useApplications'
 
@@ -63,10 +60,7 @@ export function NegotiationCoach({ application }: NegotiationCoachProps) {
     return (
         <div className="negotiation-coach space-y-6 p-4 surface-accent rounded-xl">
             <div className="flex justify-between items-center">
-                <h3 className="text-sm font-bold flex items-center gap-2">
-                    <Icon name="lighthouse" size="sm" />
-                    Negotiation Coach
-                </h3>
+                <h3 className="text-sm font-bold flex items-center gap-2">Negotiation Coach</h3>
                 <button
                     onClick={handleGenerateStrategy}
                     disabled={aiLoading}
@@ -130,11 +124,6 @@ export function NegotiationCoach({ application }: NegotiationCoachProps) {
                         </div>
                     </div>
 
-                    {/* Poetic moment: Offer negotiation */}
-                    <div className="pt-3 border-t border-accent/10">
-                        <p className="text-[10px] font-bold text-muted mb-2">The road you take</p>
-                        <PoeticVerseMinimal verse={getPoeticVerse('offer-negotiation')} />
-                    </div>
                 </div>
             )}
 

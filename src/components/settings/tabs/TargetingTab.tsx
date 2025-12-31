@@ -6,38 +6,21 @@
  */
 
 import React, { useEffect, useState, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { usePersonas } from '../../../hooks/usePersonas'
 import { useJobPreferences, type JobPreferences } from '../../../hooks/useJobPreferences'
 import { useSettingsAutoSave, type AutoSaveStatus } from '../../../hooks/useSettingsAutoSave'
-import { useToast } from '../../ui/Toast'
 import { Icon } from '../../ui/Icon'
 import type { UserPersona } from '../../../types/v2-personas'
-import { ChevronDown, ChevronUp } from 'lucide-react'
 
 interface TargetingTabProps {
     onAutoSaveStatusChange: (status: AutoSaveStatus) => void
 }
-
-const SEARCH_MODE_OPTIONS = [
-    { id: 'active', label: 'Actively looking', description: 'Ready to apply and interview' },
-    { id: 'casual', label: 'Casually browsing', description: 'Open to the right opportunity' },
-    { id: 'pivot', label: 'Career pivot', description: 'Exploring new directions' },
-    { id: 'explore', label: 'Exploration / learning', description: 'Just seeing what\'s out there' },
-] as const
 
 const SENIORITY_OPTIONS = ['Junior', 'Mid level', 'Senior', 'Lead', 'Director']
 const REMOTE_OPTIONS = [
     { id: 'remote', label: 'Remote only' },
     { id: 'hybrid', label: 'Hybrid' },
     { id: 'onsite', label: 'Onsite' },
-]
-
-const ALL_SUGGESTED_TITLES = [
-    'Product Manager', 'Senior Product Manager', 'Director of Product',
-    'Product Lead', 'Head of Product', 'VP of Product',
-    'Technical Product Manager', 'Growth Product Manager',
-    'Product Designer', 'UX Designer', 'Software Engineer',
 ]
 
 const ALL_SUGGESTED_SKILLS = [
@@ -48,23 +31,14 @@ const ALL_SUGGESTED_SKILLS = [
 ]
 
 export function TargetingTab({ onAutoSaveStatusChange }: TargetingTabProps) {
-    const navigate = useNavigate()
-    const { showToast } = useToast()
-
     // Persona state
     const { personas, activePersona, setActivePersona, loading: personaLoading, error: personaError } = usePersonas()
 
     // Career targets state
     const { prefs, loading: prefsLoading, setField, save } = useJobPreferences()
 
-    // Collapsible sections
-    const [personaExpanded, setPersonaExpanded] = useState(true)
-    const [targetsExpanded, setTargetsExpanded] = useState(true)
-
     // Type-to-add inputs
-    const [titleInput, setTitleInput] = useState('')
     const [skillInput, setSkillInput] = useState('')
-    const [titleInputFocused, setTitleInputFocused] = useState(false)
     const [skillInputFocused, setSkillInputFocused] = useState(false)
 
     const { status, triggerSave } = useSettingsAutoSave(save, { debounceMs: 800 })
@@ -85,17 +59,6 @@ export function TargetingTab({ onAutoSaveStatusChange }: TargetingTabProps) {
         triggerSave()
     }
 
-    // Title suggestions
-    const filteredTitleSuggestions = useMemo(() => {
-        if (!prefs) return []
-        const existing = prefs.related_titles || []
-        const query = titleInput.toLowerCase().trim()
-        return ALL_SUGGESTED_TITLES
-            .filter(t => !existing.includes(t))
-            .filter(t => query === '' ? true : t.toLowerCase().includes(query))
-            .slice(0, 6)
-    }, [titleInput, prefs])
-
     // Skill suggestions
     const filteredSkillSuggestions = useMemo(() => {
         if (!prefs) return []
@@ -106,21 +69,6 @@ export function TargetingTab({ onAutoSaveStatusChange }: TargetingTabProps) {
             .filter(s => query === '' ? true : s.toLowerCase().includes(query))
             .slice(0, 6)
     }, [skillInput, prefs])
-
-    const addRelatedTitle = (title: string) => {
-        if (!prefs) return
-        const current = prefs.related_titles || []
-        if (current.length >= 5) return
-        if (!current.includes(title)) {
-            handleFieldChange('related_titles', [...current, title])
-            setTitleInput('')
-        }
-    }
-
-    const removeRelatedTitle = (title: string) => {
-        if (!prefs) return
-        handleFieldChange('related_titles', prefs.related_titles.filter((t) => t !== title))
-    }
 
     const addSkill = (skill: string) => {
         if (!prefs) return
@@ -168,29 +116,18 @@ export function TargetingTab({ onAutoSaveStatusChange }: TargetingTabProps) {
         )
     }
 
-    const titleInputTrimmed = titleInput.trim()
-    const titleInputIsNew = titleInputTrimmed &&
-        !(prefs?.related_titles || []).includes(titleInputTrimmed) &&
-        !filteredTitleSuggestions.some(t => t.toLowerCase() === titleInputTrimmed.toLowerCase())
-
     const skillInputTrimmed = skillInput.trim()
     const skillInputIsNew = skillInputTrimmed &&
         !(prefs?.include_keywords || []).includes(skillInputTrimmed) &&
         !filteredSkillSuggestions.some(s => s.toLowerCase() === skillInputTrimmed.toLowerCase())
 
-    const showTitleDropdown = titleInputFocused && (prefs?.related_titles || []).length < 5
     const showSkillDropdown = skillInputFocused
 
     return (
         <div className="tab-pane">
             {/* PERSONA SECTION */}
             <section className="collapsible-section">
-                <button
-                    type="button"
-                    className="collapsible-header"
-                    onClick={() => setPersonaExpanded(!personaExpanded)}
-                    aria-expanded={personaExpanded}
-                >
+                <div className="collapsible-header">
                     <div className="collapsible-header-content">
                         <Icon name="compass" size="sm" />
                         <div>
@@ -198,69 +135,39 @@ export function TargetingTab({ onAutoSaveStatusChange }: TargetingTabProps) {
                             <p className="muted text-sm">Your persona shapes how Relevnt matches and applies for you</p>
                         </div>
                     </div>
-                    {personaExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                </button>
+                </div>
 
-                {personaExpanded && (
-                    <div className="collapsible-content">
-                        <div className="card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
-                            {personas.map((persona) => {
-                                const isActive = persona.id === activePersona?.id
-                                return (
-                                    <div
-                                        key={persona.id}
-                                        className={`card card-persona ${isActive ? 'active' : ''}`}
-                                        onClick={() => handlePersonaSelect(persona)}
-                                        style={{ cursor: 'pointer' }}
-                                    >
-                                        <h3>{persona.name || 'Untitled Persona'}</h3>
-                                        {persona.description && (
-                                            <p className="card-description text-sm muted">{persona.description}</p>
-                                        )}
-                                        <span className={`badge ${isActive ? 'badge-active' : 'badge-muted'}`}>
-                                            {isActive ? 'Active' : 'Click to activate'}
-                                        </span>
-                                    </div>
-                                )
-                            })}
-
-                            {personas.length === 0 && (
-                                <div style={{ padding: 24, textAlign: 'center', color: 'var(--color-ink-tertiary)' }}>
-                                    <p>No personas yet. Create one to get started.</p>
+                <div className="collapsible-content">
+                    <div className="card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+                        {personas.map((persona) => {
+                            const isActive = persona.id === activePersona?.id
+                            return (
+                                <div
+                                    key={persona.id}
+                                    className={`card card-persona ${isActive ? 'active' : ''}`}
+                                    onClick={() => handlePersonaSelect(persona)}
+                                    style={{ cursor: 'pointer' }}
+                                >
+                                    <h3>{persona.name || 'Untitled Persona'}</h3>
+                                    {persona.description && (
+                                        <p className="card-description text-sm muted">{persona.description}</p>
+                                    )}
                                 </div>
-                            )}
-                        </div>
+                            )
+                        })}
 
-                        <div style={{ marginTop: 16 }}>
-                            <p className="text-sm muted">Quick-start a new persona:</p>
-                            <div className="button-group" style={{ marginTop: 8, flexWrap: 'wrap' }}>
-                                {SEARCH_MODE_OPTIONS.map((option) => (
-                                    <button
-                                        key={option.id}
-                                        type="button"
-                                        className="btn btn-ghost btn-sm"
-                                        onClick={() => {
-                                            showToast(`Configuring your "${option.label}" persona...`, 'info')
-                                            navigate('/personas')
-                                        }}
-                                    >
-                                        {option.label}
-                                    </button>
-                                ))}
+                        {personas.length === 0 && (
+                            <div style={{ padding: 24, textAlign: 'center', color: 'var(--color-ink-tertiary)' }}>
+                                <p>No personas yet. Create one to get started.</p>
                             </div>
-                        </div>
+                        )}
                     </div>
-                )}
+                </div>
             </section>
 
             {/* CAREER TARGETS SECTION */}
             <section className="collapsible-section" style={{ marginTop: 24 }}>
-                <button
-                    type="button"
-                    className="collapsible-header"
-                    onClick={() => setTargetsExpanded(!targetsExpanded)}
-                    aria-expanded={targetsExpanded}
-                >
+                <div className="collapsible-header">
                     <div className="collapsible-header-content">
                         <Icon name="lighthouse" size="sm" />
                         <div>
@@ -268,64 +175,17 @@ export function TargetingTab({ onAutoSaveStatusChange }: TargetingTabProps) {
                             <p className="muted text-sm">Define what you're looking for</p>
                         </div>
                     </div>
-                    {targetsExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                </button>
+                </div>
 
-                {targetsExpanded && prefs && (
+                {prefs && (
                     <div className="collapsible-content">
                         {/* Job Titles */}
                         <div className="card">
                             <h3>Target job titles</h3>
                             <p className="card-description">Pick up to 5 titles. Type to search or add your own.</p>
 
-                            <div className="pill-input">
-                                {(prefs.related_titles || []).map((title) => (
-                                    <div key={title} className="pill">
-                                        {title}
-                                        <button className="pill-remove" onClick={() => removeRelatedTitle(title)}>×</button>
-                                    </div>
-                                ))}
-                                {(prefs.related_titles || []).length < 5 && (
-                                    <input
-                                        type="text"
-                                        value={titleInput}
-                                        onChange={(e) => setTitleInput(e.target.value)}
-                                        onFocus={() => setTitleInputFocused(true)}
-                                        onBlur={() => setTimeout(() => setTitleInputFocused(false), 150)}
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter' && titleInput.trim()) {
-                                                e.preventDefault()
-                                                addRelatedTitle(titleInput.trim())
-                                            }
-                                        }}
-                                        placeholder="Add title..."
-                                        className="pill-input-field"
-                                    />
-                                )}
-                            </div>
-
-                            {showTitleDropdown && (titleInputIsNew || filteredTitleSuggestions.length > 0) && (
-                                <div className="dropdown-suggestions">
-                                    {titleInputIsNew && (
-                                        <button
-                                            type="button"
-                                            onMouseDown={(e) => { e.preventDefault(); addRelatedTitle(titleInputTrimmed) }}
-                                            className="dropdown-item dropdown-item-new"
-                                        >
-                                            Add "{titleInputTrimmed}"
-                                        </button>
-                                    )}
-                                    {filteredTitleSuggestions.map((title) => (
-                                        <button
-                                            key={title}
-                                            type="button"
-                                            onMouseDown={(e) => { e.preventDefault(); addRelatedTitle(title) }}
-                                            className="dropdown-item"
-                                        >
-                                            {title}
-                                        </button>
-                                    ))}
-                                </div>
+                            {(prefs.related_titles || []).length > 0 && (
+                                <p>{(prefs.related_titles || []).join(', ')}</p>
                             )}
 
                             <div style={{ marginTop: 20 }}>
@@ -462,12 +322,7 @@ const targetingTabStyles = `
     padding: 16px 20px;
     background: transparent;
     border: none;
-    cursor: pointer;
     text-align: left;
-}
-
-.collapsible-header:hover {
-    background: var(--color-bg-alt);
 }
 
 .collapsible-header-content {
@@ -498,24 +353,6 @@ const targetingTabStyles = `
     margin-top: 0;
 }
 
-.badge {
-    display: inline-block;
-    padding: 4px 8px;
-    font-size: 11px;
-    font-weight: 500;
-    border-radius: var(--radius-sm);
-    margin-top: 8px;
-}
-
-.badge-active {
-    background: var(--color-accent-glow);
-    color: var(--color-accent);
-}
-
-.badge-muted {
-    background: var(--color-bg-alt);
-    color: var(--color-ink-tertiary);
-}
 
 .dropdown-suggestions {
     margin-top: 4px;

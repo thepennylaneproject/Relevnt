@@ -4,12 +4,9 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { Icon } from '../components/ui/Icon'
-import { EmptyState } from '../components/ui/EmptyState'
 import { CollectionEmptyGuard } from '../components/ui/CollectionEmptyGuard'
 import { Container } from '../components/shared/Container'
 import { useToast } from '../components/ui/Toast'
-import { PoeticEpigraph } from '../components/ui/PoeticVerse'
-import { getPoeticVerse } from '../lib/poeticMoments'
 import type { InterviewPrepRow, InterviewPracticeSession } from '../shared/types'
 import '../styles/interview-prep.css'
 
@@ -95,19 +92,10 @@ export default function InterviewPrepCenter() {
         <div className="interview-prep-center">
             <Container maxWidth="lg" padding="md">
                 <header className="prep-center__header">
-                    <div className="prep-center__title-badge">
-                        <Icon name="microphone" size="sm" hideAccent />
-                        <span>Career Coaching</span>
-                    </div>
                     <h1>Interview Prep Center</h1>
                     <p className="prep-center__subtitle">
                         Generate tailored practice sessions for any role. Refine your answers with AI-driven feedback based on your unique professional voice.
                     </p>
-
-                    {/* Poetic moment: Interview preparation */}
-                    <div style={{ marginTop: '2rem' }}>
-                        <PoeticEpigraph verse={getPoeticVerse('interview-prep')} />
-                    </div>
                 </header>
 
                 <div className="prep-center__grid">
@@ -167,12 +155,10 @@ export default function InterviewPrepCenter() {
                         {loading ? (
                             <div className="loading-state">Loading templates...</div>
                         ) : preps.length === 0 ? (
-                            <EmptyState
-                                type="analysis"
-                                title="No prep templates yet"
-                                description="Use the form to generate your first interview prep session. We'll create tailored questions based on the role."
-                                includePoetry={false}
-                            />
+                            <>
+                                <p>No prep templates yet.</p>
+                                <p>Use the form to generate your first interview prep session.</p>
+                            </>
                         ) : (
                             <div className="prep-list">
                                 {preps.map(prep => (
@@ -208,16 +194,10 @@ export default function InterviewPrepCenter() {
                     {loading ? (
                         <div className="loading-state">Loading history...</div>
                     ) : sessions.length === 0 ? (
-                        <EmptyState
-                            type="generic"
-                            title="No practice sessions yet"
-                            description="Once you complete a practice run, your history and scores will appear here."
-                            action={preps.length > 0 ? {
-                                label: 'Start practicing',
-                                onClick: () => navigate(`/interview-practice/${preps[0].id}`),
-                            } : undefined}
-                            includePoetry={false}
-                        />
+                        <>
+                            <p>No practice sessions yet.</p>
+                            <p>Once you complete a practice run, your history and scores will appear here.</p>
+                        </>
                     ) : (
                         <div className="history-grid">
                             {sessions.map(session => {

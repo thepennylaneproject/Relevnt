@@ -1,10 +1,8 @@
 
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus } from 'lucide-react'
 import PageBackground from '../components/shared/PageBackground'
 import { Container } from '../components/shared/Container'
-import { Icon } from '../components/ui/Icon'
 import { Button } from '../components/ui/Button'
 import { PrimaryActionRegistryProvider } from '../components/ui/PrimaryActionRegistry'
 import { PageHero } from '../components/ui/PageHero'
@@ -56,24 +54,6 @@ const prettyStatusLabel = (status: ApplicationStatus | null | undefined): string
       return 'Withdrawn'
     default:
       return 'Untracked'
-  }
-}
-
-const renderStatusIcon = (status: ApplicationStatus | null | undefined) => {
-  switch (status) {
-    case 'interviewing':
-      return <Icon name="microphone" size="sm" hideAccent />
-    case 'in-progress':
-      return <Icon name="candle" size="sm" hideAccent />
-    case 'offer':
-    case 'accepted':
-      return <Icon name="flower" size="sm" hideAccent />
-    case 'rejected':
-      return <Icon name="compass-cracked" size="sm" hideAccent />
-    case 'withdrawn':
-      return <Icon name="x" size="sm" hideAccent />
-    default:
-      return null
   }
 }
 
@@ -161,9 +141,6 @@ export default function ApplicationsPage() {
       <Container maxWidth="xl" padding="md">
         <div className="apps-page">
           <header className="page-header">
-            <div className="header-top">
-              <span className="label">Track</span>
-            </div>
             <h1>Track where you're at in each process, without losing the plot.</h1>
             <p className="subtitle">Keep cada role, status, and timeline in one place. Future You has the receipts.</p>
 
@@ -180,7 +157,6 @@ export default function ApplicationsPage() {
 
             <div className="mt-8">
               <Button variant="primary" onClick={handleAddApplication} primaryLabel="Log a new application">
-                <Plus size={16} aria-hidden="true" className="mr-2" />
                 Log a new application
               </Button>
             </div>
@@ -227,12 +203,7 @@ export default function ApplicationsPage() {
                 {!loading && applications.length === 0 ? (
                   <EmptyState
                     type="applications"
-                    action={{
-                      label: 'Log your first application',
-                      onClick: handleAddApplication,
-                      variant: 'secondary', // Primary Action Monogamy: header already has primary CTA
-                    }}
-                    includePoetry={true}
+                    includePoetry={false}
                   />
                 ) : (
                   <div className="item-grid">
@@ -248,17 +219,13 @@ export default function ApplicationsPage() {
                           </div>
 
                           <div className="flex flex-col items-end gap-2">
-                            <span className={`badge app-status-pill--${app.status || 'none'}`}>
-                              {renderStatusIcon(app.status)}
-                              <span>{prettyStatusLabel(app.status)}</span>
-                            </span>
+                            <span>{prettyStatusLabel(app.status)}</span>
                             {(app.status === 'interviewing' || app.status === 'in-progress') && (
                               <Link
                                 to={`/interview-prep`}
                                 className="btn btn--ghost btn--xs"
                                 style={{ textDecoration: 'none', color: 'var(--color-accent)' }}
                               >
-                                <Icon name="microphone" size="sm" />
                                 <span>Practice</span>
                               </Link>
                             )}
@@ -355,7 +322,6 @@ export default function ApplicationsPage() {
                             }}
                           >
                             {expandedId === app.id ? 'Collapse' : 'Details'}
-                            <Icon name={expandedId === app.id ? 'chevron-up' : 'scroll'} size="sm" hideAccent className="ml-2" />
                           </button>
                         </div>
 

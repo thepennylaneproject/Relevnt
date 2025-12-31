@@ -38,11 +38,3 @@
   --app-bg: var(--color-bg); /* Already shifted in design-tokens.css */
   --app-text: var(--color-ink);
 }
-
-/* 4. Utility for Poetic Text */
-.poetic-serif {
-  font-family: var(--font-display);
-  font-style: italic;
-  letter-spacing: 0.02em;
-  color: var(--color-accent);
-}

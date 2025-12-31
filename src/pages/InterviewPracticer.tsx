@@ -141,7 +141,6 @@ export default function InterviewPracticer() {
 
                 <main className="practicer-main">
                     <section className="question-card surface-card">
-                        <span className="q-type-badge">{question.type}</span>
                         <h2>{question.text}</h2>
                         <div className="talking-points-hint">
                             <Icon name="stars" size="sm" />
