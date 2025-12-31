@@ -1,0 +1,235 @@
+/* Mirror Portfolio Analysis - Ready App */
+
+.mirror__results {
+    margin-top: 2rem;
+}
+
+.mirror__main-stats {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+/* Stat Cards */
+.overall-score-large {
+    flex: 1;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    padding: 2rem;
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-left: 4px solid var(--color-accent-primary);
+    transition: transform 0.3s ease;
+}
+
+.overall-score-large:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.overall-score-large .label {
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.75rem;
+}
+
+.overall-score-large .value {
+    font-family: var(--font-serif);
+    font-size: 4rem;
+    font-weight: 400;
+    line-height: 1;
+    color: var(--color-accent-primary);
+}
+
+/* Metric Grid */
+.mirror__scores {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+@media (max-width: 768px) {
+    .mirror__scores {
+        grid-template-columns: 1fr;
+    }
+
+    .mirror__main-stats {
+        flex-direction: column;
+    }
+}
+
+.metric-box {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    transition: border-color 0.2s ease;
+}
+
+.metric-box:hover {
+    border-color: var(--color-accent-secondary);
+}
+
+.metric-box__data {
+    flex: 1;
+}
+
+.metric-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--color-text-secondary);
+    display: block;
+    margin-bottom: 0.75rem;
+}
+
+.metric-progress-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.metric-progress-bar-bg {
+    flex: 1;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 2px;
+}
+
+.metric-progress-bar {
+    height: 100%;
+    background: var(--color-accent-primary);
+    border-radius: 2px;
+}
+
+.metric-value {
+    font-family: var(--font-serif);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    min-width: 2rem;
+}
+
+/* Growth Opportunities */
+.mirror__suggestions h2 {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    margin-bottom: 2rem;
+    color: var(--color-accent-primary);
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 0.5rem;
+}
+
+.portfolio-suggestions-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+}
+
+.portfolio-suggestion-card {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.portfolio-suggestion-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--color-accent-secondary);
+}
+
+.portfolio-suggestion-card.impact--high {
+    border-top: 4px solid var(--color-accent-primary);
+}
+
+.portfolio-suggestion-card.impact--medium {
+    border-top: 4px solid var(--color-accent-secondary);
+}
+
+.portfolio-suggestion-card.impact--low {
+    border-top: 4px solid var(--color-border);
+}
+
+.portfolio-suggestion-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    align-items: center;
+}
+
+.portfolio-suggestion-card .category {
+    font-size: 0.65rem;
+    font-weight: 800;
+    background: rgba(212, 165, 116, 0.1);
+    color: var(--color-accent-primary);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+}
+
+.portfolio-suggestion-card .improvement {
+    font-family: var(--font-serif);
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin: 0;
+    color: var(--color-text-primary);
+}
+
+/* Narrative Tagline */
+.mirror__tagline {
+    margin-top: 4rem;
+    padding: 3rem;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-accent-primary);
+    border-radius: var(--radius-md);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.mirror__tagline::before {
+    content: '"';
+    position: absolute;
+    top: -20px;
+    left: 20px;
+    font-family: var(--font-serif);
+    font-size: 10rem;
+    color: rgba(212, 165, 116, 0.05);
+    line-height: 1;
+}
+
+.mirror__tagline h2 {
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    margin-bottom: 1.5rem;
+    color: var(--color-text-secondary);
+}
+
+/* Loading States */
+.mirror__analysis-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 4rem;
+    text-align: center;
+    gap: 1.5rem;
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

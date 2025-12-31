@@ -11,7 +11,6 @@ import { copy } from '../lib/copy'
 import type { JobRow } from '../shared/types'
 import { usePersonas } from '../hooks/usePersonas'
 import { RelevanceTuner } from '../components/personas/RelevanceTuner'
-import { PatternInsightsPanel } from '../components/intelligence/PatternInsightsPanel'
 import { AutoTuneSuggestions } from '../components/intelligence/AutoTuneSuggestions'
 import { useNetworkingCompanies, checkCompanyMatch } from '../hooks/useNetworkLookup'
 
@@ -439,9 +438,6 @@ export default function JobsPage() {
 
         {/* Auto-Tune Suggestions - Concierge mode */}
         <AutoTuneSuggestions />
-
-        {/* Pattern Insights - surface behavioral patterns */}
-        <PatternInsightsPanel collapsed={true} />
 
         {/* Job Feed */}
         <div className="jobs-feed-container">

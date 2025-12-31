@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom'
 import PageBackground from '../components/shared/PageBackground'
 import { Container } from '../components/shared/Container'
 import { Button } from '../components/ui/Button'
+import { Icon } from '../components/ui/Icon'
+import { getReadyUrl } from '../config/cross-product'
 import { PrimaryActionRegistryProvider } from '../components/ui/PrimaryActionRegistry'
 import { PageHero } from '../components/ui/PageHero'
 import { EmptyState } from '../components/ui/EmptyState'
@@ -16,12 +18,8 @@ import {
   type ApplicationStatus,
 } from '../hooks/useApplications'
 import { ApplicationQuestionHelper } from '../components/Applications/ApplicationQuestionHelper'
-import { NegotiationCoach } from '../components/Applications/NegotiationCoach'
-import { RejectionCoaching } from '../components/Applications/RejectionCoaching'
 import { CoverLetterGenerator } from '../components/Applications/CoverLetterGenerator'
 import { AddApplicationModal } from '../components/Applications/AddApplicationModal'
-import { NetworkingConnectionPrompt } from '../components/intelligence/NetworkingConnectionPrompt'
-import { useNetworkingDraft } from '../hooks/useNetworkingDraft'
 import { formatRelativeTime } from '../lib/utils/time'
 import '../styles/applications.css'
 
@@ -64,11 +62,9 @@ export default function ApplicationsPage() {
     undefined,
   )
   const [expandedId, setExpandedId] = useState<string | null>(null)
-  const [expandedTab, setExpandedTab] = useState<'timeline' | 'negotiate' | 'coaching' | 'letter'>('timeline')
+  const [expandedTab, setExpandedTab] = useState<'timeline' | 'letter'>('timeline')
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; position: string } | null>(null)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
-  const [networkingDrafts, setNetworkingDrafts] = useState<Record<string, { draft: string; strategy: string }>>({})
-  const { generateDraft, loading: generatingDraft } = useNetworkingDraft()
 
   const {
     applications,
@@ -221,75 +217,8 @@ export default function ApplicationsPage() {
 
                           <div className="flex flex-col items-end gap-2">
                             <span>{prettyStatusLabel(app.status)}</span>
-                            {(app.status === 'interviewing' || app.status === 'in-progress') && (
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                style={{ color: 'var(--color-accent)' }}
-                                onClick={() => navigate('/interview-prep')}
-                              >
-                                <span>Practice</span>
-                              </Button>
-                            )}
                           </div>
                         </header>
-
-                        <NetworkingConnectionPrompt 
-                          company={app.company} 
-                          variant="inline"
-                          className="mt-2"
-                          onGenerateMessage={async (contact) => {
-                            const result = await generateDraft(
-                              contact.name,
-                              contact.role || '',
-                              app.company || '',
-                              app.position || ''
-                            );
-                            if (result?.success && result.data) {
-                              setNetworkingDrafts(prev => ({
-                                ...prev,
-                                [contact.id]: result.data!
-                              }));
-                            }
-                          }}
-                        />
-
-                        {Object.entries(networkingDrafts).map(([contactId, data]: [string, { draft: string; strategy: string }]) => {
-                          // Only show if it matches a contact for this company
-                          // This is simplified but works for now
-                          return (
-                            <div key={contactId} className="mt-3 p-3 bg-accent/5 border border-accent/20 rounded-lg animate-in fade-in slide-in-from-top-1">
-                              <div className="flex justify-between items-center mb-2">
-                                <span className="text-[10px] font-bold text-accent">Drafted Outreach</span>
-                                <button 
-                                  onClick={() => setNetworkingDrafts(prev => {
-                                    const next = { ...prev };
-                                    delete next[contactId];
-                                    return next;
-                                  })}
-                                  className="text-[10px] muted hover:text-foreground"
-                                >
-                                  Clear
-                                </button>
-                              </div>
-                              <p className="text-xs whitespace-pre-wrap italic">"{data.draft}"</p>
-                              <div className="mt-2 flex gap-2">
-                                <Button 
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    navigator.clipboard.writeText(data.draft);
-                                    showToast('Draft copied to clipboard!', 'success');
-                                  }}
-                                >
-                                  Copy
-                                </Button>
-                              </div>
-                            </div>
-                          );
-                        })}
 
                         <div className="flex items-center gap-4 py-2 border-b border-subtle">
                           <div className="status-field flex-1">
@@ -314,11 +243,21 @@ export default function ApplicationsPage() {
                               <option value="withdrawn">Withdrawn</option>
                             </select>
                           </div>
+                          {app.status === 'interviewing' && (
+                            <a
+                              href={getReadyUrl('/practice')}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs font-semibold text-accent hover:underline flex items-center gap-1"
+                            >
+                              Practice interviews
+                              <Icon name="external-link" size="xs" />
+                            </a>
+                          )}
                           <Button
                             type="button"
                             variant="ghost"
                             size="sm"
-                            className="mt-4"
                             onClick={() => {
                               if (expandedId === app.id) {
                                 setExpandedId(null)
@@ -343,26 +282,6 @@ export default function ApplicationsPage() {
                               >
                                 Timeline
                               </Button>
-                              {app.status === 'offer' && (
-                                <Button
-                                  type="button"
-                                  variant={expandedTab === 'negotiate' ? 'secondary' : 'ghost'}
-                                  size="sm"
-                                  onClick={() => setExpandedTab('negotiate')}
-                                >
-                                  Negotiation Coach
-                                </Button>
-                              )}
-                              {app.status === 'rejected' && (
-                                <Button
-                                  type="button"
-                                  variant={expandedTab === 'coaching' ? 'secondary' : 'ghost'}
-                                  size="sm"
-                                  onClick={() => setExpandedTab('coaching')}
-                                >
-                                  De-brief
-                                </Button>
-                              )}
                               <Button
                                 type="button"
                                 variant={expandedTab === 'letter' ? 'secondary' : 'ghost'}
@@ -394,8 +313,6 @@ export default function ApplicationsPage() {
                                 </div>
                               </div>
                             )}
-                            {expandedTab === 'negotiate' && <NegotiationCoach application={app} />}
-                            {expandedTab === 'coaching' && <RejectionCoaching application={app} />}
                             {expandedTab === 'letter' && <CoverLetterGenerator application={app} />}
                           </div>
                         )}

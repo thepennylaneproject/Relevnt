@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title>Applications · Briefcase</title>
+  <desc>A briefcase for job applications.</desc>
+  <defs>
+    <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4E808D" />
+      <stop offset="100%" stop-color="#74AAB4" />
+    </linearGradient>
+  </defs>
+  <rect width="96" height="96" rx="16" ry="16" fill="#0F1214"/>
+  
+  <rect x="22" y="34" width="52" height="34" rx="8" fill="#0F1214" stroke="#161A1D" stroke-width="3"/>
+  <rect x="38" y="28" width="20" height="10" rx="5" fill="#0F1214" stroke="#161A1D" stroke-width="3"/>
+  <rect x="22" y="48" width="52" height="6" rx="3" fill="url(#grad-dark)"/>
+  <circle cx="48" cy="51" r="3" fill="#4E808D"/>
+
+</svg>

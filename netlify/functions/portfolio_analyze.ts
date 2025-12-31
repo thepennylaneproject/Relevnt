@@ -1,4 +1,10 @@
 
+/**
+ * @deprecated This function is deprecated and will be removed in a future version.
+ * This feature has been moved to the Ready application.
+ * Please migrate to Ready for portfolio analysis features.
+ */
+
 import type { Handler } from '@netlify/functions'
 import { createResponse, handleCORS, verifyToken, createAdminClient } from './utils/supabase'
 import { routeLegacyTask } from './ai/legacyTaskRouter'
@@ -58,6 +64,8 @@ export const handler: Handler = async (event) => {
     }
 
     try {
+        console.warn('[DEPRECATED] portfolio_analyze function is deprecated. This feature has moved to the Ready application.')
+        
         const body = JSON.parse(event.body || '{}')
         const { portfolioUrl } = body
 

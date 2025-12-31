@@ -18,11 +18,7 @@ import AdminDashboard from './pages/AdminDashboard'
 import { lazy, Suspense } from 'react'
 const Settings = lazy(() => import('./pages/Settings'))
 import ResumeWorkspacePage from './pages/ResumeWorkspacePage'
-import ProfileAnalyzer from './pages/ProfileAnalyzer'
 import SharedAuditPage from './pages/SharedAuditPage'
-
-import InterviewPrepCenter from './pages/InterviewPrepCenter'
-import InterviewPracticer from './pages/InterviewPracticer'
 import SidebarMarginNav from './components/chrome/SidebarMarginNav'
 import { OnboardingGate } from './components/onboarding'
 import './styles/margin-nav.css'
@@ -88,26 +84,6 @@ function AppInner() {
                 <Route
                   path="/auto-apply"
                   element={isAuthed ? <Navigate to="/settings#auto-apply" replace /> : <Navigate to="/login" replace />}
-                />
-                <Route
-                  path="/profile-analyzer"
-                  element={isAuthed ? <ProfileAnalyzer /> : <Navigate to="/login" replace />}
-                />
-                <Route
-                  path="/linkedin-optimizer"
-                  element={<Navigate to="/profile-analyzer" replace />}
-                />
-                <Route
-                  path="/portfolio-optimizer"
-                  element={<Navigate to="/profile-analyzer" replace />}
-                />
-                <Route
-                  path="/interview-prep"
-                  element={isAuthed ? <InterviewPrepCenter /> : <Navigate to="/login" replace />}
-                />
-                <Route
-                  path="/interview-practice/:id"
-                  element={isAuthed ? <InterviewPracticer /> : <Navigate to="/login" replace />}
                 />
 
 

@@ -6,8 +6,6 @@ import { Button } from '../components/ui/Button'
 import { Container } from '../components/shared/Container'
 import PageBackground from '../components/shared/PageBackground'
 import type { LinkedInAnalysis, PortfolioAnalysis } from '../shared/types'
-import '../styles/linkedin-optimizer.css'
-import '../styles/portfolio-optimizer.css'
 
 export default function SharedAuditPage() {
     const { type, token } = useParams<{ type?: string, token?: string }>()

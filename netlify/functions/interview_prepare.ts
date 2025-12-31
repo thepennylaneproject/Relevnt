@@ -1,4 +1,10 @@
 
+/**
+ * @deprecated This function is deprecated and will be removed in a future version.
+ * This feature has been moved to the Ready application.
+ * Please migrate to Ready for interview preparation features.
+ */
+
 import type { Handler } from '@netlify/functions'
 import { createResponse, handleCORS, verifyToken, createAdminClient } from './utils/supabase'
 import { runAI } from './ai/run'
@@ -35,6 +41,8 @@ export const handler: Handler = async (event) => {
     }
 
     try {
+        console.warn('[DEPRECATED] interview_prepare function is deprecated. This feature has moved to the Ready application.')
+        
         const body = JSON.parse(event.body || '{}')
         const { position, company, resumeContext, jobDescription, application_id } = body
 

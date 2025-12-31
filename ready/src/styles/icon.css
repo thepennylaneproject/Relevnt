@@ -1,0 +1,52 @@
+/* Ready Icon System Styles */
+
+.rdy-icon {
+  display: inline-block;
+  vertical-align: middle;
+  color: var(--color-text-secondary, #666);
+  transition: color 150ms ease;
+}
+
+.rdy-icon--default {
+  color: var(--color-text, #1a1a1a);
+}
+
+.rdy-icon--muted {
+  color: var(--color-text-secondary, #666);
+}
+
+.rdy-icon--accent {
+  color: var(--accent-primary, #6366f1);
+}
+
+.rdy-icon--success {
+  color: var(--color-success, #22c55e);
+}
+
+.rdy-icon--warning {
+  color: var(--color-warning, #f59e0b);
+}
+
+.rdy-icon--error {
+  color: var(--color-error, #ef4444);
+}
+
+.rdy-icon--disabled {
+  color: var(--color-disabled, #9ca3af);
+  opacity: 0.5;
+}
+
+/* Interactive states */
+.rdy-icon--interactive {
+  cursor: pointer;
+}
+
+.rdy-icon--interactive:hover {
+  color: var(--accent-primary, #6366f1);
+}
+
+/* Size utilities */
+.rdy-icon--sm { width: 16px; height: 16px; }
+.rdy-icon--md { width: 20px; height: 20px; }
+.rdy-icon--lg { width: 24px; height: 24px; }
+.rdy-icon--xl { width: 32px; height: 32px; }

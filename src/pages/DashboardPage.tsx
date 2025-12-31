@@ -10,6 +10,7 @@ import { useJobStats } from '../hooks/useJobStats'
 import { useWellnessMode } from '../hooks/useWellnessMode'
 import { WellnessCheckin } from '../components/dashboard/WellnessCheckin'
 import HandDrawnIcon from '../components/ui/HandDrawnIcon'
+import { getReadyUrl } from '../config/cross-product'
 import '../styles/dashboard-clarity.css'
 
 // User state enum for adaptive UI
@@ -222,10 +223,11 @@ export default function DashboardPage(): JSX.Element {
   ]
 
   // Quick actions
-  const getQuickActions = (): { icon: IconName; label: string; link: string }[] => [
+  const getQuickActions = (): { icon: IconName; label: string; link: string; isExternal?: boolean }[] => [
     { icon: 'search', label: 'Search saved filters', link: '/jobs' },
     { icon: 'scroll', label: 'Upload resume', link: '/resumes' },
     { icon: 'microphone', label: 'Mock interview', link: '/interview-prep' },
+    { icon: 'stars', label: 'Not ready? Get prepared', link: getReadyUrl('/'), isExternal: true },
   ]
 
   // Momentum message
@@ -333,10 +335,18 @@ export default function DashboardPage(): JSX.Element {
             </h3>
             <div className="quick-actions-row">
               {quickActions.map((action, idx) => (
-                <Link key={idx} to={action.link} className="quick-action-btn">
-                  <HandDrawnIcon name={action.icon} size="sm" />
-                  <span>{action.label}</span>
-                </Link>
+                action.isExternal ? (
+                  <a key={idx} href={action.link} className="quick-action-btn" target="_blank" rel="noopener noreferrer">
+                    <HandDrawnIcon name={action.icon} size="sm" />
+                    <span>{action.label}</span>
+                    <Icon name="external-link" size="xs" style={{ marginLeft: '4px', opacity: 0.6 }} />
+                  </a>
+                ) : (
+                  <Link key={idx} to={action.link} className="quick-action-btn">
+                    <HandDrawnIcon name={action.icon} size="sm" />
+                    <span>{action.label}</span>
+                  </Link>
+                )
               ))}
             </div>
           </section>

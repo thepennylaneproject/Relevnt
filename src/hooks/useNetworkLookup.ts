@@ -10,7 +10,21 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from './useAuth'
-import type { Contact } from './useNetworking'
+
+// Define Contact type inline since useNetworking was removed
+export interface Contact {
+    id: string
+    user_id: string
+    name: string
+    company?: string
+    role?: string
+    linkedin_url?: string
+    email?: string
+    phone?: string
+    notes?: string
+    status?: 'connected' | 'pending' | 'declined'
+    created_at?: string
+}
 
 export interface NetworkingMatchResult {
     contacts: Contact[]

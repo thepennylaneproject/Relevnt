@@ -281,19 +281,6 @@ export interface SalaryNegotiationResponse {
 }
 
 /**
- * Post-rejection coaching
- */
-export interface RejectionCoachingResponse {
-  success: boolean;
-  data: {
-    analysis: string;
-    missingSkills: string[];
-    nextSteps: string[];
-  };
-  error?: string;
-}
-
-/**
  * Networking outreach draft
  */
 export interface NetworkingDraftResponse {
@@ -411,7 +398,6 @@ export type AITaskResponse =
   | SuggestSkillsResponse
   | CareerNarrativeResponse
   | SalaryNegotiationResponse
-  | RejectionCoachingResponse
   | NetworkingDraftResponse
 
 /**
@@ -437,7 +423,6 @@ export const TASK_RESPONSE_TYPES = {
   'suggest-skills': {} as SuggestSkillsResponse,
   'generate-career-narrative': {} as CareerNarrativeResponse,
   'salary-negotiation': {} as SalaryNegotiationResponse,
-  'rejection-coaching': {} as RejectionCoachingResponse,
   'networking-draft': {} as NetworkingDraftResponse,
 } as const
 
@@ -470,6 +455,8 @@ export const TIER_LIMITS = {
     'rewrite-text': 5,
     'suggest-skills': 5,
     'generate-career-narrative': 2,
+    'salary-negotiation': 2,
+    'networking-draft': 3,
   },
   pro: {
     'extract-resume': 50,
@@ -487,6 +474,8 @@ export const TIER_LIMITS = {
     'rewrite-text': 50,
     'suggest-skills': 50,
     'generate-career-narrative': 20,
+    'salary-negotiation': 20,
+    'networking-draft': 30,
   },
   premium: {
     'extract-resume': Infinity,
@@ -505,7 +494,7 @@ export const TIER_LIMITS = {
     'suggest-skills': Infinity,
     'generate-career-narrative': Infinity,
     'salary-negotiation': Infinity,
-    'rejection-coaching': Infinity,
+    'networking-draft': Infinity,
   },
 } as const;
 

@@ -32,9 +32,7 @@ export { useExtractJobs, type UseExtractJobsReturn } from './useExtractJobs';
 export { default as useMatchJobs } from './useMatchJobs'
 export type { UseMatchJobsResult } from './useMatchJobs'
 // Career Operations
-export { useAnalyzeSkillsGap, type UseAnalyzeSkillsGapReturn } from './useAnalyzeSkillsGap';
 export { useGenerateCoverLetter, type UseGenerateCoverLetterReturn } from './useGenerateCoverLetter';
-export { usePrepareInterview, type UsePrepareInterviewReturn } from './usePrepareInterview';
 export { useProfessionalProfile } from './useProfessionalProfile'
 // ============================================================================
 // DATABASE HOOKS
@@ -83,7 +81,6 @@ export {
   type RelevntColors
 } from './useRelevntColors';
 export { useProfileSettings, type ProfileSettings, type ThemePreference, type LayoutDensity } from './useProfileSettings';
-export { useSkillInsights } from './useSkillInsights';
 
 
 

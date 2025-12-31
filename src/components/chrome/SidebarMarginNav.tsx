@@ -17,8 +17,6 @@ const NAV_ITEMS: NavItem[] = [
   { path: '/jobs', label: 'Jobs', icon: 'briefcase' },
   { path: '/applications', label: 'Apply', icon: 'paper-airplane' },
   { path: '/resumes', label: 'Resume', icon: 'scroll' },
-  { path: '/profile-analyzer', label: 'Profile', icon: 'stars' },
-  { path: '/interview-prep', label: 'Interview', icon: 'microphone' },
 ]
 
 const DOODLES: Record<string, string> = {
@@ -26,8 +24,6 @@ const DOODLES: Record<string, string> = {
   '/jobs': '/doodles/sidebar-constellation.svg',
   '/applications': '/doodles/sidebar-notebook.svg',
   '/resumes': '/doodles/sidebar-tools.svg',
-  '/profile-analyzer': '/doodles/sidebar-constellation.svg',
-  '/interview-prep': '/doodles/sidebar-microphone.svg',
   '/settings': '/doodles/sidebar-phoenix.svg',
 }
 
