@@ -24,6 +24,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container } from '../components/shared/Container';
 import { Icon } from '../components/ui/Icon';
+import { Button } from '../components/ui/Button';
 import { supabase } from '../lib/supabase';
 
 type ResetStep = 'email-entry' | 'password-reset' | 'success';
@@ -203,24 +204,25 @@ export function PasswordResetPage(): JSX.Element {
                     )}
                   </label>
 
-                  <button
+                  <Button
                     type="submit"
-                    className="primary-button"
+                    variant="primary"
                     disabled={loading}
                     style={{ marginTop: 8 }}
                   >
                     {loading ? 'Sending email...' : 'Send Reset Email'}
-                  </button>
+                  </Button>
                 </form>
 
                 <div style={{ textAlign: 'center', marginTop: 24 }}>
-                  <button
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
                     onClick={() => navigate('/login')}
-                    className="ghost-button"
-                    style={{ fontSize: 13 }}
                   >
                     Back to login
-                  </button>
+                  </Button>
                 </div>
               </>
             )}
@@ -283,24 +285,25 @@ export function PasswordResetPage(): JSX.Element {
                     )}
                   </label>
 
-                  <button
+                  <Button
                     type="submit"
-                    className="primary-button"
+                    variant="primary"
                     disabled={loading}
                     style={{ marginTop: 8 }}
                   >
                     {loading ? 'Resetting password...' : 'Reset Password'}
-                  </button>
+                  </Button>
                 </form>
 
                 <div style={{ textAlign: 'center', marginTop: 24 }}>
-                  <button
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
                     onClick={() => navigate('/login')}
-                    className="ghost-button"
-                    style={{ fontSize: 13 }}
                   >
                     Back to login
-                  </button>
+                  </Button>
                 </div>
               </>
             )}
@@ -321,12 +324,13 @@ export function PasswordResetPage(): JSX.Element {
                   Redirecting to login in a moment...
                 </p>
                 <div style={{ marginTop: 32 }}>
-                  <button
+                  <Button
+                    type="button"
+                    variant="primary"
                     onClick={() => navigate('/login')}
-                    className="primary-button"
                   >
                     Go to login now
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}

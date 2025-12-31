@@ -1,6 +1,7 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Icon, IconName } from '../ui/Icon'
+import { Button } from '../ui/Button'
 
 interface ActionCardProps {
   /** The icon to display */
@@ -45,6 +46,7 @@ export function ActionCard({
   ctaVariant = 'secondary',
   className,
 }: ActionCardProps) {
+  const navigate = useNavigate()
   return (
     <div className={`action-card ${className || ''}`}>
       <div className="action-card__header">
@@ -59,12 +61,14 @@ export function ActionCard({
       </div>
 
       <div className="action-card__footer">
-        <Link
-          to={ctaLink}
-          className={`btn btn--${ctaVariant} btn--sm`}
+        <Button
+          type="button"
+          variant={ctaVariant}
+          size="sm"
+          onClick={() => navigate(ctaLink)}
         >
           {cta}
-        </Link>
+        </Button>
       </div>
     </div>
   )

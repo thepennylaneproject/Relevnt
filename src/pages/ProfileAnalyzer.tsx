@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { useToast } from '../components/ui/Toast'
+import { Button } from '../components/ui/Button'
 import { Container } from '../components/shared/Container'
 import PageBackground from '../components/shared/PageBackground'
 import type { LinkedInProfileRow, LinkedInAnalysis, PortfolioAnalysisRow, PortfolioAnalysis } from '../shared/types'
@@ -213,13 +214,14 @@ export default function ProfileAnalyzer() {
                                                 required
                                             />
                                         </div>
-                                        <button
+                                        <Button
                                             type="submit"
-                                            className="btn btn-primary btn-lg"
+                                            variant="primary"
+                                            size="lg"
                                             disabled={linkedinAnalyzing}
                                         >
                                             {linkedinAnalyzing ? 'Analyzing…' : linkedinProfile ? 'Refresh Analysis' : 'Start Analysis'}
-                                        </button>
+                                        </Button>
                                         {linkedinError && <p className="form-error-text mt-4">{linkedinError}</p>}
                                     </form>
                                 </div>
@@ -305,13 +307,14 @@ export default function ProfileAnalyzer() {
                                                 required
                                             />
                                         </div>
-                                        <button
+                                        <Button
                                             type="submit"
-                                            className="btn btn-primary btn-lg"
+                                            variant="primary"
+                                            size="lg"
                                             disabled={portfolioAnalyzing}
                                         >
                                             {portfolioAnalyzing ? 'Evaluating…' : portfolioResults ? 'Re-evaluate Portfolio' : 'Evaluate Portfolio'}
-                                        </button>
+                                        </Button>
                                         {portfolioError && <p className="form-error-text mt-4">{portfolioError}</p>}
                                     </form>
                                 </div>
@@ -434,20 +437,26 @@ function ShareSection({ type, shareToken, isPublic, onTogglePublic }: {
             
             <div className="flex items-center gap-2 w-full sm:w-auto">
                 {!isPublic ? (
-                    <button 
+                    <Button 
+                        type="button"
+                        variant="primary"
+                        size="sm"
+                        className="flex-1 sm:flex-none"
                         onClick={() => onTogglePublic(true)}
-                        className="btn btn--primary btn--sm flex-1 sm:flex-none"
                     >
                         Enable Sharing
-                    </button>
+                    </Button>
                 ) : (
                     <>
-                        <button 
+                        <Button 
+                            type="button"
+                            variant={copied ? 'secondary' : 'ghost'}
+                            size="sm"
+                            className="flex-1 sm:flex-none justify-center"
                             onClick={handleCopy}
-                            className={`btn btn--sm flex-1 sm:flex-none justify-center ${copied ? 'btn--success' : 'btn--outline'}`}
                         >
                             {copied ? 'Copied!' : 'Copy Link'}
-                        </button>
+                        </Button>
                         <button 
                             onClick={() => onTogglePublic(false)}
                             className="p-2 text-rose-500 hover:bg-rose-500/10 rounded transition-colors"

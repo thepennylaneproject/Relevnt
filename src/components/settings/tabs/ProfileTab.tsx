@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useProfessionalProfile } from '../../../hooks/useProfessionalProfile'
 import { useSettingsAutoSave, type AutoSaveStatus } from '../../../hooks/useSettingsAutoSave'
 import { Icon } from '../../ui/Icon'
+import { Button } from '../../ui/Button'
 
 interface ProfileTabProps {
     onAutoSaveStatusChange: (status: AutoSaveStatus) => void
@@ -92,20 +93,22 @@ export function ProfileTab({ onAutoSaveStatusChange }: ProfileTabProps) {
                                 maxLength={120}
                             />
                             <div className="action-group">
-                                <button
+                                <Button
                                     type="button"
-                                    className="btn btn-primary btn-sm"
+                                    variant="primary"
+                                    size="sm"
                                     onClick={handleSaveHeadlineEdit}
                                 >
                                     Save
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     type="button"
-                                    className="btn btn-ghost btn-sm"
+                                    variant="ghost"
+                                    size="sm"
                                     onClick={() => setEditingHeadline(false)}
                                 >
                                     Cancel
-                                </button>
+                                </Button>
                             </div>
                         </div>
                     ) : (
@@ -115,18 +118,20 @@ export function ProfileTab({ onAutoSaveStatusChange }: ProfileTabProps) {
                             </p>
                             <div className="action-group">
                                 {!hasCustomHeadline && !acceptedHeadline && (
-                                    <button
+                                    <Button
                                         type="button"
-                                        className="btn btn-primary btn-sm"
+                                        variant="primary"
+                                        size="sm"
                                         onClick={handleAcceptHeadline}
                                     >
                                         <Icon name="check" size="sm" />
                                         <span>Accept</span>
-                                    </button>
+                                    </Button>
                                 )}
-                                <button
+                                <Button
                                     type="button"
-                                    className="btn btn-secondary btn-sm"
+                                    variant="secondary"
+                                    size="sm"
                                     onClick={() => {
                                         setHeadlineEdit(currentHeadline)
                                         setEditingHeadline(true)
@@ -134,15 +139,16 @@ export function ProfileTab({ onAutoSaveStatusChange }: ProfileTabProps) {
                                 >
                                     <Icon name="scroll" size="sm" hideAccent />
                                     <span>Edit</span>
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     type="button"
-                                    className="btn btn-ghost btn-sm"
+                                    variant="ghost"
+                                    size="sm"
                                     onClick={handleAcceptHeadline}
                                 >
                                     <Icon name="stars" size="sm" hideAccent />
                                     <span>Regenerate</span>
-                                </button>
+                                </Button>
                             </div>
                         </>
                     )}
@@ -167,22 +173,24 @@ export function ProfileTab({ onAutoSaveStatusChange }: ProfileTabProps) {
 
                     <div className="action-group">
                         {!acceptedStrengths && (
-                            <button
+                            <Button
                                 type="button"
-                                className="btn btn-primary btn-sm"
+                                variant="primary"
+                                size="sm"
                                 onClick={handleAcceptStrengths}
                             >
                                 <Icon name="check" size="sm" />
                                 <span>Accept all</span>
-                            </button>
+                            </Button>
                         )}
-                        <button
+                        <Button
                             type="button"
-                            className="btn btn-secondary btn-sm"
+                            variant="secondary"
+                            size="sm"
                         >
                             <Icon name="stars" size="sm" hideAccent />
                             <span>Regenerate</span>
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -199,17 +207,18 @@ export function ProfileTab({ onAutoSaveStatusChange }: ProfileTabProps) {
                                 { value: false, label: 'No' },
                                 { value: true, label: 'Yes' },
                             ].map((opt) => (
-                                <button
+                                <Button
                                     key={opt.label}
                                     type="button"
+                                    variant={profile.needs_sponsorship === opt.value ? 'secondary' : 'ghost'}
+                                    size="sm"
                                     onClick={() => {
                                         setField('needs_sponsorship', opt.value)
                                         triggerSave()
                                     }}
-                                    className={`btn-option ${profile.needs_sponsorship === opt.value ? 'active' : ''}`}
                                 >
                                     {opt.label}
-                                </button>
+                                </Button>
                             ))}
                         </div>
                     </div>
@@ -222,17 +231,18 @@ export function ProfileTab({ onAutoSaveStatusChange }: ProfileTabProps) {
                                 { value: 'yes', label: 'Yes' },
                                 { value: 'depends', label: 'Depends on role' },
                             ].map((opt) => (
-                                <button
+                                <Button
                                     key={opt.value}
                                     type="button"
+                                    variant={profile.relocate_preference === opt.value ? 'secondary' : 'ghost'}
+                                    size="sm"
                                     onClick={() => {
                                         setField('relocate_preference', opt.value as any)
                                         triggerSave()
                                     }}
-                                    className={`btn-option ${profile.relocate_preference === opt.value ? 'active' : ''}`}
                                 >
                                     {opt.label}
-                                </button>
+                                </Button>
                             ))}
                         </div>
                     </div>
@@ -245,17 +255,18 @@ export function ProfileTab({ onAutoSaveStatusChange }: ProfileTabProps) {
                                 { value: 'some', label: 'Occasional' },
                                 { value: 'frequent', label: 'Frequent OK' },
                             ].map((opt) => (
-                                <button
+                                <Button
                                     key={opt.value}
                                     type="button"
+                                    variant={profile.travel_preference === opt.value ? 'secondary' : 'ghost'}
+                                    size="sm"
                                     onClick={() => {
                                         setField('travel_preference', opt.value as any)
                                         triggerSave()
                                     }}
-                                    className={`btn-option ${profile.travel_preference === opt.value ? 'active' : ''}`}
                                 >
                                     {opt.label}
-                                </button>
+                                </Button>
                             ))}
                         </div>
                     </div>

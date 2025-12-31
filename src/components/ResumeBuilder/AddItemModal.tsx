@@ -1,5 +1,6 @@
 // src/pages/ResumeBuilder/components/AddItemModal.tsx
 import React from 'react'
+import { Button } from '../ui/Button'
 
 interface AddItemModalProps {
   isOpen: boolean
@@ -53,20 +54,20 @@ export const AddItemModal: React.FC<AddItemModalProps> = ({
         <div>{children}</div>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 8 }}>
-          <button
+          <Button
             type="button"
+            variant="ghost"
             onClick={onCancel}
-            className="ghost-button"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="primary"
             onClick={onConfirm}
-            className="primary-button"
           >
             Add
-          </button>
+          </Button>
         </div>
       </div>
     </div>

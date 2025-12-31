@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Icon } from '../ui/Icon'
+import { Button } from '../ui/Button'
 import { useGenerateCoverLetter } from '../../hooks/useGenerateCoverLetter'
 import { useResumes } from '../../hooks/useResumes'
 import { useCoverLetters } from '../../hooks/useCoverLetters'
@@ -78,13 +79,16 @@ export function CoverLetterGenerator({ application }: CoverLetterGeneratorProps)
                         Generate a targeted cover letter using <span className="text-foreground font-bold">{activeResume?.title || 'your resume'}</span>
                         {isSnapshot && <span className="block text-[10px] text-accent mt-1">(Using snapshot from application)</span>}
                     </p>
-                    <button
+                    <Button
+                        type="button"
+                        variant="primary"
+                        size="sm"
+                        className="mt-4"
                         onClick={handleGenerate}
                         disabled={!activeResume}
-                        className="primary-button button-sm mt-4"
                     >
                         Generate with AI
-                    </button>
+                    </Button>
                     {!activeResume && <p className="text-[10px] text-danger mt-2">Upload a resume to begin.</p>}
                 </div>
             )}
@@ -109,11 +113,13 @@ export function CoverLetterGenerator({ application }: CoverLetterGeneratorProps)
                         </div>
                         <div className="flex gap-2">
                             {!isEditing ? (
-                                <button onClick={() => setIsEditing(true)} className="ghost-button button-xs"> Edit </button>
+                                <Button type="button" variant="ghost" size="sm" onClick={() => setIsEditing(true)}>
+                                    Edit
+                                </Button>
                             ) : (
-                                <button onClick={handleSave} disabled={saving} className="primary-button button-xs">
+                                <Button type="button" variant="primary" size="sm" onClick={handleSave} disabled={saving}>
                                     {saving ? 'Saving...' : isSaved ? 'Saved!' : 'Save to Library'}
-                                </button>
+                                </Button>
                             )}
                         </div>
                     </div>

@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { Icon } from '../components/ui/Icon'
 import { Container } from '../components/shared/Container'
+import { Button } from '../components/ui/Button'
 import { useAuth } from '../contexts/AuthContext'
 import { useToast } from '../components/ui/Toast'
 import { useInterviewPrep } from '../hooks/useInterviewPrep'
@@ -160,13 +161,14 @@ export default function InterviewPracticer() {
 
                         {!evaluation && (
                             <div className="action-row">
-                                <button
-                                    className="primary-button"
+                                <Button
+                                    type="button"
+                                    variant="primary"
                                     onClick={handleEvaluate}
                                     disabled={isEvaluating || !userAnswer.trim()}
                                 >
                                     {isEvaluating ? 'AI is analyzing...' : 'Get Feedback'}
-                                </button>
+                                </Button>
                             </div>
                         )}
                     </section>
@@ -210,13 +212,13 @@ export default function InterviewPracticer() {
 
                             <div className="action-row">
                                 {!isLast ? (
-                                    <button className="primary-button" onClick={nextQuestion}>
+                                    <Button type="button" variant="primary" onClick={nextQuestion}>
                                         Next Question <Icon name="paper-airplane" size="sm" />
-                                    </button>
+                                    </Button>
                                 ) : (
-                                    <button className="secondary-button" onClick={handleFinish}>
+                                    <Button type="button" variant="secondary" onClick={handleFinish}>
                                         Finish & Save Session
-                                    </button>
+                                    </Button>
                                 )}
                             </div>
                         </section>

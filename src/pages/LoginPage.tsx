@@ -28,6 +28,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../components/ui/Toast';
 import { copy } from '../config/i18n.config';
+import { Button } from '../components/ui/Button';
 import { PageBackground } from '../components/shared/PageBackground';
 
 interface LoginFormData {
@@ -196,14 +197,15 @@ export function LoginPage(): JSX.Element {
             </div>
 
             {/* Submit Button */}
-            <button
+            <Button
               type="submit"
-              className="btn btn--lg"
+              variant="primary"
+              size="lg"
               disabled={loading}
-              style={{ width: '100%' }}
+              className="w-full"
             >
               {loading ? 'Signing in...' : copy.nav.login}
-            </button>
+            </Button>
           </form>
 
           {/* Signup Link */}

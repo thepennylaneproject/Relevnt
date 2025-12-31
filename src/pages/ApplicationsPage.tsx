@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import PageBackground from '../components/shared/PageBackground'
 import { Container } from '../components/shared/Container'
 import { Button } from '../components/ui/Button'
@@ -58,6 +58,7 @@ const prettyStatusLabel = (status: ApplicationStatus | null | undefined): string
 }
 
 export default function ApplicationsPage() {
+  const navigate = useNavigate()
   const { showToast } = useToast()
   const [selectedStatus, setSelectedStatus] = useState<ApplicationStatus | undefined>(
     undefined,
@@ -221,13 +222,15 @@ export default function ApplicationsPage() {
                           <div className="flex flex-col items-end gap-2">
                             <span>{prettyStatusLabel(app.status)}</span>
                             {(app.status === 'interviewing' || app.status === 'in-progress') && (
-                              <Link
-                                to={`/interview-prep`}
-                                className="btn btn--ghost btn--xs"
-                                style={{ textDecoration: 'none', color: 'var(--color-accent)' }}
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                style={{ color: 'var(--color-accent)' }}
+                                onClick={() => navigate('/interview-prep')}
                               >
                                 <span>Practice</span>
-                              </Link>
+                              </Button>
                             )}
                           </div>
                         </header>
@@ -272,15 +275,17 @@ export default function ApplicationsPage() {
                               </div>
                               <p className="text-xs whitespace-pre-wrap italic">"{data.draft}"</p>
                               <div className="mt-2 flex gap-2">
-                                <button 
+                                <Button 
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
                                   onClick={() => {
                                     navigator.clipboard.writeText(data.draft);
                                     showToast('Draft copied to clipboard!', 'success');
                                   }}
-                                  className="ghost-button button-xs"
                                 >
                                   Copy
-                                </button>
+                                </Button>
                               </div>
                             </div>
                           );
@@ -309,9 +314,11 @@ export default function ApplicationsPage() {
                               <option value="withdrawn">Withdrawn</option>
                             </select>
                           </div>
-                          <button
+                          <Button
                             type="button"
-                            className="btn btn--ghost btn--sm mt-4"
+                            variant="ghost"
+                            size="sm"
+                            className="mt-4"
                             onClick={() => {
                               if (expandedId === app.id) {
                                 setExpandedId(null)
@@ -322,40 +329,48 @@ export default function ApplicationsPage() {
                             }}
                           >
                             {expandedId === app.id ? 'Collapse' : 'Details'}
-                          </button>
+                          </Button>
                         </div>
 
                         {expandedId === app.id && (
                           <div className="mt-4 animate-in slide-in-from-top-2">
                             <div className="flex gap-2 mb-4 border-b border-graphite-faint pb-3">
-                              <button
-                                className={`btn btn--ghost btn--xs ${expandedTab === 'timeline' ? 'is-active' : ''}`}
+                              <Button
+                                type="button"
+                                variant={expandedTab === 'timeline' ? 'secondary' : 'ghost'}
+                                size="sm"
                                 onClick={() => setExpandedTab('timeline')}
                               >
                                 Timeline
-                              </button>
+                              </Button>
                               {app.status === 'offer' && (
-                                <button
-                                  className={`btn btn--ghost btn--xs ${expandedTab === 'negotiate' ? 'is-active' : ''}`}
+                                <Button
+                                  type="button"
+                                  variant={expandedTab === 'negotiate' ? 'secondary' : 'ghost'}
+                                  size="sm"
                                   onClick={() => setExpandedTab('negotiate')}
                                 >
                                   Negotiation Coach
-                                </button>
+                                </Button>
                               )}
                               {app.status === 'rejected' && (
-                                <button
-                                  className={`btn btn--ghost btn--xs ${expandedTab === 'coaching' ? 'is-active' : ''}`}
+                                <Button
+                                  type="button"
+                                  variant={expandedTab === 'coaching' ? 'secondary' : 'ghost'}
+                                  size="sm"
                                   onClick={() => setExpandedTab('coaching')}
                                 >
                                   De-brief
-                                </button>
+                                </Button>
                               )}
-                              <button
-                                className={`btn btn--ghost btn--xs ${expandedTab === 'letter' ? 'is-active' : ''}`}
+                              <Button
+                                type="button"
+                                variant={expandedTab === 'letter' ? 'secondary' : 'ghost'}
+                                size="sm"
                                 onClick={() => setExpandedTab('letter')}
                               >
                                 Cover Letter
-                              </button>
+                              </Button>
                             </div>
 
                             {expandedTab === 'timeline' && (
@@ -387,14 +402,14 @@ export default function ApplicationsPage() {
 
                         <footer className="item-card-footer mt-4 pt-4 border-t border-graphite-faint flex justify-between">
                           <p className="muted text-[11px]">Updated {formatUpdated(app)}</p>
-                          <button
+                          <Button
                             type="button"
-                            className="btn btn--ghost btn--xs"
-                            style={{ color: 'var(--color-error)' }}
+                            variant="destructive"
+                            size="sm"
                             onClick={() => handleDeleteClick(app.id, app.position)}
                           >
                             Delete
-                          </button>
+                          </Button>
                         </footer>
                       </article>
                     ))}

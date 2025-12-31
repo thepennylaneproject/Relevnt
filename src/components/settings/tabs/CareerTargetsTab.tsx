@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react'
 import { useJobPreferences, type JobPreferences } from '../../../hooks/useJobPreferences'
 import { useSettingsAutoSave, type AutoSaveStatus } from '../../../hooks/useSettingsAutoSave'
 import { Icon } from '../../ui/Icon'
+import { Button } from '../../ui/Button'
 import { OptionChip } from '../OptionChip'
 import { RangeSliderWithPresets } from '../RangeSliderWithPresets'
 
@@ -281,13 +282,15 @@ export function CareerTargetsTab({ onAutoSaveStatusChange }: CareerTargetsTabPro
                     <label className="form-label">Seniority levels</label>
                     <div className="button-group">
                         {SENIORITY_OPTIONS.map((level) => (
-                            <button
+                            <Button
                                 key={level}
-                                className={`btn-option ${prefs.seniority_levels.includes(level) ? 'active' : ''}`}
+                                type="button"
+                                variant={prefs.seniority_levels.includes(level) ? 'secondary' : 'ghost'}
+                                size="sm"
                                 onClick={() => toggleSeniority(level)}
                             >
                                 {level}
-                            </button>
+                            </Button>
                         ))}
                     </div>
                 </div>
@@ -383,13 +386,15 @@ export function CareerTargetsTab({ onAutoSaveStatusChange }: CareerTargetsTabPro
                     <label className="form-label">Remote preference</label>
                     <div className="button-group">
                         {REMOTE_OPTIONS.map((option) => (
-                            <button
+                            <Button
                                 key={option.id}
-                                className={`btn-option ${prefs.remote_preference === option.id ? 'active' : ''}`}
+                                type="button"
+                                variant={prefs.remote_preference === option.id ? 'secondary' : 'ghost'}
+                                size="sm"
                                 onClick={() => handleFieldChange('remote_preference', option.id as any)}
                             >
                                 {option.label}
-                            </button>
+                            </Button>
                         ))}
                     </div>
                 </div>

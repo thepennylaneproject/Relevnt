@@ -9,6 +9,7 @@
  */
 
 import React from 'react'
+import { Button } from './Button'
 import { FeatureIcon, type FeatureIconName } from './FeatureIcon'
 import type { TextureType } from './TexturedBg'
 
@@ -79,27 +80,32 @@ export function PageHero({
                 {actions && actions.length > 0 && (
                     <div className="page-hero__actions">
                         {actions.map((action, idx) => {
-                            const className = action.variant === 'primary' ? 'primary-button' : 'ghost-button'
+                            const variant = action.variant === 'primary' ? 'primary' : 'ghost'
 
                             if (action.href) {
                                 return (
-                                    <a key={idx} href={action.href} className={className}>
+                                    <Button
+                                        key={idx}
+                                        type="button"
+                                        variant={variant}
+                                        onClick={() => window.location.assign(action.href)}
+                                    >
                                         {action.icon}
                                         {action.label}
-                                    </a>
+                                    </Button>
                                 )
                             }
 
                             return (
-                                <button
+                                <Button
                                     key={idx}
                                     type="button"
-                                    className={className}
+                                    variant={variant}
                                     onClick={action.onClick}
                                 >
                                     {action.icon}
                                     {action.label}
-                                </button>
+                                </Button>
                             )
                         })}
                     </div>

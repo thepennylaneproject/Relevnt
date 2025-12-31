@@ -2,6 +2,7 @@
 import React, { useState } from 'react'
 import { useWellnessCheckin } from '../../hooks/useWellnessCheckin'
 import { Icon } from '../ui/Icon'
+import { Button } from '../ui/Button'
 
 const MOODS = [
     { score: 1, label: 'Exhausted', emoji: '😫' },
@@ -68,16 +69,18 @@ export function WellnessCheckin() {
             </p>
 
             <div className="flex flex-col gap-3">
-                <button
+                <Button
+                    type="button"
+                    variant="primary"
+                    className="w-full text-xs py-2"
                     onClick={() => {
                         setSelectedScore(5);
                         saveCheckin(5, "Quick check-in");
                         setSubmitted(true);
                     }}
-                    className="btn btn--primary w-full text-xs py-2"
                 >
                     Capture daily reflection
-                </button>
+                </Button>
                 <p className="text-[10px] text-secondary/60 text-center italic">
                     Adjusts dashboard pace to your energy.
                 </p>

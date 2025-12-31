@@ -3,6 +3,7 @@
 
 import React, { useState } from 'react'
 import { Icon } from '../ui/Icon'
+import { Button } from '../ui/Button'
 import type { ResumeDraft } from '../../types/resume-builder.types'
 
 // ============================================================================
@@ -257,11 +258,12 @@ export const ResumeExport: React.FC<Props> = ({ draft }) => {
 
     return (
         <div className="resume-export">
-            <button
+            <Button
                 type="button"
+                variant="primary"
+                size="sm"
                 onClick={() => setShowOptions(!showOptions)}
                 disabled={exporting}
-                className="primary-button button-sm"
             >
                 {exporting ? (
                     <span className="ai-improve-spinner" />
@@ -271,7 +273,7 @@ export const ResumeExport: React.FC<Props> = ({ draft }) => {
                         Export
                     </>
                 )}
-            </button>
+            </Button>
 
             {showOptions && (
                 <div className="export-dropdown">

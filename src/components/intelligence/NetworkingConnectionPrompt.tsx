@@ -9,6 +9,7 @@
 
 import React, { useState } from 'react'
 import { Users, MessageSquare, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react'
+import { Button } from '../ui/Button'
 import { useNetworkLookup } from '../../hooks/useNetworkLookup'
 import type { Contact } from '../../hooks/useNetworking'
 
@@ -124,15 +125,15 @@ export function NetworkingConnectionPrompt({
                             </div>
                             <div className="networking-contact-actions">
                                 {contact.linkedin_url && (
-                                    <a
-                                        href={contact.linkedin_url}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="ghost-button button-sm"
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => window.open(contact.linkedin_url as string, '_blank', 'noreferrer')}
                                     >
                                         <ExternalLink size={12} />
                                         LinkedIn
-                                    </a>
+                                    </Button>
                                 )}
                                 {onGenerateMessage && (
                                     <button

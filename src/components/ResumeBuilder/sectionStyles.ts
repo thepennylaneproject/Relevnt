@@ -8,6 +8,4 @@ export const labelClass = 'form-label';
 export const helperClass = 'card-info'; // Re-using card-info for helper text areas
 export const inputClass = 'form-input';
 export const textareaClass = 'form-input min-h-[120px] resize-y';
-export const addButtonClass = 'btn btn-secondary btn-sm';
-export const removeButtonClass = 'btn btn-destructive btn-sm';
 export const itemCardClass = 'card';

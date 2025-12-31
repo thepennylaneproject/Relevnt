@@ -3,6 +3,7 @@
 
 import React, { useState, useMemo } from 'react'
 import { Icon } from '../ui/Icon'
+import { Button } from '../ui/Button'
 
 // ============================================================================
 // TYPES
@@ -225,15 +226,17 @@ export const JobTargetingPanel: React.FC<Props> = ({ resumeText, onOptimize }) =
 
                             {/* Optimize button */}
                             {onOptimize && analysis.missingKeywords.length > 0 && (
-                                <button
+                                <Button
                                     type="button"
+                                    variant="primary"
+                                    size="sm"
+                                    className="w-full"
                                     onClick={() => onOptimize(analysis.suggestions)}
-                                    className="primary-button button-sm w-full"
                                     style={{ marginTop: 12 }}
                                 >
                                     <Icon name="stars" size="sm" />
                                     Tailor Resume
-                                </button>
+                                </Button>
                             )}
                         </div>
                     )}

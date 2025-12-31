@@ -150,29 +150,6 @@
   margin: var(--space-3) 0;
 }
 
-.btn-option {
-  padding: var(--space-2) var(--space-4);
-  background: var(--color-bg-secondary);
-  border: 2px solid var(--color-graphite-faint);
-  border-radius: var(--radius-sm);
-  color: var(--color-ink);
-  font-weight: 600;
-  font-family: var(--font-body);
-  font-size: var(--text-sm);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-option:hover {
-  border-color: var(--color-accent);
-}
-
-.btn-option.active {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
-  color: var(--color-ink-inverse);
-}
-
 @media (max-width: 768px) {
   .apps-page h1 {
     font-size: 1.75rem;
@@ -189,33 +166,6 @@
   .apps-page .empty-state {
     padding: 32px 16px;
   }
-}
-
-/* Button Size Variants */
-.btn--xs {
-  padding: 4px 8px;
-  font-size: 0.75rem;
-  gap: 4px;
-}
-
-.btn--sm {
-  padding: 6px 12px;
-  font-size: 0.8125rem;
-  gap: 6px;
-}
-
-.btn--lg {
-  padding: 12px 24px;
-  font-size: 1rem;
-  gap: 8px;
-}
-
-/* Utility for active states in nav-like buttons */
-.btn.is-active,
-.btn-option.active {
-  background: var(--color-accent) !important;
-  color: var(--color-ink-inverse) !important;
-  border-color: var(--color-accent) !important;
 }
 
 /* Card Improvements */

@@ -1,5 +1,6 @@
 // src/components/jobs/JobsFiltersBar.tsx
 import React from 'react'
+import { Button } from './ui/Button'
 
 export type JobSourceRow = {
   id: string
@@ -218,13 +219,14 @@ export default function JobsFiltersBar(props: JobsFiltersBarProps) {
           gap: 12,
         }}
       >
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="sm"
           onClick={onClearFilters}
-          className="ghost-button button-sm"
         >
           Clear filters
-        </button>
+        </Button>
 
         {sourcesError && (
           <span

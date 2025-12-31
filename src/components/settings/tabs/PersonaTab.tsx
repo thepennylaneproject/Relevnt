@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { usePersonas } from '../../../hooks/usePersonas'
 import { useSettingsAutoSave, type AutoSaveStatus } from '../../../hooks/useSettingsAutoSave'
 import { useToast } from '../../ui/Toast'
+import { Button } from '../../ui/Button'
 import type { UserPersona } from '../../../types/v2-personas'
 import { Send } from 'lucide-react'
 
@@ -81,9 +82,9 @@ export function PersonaTab({ onAutoSaveStatusChange }: PersonaTabProps) {
                                     {persona.description}
                                 </p>
                             )}
-                            <button className="btn btn-ghost btn-sm">
+                            <Button type="button" variant="ghost" size="sm">
                                 {isActive ? 'Active' : 'Click to activate'}
-                            </button>
+                            </Button>
                         </div>
                     )
                 })}
@@ -116,13 +117,15 @@ export function PersonaTab({ onAutoSaveStatusChange }: PersonaTabProps) {
                 </div>
 
                 <div style={{ marginTop: 24, display: 'flex', justifyContent: 'center' }}>
-                     <button 
+                     <Button 
+                        type="button"
+                        variant="ghost"
+                        size="sm"
                         onClick={() => navigate('/personas')}
-                        className="btn btn-ghost btn-sm"
                      >
                         <span>Manage all personas</span>
                         <Send size={14} style={{ marginLeft: 8 }} />
-                     </button>
+                     </Button>
                 </div>
             </div>
         </div>

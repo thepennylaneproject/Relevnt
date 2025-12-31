@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { Icon } from '../components/ui/Icon'
+import { Button } from '../components/ui/Button'
 import { Container } from '../components/shared/Container'
 import PageBackground from '../components/shared/PageBackground'
 import type { LinkedInAnalysis, PortfolioAnalysis } from '../shared/types'
@@ -10,6 +11,7 @@ import '../styles/portfolio-optimizer.css'
 
 export default function SharedAuditPage() {
     const { type, token } = useParams<{ type?: string, token?: string }>()
+    const navigate = useNavigate()
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [auditData, setAuditData] = useState<any>(null)
@@ -68,9 +70,13 @@ export default function SharedAuditPage() {
                         <Icon name="alert-triangle" size="lg" className="mx-auto text-amber-500 mb-4" />
                         <h1 className="text-2xl font-display mb-2">Audit Not Available</h1>
                         <p className="muted mb-8">{error || 'This audit could not be found.'}</p>
-                        <Link to="/" className="btn btn--primary">
+                        <Button
+                            type="button"
+                            variant="primary"
+                            onClick={() => navigate('/')}
+                        >
                             Create Your Own Career Audit
-                        </Link>
+                        </Button>
                     </div>
                 </Container>
             </PageBackground>
@@ -111,12 +117,22 @@ export default function SharedAuditPage() {
                                 interview practice, and smart job matching.
                             </p>
                             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                                <Link to="/signup" className="btn btn--primary btn--lg">
+                                <Button
+                                    type="button"
+                                    variant="primary"
+                                    size="lg"
+                                    onClick={() => navigate('/signup')}
+                                >
                                     Get Started for Free
-                                </Link>
-                                <Link to="/" className="btn btn--outline btn--lg">
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="lg"
+                                    onClick={() => navigate('/')}
+                                >
                                     Learn More
-                                </Link>
+                                </Button>
                             </div>
                         </div>
                     </div>

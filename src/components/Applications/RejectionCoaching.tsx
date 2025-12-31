@@ -5,6 +5,7 @@ import { type Application } from '../../hooks/useApplications'
 import { useAuth } from '../../hooks/useAuth'
 import { useJobPreferences } from '../../hooks/useJobPreferences'
 import { useToast } from '../ui/Toast'
+import { Button } from '../ui/Button'
 
 // =============================================================================
 // ACTION TYPE DETECTION
@@ -152,13 +153,16 @@ export function RejectionCoaching({ application }: RejectionCoachingProps) {
                         onChange={(e) => setRejectionText(e.target.value)}
                     />
 
-                    <button
+                    <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="mt-2 w-full justify-center"
                         onClick={handleStartCoaching}
                         disabled={!rejectionText.trim()}
-                        className="primary-button button-sm mt-2 bg-danger text-white border-none w-full justify-center"
                     >
                         Analyze & Debrief
-                    </button>
+                    </Button>
                 </div>
             )}
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useAITask } from '../../hooks/useAITask'
 import { useApplications, type Application } from '../../hooks/useApplications'
+import { Button } from '../ui/Button'
 
 interface NegotiationCoachProps {
     application: Application
@@ -61,13 +62,15 @@ export function NegotiationCoach({ application }: NegotiationCoachProps) {
         <div className="negotiation-coach space-y-6 p-4 surface-accent rounded-xl">
             <div className="flex justify-between items-center">
                 <h3 className="text-sm font-bold flex items-center gap-2">Negotiation Coach</h3>
-                <button
+                <Button
+                    type="button"
+                    variant="primary"
+                    size="sm"
                     onClick={handleGenerateStrategy}
                     disabled={aiLoading}
-                    className="primary-button button-xs"
                 >
                     {aiLoading ? 'Thinking...' : 'Generate strategy'}
-                </button>
+                </Button>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -128,9 +131,9 @@ export function NegotiationCoach({ application }: NegotiationCoachProps) {
             )}
 
             <div className="pt-2 flex justify-end">
-                <button onClick={handleSaveDraft} className="ghost-button button-xs">
+                <Button type="button" variant="ghost" size="sm" onClick={handleSaveDraft}>
                     Save Draft Notes
-                </button>
+                </Button>
             </div>
         </div>
     )

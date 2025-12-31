@@ -200,68 +200,6 @@
   flex: 1;
 }
 
-/* Unified Button System (Jobs Page) */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-family: var(--font-body);
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: 2px solid transparent;
-  line-height: 1;
-}
-
-.btn-sm {
-  padding: 8px 16px;
-  font-size: 0.8125rem;
-}
-
-.btn-lg {
-  padding: 12px 24px;
-  font-size: 1rem;
-}
-
-.btn-primary, .btn--primary {
-  background: var(--color-accent);
-  color: white; /* Contrast */
-  border: 2px solid var(--color-accent);
-}
-
-.btn-primary:hover, .btn--primary:hover {
-  background: var(--color-accent-hover, #C39463);
-  border-color: var(--color-accent-hover, #C39463);
-  transform: translateY(-1px);
-}
-
-.btn-secondary, .btn--secondary {
-  background: transparent;
-  color: var(--color-accent);
-  border: 2px solid var(--color-accent);
-}
-
-.btn-secondary:hover, .btn--secondary:hover {
-  background: var(--color-surface-hover);
-  border-color: var(--color-accent);
-  transform: translateY(-1px);
-}
-
-.btn-ghost, .btn--ghost {
-  background: transparent;
-  color: var(--color-ink-secondary);
-  border: 2px solid transparent;
-}
-
-.btn-ghost:hover, .btn--ghost:hover {
-  background: var(--color-surface-hover);
-  color: var(--color-ink);
-}
-
 /* Job Grid (All Jobs Tab) */
 .card-grid-3col {
   display: grid;
@@ -743,21 +681,6 @@
   }
 }
 
-/* Saved button state */
-.btn-saved {
-  background: rgba(16, 185, 129, 0.1) !important;
-  color: #059669 !important;
-  border: 1px solid rgba(16, 185, 129, 0.3) !important;
-}
-
-.btn-saved:hover {
-  background: rgba(16, 185, 129, 0.15) !important;
-}
-
-.btn-saved svg {
-  fill: #059669;
-}
-
 /* ============================================================================
    TAB ENHANCEMENTS — Tooltips and clarity
    ============================================================================ */
@@ -823,13 +746,6 @@
    DARK MODE ADJUSTMENTS
    ============================================================================ */
 
-:root.dark .btn-saved,
-[data-theme="dark"] .btn-saved {
-  background: rgba(16, 185, 129, 0.15) !important;
-  color: #34D399 !important;
-  border-color: rgba(16, 185, 129, 0.25) !important;
-}
-
 :root.dark .tab[data-tooltip]::after,
 [data-theme="dark"] .tab[data-tooltip]::after {
   background: var(--ivory-100);
@@ -875,19 +791,10 @@
   align-items: center;
 }
 
-.card-job-grid .card-footer .btn {
-  flex: 1;
-}
-
-.card-job-grid .card-footer .btn:last-child {
-  flex: 0 0 auto;
-}
-
 /* ============================================================================
    ACCESSIBILITY — Focus states
    ============================================================================ */
 
-.btn:focus-visible,
 .tab:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
@@ -908,28 +815,6 @@
 }
 
 /* ============================================================================
-   NOT INTERESTED BUTTON — Subtle feedback action
-   ============================================================================ */
-
-.btn-not-interested {
-  opacity: 0.7;
-  font-size: 0.8125rem;
-}
-
-.btn-not-interested:hover {
-  opacity: 1;
-  color: var(--color-error);
-}
-
-.btn-not-interested svg {
-  transition: transform 0.15s ease;
-}
-
-.btn-not-interested:hover svg {
-  transform: scale(1.1);
-}
-
-/* ============================================================================
    MOBILE CARD ACTION HIERARCHY (#6)
    Prioritize primary actions, collapse secondary to icons
    ============================================================================ */
@@ -941,37 +826,10 @@
     gap: 8px;
   }
 
-  .card-job-feed .card-footer .btn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  /* Primary action (View posting) gets full emphasis */
-  .card-job-feed .card-footer .btn-secondary {
-    order: -1;
-  }
-
-  /* Secondary actions in a row */
-  .card-job-feed .card-footer .btn-ghost,
-  .card-job-feed .card-footer .btn-saved {
-    flex: 1;
-  }
-
   /* Grid cards: simplify footer */
   .card-job-grid .card-footer {
     flex-direction: column;
     gap: 6px;
-  }
-
-  .card-job-grid .card-footer .btn {
-    width: 100%;
-    justify-content: center;
-    padding: 10px;
-  }
-
-  /* Hide Not Interested text on mobile, show icon only */
-  .btn-not-interested span:not(.sr-only) {
-    display: none;
   }
 
   /* Adjust card padding for mobile */
@@ -1259,44 +1117,6 @@
   gap: 12px;
   padding: 16px 24px;
   border-top: 1px solid var(--border-subtle, #eee);
-}
-
-.quick-apply-footer .btn-primary {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* Quick Apply Button on Cards */
-.btn-quick-apply {
-  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover, #C39463) 100%);
-  color: white;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-
-.btn-quick-apply:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(var(--color-accent-rgb, 195, 148, 99), 0.3);
-}
-
-.btn-quick-apply:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-/* Applied state */
-.btn-applied {
-  background: rgba(16, 185, 129, 0.1);
-  color: #059669;
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  cursor: default;
-}
-
-.btn-applied:hover {
-  transform: none;
-  box-shadow: none;
 }
 
 /* Dark mode adjustments */

@@ -3,6 +3,7 @@
 
 import React, { useState } from 'react'
 import { Icon } from '../ui/Icon'
+import { Button } from '../ui/Button'
 import { useAITask } from '../../hooks/useAITask'
 
 // ============================================================================
@@ -98,11 +99,12 @@ export const BulletGenerator: React.FC<Props> = ({
 
     return (
         <div className="bullet-generator">
-            <button
+            <Button
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={handleGenerate}
                 disabled={loading || !jobTitle.trim()}
-                className="ghost-button button-xs"
             >
                 {loading ? (
                     <span className="ai-improve-spinner" />
@@ -112,22 +114,23 @@ export const BulletGenerator: React.FC<Props> = ({
                         Generate Bullets
                     </>
                 )}
-            </button>
+            </Button>
 
             {isOpen && suggestions.length > 0 && (
                 <div className="bullet-suggestions">
                     <div className="bullet-suggestions-header">
                         <span className="text-xs font-semibold">AI Suggestions</span>
-                        <button
+                        <Button
                             type="button"
+                            variant="ghost"
+                            size="sm"
                             onClick={() => {
                                 setIsOpen(false)
                                 setSuggestions([])
                             }}
-                            className="ghost-button button-xs"
                         >
                             ✕
-                        </button>
+                        </Button>
                     </div>
                     <div className="bullet-suggestions-list">
                         {suggestions.map((bullet) => (
@@ -136,13 +139,14 @@ export const BulletGenerator: React.FC<Props> = ({
                                     {getStrengthBadge(bullet.strength)}
                                     <p className="text-xs">{bullet.text}</p>
                                 </div>
-                                <button
+                                <Button
                                     type="button"
+                                    variant="primary"
+                                    size="sm"
                                     onClick={() => handleAddBullet(bullet)}
-                                    className="primary-button button-xs"
                                 >
                                     Add
-                                </button>
+                                </Button>
                             </div>
                         ))}
                     </div>

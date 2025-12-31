@@ -13,7 +13,6 @@
  * Variants:
  *   - primary:     Gold/accent background - the dominant CTA (use sparingly!)
  *   - secondary:   Outlined, transparent - good for secondary actions
- *   - tertiary:    Subtle, transparent - minimal visual weight
  *   - ghost:       Text-only appearance - for low-emphasis actions
  *   - destructive: Red/danger styling - for delete, remove actions
  *
@@ -29,7 +28,7 @@
 import React from 'react';
 import { useRegisterPrimaryAction } from './PrimaryActionRegistry';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'ghost' | 'destructive';
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -69,7 +68,6 @@ export const Button: React.FC<ButtonProps> = ({
     const variantClasses: Record<ButtonVariant, string> = {
         primary: 'btn--primary',
         secondary: 'btn--secondary',
-        tertiary: 'btn--ghost', // Tertiary maps to ghost styling (quiet)
         ghost: 'btn--ghost',
         destructive: 'btn--ghost btn--destructive', // Uses ghost base + destructive modifier
     };

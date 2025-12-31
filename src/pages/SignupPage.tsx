@@ -27,6 +27,7 @@ import { useToast } from '../components/ui/Toast';
 import { copy } from '../config/i18n.config';
 import { Container } from '../components/shared/Container';
 import { Icon } from '../components/ui/Icon';
+import { Button } from '../components/ui/Button';
 
 interface SignupFormData {
   firstName: string;
@@ -339,14 +340,14 @@ export function SignupPage(): JSX.Element {
               </div>
 
               {/* Submit Button */}
-              <button
+              <Button
                 type="submit"
-                className="primary-button"
+                variant="primary"
                 disabled={loading}
                 style={{ marginTop: 16 }}
               >
                 {loading ? 'Creating account...' : copy.onboarding.ctaStart}
-              </button>
+              </Button>
             </form>
 
             {/* Login Link */}

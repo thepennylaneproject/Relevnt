@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import PageBackground from '../components/shared/PageBackground'
 import { Container } from '../components/shared/Container'
 import { Icon } from '../components/ui/Icon'
 import { EmptyState } from '../components/ui/EmptyState'
 import { CollectionEmptyGuard } from '../components/ui/CollectionEmptyGuard'
+import { Button } from '../components/ui/Button'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import type { Database } from '../lib/database.types'
@@ -117,17 +118,21 @@ export default function ResumeListPage({ embedded = false }: { embedded?: boolea
         </div>
 
         <div className="section-actions">
-          <button
+          <Button
             type="button"
-            className="btn btn-primary"
+            variant="primary"
             onClick={createResume}
             disabled={creating}
           >
             {creating ? 'Creating…' : 'New Resume'}
-          </button>
-          <Link to="/resumes/builder" className="btn btn-secondary">
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => navigate('/resumes/builder')}
+          >
             Open Builder
-          </Link>
+          </Button>
         </div>
 
         {statusText && (
@@ -169,28 +174,31 @@ export default function ResumeListPage({ embedded = false }: { embedded?: boolea
                   </p>
                 </div>
                 <div className="card-actions">
-                  <button
+                  <Button
                     type="button"
-                    className="btn btn-destructive btn-sm"
+                    variant="destructive"
+                    size="sm"
                     onClick={() => deleteResume(resume.id)}
                     disabled={deletingId === resume.id}
                   >
                     {deletingId === resume.id ? 'Deleting…' : 'Delete'}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
-                    className="btn btn-secondary btn-sm"
+                    variant="secondary"
+                    size="sm"
                     onClick={() => navigate(`/resumes/builder?id=${resume.id}`)}
                   >
                     Edit
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
-                    className="btn btn-ghost btn-sm"
+                    variant="ghost"
+                    size="sm"
                     onClick={() => navigate(`/resumes/builder?id=${resume.id}`)}
                   >
                     Open
-                  </button>
+                  </Button>
                 </div>
               </div>
             ))}

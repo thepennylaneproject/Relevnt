@@ -147,85 +147,6 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   BUTTONS — Elevated CTAs with glow/gradient
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-/* Primary button with glow */
-.btn-primary-glow {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  padding: var(--space-4) var(--space-6);
-  min-width: 180px;
-  font-family: var(--font-display);
-  font-size: var(--text-sm);
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-decoration: none;
-  color: #ffffff;
-  background: linear-gradient(
-    135deg,
-    var(--color-accent) 0%,
-    var(--color-accent-hover) 100%
-  );
-  border: none;
-  border-radius: var(--radius-full);
-  cursor: pointer;
-  transition: all 0.25s ease;
-  box-shadow:
-    0 4px 16px var(--color-accent-glow),
-    0 0 0 0 var(--color-accent-glow);
-}
-
-.btn-primary-glow:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 6px 24px var(--color-accent-glow),
-    0 0 32px var(--color-accent-glow);
-}
-
-.btn-primary-glow:active {
-  transform: translateY(0);
-}
-
-.btn-primary-glow:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 3px;
-}
-
-/* Secondary subtle button */
-.btn-secondary-subtle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-5);
-  font-family: var(--font-display);
-  font-size: var(--text-sm);
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  text-decoration: none;
-  color: var(--color-ink-secondary);
-  background: transparent;
-  border: 1px solid var(--color-graphite-faint);
-  border-radius: var(--radius-full);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-secondary-subtle:hover {
-  color: var(--color-ink);
-  background: var(--color-surface-hover);
-  border-color: var(--color-graphite-light);
-}
-
-.btn-secondary-subtle:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
    SECTION HEADERS — Stronger hierarchy
    ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -733,17 +654,11 @@ button:focus-visible {
     opacity: 1;
     border-style: dashed;
   }
-
-  .btn-primary-glow {
-    box-shadow: none;
-    border: 2px solid currentColor;
-  }
 }
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   .momentum-message,
-  .btn-primary-glow,
   .primary-cta-card,
   .priority-card,
   .foundation-card,
@@ -810,26 +725,6 @@ button:focus-visible {
 [data-theme="dark"] .foundation-card-description,
 [data-theme="dark"] .priority-card-action {
   color: var(--ivory-400);
-}
-
-/* Ensure accent colors pop in dark mode */
-:root.dark .btn-primary-glow,
-[data-theme="dark"] .btn-primary-glow {
-  background: linear-gradient(
-    135deg,
-    var(--color-accent) 0%,
-    var(--color-accent-hover) 100%
-  );
-  box-shadow:
-    0 4px 20px var(--color-accent-glow),
-    0 0 0 0 var(--color-accent-glow);
-}
-
-:root.dark .btn-primary-glow:hover,
-[data-theme="dark"] .btn-primary-glow:hover {
-  box-shadow:
-    0 6px 28px var(--color-accent-glow),
-    0 0 40px var(--color-accent-glow);
 }
 
 
@@ -951,40 +846,6 @@ button:focus-visible {
     gap: var(--space-element-gap);
   }
 }
-
-/* Button styles */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-5);
-  font-family: var(--font-display);
-  font-size: var(--text-sm);
-  letter-spacing: var(--tracking-wide);
-  line-height: 1;
-  border-radius: var(--radius-md);
-  border: none;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  text-decoration: none;
-}
-
-.btn--accent {
-  background-color: var(--color-accent);
-  color: var(--color-ink-inverse);
-}
-
-.btn--accent:hover {
-  background-color: var(--color-accent-hover);
-  box-shadow: var(--shadow-glow);
-}
-
-.btn--lg {
-  padding: var(--space-4) var(--space-6);
-  font-size: var(--text-base);
-}
-
 
 /* ═══════════════════════════════════════════════════════════════════════════
    ENHANCED UX IMPROVEMENTS — Based on UX Critique Feedback

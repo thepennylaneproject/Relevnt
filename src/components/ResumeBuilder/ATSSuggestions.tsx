@@ -3,6 +3,7 @@
 
 import React, { useState } from 'react'
 import { Icon, IconName } from '../ui/Icon'
+import { Button } from '../ui/Button'
 import type { ATSSuggestion } from './ATSScoreCard'
 
 // ============================================================================
@@ -105,22 +106,24 @@ export const ATSSuggestions: React.FC<Props> = ({ suggestions, onApplyFix, onDis
                                     </div>
                                     <div className="ats-suggestion-actions">
                                         {onApplyFix && suggestion.priority !== 'low' && (
-                                            <button
+                                            <Button
                                                 type="button"
+                                                variant="primary"
+                                                size="sm"
                                                 onClick={() => onApplyFix(suggestion)}
-                                                className="primary-button button-xs"
                                             >
                                                 <Icon name="stars" size="sm" />
                                                 Apply Fix
-                                            </button>
+                                            </Button>
                                         )}
-                                        <button
+                                        <Button
                                             type="button"
+                                            variant="ghost"
+                                            size="sm"
                                             onClick={() => handleDismiss(suggestion.id)}
-                                            className="ghost-button button-xs"
                                         >
                                             Dismiss
-                                        </button>
+                                        </Button>
                                     </div>
                                 </div>
                             )}

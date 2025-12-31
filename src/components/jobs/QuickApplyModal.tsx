@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { Icon } from '../ui/Icon'
+import { Button } from '../ui/Button'
 import { useToast } from '../ui/Toast'
 import { supabase } from '../../lib/supabase'
 import type { UserPersona } from '../../types/v2-personas'
@@ -240,16 +241,16 @@ export function QuickApplyModal({
 
         {/* Footer */}
         <div className="quick-apply-footer">
-          <button
+          <Button
             type="button"
-            className="btn btn-ghost"
+            variant="ghost"
             onClick={onClose}
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
-            className="btn btn-primary"
+            variant="primary"
             onClick={handleApply}
             disabled={loading || submitting || !profile}
           >
@@ -261,7 +262,7 @@ export function QuickApplyModal({
                 Apply Now
               </>
             )}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

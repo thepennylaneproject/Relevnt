@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { Menu, X } from 'lucide-react'
+import { Button } from '../ui/Button'
 import './header.css'
 
 export interface HeaderProps {
@@ -52,9 +53,15 @@ export function Header({ userInitial }: HeaderProps) {
           {user ? (
             <>
               <div className="header-avatar">{initial}</div>
-              <button type="button" onClick={handleLogout} className="ghost-button button-sm header-desktop-only">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="header-desktop-only"
+                onClick={handleLogout}
+              >
                 Log out
-              </button>
+              </Button>
               <button
                 type="button"
                 className="header-mobile-menu-btn"
@@ -66,20 +73,22 @@ export function Header({ userInitial }: HeaderProps) {
             </>
           ) : (
             <>
-              <button
+              <Button
                 type="button"
-                className="ghost-button button-sm"
+                variant="ghost"
+                size="sm"
                 onClick={() => navigate('/login')}
               >
                 Log in
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
-                className="primary-button button-sm"
+                variant="primary"
+                size="sm"
                 onClick={() => navigate('/signup')}
               >
                 Get started
-              </button>
+              </Button>
             </>
           )}
         </div>
@@ -114,13 +123,14 @@ export function Header({ userInitial }: HeaderProps) {
               ))}
             </ul>
             <div className="mobile-nav-footer">
-              <button
+              <Button
                 type="button"
-                className="btn btn-ghost w-full"
+                variant="ghost"
+                className="w-full"
                 onClick={handleLogout}
               >
                 Log out
-              </button>
+              </Button>
             </div>
           </nav>
         </div>

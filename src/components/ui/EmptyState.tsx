@@ -19,6 +19,7 @@
  */
 
 import React from 'react';
+import { Button } from './Button';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -145,20 +146,22 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       {(action || secondaryAction) && (
         <div className="empty-state__actions">
           {action && (
-            <button
+            <Button
+              type="button"
               onClick={action.onClick}
-              className={`btn ${action.variant === 'secondary' ? 'btn--secondary' : 'btn--primary'}`}
+              variant={action.variant === 'secondary' ? 'secondary' : 'primary'}
             >
               {action.label}
-            </button>
+            </Button>
           )}
           {secondaryAction && (
-            <button
+            <Button
+              type="button"
               onClick={secondaryAction.onClick}
-              className={`btn ${secondaryAction.variant === 'primary' ? 'btn--primary' : 'btn--secondary'}`}
+              variant={secondaryAction.variant === 'primary' ? 'primary' : 'secondary'}
             >
               {secondaryAction.label}
-            </button>
+            </Button>
           )}
         </div>
       )}

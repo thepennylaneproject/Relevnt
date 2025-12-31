@@ -1,12 +1,14 @@
 
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useDailyBriefing } from '../../hooks/useDailyBriefing'
 import { Icon } from '../ui/Icon'
+import { Button } from '../ui/Button'
 
 export function DailyBriefing() {
     const { topOpportunities, personaName, loading, error, refetch } = useDailyBriefing()
     const [retrying, setRetrying] = useState(false)
+    const navigate = useNavigate()
 
     const handleRetry = async () => {
         setRetrying(true)
@@ -35,13 +37,16 @@ export function DailyBriefing() {
         <div className="briefing-error p-6 rounded-xl bg-amber-50/50 dark:bg-amber-900/10 border border-amber-200/50 dark:border-amber-700/30 text-center">
             <Icon name="heart" size="lg" className="text-amber-500/60 mb-3" />
             <p className="text-sm text-amber-800 dark:text-amber-300">We couldn't load your matches right now. This is on us, not you.</p>
-            <button 
+            <Button 
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="mt-4 text-xs"
                 onClick={handleRetry} 
                 disabled={retrying}
-                className="mt-4 ghost-button text-xs"
             >
                 {retrying ? 'Trying again...' : 'Try again'}
-            </button>
+            </Button>
         </div>
     )
 
@@ -53,9 +58,15 @@ export function DailyBriefing() {
                     No matches found for <span className="text-foreground font-medium">{personaName || 'your profile'}</span> yet.
                     Make sure your preferences are complete so we can find the right opportunities.
                 </p>
-                <Link to="/job-preferences" className="ghost-button text-xs mt-4 inline-block">
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="mt-4 inline-block text-xs"
+                    onClick={() => navigate('/job-preferences')}
+                >
                     Update your preferences
-                </Link>
+                </Button>
             </div>
         )
     }
@@ -101,9 +112,15 @@ export function DailyBriefing() {
                                     <span className="text-[9px] muted">• {match.match_score.toFixed(0)}% match</span>
                                 </div>
                             </div>
-                            <Link to={`/jobs?id=${match.job.id}`} className="primary-button text-[10px] py-1 px-3">
+                            <Button
+                                type="button"
+                                variant="primary"
+                                size="sm"
+                                className="text-[10px] py-1 px-3"
+                                onClick={() => navigate(`/jobs?id=${match.job.id}`)}
+                            >
                                 View details
-                            </Link>
+                            </Button>
                         </div>
                     )
                 })}

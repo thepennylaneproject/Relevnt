@@ -1,10 +1,12 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Icon } from '../ui/Icon'
+import { Button } from '../ui/Button'
 import { useNotifications } from '../../hooks/useNotifications'
 
 export function OpportunityAlerts() {
     const { notifications, markAsRead } = useNotifications()
+    const navigate = useNavigate()
 
     // Filter for unread job alerts with metadata
     const alerts = notifications.filter(n =>
@@ -67,13 +69,18 @@ export function OpportunityAlerts() {
                         </div>
 
                         <div className="flex flex-col gap-2 shrink-0">
-                            <Link
-                                to={alert.link || '/jobs'}
-                                onClick={() => markAsRead(alert.id)}
-                                className="primary-button button-sm whitespace-nowrap"
+                            <Button
+                                type="button"
+                                variant="primary"
+                                size="sm"
+                                className="whitespace-nowrap"
+                                onClick={() => {
+                                    markAsRead(alert.id)
+                                    navigate(alert.link || '/jobs')
+                                }}
                             >
                                 View Job
-                            </Link>
+                            </Button>
                             <button
                                 onClick={() => markAsRead(alert.id)}
                                 className="text-[10px] text-muted hover:text-foreground text-center"

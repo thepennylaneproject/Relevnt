@@ -3,6 +3,7 @@ import { supabase } from '../../../lib/supabase'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useSettingsAutoSave, type AutoSaveStatus } from '../../../hooks/useSettingsAutoSave'
 import { useToast } from '../../ui/Toast'
+import { Button } from '../../ui/Button'
 
 interface VoiceStyleTabProps {
     onAutoSaveStatusChange: (status: AutoSaveStatus) => void
@@ -189,12 +190,33 @@ export function VoiceStyleTab({ onAutoSaveStatusChange }: VoiceStyleTabProps) {
                     rows={2}
                 ></textarea>
                 <div className="action-group">
-                    <button className="btn btn-secondary btn-sm" onClick={() => showToast('AI generation coming soon', 'info')}>Generate with AI</button>
-                    <button className="btn btn-ghost btn-sm" onClick={() => setHeadline(profile?.headline_raw || '')}>Undo</button>
-                    <button className="btn btn-primary btn-sm" onClick={() => {
-                        setProfileField('headline_raw', headline)
-                        triggerSave()
-                    }}>Save Headline</button>
+                    <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => showToast('AI generation coming soon', 'info')}
+                    >
+                        Generate with AI
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setHeadline(profile?.headline_raw || '')}
+                    >
+                        Undo
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="primary"
+                        size="sm"
+                        onClick={() => {
+                            setProfileField('headline_raw', headline)
+                            triggerSave()
+                        }}
+                    >
+                        Save Headline
+                    </Button>
                 </div>
             </div>
 
@@ -204,9 +226,20 @@ export function VoiceStyleTab({ onAutoSaveStatusChange }: VoiceStyleTabProps) {
                     {strengths.map((s, i) => <li key={i}>{s}</li>)}
                 </ul>
                 <div className="action-group">
-                    <button className="btn btn-secondary btn-sm" onClick={() => showToast('Regenerating strengths...', 'info')}>Regenerate</button>
-                    <button className="btn btn-ghost btn-sm">Edit Manually</button>
-                    <button className="btn btn-primary btn-sm">Accept All</button>
+                    <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => showToast('Regenerating strengths...', 'info')}
+                    >
+                        Regenerate
+                    </Button>
+                    <Button type="button" variant="ghost" size="sm">
+                        Edit Manually
+                    </Button>
+                    <Button type="button" variant="primary" size="sm">
+                        Accept All
+                    </Button>
                 </div>
             </div>
 
@@ -216,20 +249,24 @@ export function VoiceStyleTab({ onAutoSaveStatusChange }: VoiceStyleTabProps) {
                     <div className="confirmation-question">
                         <h4>Do you require visa sponsorship?</h4>
                         <div className="button-group">
-                            <button 
-                                className={`btn-option ${profile?.needs_sponsorship === false ? 'active' : ''}`}
+                            <Button 
+                                type="button"
+                                variant={profile?.needs_sponsorship === false ? 'secondary' : 'ghost'}
+                                size="sm"
                                 onClick={() => {
                                     setProfileField('needs_sponsorship', false)
                                     triggerSave()
                                 }}
-                            >No</button>
-                            <button 
-                                className={`btn-option ${profile?.needs_sponsorship === true ? 'active' : ''}`}
+                            >No</Button>
+                            <Button 
+                                type="button"
+                                variant={profile?.needs_sponsorship === true ? 'secondary' : 'ghost'}
+                                size="sm"
                                 onClick={() => {
                                     setProfileField('needs_sponsorship', true)
                                     triggerSave()
                                 }}
-                            >Yes</button>
+                            >Yes</Button>
                         </div>
                     </div>
 
@@ -237,14 +274,16 @@ export function VoiceStyleTab({ onAutoSaveStatusChange }: VoiceStyleTabProps) {
                         <h4>Open to relocation?</h4>
                         <div className="button-group">
                             {['no', 'yes', 'depends'].map((opt) => (
-                                <button 
+                                <Button 
                                     key={opt}
-                                    className={`btn-option ${profile?.relocate_preference === opt ? 'active' : ''}`}
+                                    type="button"
+                                    variant={profile?.relocate_preference === opt ? 'secondary' : 'ghost'}
+                                    size="sm"
                                     onClick={() => {
                                         setProfileField('relocate_preference', opt as any)
                                         triggerSave()
                                     }}
-                                >{opt === 'depends' ? 'Depends on role' : opt.charAt(0).toUpperCase() + opt.slice(1)}</button>
+                                >{opt === 'depends' ? 'Depends on role' : opt.charAt(0).toUpperCase() + opt.slice(1)}</Button>
                             ))}
                         </div>
                     </div>

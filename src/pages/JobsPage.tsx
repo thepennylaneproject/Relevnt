@@ -6,6 +6,7 @@ import PageBackground from '../components/shared/PageBackground'
 import { Container } from '../components/shared/Container'
 import { EmptyState } from '../components/ui/EmptyState'
 import { useToast } from '../components/ui/Toast'
+import { Button } from '../components/ui/Button'
 import { copy } from '../lib/copy'
 import type { JobRow } from '../shared/types'
 import { usePersonas } from '../hooks/usePersonas'
@@ -599,12 +600,12 @@ export default function JobsPage() {
           </div>
 
           <div className="form-actions">
-            <button className="btn btn-primary" onClick={() => fetchJobs()}>
+            <Button type="button" variant="primary" onClick={() => fetchJobs()}>
               Refresh jobs
-            </button>
-            <button className="btn btn-secondary" onClick={handleClearFilters}>
+            </Button>
+            <Button type="button" variant="secondary" onClick={handleClearFilters}>
               Clear filters
-            </button>
+            </Button>
           </div>
         </aside>
 
@@ -691,23 +692,24 @@ export default function JobsPage() {
 
                     <div className="card-footer">
                       {job.external_url && (
-                        <a
-                          href={job.external_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="btn btn-secondary btn-sm"
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => window.open(job.external_url, '_blank', 'noreferrer')}
                         >
                           View
-                        </a>
+                        </Button>
                       )}
-                      <button
+                      <Button
                         type="button"
                         onClick={() => toggleSavedJob(job.id)}
-                        className={`btn btn-sm ${isSaved ? 'btn-saved is-active' : 'btn-ghost'}`}
+                        variant={isSaved ? 'secondary' : 'ghost'}
+                        size="sm"
                         aria-label={isSaved ? 'Remove from saved' : 'Save job'}
                       >
                         {isSaved ? 'Saved' : 'Save'}
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 )

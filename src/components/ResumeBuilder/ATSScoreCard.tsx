@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { Icon } from '../ui/Icon'
+import { Button } from '../ui/Button'
 
 // ============================================================================
 // TYPES
@@ -115,15 +116,16 @@ export const ATSScoreCard: React.FC<Props> = ({ analysis, loading, onAnalyze }) 
                         Check how your resume performs against Applicant Tracking Systems used by 75% of employers.
                     </p>
                     {onAnalyze && (
-                        <button
+                        <Button
                             type="button"
+                            variant="primary"
+                            size="sm"
                             onClick={onAnalyze}
-                            className="primary-button button-sm"
                             style={{ marginTop: 12 }}
                         >
                             <Icon name="stars" size="sm" />
                             Analyze Resume
-                        </button>
+                        </Button>
                     )}
                 </div>
             </div>
@@ -273,15 +275,17 @@ export const ATSScoreCard: React.FC<Props> = ({ analysis, loading, onAnalyze }) 
 
             {/* Re-analyze button */}
             {onAnalyze && (
-                <button
+                <Button
                     type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="w-full"
                     onClick={onAnalyze}
-                    className="ghost-button button-sm w-full"
                     style={{ marginTop: 12 }}
                 >
                     <Icon name="stars" size="sm" />
                     Re-analyze
-                </button>
+                </Button>
             )}
         </div>
     )

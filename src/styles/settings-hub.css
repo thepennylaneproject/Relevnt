@@ -99,27 +99,6 @@
   margin: 12px 0;
 }
 
-.btn-option {
-  padding: 8px 16px;
-  background: var(--color-bg-secondary);
-  border: 2px solid var(--color-graphite-faint);
-  border-radius: 4px;
-  color: var(--color-ink);
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-option:hover {
-  border-color: var(--color-accent);
-}
-
-.btn-option.active {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
-  color: var(--color-ink-inverse);
-}
-
 /* Pill Input System */
 .pill-input {
   display: flex;

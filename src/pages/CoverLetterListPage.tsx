@@ -6,6 +6,7 @@ import { CollectionEmptyGuard } from '../components/ui/CollectionEmptyGuard'
 import { useCoverLetters, type CoverLetter } from '../hooks/useCoverLetters'
 import { Container } from '../components/shared/Container'
 import PageBackground from '../components/shared/PageBackground'
+import { Button } from '../components/ui/Button'
 
 export default function CoverLetterListPage({ embedded = false }: { embedded?: boolean }) {
     const navigate = useNavigate()
@@ -61,18 +62,22 @@ export default function CoverLetterListPage({ embedded = false }: { embedded?: b
                                 </div>
                             </div>
                             <div className="card-actions">
-                                <button
+                                <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="sm"
                                     onClick={() => deleteCoverLetter(letter.id)}
-                                    className="btn btn-destructive btn-sm"
                                 >
                                     Delete
-                                </button>
-                                <button
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    size="sm"
                                     onClick={() => setViewingLetter(letter)}
-                                    className="btn btn-secondary btn-sm"
                                 >
                                     View Full
-                                </button>
+                                </Button>
                             </div>
                         </div>
                     ))}
@@ -100,21 +105,25 @@ export default function CoverLetterListPage({ embedded = false }: { embedded?: b
                             </div>
                         </div>
                         <footer className="p-4 bg-surface-accent border-top border-subtle flex justify-end gap-3">
-                            <button
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
                                 onClick={() => {
                                     navigator.clipboard.writeText(viewingLetter.content)
                                     alert('Copied to clipboard!')
                                 }}
-                                className="ghost-button button-sm"
                             >
                                 Copy Content
-                            </button>
-                            <button
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="primary"
+                                size="sm"
                                 onClick={() => setViewingLetter(null)}
-                                className="primary-button button-sm"
                             >
                                 Close
-                            </button>
+                            </Button>
                         </footer>
                     </div>
                 </div>

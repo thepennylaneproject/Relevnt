@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Container } from '../components/shared/Container'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
+// TODO(buttons): Retired screen still uses legacy button classes; migrate if reactivated.
 import { Icon } from '../components/ui/Icon'
 import { useToast } from '../components/ui/Toast'
 import {

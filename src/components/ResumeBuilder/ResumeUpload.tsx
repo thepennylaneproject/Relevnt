@@ -3,6 +3,7 @@
 
 import React, { useState, useCallback, useRef } from 'react'
 import { Icon } from '../ui/Icon'
+import { Button } from '../ui/Button'
 import { useExtractResume } from '../../hooks/useExtractResume'
 import type { ResumeDraft } from '../../types/resume-builder.types'
 
@@ -395,14 +396,15 @@ export const ResumeUpload: React.FC<Props> = ({ onUploadComplete }) => {
 
     return (
         <>
-            <button
+            <Button
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={() => setShowModal(true)}
-                className="ghost-button button-sm"
             >
                 <Icon name="scroll" size="sm" />
                 Import Resume
-            </button>
+            </Button>
 
             {showModal && (
                 <div className="modal-overlay" onClick={() => !isProcessing && setShowModal(false)}>
@@ -414,14 +416,15 @@ export const ResumeUpload: React.FC<Props> = ({ onUploadComplete }) => {
                                     Upload a file or paste your resume text. We'll intelligently extract your information.
                                 </p>
                             </div>
-                            <button
+                            <Button
                                 type="button"
+                                variant="ghost"
+                                size="sm"
                                 onClick={() => !isProcessing && setShowModal(false)}
-                                className="ghost-button button-xs"
                                 disabled={isProcessing}
                             >
                                 ✕
-                            </button>
+                            </Button>
                         </div>
 
                         <div className="modal-body">
@@ -521,25 +524,27 @@ export const ResumeUpload: React.FC<Props> = ({ onUploadComplete }) => {
                         </div>
 
                         <div className="modal-footer">
-                            <button
+                            <Button
                                 type="button"
+                                variant="ghost"
+                                size="sm"
                                 onClick={() => {
                                     setShowModal(false)
                                     resetState()
                                 }}
-                                className="ghost-button button-sm"
                                 disabled={isProcessing}
                             >
                                 Cancel
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                                 type="button"
+                                variant="primary"
+                                size="sm"
                                 onClick={handleTextSubmit}
-                                className="primary-button button-sm"
                                 disabled={isProcessing || !resumeText.trim()}
                             >
                                 {isProcessing ? 'Processing...' : 'Import from Text'}
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>

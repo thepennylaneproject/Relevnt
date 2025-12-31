@@ -3,6 +3,7 @@
 
 import React, { useState } from 'react'
 import { Icon } from '../ui/Icon'
+import { Button } from '../ui/Button'
 import type { ResumeDraft } from '../../types/resume-builder.types'
 
 // ============================================================================
@@ -53,27 +54,29 @@ export const SaveToPersona: React.FC<Props> = ({
 
     return (
         <>
-            <button
+            <Button
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={() => setShowModal(true)}
-                className="ghost-button button-sm"
             >
                 <Icon name="compass" size="sm" />
                 Save to Persona
-            </button>
+            </Button>
 
             {showModal && (
                 <div className="modal-overlay" onClick={() => setShowModal(false)}>
                     <div className="modal-content" onClick={e => e.stopPropagation()}>
                         <div className="modal-header">
                             <h2 className="text-lg font-semibold">Save to Persona</h2>
-                            <button
+                            <Button
                                 type="button"
+                                variant="ghost"
+                                size="sm"
                                 onClick={() => setShowModal(false)}
-                                className="ghost-button button-xs"
                             >
                                 ✕
-                            </button>
+                            </Button>
                         </div>
 
                         <div className="modal-body">
@@ -116,34 +119,36 @@ export const SaveToPersona: React.FC<Props> = ({
                             )}
 
                             {onCreateNew && (
-                                <button
+                                <Button
                                     type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="w-full"
                                     onClick={onCreateNew}
-                                    className="ghost-button button-sm w-full"
                                     style={{ marginTop: 12 }}
                                 >
                                     <Icon name="stars" size="sm" />
                                     Create New Persona
-                                </button>
+                                </Button>
                             )}
                         </div>
 
                         <div className="modal-footer">
-                            <button
+                            <Button
                                 type="button"
+                                variant="ghost"
                                 onClick={() => setShowModal(false)}
-                                className="ghost-button"
                             >
                                 Cancel
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                                 type="button"
+                                variant="primary"
                                 onClick={handleSave}
                                 disabled={!selectedId || saving}
-                                className="primary-button"
                             >
                                 {saving ? 'Saving...' : 'Save Resume'}
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>

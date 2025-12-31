@@ -8,6 +8,7 @@ import { useSearchParams } from 'react-router-dom'
 // Layout components
 import PageBackground from '../components/shared/PageBackground'
 import { Container } from '../components/shared/Container'
+import { Button } from '../components/ui/Button'
 
 // Resume section editors
 import { ContactSection } from '../components/ResumeBuilder/ContactSection'
@@ -229,27 +230,29 @@ const ResumeBuilderPage: React.FC<ResumeBuilderPageProps> = ({ embedded = false 
                 </div>
 
                 <div className="action-group">
-                  <button
+                  <Button
                     type="button"
+                    variant="secondary"
+                    size="sm"
                     onClick={() => setShowWizard(true)}
-                    className="btn btn-secondary btn-sm"
                   >
                     New Resume
-                  </button>
+                  </Button>
 
                   <ResumeUpload onUploadComplete={handleUploadComplete} />
 
                   {hasContent && <ResumeExport draft={draft} />}
 
                   {isDirty && (
-                    <button
+                    <Button
                       type="button"
+                      variant="primary"
+                      size="sm"
                       onClick={manualSave}
                       disabled={status === 'saving'}
-                      className="btn btn-primary btn-sm"
                     >
                       Save
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
@@ -321,30 +324,33 @@ const ResumeBuilderPage: React.FC<ResumeBuilderPageProps> = ({ embedded = false 
 
             <div className="builder-preview">
               <div className="panel-tabs" style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-                <button
+                <Button
                   type="button"
+                  size="sm"
+                  variant={activePanel === 'preview' ? 'primary' : 'ghost'}
                   onClick={() => setActivePanel('preview')}
-                  className={`btn btn-sm ${activePanel === 'preview' ? 'btn-primary' : 'btn-ghost'}`}
                 >
                   Preview
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
+                  size="sm"
+                  variant={activePanel === 'ats' ? 'primary' : 'ghost'}
                   onClick={() => setActivePanel('ats')}
-                  className={`btn btn-sm ${activePanel === 'ats' ? 'btn-primary' : 'btn-ghost'}`}
                 >
                   ATS Score
                   {analysis && (
                     <span style={{ marginLeft: '4px', opacity: 0.8 }}>{analysis.overallScore}</span>
                   )}
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
+                  size="sm"
+                  variant={activePanel === 'targeting' ? 'primary' : 'ghost'}
                   onClick={() => setActivePanel('targeting')}
-                  className={`btn btn-sm ${activePanel === 'targeting' ? 'btn-primary' : 'btn-ghost'}`}
                 >
                   Job Match
-                </button>
+                </Button>
               </div>
 
               <div className="at-panel-content">

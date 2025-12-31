@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useJobPreferences } from '../hooks'
 import type { JobPreferences } from '../hooks/useJobPreferences'
 import { Container } from '../components/shared/Container'
+// TODO(buttons): Retired screen still uses legacy button classes; migrate if reactivated.
 import { Icon } from '../components/ui/Icon'
 
 type ChipField =

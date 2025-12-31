@@ -1,7 +1,8 @@
 import React, { ChangeEvent } from 'react'
 import { SectionCard } from './SectionCard'
 import { ResumeContact } from '../../types/resume-builder.types'
-import { addButtonClass, helperClass, inputClass, labelClass, removeButtonClass } from './sectionStyles'
+import { Button } from '../ui/Button'
+import { helperClass, inputClass, labelClass } from './sectionStyles'
 import { User } from "lucide-react"
 
 interface Props {
@@ -108,13 +109,14 @@ export const ContactSection: React.FC<Props> = ({ contact, onChange, colors }) =
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <label className={labelClass}>Links (optional)</label>
-            <button
+            <Button
               type="button"
+              variant="secondary"
+              size="sm"
               onClick={addLink}
-              className={addButtonClass}
             >
               + Add link
-            </button>
+            </Button>
           </div>
 
           {(contact.links ?? []).length === 0 ? (
@@ -140,14 +142,15 @@ export const ContactSection: React.FC<Props> = ({ contact, onChange, colors }) =
                     onChange={handleLinkUrlChange(index)}
                     placeholder="https://linkedin.com/in/you"
                   />
-                  <button
+                  <Button
                     type="button"
+                    variant="destructive"
+                    size="sm"
                     onClick={() => removeLink(index)}
-                    className={removeButtonClass}
                     aria-label="Remove link"
                   >
                     ✕ Remove
-                  </button>
+                  </Button>
                 </div>
               ))}
             </div>

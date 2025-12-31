@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { Container } from '../components/shared/Container'
 import { Icon } from '../components/ui/Icon'
+// TODO(buttons): Retired screen still uses legacy button classes; migrate if reactivated.
 import { useAITask } from '../hooks/useAITask'
 import { useCareerProfile } from '../hooks/useCareerProfile'
 

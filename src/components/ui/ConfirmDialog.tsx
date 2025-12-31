@@ -7,6 +7,7 @@
 
 import React from 'react'
 import { Icon } from './Icon'
+import { Button } from './Button'
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -75,21 +76,21 @@ export function ConfirmDialog({
                 <p className="confirm-dialog__message">{message}</p>
 
                 <div className="confirm-dialog__actions">
-                    <button
+                    <Button
                         type="button"
-                        className="ghost-button"
+                        variant="ghost"
                         onClick={onCancel}
                     >
                         {cancelLabel}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         type="button"
-                        className={`primary-button ${variant === 'danger' ? 'primary-button--danger' : ''}`}
+                        variant={variant === 'danger' ? 'destructive' : 'primary'}
                         onClick={onConfirm}
                         autoFocus
                     >
                         {confirmLabel}
-                    </button>
+                    </Button>
                 </div>
             </div>
 
@@ -166,14 +167,6 @@ const confirmDialogStyles = `
   justify-content: center;
 }
 
-.primary-button--danger {
-  background: var(--color-error, #ef4444) !important;
-  border-color: var(--color-error, #ef4444) !important;
-}
-
-.primary-button--danger:hover {
-  background: #dc2626 !important;
-}
 `
 
 export default ConfirmDialog

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import { useAutoApplyQueue, type QueueItem, type ArtifactType } from '../hooks/useAutoApplyQueue'
+// TODO(buttons): Retired panel still uses legacy button classes; migrate if reintroduced.
 
 type StatusFilter = 'all' | 'ready_to_submit' | 'requires_review' | 'pending' | 'processing'
 

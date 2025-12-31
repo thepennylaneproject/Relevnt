@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAnalyzeSkillsGap } from '../hooks/useAnalyzeSkillsGap';
 import { Container } from '../components/shared/Container';
 import { Icon } from '../components/ui/Icon';
+// TODO(buttons): Retired screen still uses legacy button classes; migrate if reactivated.
 
 export default function LearningPathsPage() {
   const { analyze, loading } = useAnalyzeSkillsGap();

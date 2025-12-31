@@ -4,6 +4,7 @@ import { PersonaEditor } from '../components/personas/PersonaEditor'
 import PageBackground from '../components/shared/PageBackground'
 import { Container } from '../components/shared/Container'
 import { Icon } from '../components/ui/Icon'
+import { Button } from '../components/ui/Button'
 import { copy } from '../config/i18n.config'
 import type { UserPersona } from '../types/v2-personas'
 
@@ -74,14 +75,17 @@ export default function PersonaManagementPage() {
                         <div className="lg:col-span-1 space-y-4">
                             <div className="flex items-center justify-between mb-2">
                                 <h2 className="text-lg font-semibold text-text-primary">Your Personas</h2>
-                                <button
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-accent-primary hover:text-accent-hover"
                                     onClick={handleCreate}
-                                    className="ghost-button text-accent-primary hover:text-accent-hover"
                                     disabled={isEditorOpen && isCreating}
                                 >
                                     <Icon name="plus" size="sm" hideAccent />
                                     New
-                                </button>
+                                </Button>
                             </div>
 
                             <div className="space-y-3">
@@ -140,9 +144,9 @@ export default function PersonaManagementPage() {
                                         <p className="text-text-secondary text-sm mb-4">
                                             {copy.personas.emptyState}
                                         </p>
-                                        <button onClick={handleCreate} className="primary-button">
+                                        <Button type="button" variant="primary" onClick={handleCreate}>
                                             Create your first persona
-                                        </button>
+                                        </Button>
                                     </div>
                                 )}
                             </div>
@@ -156,9 +160,9 @@ export default function PersonaManagementPage() {
                                         <h2 className="text-xl font-semibold text-text-primary">
                                             {isCreating ? 'Create New Persona' : `Edit ${editingPersona?.name}`}
                                         </h2>
-                                        <button onClick={handleCloseEditor} className="ghost-button">
+                                        <Button type="button" variant="ghost" onClick={handleCloseEditor}>
                                             Close
-                                        </button>
+                                        </Button>
                                     </div>
 
                                     <PersonaEditor

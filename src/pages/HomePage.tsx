@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { Container } from '../components/shared/Container'
 import { FeatureIcon } from '../components/ui/FeatureIcon'
+import { Button } from '../components/ui/Button'
 
 // Cloudinary hero image URLs with f_auto for automatic WebP delivery
 const HERO_BG_LIGHT = 'https://res.cloudinary.com/sarah-sahl/image/upload/f_auto,q_auto/v1766284025/Starter_Hero_Light_16x9_v04_psu2by.jpg'
@@ -148,12 +149,12 @@ const HomePage: React.FC = () => {
 
           {/* CTAs */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-            <button type="button" className="primary-button" onClick={handlePrimary}>
+            <Button type="button" variant="primary" onClick={handlePrimary}>
               {user ? 'Go to dashboard' : 'Get started free'}
-            </button>
-            <button type="button" className="ghost-button" onClick={handleSecondary}>
+            </Button>
+            <Button type="button" variant="ghost" onClick={handleSecondary}>
               {user ? 'Browse jobs' : 'Log in to your account'}
-            </button>
+            </Button>
           </div>
 
           <div style={{ marginTop: 24, fontSize: 13, color: 'var(--color-ink-tertiary)' }}>

@@ -3,6 +3,7 @@
 
 import React, { useState } from 'react'
 import { Icon } from '../ui/Icon'
+import { Button } from '../ui/Button'
 import { useAITask } from '../../hooks/useAITask'
 
 // ============================================================================
@@ -119,20 +120,22 @@ export const AIImproveButton: React.FC<Props> = ({
                     </div>
                     <p className="ai-improve-preview-text text-xs">{preview}</p>
                     <div className="ai-improve-preview-actions">
-                        <button
+                        <Button
                             type="button"
+                            variant="primary"
+                            size="sm"
                             onClick={handleAccept}
-                            className="primary-button button-xs"
                         >
                             Accept
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             type="button"
+                            variant="ghost"
+                            size="sm"
                             onClick={handleReject}
-                            className="ghost-button button-xs"
                         >
                             Dismiss
-                        </button>
+                        </Button>
                     </div>
                 </div>
             )}

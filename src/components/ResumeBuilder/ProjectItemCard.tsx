@@ -1,7 +1,8 @@
 // src/pages/ResumeBuilder/components/ProjectItemCard.tsx
 import React, { ChangeEvent } from 'react'
 import { ResumeProjectItem } from '../../types/resume-builder.types'
-import { inputClass, itemCardClass, labelClass, removeButtonClass, textareaClass } from './sectionStyles'
+import { Button } from '../ui/Button'
+import { inputClass, itemCardClass, labelClass, textareaClass } from './sectionStyles'
 
 interface ProjectItemCardProps {
   item: ResumeProjectItem
@@ -92,13 +93,14 @@ export const ProjectItemCard: React.FC<ProjectItemCardProps> = ({
         />
       </div>
 
-      <button
+      <Button
         type="button"
+        variant="destructive"
+        size="sm"
         onClick={onRemove}
-        className={removeButtonClass}
       >
         ✕ Remove project
-      </button>
+      </Button>
     </div>
   )
 }

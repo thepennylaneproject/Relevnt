@@ -5,7 +5,8 @@ import { ResumeSkillGroup } from '../../types/resume-builder.types'
 import { RelevntColors } from '../../hooks/useRelevntColors'
 import { AIButton } from './AIButton'
 import { useAITask } from '../../hooks/useAITask'
-import { addButtonClass, inputClass, itemCardClass, labelClass, removeButtonClass } from './sectionStyles'
+import { Button } from '../ui/Button'
+import { inputClass, itemCardClass, labelClass } from './sectionStyles'
 import { FileText } from "lucide-react"
 
 interface SkillsSectionProps {
@@ -173,13 +174,14 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ id, skillGroups, o
                   placeholder="Core Skills"
                 />
               </div>
-              <button
+              <Button
                 type="button"
+                variant="destructive"
+                size="sm"
                 onClick={() => removeGroup(index)}
-                className={removeButtonClass}
               >
                 ✕
-              </button>
+              </Button>
             </div>
 
             <div>
@@ -245,13 +247,14 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ id, skillGroups, o
           </div>
         ))}
 
-        <button
+        <Button
           type="button"
+          variant="secondary"
+          size="sm"
           onClick={addGroup}
-          className={addButtonClass}
         >
           + Add skill group
-        </button>
+        </Button>
       </div>
     </SectionCard>
   )

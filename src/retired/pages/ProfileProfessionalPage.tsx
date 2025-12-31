@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Container } from '../components/shared/Container'
 import { useProfessionalProfile } from '../hooks'
 import { Icon } from '../components/ui/Icon'
+// TODO(buttons): Retired screen still uses legacy button classes; migrate if reactivated.
 
 export default function ProfileProfessionalPage(): JSX.Element {
   const {

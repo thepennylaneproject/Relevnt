@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { Icon } from '../components/ui/Icon'
 import { CollectionEmptyGuard } from '../components/ui/CollectionEmptyGuard'
 import { Container } from '../components/shared/Container'
+import { Button } from '../components/ui/Button'
 import { useToast } from '../components/ui/Toast'
 import type { InterviewPrepRow, InterviewPracticeSession } from '../shared/types'
 import '../styles/interview-prep.css'
@@ -132,9 +133,9 @@ export default function InterviewPrepCenter() {
                                         onChange={e => setJobDescription(e.target.value)}
                                     />
                                 </div>
-                                <button type="submit" className="primary-button" disabled={isCreating}>
+                                <Button type="submit" variant="primary" disabled={isCreating}>
                                     {isCreating ? 'Generating Session...' : 'Prepare my Interview'}
-                                </button>
+                                </Button>
                             </form>
                         </article>
                     </section>

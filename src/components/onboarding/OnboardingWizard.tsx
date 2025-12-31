@@ -15,6 +15,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Icon } from '../ui/Icon'
+import { Button } from '../ui/Button'
 import { usePersonas } from '../../hooks/usePersonas'
 import type { CreatePersonaInput } from '../../types/v2-personas'
 import './onboarding-wizard.css'
@@ -437,41 +438,41 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
         {/* Navigation */}
         <div className="wizard-footer">
           {step === 1 ? (
-            <button
+            <Button
               type="button"
-              className="btn btn-ghost"
+              variant="ghost"
               onClick={handleSkip}
             >
               Skip for now
-            </button>
+            </Button>
           ) : (
-            <button
+            <Button
               type="button"
-              className="btn btn-ghost"
+              variant="ghost"
               onClick={handleBack}
             >
               Back
-            </button>
+            </Button>
           )}
 
           {step < 6 ? (
-            <button
+            <Button
               type="button"
-              className="btn btn-primary"
+              variant="primary"
               onClick={handleNext}
               disabled={!canProceed()}
             >
               Continue
-            </button>
+            </Button>
           ) : (
-            <button
+            <Button
               type="button"
-              className="btn btn-primary"
+              variant="primary"
               onClick={handleComplete}
               disabled={loading}
             >
               {loading ? 'Creating...' : 'Start Finding Jobs'}
-            </button>
+            </Button>
           )}
         </div>
       </div>

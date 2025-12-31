@@ -122,15 +122,16 @@ export const ApplicationQuestionHelper: React.FC = () => {
     const renderModeSelector = (mini = false) => (
         <div className={mini ? 'mb-4' : 'button-group'}>
             {MODES.map((m) => (
-                <button
+                <Button
                     key={m.value}
                     type="button"
+                    variant={m.value === selectedMode ? 'secondary' : 'ghost'}
+                    size="sm"
                     onClick={() => !loading && setSelectedMode(m.value)}
-                    className={`btn-option ${m.value === selectedMode ? 'active' : ''}`}
                 >
                     <Icon name={m.icon as any} size="sm" />
                     {mini ? `Rewrite: ${m.label}` : m.label}
-                </button>
+                </Button>
             ))}
         </div>
     )
@@ -227,14 +228,14 @@ export const ApplicationQuestionHelper: React.FC = () => {
                     />
                 </div>
 
-                <button
+                <Button
                     type="button"
+                    variant="secondary"
                     onClick={() => setContextOpen(!contextOpen)}
-                    className="btn btn--secondary"
                 >
                     <Icon name="plus" size="sm" className="mr-2" />
                     Add Context (Optional)
-                </button>
+                </Button>
 
                 {contextOpen && (
                     <div className="p-4 space-y-4 bg-bg-secondary rounded-lg border border-graphite-faint animate-in fade-in slide-in-from-top-2">
@@ -313,13 +314,16 @@ export const ApplicationQuestionHelper: React.FC = () => {
                     </div>
                 )}
 
-                <button
-                    className="btn btn--primary btn-lg w-full"
+                <Button
+                    type="button"
+                    variant="primary"
+                    size="lg"
+                    className="w-full"
                     onClick={() => handleDraft()}
                     disabled={!question.trim()}
                 >
                     Draft Answer
-                </button>
+                </Button>
             </div>
         </div>
     )

@@ -17,6 +17,7 @@
 
 import { useState } from 'react'
 import { Icon } from '../ui/Icon'
+import { Button } from '../ui/Button'
 import { useRelevanceTuner } from '../../hooks/useRelevanceTuner'
 import type { WeightConfig } from '../../types/v2-schema'
 
@@ -337,29 +338,32 @@ export function RelevanceTuner({
 
                         <div className="preset-buttons">
                             {selectedPreset && !selectedPreset.is_default && (
-                                <button
+                                <Button
                                     type="button"
+                                    variant="destructive"
+                                    size="sm"
                                     onClick={handleDeletePreset}
-                                    className="btn btn-destructive btn-sm"
                                     title="Delete preset"
                                 >
                                     🗑️
-                                </button>
+                                </Button>
                             )}
-                            <button
+                            <Button
                                 type="button"
+                                variant="secondary"
+                                size="sm"
                                 onClick={() => setShowSaveForm(!showSaveForm)}
-                                className="btn btn-secondary btn-sm"
                             >
                                 {showSaveForm ? 'Cancel' : 'Save'}
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                                 type="button"
+                                variant="ghost"
+                                size="sm"
                                 onClick={handleReset}
-                                className="btn btn-ghost btn-sm"
                             >
                                 Reset
-                            </button>
+                            </Button>
                         </div>
                     </div>
 
@@ -375,13 +379,14 @@ export function RelevanceTuner({
                                 disabled={saving}
                                 autoFocus
                             />
-                            <button
+                            <Button
                                 type="submit"
-                                className="btn btn-primary btn-sm"
+                                variant="primary"
+                                size="sm"
                                 disabled={saving || !presetName.trim()}
                             >
                                 {saving ? 'Saving...' : 'Save'}
-                            </button>
+                            </Button>
                         </form>
                     )}
 

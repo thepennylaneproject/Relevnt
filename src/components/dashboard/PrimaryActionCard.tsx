@@ -1,6 +1,7 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Icon, IconName } from '../ui/Icon'
+import { Button } from '../ui/Button'
 
 interface PrimaryActionCardProps {
   /** The icon to display (journey stage) */
@@ -56,6 +57,7 @@ export function PrimaryActionCard({
   ctaLarge = true,
   className,
 }: PrimaryActionCardProps) {
+  const navigate = useNavigate()
   return (
     <div className={`primary-action-card ${className || ''}`}>
       <div className="primary-action-card__icon">
@@ -69,13 +71,15 @@ export function PrimaryActionCard({
       </div>
 
       <div className="primary-action-card__footer">
-        <Link
-          to={ctaLink}
-          className={`btn btn--accent ${ctaLarge ? 'btn--lg' : ''}`}
+        <Button
+          type="button"
+          variant="primary"
+          size={ctaLarge ? 'lg' : 'md'}
+          onClick={() => navigate(ctaLink)}
         >
           {cta}
           <Icon name="chevron-right" size="sm" />
-        </Link>
+        </Button>
       </div>
     </div>
   )

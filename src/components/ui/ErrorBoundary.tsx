@@ -7,6 +7,7 @@
 
 import React, { Component, ReactNode } from 'react'
 import { Icon } from './Icon'
+import { Button } from './Button'
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -69,20 +70,20 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                         </p>
 
                         <div className="error-boundary__actions">
-                            <button
+                            <Button
                                 type="button"
-                                className="primary-button"
+                                variant="primary"
                                 onClick={this.handleRetry}
                             >
                                 Try again
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                                 type="button"
-                                className="ghost-button"
+                                variant="ghost"
                                 onClick={this.handleGoHome}
                             >
                                 Go to Dashboard
-                            </button>
+                            </Button>
                         </div>
 
                         {process.env.NODE_ENV === 'development' && this.state.error && (

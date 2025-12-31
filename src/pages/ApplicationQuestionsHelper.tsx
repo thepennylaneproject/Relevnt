@@ -8,6 +8,7 @@
 import { useState } from 'react';
 import { usePrepareInterview } from '../hooks/usePrepareInterview';
 import { Container } from '../components/shared/Container';
+import { Button } from '../components/ui/Button';
 
 export default function ApplicationQuestionsHelper(): JSX.Element {
   const { prepare, loading, error } = usePrepareInterview();
@@ -112,14 +113,14 @@ export default function ApplicationQuestionsHelper(): JSX.Element {
             </div>
 
             <div style={{ marginTop: 24, display: 'flex', alignItems: 'center', gap: 16 }}>
-              <button
+              <Button
                 type="button"
+                variant="primary"
                 onClick={handleGenerate}
                 disabled={loading}
-                className="primary-button"
               >
                 {loading ? 'Generating…' : 'Generate Questions & Prompts'}
-              </button>
+              </Button>
 
               {error && (
                 <span style={{ fontSize: '13px', color: 'var(--color-error)' }}>

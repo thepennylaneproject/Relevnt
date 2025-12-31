@@ -4,7 +4,8 @@ import { ResumeExperienceItem } from '../../types/resume-builder.types'
 import { AIButton } from './AIButton'
 import { useAITask } from '../../hooks/useAITask'
 import { useState } from 'react'
-import { inputClass, itemCardClass, labelClass, removeButtonClass, textareaClass } from './sectionStyles'
+import { Button } from '../ui/Button'
+import { inputClass, itemCardClass, labelClass, textareaClass } from './sectionStyles'
 
 interface ExperienceItemCardProps {
   item: ResumeExperienceItem
@@ -180,13 +181,14 @@ export const ExperienceItemCard: React.FC<ExperienceItemCardProps> = ({
         {error && <div className="text-xs text-rose-600">{error.message}</div>}
       </div>
 
-      <button
+      <Button
         type="button"
+        variant="destructive"
+        size="sm"
         onClick={onRemove}
-        className={removeButtonClass}
       >
         ✕ Remove experience
-      </button>
+      </Button>
     </div >
   )
 }

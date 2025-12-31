@@ -8,6 +8,7 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Icon, IconName } from '../ui/Icon'
+import { Button } from '../ui/Button'
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -84,13 +85,15 @@ export function QuickActionsPanel(): JSX.Element {
                             </div>
                         </div>
                         <div className="mt-auto pt-4 border-t border-border">
-                            <button 
+                            <Button 
+                                type="button"
+                                variant="secondary"
+                                className="w-full text-xs py-2"
                                 onClick={() => navigate(action.route)}
-                                className="btn btn-secondary w-full text-xs py-2 btn-with-icon"
                             >
                                 Launch Action
                                 <Icon name="chevron-right" size="sm" />
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 ))}

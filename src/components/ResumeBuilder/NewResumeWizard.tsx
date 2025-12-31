@@ -3,6 +3,7 @@
 
 import React, { useState } from 'react'
 import { Icon } from '../ui/Icon'
+import { Button } from '../ui/Button'
 import { useAITask } from '../../hooks/useAITask'
 import type { ResumeDraft } from '../../types/resume-builder.types'
 
@@ -337,21 +338,21 @@ export const NewResumeWizard: React.FC<Props> = ({ onComplete, onCancel }) => {
                 {/* Actions */}
                 {step !== 'generating' && step !== 'complete' && (
                     <div className="wizard-actions">
-                        <button
+                        <Button
                             type="button"
+                            variant="ghost"
                             onClick={onCancel}
-                            className="ghost-button"
                         >
                             Cancel
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             type="button"
+                            variant="primary"
                             onClick={handleNext}
                             disabled={!canProceed()}
-                            className="primary-button"
                         >
                             {step === 'industry' ? 'Generate Resume' : 'Continue'}
-                        </button>
+                        </Button>
                     </div>
                 )}
             </div>

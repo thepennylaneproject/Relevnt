@@ -14,7 +14,7 @@
  *
  * The canonical Button in ui/Button.tsx:
  * - Uses CSS design tokens for consistent styling
- * - Supports: primary, secondary, tertiary, ghost, destructive variants
+ * - Supports: primary, secondary, ghost, destructive variants
  * - Integrates with PrimaryActionRegistry for Rule 1 enforcement
  *
  * ═══════════════════════════════════════════════════════════════════════════

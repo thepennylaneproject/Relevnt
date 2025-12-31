@@ -4,7 +4,7 @@ import { SectionCard } from './SectionCard'
 import { EducationItemCard } from './EducationItemCard'
 import { ResumeEducationItem } from '../../types/resume-builder.types'
 import { RelevntColors } from '../../hooks/useRelevntColors'
-import { addButtonClass } from './sectionStyles'
+import { Button } from '../ui/Button'
 import { GraduationCap } from "lucide-react"
 
 interface EducationSectionProps {
@@ -63,13 +63,14 @@ export const EducationSection: React.FC<EducationSectionProps> = ({
           />
         ))}
 
-        <button
+        <Button
           type="button"
+          variant="secondary"
+          size="sm"
           onClick={addItem}
-          className={addButtonClass}
         >
           + Add education
-        </button>
+        </Button>
       </div>
     </SectionCard>
   )

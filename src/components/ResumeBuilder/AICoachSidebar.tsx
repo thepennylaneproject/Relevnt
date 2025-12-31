@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { Icon, IconName } from '../ui/Icon'
+import { Button } from '../ui/Button'
 import type { ResumeDraft } from '../../types/resume-builder.types'
 
 // ============================================================================
@@ -376,14 +377,15 @@ export const AICoachSidebar: React.FC<Props> = ({ activeSection, draft, onClose 
                     </div>
                 </div>
                 {onClose && (
-                    <button
+                    <Button
                         type="button"
+                        variant="ghost"
+                        size="sm"
                         onClick={onClose}
-                        className="ghost-button button-sm"
                         onMouseDown={(e) => e.stopPropagation()} // Prevent dragging when clicking close
                     >
                         ✕
-                    </button>
+                    </Button>
                 )}
             </div>
 

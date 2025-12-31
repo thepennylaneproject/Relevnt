@@ -3,7 +3,8 @@ import React, { ChangeEvent } from 'react'
 import { SectionCard } from './SectionCard'
 import { ResumeCertificationItem } from '../../types/resume-builder.types'
 import { RelevntColors } from '../../hooks/useRelevntColors'
-import { addButtonClass, inputClass, itemCardClass, labelClass, removeButtonClass } from './sectionStyles'
+import { Button } from '../ui/Button'
+import { inputClass, itemCardClass, labelClass } from './sectionStyles'
 import { Award } from "lucide-react"
 
 interface CertificationsSectionProps {
@@ -112,23 +113,25 @@ export const CertificationsSection: React.FC<CertificationsSectionProps> = ({
               />
             </div>
 
-            <button
+            <Button
               type="button"
+              variant="destructive"
+              size="sm"
               onClick={() => removeItem(index)}
-              className={removeButtonClass}
             >
               ✕ Remove certification
-            </button>
+            </Button>
           </div>
         ))}
 
-        <button
+        <Button
           type="button"
+          variant="secondary"
+          size="sm"
           onClick={addItem}
-          className={addButtonClass}
         >
           + Add certification
-        </button>
+        </Button>
       </div>
     </SectionCard>
   )

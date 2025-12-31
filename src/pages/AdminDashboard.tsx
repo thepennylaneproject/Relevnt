@@ -4,6 +4,7 @@ import { Container } from '../components/shared/Container'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import { Icon } from '../components/ui/Icon'
+import { Button } from '../components/ui/Button'
 import type { Database } from '../lib/database.types'
 import { AlertsPanel } from '../components/admin/AlertsPanel'
 import { IngestionActivityFeed } from '../components/admin/IngestionActivityFeed'
@@ -294,8 +295,9 @@ function OverviewTab() {
       <div className="surface-card">
         <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16 }}>Quick Actions</h4>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          <button
-            className="ghost-button"
+          <Button
+            type="button"
+            variant="ghost"
             onClick={async () => {
               try {
                 await fetch('/.netlify/functions/ingest_jobs', { method: 'POST' })
@@ -306,10 +308,15 @@ function OverviewTab() {
             }}
           >
             ▶ Run All Ingestion
-          </button>
-          <a href="/admin" className="ghost-button" style={{ textDecoration: 'none' }}>
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => window.location.assign('/admin')}
+            style={{ textDecoration: 'none' }}
+          >
             View Full Dashboard
-          </a>
+          </Button>
         </div>
       </div>
     </div>
@@ -477,12 +484,12 @@ function UsersTab() {
             placeholder="Search by name or email"
             style={{ width: 220 }}
           />
-          <button type="button" onClick={fetchUsers} className="ghost-button">
+          <Button type="button" variant="ghost" onClick={fetchUsers}>
             Refresh
-          </button>
-          <button type="button" onClick={startNewUser} className="primary-button">
+          </Button>
+          <Button type="button" variant="primary" onClick={startNewUser}>
             + New user
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -572,21 +579,21 @@ function UsersTab() {
           {userError && <div style={{ fontSize: 13, color: 'var(--color-error)', marginTop: 12 }}>{userError}</div>}
 
           <div style={{ marginTop: 24, display: 'flex', gap: 8 }}>
-            <button
+            <Button
               type="button"
+              variant="primary"
               onClick={saveUserForm}
               disabled={!!savingId}
-              className="primary-button"
             >
               {savingId ? 'Saving…' : 'Save profile'}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="ghost"
               onClick={() => setUserFormVisible(false)}
-              className="ghost-button"
             >
               Cancel
-            </button>
+            </Button>
           </div>
         </article>
       )}
@@ -650,8 +657,24 @@ function UsersTab() {
                 </td>
                 <td style={{ padding: '12px 16px', textAlign: 'right' }}>
                   <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                    <button onClick={() => startEditUser(u)} className="ghost-button" style={{ padding: '4px 8px', fontSize: 12 }}>Edit</button>
-                    <button onClick={() => deleteUser(u.id)} className="ghost-button" style={{ padding: '4px 8px', fontSize: 12, color: 'var(--color-error)' }}>Delete</button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => startEditUser(u)}
+                      style={{ padding: '4px 8px', fontSize: 12 }}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => deleteUser(u.id)}
+                      style={{ padding: '4px 8px', fontSize: 12 }}
+                    >
+                      Delete
+                    </Button>
                   </div>
                 </td>
               </tr>
@@ -926,21 +949,22 @@ function SourcesTab() {
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <button onClick={fetchSources} className="ghost-button" disabled={loading}>
+          <Button type="button" variant="ghost" onClick={fetchSources} disabled={loading}>
             {loading ? 'Refreshing...' : 'Refresh'}
-          </button>
+          </Button>
           {selectedSources.size > 0 && (
-            <button
+            <Button
+              type="button"
+              variant="primary"
               onClick={() => setShowBulkActions(!showBulkActions)}
-              className="primary-button"
               style={{ background: 'var(--color-warning)' }}
             >
               ⚙ Bulk Actions ({selectedSources.size})
-            </button>
+            </Button>
           )}
-          <button onClick={() => setShowAddModal(true)} className="primary-button">
+          <Button type="button" variant="primary" onClick={() => setShowAddModal(true)}>
             + Add Source
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -952,16 +976,35 @@ function SourcesTab() {
             <button onClick={() => setShowBulkActions(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18 }}>×</button>
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <button onClick={() => bulkToggleEnabled(true)} disabled={savingId === 'bulk'} className="primary-button" style={{ background: 'var(--color-success)' }}>
+            <Button
+              type="button"
+              variant="primary"
+              onClick={() => bulkToggleEnabled(true)}
+              disabled={savingId === 'bulk'}
+              style={{ background: 'var(--color-success)' }}
+            >
               {savingId === 'bulk' ? '⏳' : '✓'} Enable All
-            </button>
-            <button onClick={() => bulkToggleEnabled(false)} disabled={savingId === 'bulk'} className="primary-button" style={{ background: 'var(--color-error)' }}>
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              onClick={() => bulkToggleEnabled(false)}
+              disabled={savingId === 'bulk'}
+              style={{ background: 'var(--color-error)' }}
+            >
               {savingId === 'bulk' ? '⏳' : '✗'} Disable All
-            </button>
-            <button onClick={bulkTriggerIngestion} disabled={triggeringId === 'bulk'} className="primary-button">
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              onClick={bulkTriggerIngestion}
+              disabled={triggeringId === 'bulk'}
+            >
               {triggeringId === 'bulk' ? '⏳ Running' : '▶ Trigger Ingestion'}
-            </button>
-            <button onClick={() => setSelectedSources(new Set())} className="ghost-button">Cancel</button>
+            </Button>
+            <Button type="button" variant="ghost" onClick={() => setSelectedSources(new Set())}>
+              Cancel
+            </Button>
           </div>
         </article>
       )}
@@ -1036,10 +1079,17 @@ function SourcesTab() {
             </label>
           </div>
           <div style={{ marginTop: 16, display: 'flex', gap: 8 }}>
-            <button onClick={createSource} disabled={savingId === 'new' || !newSource.name || !newSource.slug} className="primary-button">
+            <Button
+              type="button"
+              variant="primary"
+              onClick={createSource}
+              disabled={savingId === 'new' || !newSource.name || !newSource.slug}
+            >
               {savingId === 'new' ? 'Creating...' : 'Create Source'}
-            </button>
-            <button onClick={() => setShowAddModal(false)} className="ghost-button">Cancel</button>
+            </Button>
+            <Button type="button" variant="ghost" onClick={() => setShowAddModal(false)}>
+              Cancel
+            </Button>
           </div>
         </article>
       )}
@@ -1104,13 +1154,25 @@ function SourcesTab() {
             </label>
           </div>
           <div style={{ marginTop: 16, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <button onClick={() => saveSource(editingSource)} disabled={savingId === editingSource.id} className="primary-button">
+            <Button
+              type="button"
+              variant="primary"
+              onClick={() => saveSource(editingSource)}
+              disabled={savingId === editingSource.id}
+            >
               {savingId === editingSource.id ? 'Saving...' : 'Save Changes'}
-            </button>
-            <button onClick={() => testConnection(editingSource)} disabled={testingId === editingSource.id} className="ghost-button">
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => testConnection(editingSource)}
+              disabled={testingId === editingSource.id}
+            >
               {testingId === editingSource.id ? '⏳' : '🔗'} Test Connection
-            </button>
-            <button onClick={() => setEditingSource(null)} className="ghost-button">Cancel</button>
+            </Button>
+            <Button type="button" variant="ghost" onClick={() => setEditingSource(null)}>
+              Cancel
+            </Button>
           </div>
         </article>
       )}
@@ -1209,24 +1271,48 @@ function SourcesTab() {
                 </td>
                 <td style={{ padding: '12px 16px' }}>
                   <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                    <button
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
                       onClick={() => triggerIngestion(source)}
                       disabled={triggeringId === source.id || !source.enabled}
-                      className="ghost-button"
                       style={{ padding: '4px 6px', fontSize: 11 }}
                       title={!source.enabled ? 'Enable source first' : 'Run ingestion now'}
                     >
                       {triggeringId === source.id ? '⏳' : '▶'}
-                    </button>
-                    <button onClick={() => testConnection(source)} disabled={testingId === source.id} className="ghost-button" style={{ padding: '4px 6px', fontSize: 11 }} title="Test connection">
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => testConnection(source)}
+                      disabled={testingId === source.id}
+                      style={{ padding: '4px 6px', fontSize: 11 }}
+                      title="Test connection"
+                    >
                       {testingId === source.id ? '⏳' : '🔗'}
-                    </button>
-                    <button onClick={() => setEditingSource(source)} className="ghost-button" style={{ padding: '4px 6px', fontSize: 11 }} title="Edit">
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setEditingSource(source)}
+                      style={{ padding: '4px 6px', fontSize: 11 }}
+                      title="Edit"
+                    >
                       ✎
-                    </button>
-                    <button onClick={() => deleteSource(source.id)} className="ghost-button" style={{ padding: '4px 6px', fontSize: 11, color: 'var(--color-error)' }} title="Delete">
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => deleteSource(source.id)}
+                      style={{ padding: '4px 6px', fontSize: 11 }}
+                      title="Delete"
+                    >
                       ✕
-                    </button>
+                    </Button>
                   </div>
                 </td>
               </tr>
@@ -1418,12 +1504,12 @@ function IngestionTab() {
               autoFocus
             />
             <div style={{ marginTop: 16, display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => setShowSecretModal(false)} className="ghost-button">
+              <Button type="button" variant="ghost" onClick={() => setShowSecretModal(false)}>
                 Cancel
-              </button>
-              <button onClick={saveAdminSecret} disabled={!secretInput} className="primary-button">
+              </Button>
+              <Button type="button" variant="primary" onClick={saveAdminSecret} disabled={!secretInput}>
                 Save Secret
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -1438,30 +1524,32 @@ function IngestionTab() {
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           {adminSecret && (
-            <button
+            <Button
+              type="button"
+              variant="ghost"
               onClick={clearAdminSecret}
-              className="ghost-button"
               title="Clear stored admin secret"
               style={{ fontSize: 11, padding: '6px 10px' }}
             >
               🔑 Reset Secret
-            </button>
+            </Button>
           )}
           {!adminSecret && (
-            <button
+            <Button
+              type="button"
+              variant="ghost"
               onClick={() => setShowSecretModal(true)}
-              className="ghost-button"
               style={{ fontSize: 11, padding: '6px 10px' }}
             >
               🔑 Set Secret
-            </button>
+            </Button>
           )}
-          <button onClick={fetchData} className="ghost-button" disabled={loading}>
+          <Button type="button" variant="ghost" onClick={fetchData} disabled={loading}>
             {loading ? 'Refreshing...' : 'Refresh'}
-          </button>
-          <button onClick={runAllIngestion} className="primary-button" disabled={runningAll || !adminSecret}>
+          </Button>
+          <Button type="button" variant="primary" onClick={runAllIngestion} disabled={runningAll || !adminSecret}>
             {runningAll ? '⏳ Running...' : '▶ Run All Ingestion'}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -1555,14 +1643,15 @@ function IngestionTab() {
                       </span>
                     </td>
                     <td style={{ padding: '8px 12px', textAlign: 'center' }}>
-                      <button
+                      <Button
+                        type="button"
+                        variant="ghost"
                         onClick={() => runSourceIngestion(health.source)}
                         disabled={runningSource === health.source}
-                        className="ghost-button"
                         style={{ padding: '4px 8px', fontSize: 11 }}
                       >
                         {runningSource === health.source ? '⏳' : '▶'} Run
-                      </button>
+                      </Button>
                     </td>
                   </tr>
                 ))}

@@ -1,8 +1,9 @@
 import React from 'react'
-import { Navigate, Link } from 'react-router-dom'
+import { Navigate, Link, useNavigate } from 'react-router-dom'
 import PageBackground from '../components/shared/PageBackground'
 import { IconName, Icon } from '../components/ui/Icon'
 import { Container } from '../components/shared/Container'
+import { Button } from '../components/ui/Button'
 import { useAuth } from '../contexts/AuthContext'
 import { useApplications } from '../hooks/useApplications'
 import { useJobStats } from '../hooks/useJobStats'
@@ -39,6 +40,7 @@ export default function DashboardPage(): JSX.Element {
   const { applications } = useApplications()
   const { total } = useJobStats()
   const { mode: wellnessMode } = useWellnessMode()
+  const navigate = useNavigate()
 
   if (authLoading) {
     return (
@@ -276,13 +278,21 @@ export default function DashboardPage(): JSX.Element {
                 <p className="primary-cta-description">{primaryCTA.description}</p>
               </div>
               <div className="primary-cta-actions">
-                <Link to={primaryCTA.ctaLink} className="btn-primary-glow">
+                <Button
+                  type="button"
+                  variant="primary"
+                  onClick={() => navigate(primaryCTA.ctaLink)}
+                >
                   {primaryCTA.cta}
                   <Icon name="chevron-right" size="sm" />
-                </Link>
-                <Link to={primaryCTA.secondaryLink} className="btn-secondary-subtle">
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => navigate(primaryCTA.secondaryLink)}
+                >
                   {primaryCTA.secondaryCta}
-                </Link>
+                </Button>
               </div>
             </div>
           </section>

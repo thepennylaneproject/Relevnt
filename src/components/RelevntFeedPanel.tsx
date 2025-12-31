@@ -8,6 +8,7 @@ import { QuickApplyModal } from './jobs/QuickApplyModal'
 import type { MatchJobsResult } from '../hooks/useMatchJobs'
 import type { MatchFactors } from '../lib/matchJobs'
 import Icon from './ui/Icon'
+import { Button } from './ui/Button'
 import { useToast } from './ui/Toast'
 import { copy } from '../lib/copy'
 
@@ -192,13 +193,13 @@ export function RelevntFeedPanel({
               <div className="empty-state">
                 <Icon name="search" size="xl" className="empty-icon" />
                 <p className="empty-state__description">We couldn't load your matches right now...</p>
-                <button
+                <Button
                   type="button"
-                  className="btn btn-secondary"
+                  variant="secondary"
                   onClick={() => runMatchJobs(null, activePersona?.id || null)}
                 >
                   Try again
-                </button>
+                </Button>
               </div>
             )}
 
@@ -275,17 +276,17 @@ export function RelevntFeedPanel({
                 <div className="card-footer">
                   {/* Quick Apply / Applied button */}
                   {isApplied ? (
-                    <button
+                    <Button
                       type="button"
-                      className="btn btn-applied btn-with-icon"
+                      variant="secondary"
                       disabled
                     >
                       <Icon name="check" size="sm" /> Applied
-                    </button>
+                    </Button>
                   ) : (
-                    <button
+                    <Button
                       type="button"
-                      className="btn btn-quick-apply btn-with-icon"
+                      variant="primary"
                       onClick={() => setQuickApplyJob({
                         id: m.job_id,
                         title: job.title || 'Job',
@@ -294,34 +295,33 @@ export function RelevntFeedPanel({
                       })}
                     >
                       <Icon name="paper-airplane" size="sm" /> Quick Apply
-                    </button>
+                    </Button>
                   )}
                   {job.external_url && (
-                    <a
-                      href={job.external_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="btn btn-secondary btn-with-icon"
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => window.open(job.external_url, '_blank', 'noreferrer')}
                     >
                       View <Icon name="chevron-right" size="sm" />
-                    </a>
+                    </Button>
                   )}
-                  <button
+                  <Button
                     type="button"
-                    className={`btn btn-with-icon ${isSaved ? 'btn-saved is-active' : 'btn-ghost'}`}
+                    variant={isSaved ? 'secondary' : 'ghost'}
                     onClick={() => handleSaveJob(m.job_id, m.score)}
                     aria-label={isSaved ? 'Remove from saved jobs' : 'Save job'}
                   >
                     <Icon name="bookmark" size="sm" /> {isSaved ? 'Saved' : 'Save'}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
-                    className="btn btn-ghost btn-with-icon btn-not-interested"
+                    variant="ghost"
                     onClick={() => handleDismissJob(m.job_id, m.score)}
                     aria-label="Not interested in this job"
                   >
                     <Icon name="x" size="sm" /> Not Interested
-                  </button>
+                  </Button>
                   {/* Keep "Why this match" as a ghost button? The prompt didn't include it in the template, 
                       but it's good functionality. I'll omit it to strictly follow the template unless it's critical. 
                       Actually, "Why this match" is usually helpful. I'll leave it out to match the prompt template exactly. */}
@@ -425,14 +425,15 @@ export function RelevntFeedPanel({
 
             {(selectedMatch.job as JobLike)?.external_url && (
               <div className="feed-modal-actions">
-                <a
-                  href={(selectedMatch.job as JobLike).external_url as string}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="ghost-button button-sm feed-accent-link"
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="feed-accent-link"
+                  onClick={() => window.open((selectedMatch.job as JobLike).external_url as string, '_blank', 'noreferrer')}
                 >
                   Open full posting on employer site
-                </a>
+                </Button>
               </div>
             )}
           </div>

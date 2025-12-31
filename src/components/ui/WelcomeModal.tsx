@@ -8,6 +8,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Icon } from './Icon'
+import { Button } from './Button'
 import { useAuth } from '../../contexts/AuthContext'
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -154,30 +155,30 @@ export function WelcomeModal(): JSX.Element | null {
                 <div className="welcome-modal__actions">
                     {currentStep === 0 ? (
                         <>
-                            <button type="button" className="ghost-button" onClick={handleSkip}>
+                            <Button type="button" variant="ghost" onClick={handleSkip}>
                                 I'll explore on my own
-                            </button>
-                            <button type="button" className="primary-button" onClick={() => handleStepClick(ONBOARDING_STEPS[0])}>
+                            </Button>
+                            <Button type="button" variant="primary" onClick={() => handleStepClick(ONBOARDING_STEPS[0])}>
                                 Let's start
-                            </button>
+                            </Button>
                         </>
                     ) : currentStep < ONBOARDING_STEPS.length - 1 ? (
                         <>
-                            <button type="button" className="ghost-button" onClick={() => setCurrentStep(c => c - 1)}>
+                            <Button type="button" variant="ghost" onClick={() => setCurrentStep(c => c - 1)}>
                                 Back
-                            </button>
-                            <button type="button" className="primary-button" onClick={() => setCurrentStep(c => c + 1)}>
+                            </Button>
+                            <Button type="button" variant="primary" onClick={() => setCurrentStep(c => c + 1)}>
                                 Next
-                            </button>
+                            </Button>
                         </>
                     ) : (
                         <>
-                            <button type="button" className="ghost-button" onClick={() => setCurrentStep(c => c - 1)}>
+                            <Button type="button" variant="ghost" onClick={() => setCurrentStep(c => c - 1)}>
                                 Back
-                            </button>
-                            <button type="button" className="primary-button" onClick={handleComplete}>
+                            </Button>
+                            <Button type="button" variant="primary" onClick={handleComplete}>
                                 Get Started
-                            </button>
+                            </Button>
                         </>
                     )}
                 </div>

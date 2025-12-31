@@ -2,6 +2,7 @@ import React from 'react'
 import { useNetworkLookup } from '../../hooks/useNetworkLookup'
 import { Icon } from '../ui/Icon'
 import { useToast } from '../ui/Toast'
+import { Button } from '../ui/Button'
 
 interface NetworkingOverlayProps {
     company: string
@@ -49,14 +50,16 @@ export const NetworkingOverlay: React.FC<NetworkingOverlayProps> = ({ company })
                                     <Icon name="paper-airplane" size="sm" hideAccent />
                                 </a>
                             )}
-                            <button 
+                            <Button 
+                                type="button"
+                                variant="ghost"
+                                size="sm"
                                 onClick={() => copyTemplate(contact.name)}
-                                className="ghost-button button-xs"
                                 title="Copy outreach template"
                             >
                                 <Icon name="scroll" size="sm" hideAccent />
                                 Template
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 ))}
