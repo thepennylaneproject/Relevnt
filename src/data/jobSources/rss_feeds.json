@@ -2,78 +2,442 @@
     {
         "name": "Stack Overflow Jobs",
         "feedUrl": "https://stackoverflow.com/jobs/feed",
-        "defaultCompany": "Stack Overflow",
+        "defaultCompany": null,
         "defaultLocation": null,
         "trustLevel": "high"
     },
     {
-        "name": "We Work Remotely",
-        "feedUrl": "https://weworkremotely.com/feed",
-        "defaultCompany": "We Work Remotely",
+        "name": "We Work Remotely - Programming",
+        "feedUrl": "https://weworkremotely.com/categories/remote-programming-jobs.rss",
+        "defaultCompany": null,
         "defaultLocation": "Remote",
         "trustLevel": "high"
     },
     {
-        "name": "Dev.to Jobs",
-        "feedUrl": "https://dev.to/api/articles?tag=jobs",
-        "defaultCompany": "Dev.to",
+        "name": "We Work Remotely - Design",
+        "feedUrl": "https://weworkremotely.com/categories/remote-design-jobs.rss",
+        "defaultCompany": null,
+        "defaultLocation": "Remote",
+        "trustLevel": "high"
+    },
+    {
+        "name": "We Work Remotely - Marketing",
+        "feedUrl": "https://weworkremotely.com/categories/remote-marketing-jobs.rss",
+        "defaultCompany": null,
+        "defaultLocation": "Remote",
+        "trustLevel": "high"
+    },
+    {
+        "name": "We Work Remotely - Sales",
+        "feedUrl": "https://weworkremotely.com/categories/remote-sales-jobs.rss",
+        "defaultCompany": null,
+        "defaultLocation": "Remote",
+        "trustLevel": "high"
+    },
+    {
+        "name": "We Work Remotely - Customer Support",
+        "feedUrl": "https://weworkremotely.com/categories/remote-customer-support-jobs.rss",
+        "defaultCompany": null,
+        "defaultLocation": "Remote",
+        "trustLevel": "high"
+    },
+    {
+        "name": "We Work Remotely - DevOps",
+        "feedUrl": "https://weworkremotely.com/categories/remote-devops-sysadmin-jobs.rss",
+        "defaultCompany": null,
+        "defaultLocation": "Remote",
+        "trustLevel": "high"
+    },
+    {
+        "name": "We Work Remotely - All Others",
+        "feedUrl": "https://weworkremotely.com/categories/remote-all-other-jobs.rss",
+        "defaultCompany": null,
+        "defaultLocation": "Remote",
+        "trustLevel": "high"
+    },
+    {
+        "name": "GitHub Jobs",
+        "feedUrl": "https://jobs.github.com/positions.atom",
+        "defaultCompany": null,
         "defaultLocation": null,
-        "trustLevel": "medium"
+        "trustLevel": "high"
     },
     {
         "name": "Dribbble Jobs",
-        "feedUrl": "https://dribbble.com/jobs/feed",
-        "defaultCompany": "Dribbble",
+        "feedUrl": "https://dribbble.com/jobs.rss",
+        "defaultCompany": null,
         "defaultLocation": null,
-        "trustLevel": "medium"
-    },
-    {
-        "name": "ProBlogger",
-        "feedUrl": "https://www.problogger.com/feed/",
-        "defaultCompany": "ProBlogger",
-        "defaultLocation": "Remote",
-        "trustLevel": "medium"
+        "trustLevel": "high"
     },
     {
         "name": "Authentic Jobs",
-        "feedUrl": "https://www.authenticjobs.com/feed/",
-        "defaultCompany": "Authentic Jobs",
-        "defaultLocation": null,
-        "trustLevel": "medium"
-    },
-    {
-        "name": "HubSpot Careers",
-        "feedUrl": "https://www.hubspot.com/company/careers",
-        "defaultCompany": "HubSpot",
+        "feedUrl": "https://authenticjobs.com/rss/",
+        "defaultCompany": null,
         "defaultLocation": null,
         "trustLevel": "high"
     },
     {
-        "name": "Mediabistro",
-        "feedUrl": "https://www.mediabistro.com/rss-feeds/",
-        "defaultCompany": "Various",
-        "defaultLocation": "US",
-        "trustLevel": "medium"
-    },
-    {
-        "name": "Built In Marketing",
-        "feedUrl": "https://builtin.com/jobs/marketing/feed",
-        "defaultCompany": "Various",
-        "defaultLocation": "US",
+        "name": "AngelList Startup Jobs",
+        "feedUrl": "https://angel.co/jobs/rss",
+        "defaultCompany": null,
+        "defaultLocation": null,
         "trustLevel": "high"
     },
     {
-        "name": "Marketing Jobs",
-        "feedUrl": "https://www.marketingjobs.com/feed/",
-        "defaultCompany": "Various",
-        "defaultLocation": "US",
-        "trustLevel": "medium"
-    },
-    {
-        "name": "Content Marketing Institute",
-        "feedUrl": "https://contentmarketinginstitute.com/jobs/feed/",
-        "defaultCompany": "Various",
+        "name": "Indeed Remote Jobs",
+        "feedUrl": "https://www.indeed.com/rss?q=remote&l=",
+        "defaultCompany": null,
         "defaultLocation": "Remote",
+        "trustLevel": "medium"
+    },
+    {
+        "name": "Indeed Software Engineer",
+        "feedUrl": "https://www.indeed.com/rss?q=software+engineer&l=",
+        "defaultCompany": null,
+        "defaultLocation": "US",
+        "trustLevel": "medium"
+    },
+    {
+        "name": "Indeed Data Scientist",
+        "feedUrl": "https://www.indeed.com/rss?q=data+scientist&l=",
+        "defaultCompany": null,
+        "defaultLocation": "US",
+        "trustLevel": "medium"
+    },
+    {
+        "name": "Indeed Product Manager",
+        "feedUrl": "https://www.indeed.com/rss?q=product+manager&l=",
+        "defaultCompany": null,
+        "defaultLocation": "US",
+        "trustLevel": "medium"
+    },
+    {
+        "name": "Indeed UX Designer",
+        "feedUrl": "https://www.indeed.com/rss?q=ux+designer&l=",
+        "defaultCompany": null,
+        "defaultLocation": "US",
+        "trustLevel": "medium"
+    },
+    {
+        "name": "Indeed Marketing Manager",
+        "feedUrl": "https://www.indeed.com/rss?q=marketing+manager&l=",
+        "defaultCompany": null,
+        "defaultLocation": "US",
+        "trustLevel": "medium"
+    },
+    {
+        "name": "Crunchboard Tech Jobs",
+        "feedUrl": "https://www.crunchboard.com/jobs/feed",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "high"
+    },
+    {
+        "name": "Smashing Magazine Jobs",
+        "feedUrl": "https://jobs.smashingmagazine.com/rss",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "high"
+    },
+    {
+        "name": "Behance Jobs",
+        "feedUrl": "https://www.behance.net/joblist/rss",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "high"
+    },
+    {
+        "name": "Krop Creative Jobs",
+        "feedUrl": "https://www.krop.com/jobs/feed/",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "medium"
+    },
+    {
+        "name": "FlexJobs Remote",
+        "feedUrl": "https://www.flexjobs.com/rss/all",
+        "defaultCompany": null,
+        "defaultLocation": "Remote",
+        "trustLevel": "high"
+    },
+    {
+        "name": "Working Nomads",
+        "feedUrl": "https://www.workingnomads.co/jobs.rss",
+        "defaultCompany": null,
+        "defaultLocation": "Remote",
+        "trustLevel": "high"
+    },
+    {
+        "name": "Remote.co Jobs",
+        "feedUrl": "https://remote.co/remote-jobs/feed/",
+        "defaultCompany": null,
+        "defaultLocation": "Remote",
+        "trustLevel": "high"
+    },
+    {
+        "name": "JustRemote Jobs",
+        "feedUrl": "https://justremote.co/feed",
+        "defaultCompany": null,
+        "defaultLocation": "Remote",
+        "trustLevel": "medium"
+    },
+    {
+        "name": "Jobspresso",
+        "feedUrl": "https://jobspresso.co/feed/",
+        "defaultCompany": null,
+        "defaultLocation": "Remote",
+        "trustLevel": "high"
+    },
+    {
+        "name": "Dice Tech Jobs",
+        "feedUrl": "https://www.dice.com/rss/feeds/technology-jobs.xml",
+        "defaultCompany": null,
+        "defaultLocation": "US",
+        "trustLevel": "high"
+    },
+    {
+        "name": "TechCrunch Jobs",
+        "feedUrl": "https://techcrunch.com/jobs/feed/",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "high"
+    },
+    {
+        "name": "VentureBeat Jobs",
+        "feedUrl": "https://jobs.venturebeat.com/feed/",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "high"
+    },
+    {
+        "name": "The Muse Blog Jobs",
+        "feedUrl": "https://www.themuse.com/jobs/rss",
+        "defaultCompany": null,
+        "defaultLocation": "US",
+        "trustLevel": "high"
+    },
+    {
+        "name": "Built In Jobs",
+        "feedUrl": "https://builtin.com/jobs/rss",
+        "defaultCompany": null,
+        "defaultLocation": "US",
+        "trustLevel": "high"
+    },
+    {
+        "name": "Built In NYC",
+        "feedUrl": "https://www.builtinnyc.com/jobs/feed",
+        "defaultCompany": null,
+        "defaultLocation": "New York",
+        "trustLevel": "high"
+    },
+    {
+        "name": "Built In SF",
+        "feedUrl": "https://www.builtinsf.com/jobs/feed",
+        "defaultCompany": null,
+        "defaultLocation": "San Francisco",
+        "trustLevel": "high"
+    },
+    {
+        "name": "Built In LA",
+        "feedUrl": "https://www.builtinla.com/jobs/feed",
+        "defaultCompany": null,
+        "defaultLocation": "Los Angeles",
+        "trustLevel": "high"
+    },
+    {
+        "name": "Built In Chicago",
+        "feedUrl": "https://www.builtinchicago.org/jobs/feed",
+        "defaultCompany": null,
+        "defaultLocation": "Chicago",
+        "trustLevel": "high"
+    },
+    {
+        "name": "Built In Austin",
+        "feedUrl": "https://www.builtinaustin.com/jobs/feed",
+        "defaultCompany": null,
+        "defaultLocation": "Austin",
+        "trustLevel": "high"
+    },
+    {
+        "name": "Built In Boston",
+        "feedUrl": "https://www.builtinboston.com/jobs/feed",
+        "defaultCompany": null,
+        "defaultLocation": "Boston",
+        "trustLevel": "high"
+    },
+    {
+        "name": "Built In Seattle",
+        "feedUrl": "https://www.builtinseattle.com/jobs/feed",
+        "defaultCompany": null,
+        "defaultLocation": "Seattle",
+        "trustLevel": "high"
+    },
+    {
+        "name": "Built In Colorado",
+        "feedUrl": "https://www.builtincolorado.com/jobs/feed",
+        "defaultCompany": null,
+        "defaultLocation": "Colorado",
+        "trustLevel": "high"
+    },
+    {
+        "name": "Y Combinator Jobs",
+        "feedUrl": "https://news.ycombinator.com/jobs.rss",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "high"
+    },
+    {
+        "name": "Hacker News Who's Hiring",
+        "feedUrl": "https://hnhiring.com/feed",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "high"
+    },
+    {
+        "name": "Product Hunt Jobs",
+        "feedUrl": "https://www.producthunt.com/jobs/feed",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "high"
+    },
+    {
+        "name": "Startup Jobs",
+        "feedUrl": "https://startup.jobs/feed",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "medium"
+    },
+    {
+        "name": "Designer News Jobs",
+        "feedUrl": "https://www.designernews.co/jobs.rss",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "high"
+    },
+    {
+        "name": "WordPress Jobs",
+        "feedUrl": "https://jobs.wordpress.net/feed/",
+        "defaultCompany": null,
+        "defaultLocation": "Remote",
+        "trustLevel": "high"
+    },
+    {
+        "name": "Drupal Jobs",
+        "feedUrl": "https://jobs.drupal.org/rss.xml",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "medium"
+    },
+    {
+        "name": "Ruby Inside Jobs",
+        "feedUrl": "https://jobs.rubyinside.com/a/jobs/list/rss",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "medium"
+    },
+    {
+        "name": "Python Jobs",
+        "feedUrl": "https://www.python.org/jobs/feed/rss/",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "high"
+    },
+    {
+        "name": "Golang Jobs",
+        "feedUrl": "https://www.golangprojects.com/rss/golang-jobs.xml",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "medium"
+    },
+    {
+        "name": "Rust Jobs",
+        "feedUrl": "https://rustjobs.dev/feed.xml",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "medium"
+    },
+    {
+        "name": "iOS Dev Jobs",
+        "feedUrl": "https://iosdevjobs.com/feed/",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "medium"
+    },
+    {
+        "name": "Android Jobs",
+        "feedUrl": "https://androidjobs.io/feed/",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "medium"
+    },
+    {
+        "name": "AI Jobs",
+        "feedUrl": "https://aijobs.net/feed/",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "medium"
+    },
+    {
+        "name": "Machine Learning Jobs",
+        "feedUrl": "https://www.mlcareers.com/rss/jobs",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "medium"
+    },
+    {
+        "name": "Crypto Jobs",
+        "feedUrl": "https://cryptojobslist.com/feed.xml",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "medium"
+    },
+    {
+        "name": "Web3 Jobs",
+        "feedUrl": "https://web3.career/feed.xml",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "medium"
+    },
+    {
+        "name": "Climate Tech Jobs",
+        "feedUrl": "https://www.climatetechlist.com/feed/",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "high"
+    },
+    {
+        "name": "GreenJobs",
+        "feedUrl": "https://www.greenjobs.com/rss/all-jobs.xml",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "medium"
+    },
+    {
+        "name": "Healthcare IT Jobs",
+        "feedUrl": "https://www.healthcareitjobs.com/rss/jobs.aspx",
+        "defaultCompany": null,
+        "defaultLocation": "US",
+        "trustLevel": "medium"
+    },
+    {
+        "name": "EdSurge Jobs",
+        "feedUrl": "https://www.edsurge.com/jobs/feed",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "high"
+    },
+    {
+        "name": "Non-Profit Jobs",
+        "feedUrl": "https://www.idealist.org/en/jobs.rss",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "high"
+    },
+    {
+        "name": "Media Jobs",
+        "feedUrl": "https://www.journalismjobs.com/rss/jobs.xml",
+        "defaultCompany": null,
+        "defaultLocation": null,
         "trustLevel": "medium"
     }
 ]
