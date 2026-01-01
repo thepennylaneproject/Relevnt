@@ -404,35 +404,9 @@ h6, .text-lg { font-size: var(--text-lg); }
 
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   GOLD DUST ANIMATION (for hero illustrations)
+   [REMOVED] GOLD DUST ANIMATION
+   Removed to restore visual restraint. See VISUAL_IDENTITY_AUDIT.md A2.
    ═══════════════════════════════════════════════════════════════════════════ */
-
-.gold-dust {
-  position: relative;
-}
-
-.gold-dust::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(circle, var(--color-accent) 1px, transparent 1px);
-  background-size: 24px 24px;
-  opacity: 0.25;
-  mask-image: radial-gradient(ellipse 50% 70% at 60% 40%, black 10%, transparent 60%);
-  animation: dust-float 10s ease-in-out infinite;
-  pointer-events: none;
-}
-
-@keyframes dust-float {
-  0%, 100% {
-    transform: translateY(0) scale(1);
-    opacity: 0.25;
-  }
-  50% {
-    transform: translateY(-8px) scale(1.02);
-    opacity: 0.35;
-  }
-}
 
 
 /* ═══════════════════════════════════════════════════════════════════════════

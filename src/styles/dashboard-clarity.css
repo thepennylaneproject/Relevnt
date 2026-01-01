@@ -513,11 +513,7 @@
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    var(--color-accent) 0%,
-    var(--color-accent-hover) 100%
-  );
+  background: var(--color-accent);
   border-radius: var(--radius-full);
   transition: width 0.5s ease;
 }
@@ -877,15 +873,15 @@ button:focus-visible {
 /* COLOR-CODED PROGRESS BARS */
 
 .progress-fill--low {
-  background: linear-gradient(90deg, #dc2626 0%, #ef4444 100%);
+  background: var(--color-error);
 }
 
 .progress-fill--medium {
-  background: linear-gradient(90deg, #d97706 0%, #f59e0b 100%);
+  background: var(--color-warning);
 }
 
 .progress-fill--high {
-  background: linear-gradient(90deg, var(--sage-500) 0%, var(--sage-400) 100%);
+  background: var(--color-success);
 }
 
 .progress-value--warning {
