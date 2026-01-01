@@ -203,7 +203,6 @@ const config: Config = {
          ANIMATIONS
          ───────────────────────────────────────────────────────────────────── */
       animation: {
-        'dust-float': 'dust-float 10s ease-in-out infinite',
         'fade-in': 'fade-in 0.3s ease-out',
         'fade-in-up': 'fade-in-up 0.4s ease-out',
         'slide-in-right': 'slide-in-right 0.3s ease-out',
@@ -211,10 +210,6 @@ const config: Config = {
       },
       
       keyframes: {
-        'dust-float': {
-          '0%, 100%': { transform: 'translateY(0) scale(1)', opacity: '0.25' },
-          '50%': { transform: 'translateY(-8px) scale(1.02)', opacity: '0.35' },
-        },
         'fade-in': {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
@@ -250,38 +245,6 @@ const config: Config = {
   plugins: [
     // Custom plugin for Relevnt-specific utilities
     function({ addComponents, addUtilities, theme }: any) {
-      // Gold accent dot (for icons)
-      addComponents({
-        '.accent-dot': {
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            width: '4px',
-            height: '4px',
-            borderRadius: '50%',
-            backgroundColor: theme('colors.champagne.DEFAULT'),
-          },
-        },
-      });
-      
-      // Gold dust overlay utility
-      addUtilities({
-        '.gold-dust': {
-          position: 'relative',
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            inset: '0',
-            backgroundImage: `radial-gradient(circle, ${theme('colors.champagne.DEFAULT')} 1px, transparent 1px)`,
-            backgroundSize: '24px 24px',
-            opacity: '0.25',
-            maskImage: 'radial-gradient(ellipse 50% 70% at 60% 40%, black 10%, transparent 60%)',
-            animation: 'dust-float 10s ease-in-out infinite',
-            pointerEvents: 'none',
-          },
-        },
-      });
-      
       // Text selection utility
       addUtilities({
         '.selection-gold': {

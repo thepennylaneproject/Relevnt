@@ -47,7 +47,7 @@
 }
 
 .card-persona:hover {
-  border-color: var(--color-accent);
+  border-color: var(--color-graphite-faint);
 }
 
 .card-persona.active {
@@ -75,7 +75,7 @@
 }
 
 .option-button:hover {
-  border-color: var(--color-accent);
+  border-color: var(--color-graphite-faint);
 }
 
 .option-button .option-title {
@@ -183,13 +183,13 @@
 }
 
 .radio-card:hover .radio-card-content {
-  border-color: var(--color-accent);
+  border-color: var(--color-graphite-faint);
 }
 
 .radio-card input:checked + .radio-card-content {
-  border-color: var(--color-accent);
+  border-color: var(--color-graphite-faint);
   background: var(--color-bg-tertiary);
-  box-shadow: 0 0 12px var(--color-accent-glow);
+  box-shadow: var(--shadow-sm);
 }
 
 .radio-card-content h4 {
@@ -292,7 +292,7 @@
 
 .form-input:focus, .form-textarea:focus {
   outline: none;
-  border-color: var(--color-accent);
+  border-color: var(--color-graphite-faint);
 }
 
 .action-group {
