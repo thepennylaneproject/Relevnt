@@ -1,23 +1,23 @@
-import React from 'react'
-import { Navigate, Link, useNavigate } from 'react-router-dom'
-import PageBackground from '../components/shared/PageBackground'
-import { IconName, Icon } from '../components/ui/Icon'
-import { Container } from '../components/shared/Container'
-import { Button } from '../components/ui/Button'
-import { useAuth } from '../contexts/AuthContext'
-import { useApplications } from '../hooks/useApplications'
-import { useJobStats } from '../hooks/useJobStats'
-import { useWellnessMode } from '../hooks/useWellnessMode'
-import { WellnessCheckin } from '../components/dashboard/WellnessCheckin'
-import { getReadyUrl } from '../config/cross-product'
-import '../styles/dashboard-clarity.css'
+import React from "react";
+import { Navigate, Link, useNavigate } from "react-router-dom";
+import PageBackground from "../components/shared/PageBackground";
+import { IconName, Icon } from "../components/ui/Icon";
+import { Container } from "../components/shared/Container";
+import { Button } from "../components/ui/Button";
+import { useAuth } from "../contexts/AuthContext";
+import { useApplications } from "../hooks/useApplications";
+import { useJobStats } from "../hooks/useJobStats";
+import { useWellnessMode } from "../hooks/useWellnessMode";
+import { WellnessCheckin } from "../components/dashboard/WellnessCheckin";
+import { getReadyUrl } from "../config/cross-product";
+import "../styles/dashboard-clarity.css";
 
 // User state enum for adaptive UI
 enum UserState {
-  ZERO_APPLICATIONS = 'zero_applications',
-  ACTIVE_APPLICATIONS = 'active_applications',
-  IN_INTERVIEWS = 'in_interviews',
-  ALL_CAUGHT_UP = 'all_caught_up',
+  ZERO_APPLICATIONS = "zero_applications",
+  ACTIVE_APPLICATIONS = "active_applications",
+  IN_INTERVIEWS = "in_interviews",
+  ALL_CAUGHT_UP = "all_caught_up",
 }
 
 /**
@@ -36,11 +36,11 @@ enum UserState {
  */
 
 export default function DashboardPage(): JSX.Element {
-  const { user, loading: authLoading } = useAuth()
-  const { applications } = useApplications()
-  const { total } = useJobStats()
-  const { mode: wellnessMode } = useWellnessMode()
-  const navigate = useNavigate()
+  const { user, loading: authLoading } = useAuth();
+  const { applications } = useApplications();
+  const { total } = useJobStats();
+  const { mode: wellnessMode } = useWellnessMode();
+  const navigate = useNavigate();
 
   if (authLoading) {
     return (
@@ -52,11 +52,11 @@ export default function DashboardPage(): JSX.Element {
           </div>
         </Container>
       </PageBackground>
-    )
+    );
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />
+    return <Navigate to="/login" replace />;
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -64,26 +64,28 @@ export default function DashboardPage(): JSX.Element {
   // ───────────────────────────────────────────────────────────────────────────
 
   const activeApplications = applications.filter((a) =>
-    ['applied', 'interviewing', 'in-progress'].includes(a.status || '')
-  )
+    ["applied", "interviewing", "in-progress"].includes(a.status || "")
+  );
   const interviewingCount = applications.filter(
-    (a) => a.status === 'interviewing'
-  ).length
-  const appliedCount = applications.filter((a) => a.status === 'applied').length
-  const discoveredCount = total || 0
+    (a) => a.status === "interviewing"
+  ).length;
+  const appliedCount = applications.filter(
+    (a) => a.status === "applied"
+  ).length;
+  const discoveredCount = total || 0;
 
   // Determine user state for adaptive content
-  let userState = UserState.ZERO_APPLICATIONS
+  let userState = UserState.ZERO_APPLICATIONS;
   if (interviewingCount > 0) {
-    userState = UserState.IN_INTERVIEWS
+    userState = UserState.IN_INTERVIEWS;
   } else if (activeApplications.length > 0) {
-    userState = UserState.ACTIVE_APPLICATIONS
+    userState = UserState.ACTIVE_APPLICATIONS;
   } else if (applications.length > 0 && appliedCount === 0) {
-    userState = UserState.ALL_CAUGHT_UP
+    userState = UserState.ALL_CAUGHT_UP;
   }
 
   // Calculate profile completion (mock - would be from profile data)
-  const profileCompletion = 60 // Would come from actual profile data
+  const profileCompletion = 60; // Would come from actual profile data
 
   // ───────────────────────────────────────────────────────────────────────────
   // ADAPTIVE CONTENT BASED ON USER STATE
@@ -91,168 +93,208 @@ export default function DashboardPage(): JSX.Element {
 
   // Time-adaptive greeting
   const getGreeting = () => {
-    const hour = new Date().getHours()
-    if (hour < 12) return 'Good morning'
-    if (hour < 18) return 'Good afternoon'
-    return 'Good evening'
-  }
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 18) return "Good afternoon";
+    return "Good evening";
+  };
 
   // Primary CTA content
   const getPrimaryCTA = () => {
     switch (userState) {
       case UserState.ZERO_APPLICATIONS:
         return {
-          heading: 'Your next move',
-          title: 'Start your search',
-          description: 'Find roles aligned with your skills and goals.',
-          cta: 'Search roles',
-          ctaLink: '/jobs',
-          secondaryCta: 'Import resume',
-          secondaryLink: '/resumes',
-        }
+          heading: "Your next move",
+          title: "Start your search",
+          description: "Find roles aligned with your skills and goals.",
+          cta: "Search roles",
+          ctaLink: "/jobs",
+          secondaryCta: "Import resume",
+          secondaryLink: "/resumes",
+        };
       case UserState.ACTIVE_APPLICATIONS:
         return {
-          heading: 'Keep momentum',
-          title: `${appliedCount} application${appliedCount !== 1 ? 's' : ''} in progress`,
-          description: 'Responses typically arrive in 5–10 days. Send 2–3 more this week.',
-          cta: 'Find more roles',
-          ctaLink: '/jobs',
-          secondaryCta: 'Track applications',
-          secondaryLink: '/applications',
-        }
+          heading: "Keep momentum",
+          title: `${appliedCount} application${
+            appliedCount !== 1 ? "s" : ""
+          } in progress`,
+          description:
+            "Responses typically arrive in 5–10 days. Send 2–3 more this week.",
+          cta: "Find more roles",
+          ctaLink: "/jobs",
+          secondaryCta: "Track applications",
+          secondaryLink: "/applications",
+        };
       case UserState.IN_INTERVIEWS:
         return {
-          heading: 'Prepare to shine',
-          title: `${interviewingCount} interview${interviewingCount !== 1 ? 's' : ''} scheduled`,
-          description: 'Practice your responses and research each company.',
-          cta: 'Practice interviews',
-          ctaLink: getReadyUrl('/practice'),
+          heading: "Prepare to shine",
+          title: `${interviewingCount} interview${
+            interviewingCount !== 1 ? "s" : ""
+          } scheduled`,
+          description: "Practice your responses and research each company.",
+          cta: "Practice interviews",
+          ctaLink: getReadyUrl("/practice"),
           ctaIsExternal: true,
-          secondaryCta: 'View schedule',
-          secondaryLink: '/applications',
-        }
+          secondaryCta: "View schedule",
+          secondaryLink: "/applications",
+        };
       default:
         return {
-          heading: 'Rest and reflect',
+          heading: "Rest and reflect",
           title: "You're caught up",
-          description: 'Strengthen your profile or explore new opportunities.',
-          cta: 'Explore roles',
-          ctaLink: '/jobs',
-          secondaryCta: 'Improve profile',
-          secondaryLink: '/settings#profile',
-        }
+          description: "Strengthen your profile or explore new opportunities.",
+          cta: "Explore roles",
+          ctaLink: "/jobs",
+          secondaryCta: "Improve profile",
+          secondaryLink: "/settings#profile",
+        };
     }
-  }
+  };
 
   // Today's Priority items
-  const getTodaysPriorities = (): { icon: IconName; label: string; action: string; link: string; isExternal?: boolean }[] => {
-    const priorities: { icon: IconName; label: string; action: string; link: string; isExternal?: boolean }[] = []
+  const getTodaysPriorities = (): {
+    icon: IconName;
+    label: string;
+    action: string;
+    link: string;
+    isExternal?: boolean;
+  }[] => {
+    const priorities: {
+      icon: IconName;
+      label: string;
+      action: string;
+      link: string;
+      isExternal?: boolean;
+    }[] = [];
 
     if (userState === UserState.ZERO_APPLICATIONS) {
       priorities.push({
-        icon: 'search',
-        label: 'Discover roles',
-        action: '5 AI-curated picks',
-        link: '/jobs',
-      })
+        icon: "search",
+        label: "Discover roles",
+        action: "5 AI-curated picks",
+        link: "/jobs",
+      });
       priorities.push({
-        icon: 'scroll',
-        label: 'Resume check',
-        action: 'Quick optimization tips',
-        link: '/resumes',
-      })
+        icon: "scroll",
+        label: "Resume check",
+        action: "Quick optimization tips",
+        link: "/resumes",
+      });
     } else if (userState === UserState.ACTIVE_APPLICATIONS) {
       priorities.push({
-        icon: 'briefcase',
-        label: 'Follow up',
+        icon: "briefcase",
+        label: "Follow up",
         action: `${appliedCount} pending responses`,
-        link: '/applications',
-      })
+        link: "/applications",
+      });
       priorities.push({
-        icon: 'microphone',
-        label: 'Stay sharp',
-        action: 'Practice top questions',
-        link: getReadyUrl('/practice'),
+        icon: "microphone",
+        label: "Stay sharp",
+        action: "Practice top questions",
+        link: getReadyUrl("/practice"),
         isExternal: true,
-      })
+      });
     } else if (userState === UserState.IN_INTERVIEWS) {
       priorities.push({
-        icon: 'microphone',
-        label: 'Interview prep',
-        action: 'Review company research',
-        link: getReadyUrl('/practice'),
+        icon: "microphone",
+        label: "Interview prep",
+        action: "Review company research",
+        link: getReadyUrl("/practice"),
         isExternal: true,
-      })
+      });
       priorities.push({
-        icon: 'book',
-        label: 'Company intel',
-        action: 'Key talking points',
-        link: '/jobs',
-      })
+        icon: "book",
+        label: "Company intel",
+        action: "Key talking points",
+        link: "/jobs",
+      });
     }
 
     // Always suggest profile improvement if not complete
     if (profileCompletion < 100) {
       priorities.push({
-        icon: 'stars',
-        label: 'Profile strength',
+        icon: "stars",
+        label: "Profile strength",
         action: `${profileCompletion}% → Improve`,
-        link: '/settings#profile',
-      })
+        link: "/settings#profile",
+      });
     }
 
-    return priorities.slice(0, 3)
-  }
+    return priorities.slice(0, 3);
+  };
 
   // Foundation cards
-  const getFoundationCards = (): { icon: IconName; title: string; description: string; cta: string; ctaLink: string; sublabel?: string }[] => [
+  const getFoundationCards = (): {
+    icon: IconName;
+    title: string;
+    description: string;
+    cta: string;
+    ctaLink: string;
+    sublabel?: string;
+  }[] => [
     {
-      icon: 'book',
-      title: 'Learn your market',
-      description: 'Understand industry trends and company needs.',
-      cta: 'Explore insights',
-      ctaLink: '/jobs',
-      sublabel: 'Suggested for you',
+      icon: "book",
+      title: "Learn your market",
+      description: "Understand industry trends and company needs.",
+      cta: "Explore insights",
+      ctaLink: "/jobs",
+      sublabel: "Suggested for you",
     },
     {
-      icon: 'scroll',
-      title: 'Polish your resume',
-      description: 'Make sure your resume stands out to recruiters.',
-      cta: 'Build resume',
-      ctaLink: '/resumes',
-      sublabel: profileCompletion < 80 ? `Resume strength: ${profileCompletion}/100` : 'Looking good',
+      icon: "scroll",
+      title: "Polish your resume",
+      description: "Make sure your resume stands out to recruiters.",
+      cta: "Build resume",
+      ctaLink: "/resumes",
+      sublabel:
+        profileCompletion < 80
+          ? `Resume strength: ${profileCompletion}/100`
+          : "Looking good",
     },
-  ]
+  ];
 
   // Quick actions
-  const getQuickActions = (): { icon: IconName; label: string; link: string; isExternal?: boolean }[] => [
-    { icon: 'search', label: 'Search saved filters', link: '/jobs' },
-    { icon: 'scroll', label: 'Upload resume', link: '/resumes' },
-    { icon: 'microphone', label: 'Mock interview', link: '/interview-prep' },
-    { icon: 'stars', label: 'Not ready? Get prepared', link: getReadyUrl('/'), isExternal: true },
-  ]
+  const getQuickActions = (): {
+    icon: IconName;
+    label: string;
+    link: string;
+    isExternal?: boolean;
+  }[] => [
+    { icon: "search", label: "Search saved filters", link: "/jobs" },
+    { icon: "scroll", label: "Upload resume", link: "/resumes" },
+    { icon: "microphone", label: "Mock interview", link: "/interview-prep" },
+    {
+      icon: "stars",
+      label: "Not ready? Get prepared",
+      link: getReadyUrl("/"),
+      isExternal: true,
+    },
+  ];
 
   // Momentum message
   const getMomentumMessage = () => {
     if (discoveredCount > 0 && appliedCount === 0) {
-      return `You explored ${discoveredCount} role${discoveredCount !== 1 ? 's' : ''} yesterday—ready to apply?`
+      return `You explored ${discoveredCount} role${
+        discoveredCount !== 1 ? "s" : ""
+      } yesterday—ready to apply?`;
     }
     if (appliedCount > 0) {
-      return `${appliedCount} application${appliedCount !== 1 ? 's' : ''} sent—keep the momentum going!`
+      return `${appliedCount} application${
+        appliedCount !== 1 ? "s" : ""
+      } sent—keep the momentum going!`;
     }
-    return null
-  }
+    return null;
+  };
 
-  const primaryCTA = getPrimaryCTA()
-  const todaysPriorities = getTodaysPriorities()
-  const foundationCards = getFoundationCards()
-  const quickActions = getQuickActions()
-  const momentumMessage = getMomentumMessage()
+  const primaryCTA = getPrimaryCTA();
+  const todaysPriorities = getTodaysPriorities();
+  const foundationCards = getFoundationCards();
+  const quickActions = getQuickActions();
+  const momentumMessage = getMomentumMessage();
 
   // ───────────────────────────────────────────────────────────────────────────
   // RENDER
   // ───────────────────────────────────────────────────────────────────────────
-
 
   return (
     <PageBackground>
@@ -279,7 +321,9 @@ export default function DashboardPage(): JSX.Element {
               <div className="primary-cta-header">
                 <span className="primary-cta-label">{primaryCTA.heading}</span>
                 <h2 className="primary-cta-title">{primaryCTA.title}</h2>
-                <p className="primary-cta-description">{primaryCTA.description}</p>
+                <p className="primary-cta-description">
+                  {primaryCTA.description}
+                </p>
               </div>
               <div className="primary-cta-actions">
                 {primaryCTA.ctaIsExternal ? (
@@ -314,26 +358,42 @@ export default function DashboardPage(): JSX.Element {
           </section>
 
           {/* ═══════════════════════════════════════════════════════════════════
-              SECTION 2: TODAY'S PRIORITY MICRO-MODULE
+              SECTION 2: NEXT STEPS (Merged: Priority + Quick Actions)
           ═══════════════════════════════════════════════════════════════════ */}
-          {todaysPriorities.length > 0 && (
-            <section className="todays-priority-section">
-              <h3 className="section-header">
-                <Icon name="compass" size="sm" />
-                Today's priorities
-              </h3>
-              <div className="priority-cards">
-                {todaysPriorities.map((item, idx) => (
+          <section className="next-steps-section">
+            <h3 className="section-header">
+              <Icon name="compass" size="sm" />
+              Next steps
+            </h3>
+
+            {/* Priority items (adaptive based on user state) */}
+            {todaysPriorities.length > 0 && (
+              <div className="next-steps-priorities">
+                {todaysPriorities.map((item, idx) =>
                   item.isExternal ? (
-                    <a key={idx} href={item.link} className="priority-card" target="_blank" rel="noopener noreferrer">
+                    <a
+                      key={idx}
+                      href={item.link}
+                      className="priority-card"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       <div className="priority-card-icon">
                         <Icon name={item.icon} size="md" />
                       </div>
                       <div className="priority-card-content">
-                        <span className="priority-card-label">{item.label}</span>
-                        <span className="priority-card-action">{item.action}</span>
+                        <span className="priority-card-label">
+                          {item.label}
+                        </span>
+                        <span className="priority-card-action">
+                          {item.action}
+                        </span>
                       </div>
-                      <Icon name="external-link" size="sm" className="priority-arrow" />
+                      <Icon
+                        name="external-link"
+                        size="sm"
+                        className="priority-arrow"
+                      />
                     </a>
                   ) : (
                     <Link key={idx} to={item.link} className="priority-card">
@@ -341,32 +401,42 @@ export default function DashboardPage(): JSX.Element {
                         <Icon name={item.icon} size="md" />
                       </div>
                       <div className="priority-card-content">
-                        <span className="priority-card-label">{item.label}</span>
-                        <span className="priority-card-action">{item.action}</span>
+                        <span className="priority-card-label">
+                          {item.label}
+                        </span>
+                        <span className="priority-card-action">
+                          {item.action}
+                        </span>
                       </div>
-                      <Icon name="chevron-right" size="sm" className="priority-arrow" />
+                      <Icon
+                        name="chevron-right"
+                        size="sm"
+                        className="priority-arrow"
+                      />
                     </Link>
                   )
-                ))}
+                )}
               </div>
-            </section>
-          )}
+            )}
 
-          {/* ═══════════════════════════════════════════════════════════════════
-              SECTION 3: QUICK ACTIONS ROW
-          ═══════════════════════════════════════════════════════════════════ */}
-          <section className="quick-actions-section quick-actions-section--prominent">
-            <h3 className="section-header">
-              <Icon name="zap" size="sm" />
-              Quick actions
-            </h3>
+            {/* Quick actions row */}
             <div className="quick-actions-row">
-              {quickActions.map((action, idx) => (
+              {quickActions.map((action, idx) =>
                 action.isExternal ? (
-                  <a key={idx} href={action.link} className="quick-action-btn" target="_blank" rel="noopener noreferrer">
+                  <a
+                    key={idx}
+                    href={action.link}
+                    className="quick-action-btn"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <Icon name={action.icon} size="sm" />
                     <span>{action.label}</span>
-                    <Icon name="external-link" size="xs" className="ml-1 opacity-60" />
+                    <Icon
+                      name="external-link"
+                      size="xs"
+                      className="ml-1 opacity-60"
+                    />
                   </a>
                 ) : (
                   <Link key={idx} to={action.link} className="quick-action-btn">
@@ -374,7 +444,7 @@ export default function DashboardPage(): JSX.Element {
                     <span>{action.label}</span>
                   </Link>
                 )
-              ))}
+              )}
             </div>
           </section>
 
@@ -393,7 +463,9 @@ export default function DashboardPage(): JSX.Element {
                     <Icon name={card.icon} size="lg" />
                   </div>
                   <h4 className="foundation-card-title">{card.title}</h4>
-                  <p className="foundation-card-description">{card.description}</p>
+                  <p className="foundation-card-description">
+                    {card.description}
+                  </p>
                   <Link to={card.ctaLink} className="foundation-card-cta">
                     {card.cta}
                     <Icon name="chevron-right" size="sm" />
@@ -404,18 +476,20 @@ export default function DashboardPage(): JSX.Element {
           </section>
 
           {/* ═══════════════════════════════════════════════════════════════════
-              SECTION 5: PIPELINE STATUS
+              SECTION 4: YOUR PROGRESS (Merged: Pipeline + Progress Tracker)
           ═══════════════════════════════════════════════════════════════════ */}
-          <section className="pipeline-section">
+          <section className="your-progress-section">
             <h3 className="section-header">
               <Icon name="gauge" size="sm" />
-              Where you are in your search
+              Your progress
             </h3>
             <div className="pipeline-grid">
               {/* Pipeline stats would be refactored here to use HandDrawnIcon as well */}
               <Link
                 to="/jobs"
-                className={`pipeline-stat pipeline-stat--clickable ${discoveredCount === 0 ? 'is-empty' : ''}`}
+                className={`pipeline-stat pipeline-stat--clickable ${
+                  discoveredCount === 0 ? "is-empty" : ""
+                }`}
               >
                 <div className="pipeline-stat-icon">
                   <Icon name="seeds" size="sm" />
@@ -428,8 +502,12 @@ export default function DashboardPage(): JSX.Element {
                     </span>
                   ) : (
                     <>
-                      <span className="pipeline-stat-value">{discoveredCount}</span>
-                      <span className="pipeline-stat-subtext">roles explored</span>
+                      <span className="pipeline-stat-value">
+                        {discoveredCount}
+                      </span>
+                      <span className="pipeline-stat-subtext">
+                        roles explored
+                      </span>
                     </>
                   )}
                 </div>
@@ -437,7 +515,9 @@ export default function DashboardPage(): JSX.Element {
 
               <Link
                 to="/applications"
-                className={`pipeline-stat pipeline-stat--clickable ${appliedCount === 0 ? 'is-empty' : ''}`}
+                className={`pipeline-stat pipeline-stat--clickable ${
+                  appliedCount === 0 ? "is-empty" : ""
+                }`}
               >
                 <div className="pipeline-stat-icon">
                   <Icon name="paper-airplane" size="sm" />
@@ -445,11 +525,17 @@ export default function DashboardPage(): JSX.Element {
                 <div className="pipeline-stat-content">
                   <span className="pipeline-stat-label">Applied</span>
                   {appliedCount === 0 ? (
-                    <span className="pipeline-empty-hint">Waiting for your signal.</span>
+                    <span className="pipeline-empty-hint">
+                      Waiting for your signal.
+                    </span>
                   ) : (
                     <>
-                      <span className="pipeline-stat-value">{appliedCount}</span>
-                      <span className="pipeline-stat-subtext">applications sent</span>
+                      <span className="pipeline-stat-value">
+                        {appliedCount}
+                      </span>
+                      <span className="pipeline-stat-subtext">
+                        applications sent
+                      </span>
                     </>
                   )}
                 </div>
@@ -457,7 +543,9 @@ export default function DashboardPage(): JSX.Element {
 
               <Link
                 to="/applications?status=awaiting"
-                className={`pipeline-stat pipeline-stat--clickable ${appliedCount - interviewingCount === 0 ? 'is-empty' : ''}`}
+                className={`pipeline-stat pipeline-stat--clickable ${
+                  appliedCount - interviewingCount === 0 ? "is-empty" : ""
+                }`}
               >
                 <div className="pipeline-stat-icon">
                   <Icon name="candle" size="sm" />
@@ -468,8 +556,12 @@ export default function DashboardPage(): JSX.Element {
                     <span className="pipeline-empty-hint">—</span>
                   ) : (
                     <>
-                      <span className="pipeline-stat-value">{appliedCount - interviewingCount}</span>
-                      <span className="pipeline-stat-subtext">responses pending</span>
+                      <span className="pipeline-stat-value">
+                        {appliedCount - interviewingCount}
+                      </span>
+                      <span className="pipeline-stat-subtext">
+                        responses pending
+                      </span>
                     </>
                   )}
                 </div>
@@ -477,7 +569,9 @@ export default function DashboardPage(): JSX.Element {
 
               <Link
                 to="/applications?status=interviewing"
-                className={`pipeline-stat pipeline-stat--clickable ${interviewingCount === 0 ? 'is-empty' : 'is-active'}`}
+                className={`pipeline-stat pipeline-stat--clickable ${
+                  interviewingCount === 0 ? "is-empty" : "is-active"
+                }`}
               >
                 <div className="pipeline-stat-icon">
                   <Icon name="flower" size="sm" />
@@ -485,56 +579,69 @@ export default function DashboardPage(): JSX.Element {
                 <div className="pipeline-stat-content">
                   <span className="pipeline-stat-label">Interviews</span>
                   {interviewingCount === 0 ? (
-                    <span className="pipeline-empty-hint">Milestones await.</span>
+                    <span className="pipeline-empty-hint">
+                      Milestones await.
+                    </span>
                   ) : (
                     <>
-                      <span className="pipeline-stat-value">{interviewingCount}</span>
-                      <span className="pipeline-stat-subtext">active conversations</span>
+                      <span className="pipeline-stat-value">
+                        {interviewingCount}
+                      </span>
+                      <span className="pipeline-stat-subtext">
+                        active conversations
+                      </span>
                     </>
                   )}
                 </div>
               </Link>
             </div>
-          </section>
 
-          {/* ═══════════════════════════════════════════════════════════════════
-              SECTION 6: PROGRESS TRACKER
-          ═══════════════════════════════════════════════════════════════════ */}
-          <section className="progress-section">
+            {/* Profile progress bar */}
             <div className="progress-card">
               <div className="progress-header">
-                <span className="progress-label">
-                  Profile completeness
-                </span>
-                <span className={`progress-value ${profileCompletion < 80 ? 'progress-value--warning' : 'progress-value--good'}`}>
+                <span className="progress-label">Profile completeness</span>
+                <span
+                  className={`progress-value ${
+                    profileCompletion < 80
+                      ? "progress-value--warning"
+                      : "progress-value--good"
+                  }`}
+                >
                   {profileCompletion}%
                 </span>
               </div>
               <div className="progress-bar">
                 <div
-                  className={`progress-fill ${profileCompletion < 50 ? 'progress-fill--low' : profileCompletion < 80 ? 'progress-fill--medium' : 'progress-fill--high'}`}
+                  className={`progress-fill ${
+                    profileCompletion < 50
+                      ? "progress-fill--low"
+                      : profileCompletion < 80
+                      ? "progress-fill--medium"
+                      : "progress-fill--high"
+                  }`}
                   style={{ width: `${profileCompletion}%` }}
                 />
               </div>
               <div className="progress-footer">
                 <span className="progress-hint">
                   {profileCompletion < 50
-                    ? 'Add more details to stand out'
+                    ? "Add more details to stand out"
                     : profileCompletion < 80
-                      ? 'Almost there!'
-                      : 'Looking great!'}
+                    ? "Almost there!"
+                    : "Looking great!"}
                 </span>
                 <Link to="/settings#profile" className="progress-cta">
-                  {profileCompletion < 80 ? 'Improve profile' : 'View profile'} →
+                  {profileCompletion < 80 ? "Improve profile" : "View profile"}{" "}
+                  →
                 </Link>
               </div>
             </div>
           </section>
 
           {/* ═══════════════════════════════════════════════════════════════════
-              SECTION 7: WELLNESS CHECK (if gentle mode)
+              SECTION 5: WELLNESS CHECK (if gentle mode)
           ═══════════════════════════════════════════════════════════════════ */}
-          {wellnessMode === 'gentle' && (
+          {wellnessMode === "gentle" && (
             <section className="wellness-section">
               <WellnessCheckin />
             </section>
@@ -542,5 +649,5 @@ export default function DashboardPage(): JSX.Element {
         </div>
       </Container>
     </PageBackground>
-  )
+  );
 }
