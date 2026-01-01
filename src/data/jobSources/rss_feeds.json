@@ -439,5 +439,429 @@
         "defaultCompany": null,
         "defaultLocation": null,
         "trustLevel": "medium"
+    },
+    {
+        "name": "ProBlogger Jobs",
+        "feedUrl": "https://problogger.com/jobs/feed/",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "high",
+        "notes": "Content/writing jobs - US heavy"
+    },
+    {
+        "name": "Mediabistro Jobs",
+        "feedUrl": "https://www.mediabistro.com/jobs/feed/",
+        "defaultCompany": null,
+        "defaultLocation": "US",
+        "trustLevel": "high",
+        "notes": "Media, marketing, content jobs"
+    },
+    {
+        "name": "Content Marketing Institute Jobs",
+        "feedUrl": "https://contentmarketinginstitute.com/jobs/feed/",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "high",
+        "notes": "Marketing jobs"
+    },
+    {
+        "name": "MarketingHire",
+        "feedUrl": "https://www.marketinghire.com/rss/jobs",
+        "defaultCompany": null,
+        "defaultLocation": "US",
+        "trustLevel": "medium",
+        "notes": "Marketing-specific job board"
+    },
+    {
+        "name": "Mashable Jobs",
+        "feedUrl": "https://jobs.mashable.com/jobs/feed/",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "high",
+        "notes": "Tech and digital media jobs"
+    },
+    {
+        "name": "The Ladders",
+        "feedUrl": "https://www.theladders.com/jobs/feed/",
+        "defaultCompany": null,
+        "defaultLocation": "US",
+        "trustLevel": "high",
+        "notes": "Senior level jobs 100K+"
+    },
+    {
+        "name": "Wellfound (AngelList)",
+        "feedUrl": "https://wellfound.com/jobs/feed",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "high",
+        "notes": "Startup jobs - AngelList rebrand"
+    },
+    {
+        "name": "Remote OK RSS",
+        "feedUrl": "https://remoteok.com/remote-jobs.rss",
+        "defaultCompany": null,
+        "defaultLocation": "Remote",
+        "trustLevel": "high",
+        "notes": "Supplements the API source"
+    },
+    {
+        "name": "Remotive RSS",
+        "feedUrl": "https://remotive.com/remote-jobs/feed",
+        "defaultCompany": null,
+        "defaultLocation": "Remote",
+        "trustLevel": "high",
+        "notes": "Supplements the API source"
+    },
+    {
+        "name": "Landing.jobs",
+        "feedUrl": "https://landing.jobs/jobs.rss",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "medium",
+        "notes": "European tech jobs with some remote/US"
+    },
+    {
+        "name": "PowerToFly",
+        "feedUrl": "https://powertofly.com/jobs/feed/",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "high",
+        "notes": "Diversity-focused jobs"
+    },
+    {
+        "name": "Tech Ladies",
+        "feedUrl": "https://www.hiretechladies.com/jobs/feed",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "high",
+        "notes": "Women in tech jobs"
+    },
+    {
+        "name": "Diversify Tech",
+        "feedUrl": "https://www.diversifytech.co/jobs/feed",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "high",
+        "notes": "Underrepresented groups in tech"
+    },
+    {
+        "name": "No CS Degree",
+        "feedUrl": "https://www.nocsdegree.com/jobs/feed/",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "medium",
+        "notes": "Non-traditional tech jobs"
+    },
+    {
+        "name": "4 Day Week Jobs",
+        "feedUrl": "https://4dayweek.io/jobs/feed",
+        "defaultCompany": null,
+        "defaultLocation": null,
+        "trustLevel": "medium",
+        "notes": "Alternative work schedule jobs"
+    },
+    {
+        "name": "EU Remote Jobs",
+        "feedUrl": "https://euremotejobs.com/feed/",
+        "defaultCompany": null,
+        "defaultLocation": "Remote",
+        "trustLevel": "medium",
+        "notes": "EU timezone remote jobs"
+    },
+    {
+        "name": "Remote Leaf",
+        "feedUrl": "https://remoteleaf.com/feed/",
+        "defaultCompany": null,
+        "defaultLocation": "Remote",
+        "trustLevel": "medium",
+        "notes": "Curated remote jobs"
+    },
+    {
+        "name": "Entry Level Jobs",
+        "feedUrl": "https://www.yourfreecareertest.com/jobs/feed/",
+        "defaultCompany": null,
+        "defaultLocation": "US",
+        "trustLevel": "medium",
+        "notes": "Entry-level positions"
+    },
+    {
+        "name": "Indeed Marketing US",
+        "feedUrl": "https://www.indeed.com/rss?q=marketing&l=United+States",
+        "defaultCompany": null,
+        "defaultLocation": "US",
+        "trustLevel": "medium",
+        "notes": "Indeed marketing jobs feed"
+    },
+    {
+        "name": "Indeed Content Writer US",
+        "feedUrl": "https://www.indeed.com/rss?q=content+writer&l=United+States",
+        "defaultCompany": null,
+        "defaultLocation": "US",
+        "trustLevel": "medium",
+        "notes": "Indeed content writer jobs"
+    },
+    {
+        "name": "Indeed Social Media Manager US",
+        "feedUrl": "https://www.indeed.com/rss?q=social+media+manager&l=United+States",
+        "defaultCompany": null,
+        "defaultLocation": "US",
+        "trustLevel": "medium",
+        "notes": "Indeed social media jobs"
+    },
+    {
+        "name": "Indeed DevOps US",
+        "feedUrl": "https://www.indeed.com/rss?q=devops&l=United+States",
+        "defaultCompany": null,
+        "defaultLocation": "US",
+        "trustLevel": "medium",
+        "notes": "Indeed DevOps jobs"
+    },
+    {
+        "name": "Indeed Frontend Developer US",
+        "feedUrl": "https://www.indeed.com/rss?q=frontend+developer&l=United+States",
+        "defaultCompany": null,
+        "defaultLocation": "US",
+        "trustLevel": "medium",
+        "notes": "Indeed frontend jobs"
+    },
+    {
+        "name": "Indeed Backend Developer US",
+        "feedUrl": "https://www.indeed.com/rss?q=backend+developer&l=United+States",
+        "defaultCompany": null,
+        "defaultLocation": "US",
+        "trustLevel": "medium",
+        "notes": "Indeed backend jobs"
+    },
+    {
+        "name": "Craigslist SF Bay Area Jobs",
+        "feedUrl": "https://sfbay.craigslist.org/search/jjj?format=rss",
+        "defaultCompany": null,
+        "defaultLocation": "San Francisco, CA",
+        "trustLevel": "low",
+        "notes": "Craigslist SF Bay - all jobs"
+    },
+    {
+        "name": "Craigslist SF Software Jobs",
+        "feedUrl": "https://sfbay.craigslist.org/search/sof?format=rss",
+        "defaultCompany": null,
+        "defaultLocation": "San Francisco, CA",
+        "trustLevel": "low",
+        "notes": "Craigslist SF Bay - software jobs"
+    },
+    {
+        "name": "Craigslist New York Jobs",
+        "feedUrl": "https://newyork.craigslist.org/search/jjj?format=rss",
+        "defaultCompany": null,
+        "defaultLocation": "New York, NY",
+        "trustLevel": "low",
+        "notes": "Craigslist NYC - all jobs"
+    },
+    {
+        "name": "Craigslist New York Software Jobs",
+        "feedUrl": "https://newyork.craigslist.org/search/sof?format=rss",
+        "defaultCompany": null,
+        "defaultLocation": "New York, NY",
+        "trustLevel": "low",
+        "notes": "Craigslist NYC - software jobs"
+    },
+    {
+        "name": "Craigslist Los Angeles Jobs",
+        "feedUrl": "https://losangeles.craigslist.org/search/jjj?format=rss",
+        "defaultCompany": null,
+        "defaultLocation": "Los Angeles, CA",
+        "trustLevel": "low",
+        "notes": "Craigslist LA - all jobs"
+    },
+    {
+        "name": "Craigslist Chicago Jobs",
+        "feedUrl": "https://chicago.craigslist.org/search/jjj?format=rss",
+        "defaultCompany": null,
+        "defaultLocation": "Chicago, IL",
+        "trustLevel": "low",
+        "notes": "Craigslist Chicago - all jobs"
+    },
+    {
+        "name": "Craigslist Seattle Jobs",
+        "feedUrl": "https://seattle.craigslist.org/search/jjj?format=rss",
+        "defaultCompany": null,
+        "defaultLocation": "Seattle, WA",
+        "trustLevel": "low",
+        "notes": "Craigslist Seattle - all jobs"
+    },
+    {
+        "name": "Craigslist Seattle Software Jobs",
+        "feedUrl": "https://seattle.craigslist.org/search/sof?format=rss",
+        "defaultCompany": null,
+        "defaultLocation": "Seattle, WA",
+        "trustLevel": "low",
+        "notes": "Craigslist Seattle - software jobs"
+    },
+    {
+        "name": "Craigslist Boston Jobs",
+        "feedUrl": "https://boston.craigslist.org/search/jjj?format=rss",
+        "defaultCompany": null,
+        "defaultLocation": "Boston, MA",
+        "trustLevel": "low",
+        "notes": "Craigslist Boston - all jobs"
+    },
+    {
+        "name": "Craigslist Austin Jobs",
+        "feedUrl": "https://austin.craigslist.org/search/jjj?format=rss",
+        "defaultCompany": null,
+        "defaultLocation": "Austin, TX",
+        "trustLevel": "low",
+        "notes": "Craigslist Austin - all jobs"
+    },
+    {
+        "name": "Craigslist Denver Jobs",
+        "feedUrl": "https://denver.craigslist.org/search/jjj?format=rss",
+        "defaultCompany": null,
+        "defaultLocation": "Denver, CO",
+        "trustLevel": "low",
+        "notes": "Craigslist Denver - all jobs"
+    },
+    {
+        "name": "Craigslist Washington DC Jobs",
+        "feedUrl": "https://washingtondc.craigslist.org/search/jjj?format=rss",
+        "defaultCompany": null,
+        "defaultLocation": "Washington, DC",
+        "trustLevel": "low",
+        "notes": "Craigslist DC - all jobs"
+    },
+    {
+        "name": "Craigslist Atlanta Jobs",
+        "feedUrl": "https://atlanta.craigslist.org/search/jjj?format=rss",
+        "defaultCompany": null,
+        "defaultLocation": "Atlanta, GA",
+        "trustLevel": "low",
+        "notes": "Craigslist Atlanta - all jobs"
+    },
+    {
+        "name": "Craigslist Miami Jobs",
+        "feedUrl": "https://miami.craigslist.org/search/jjj?format=rss",
+        "defaultCompany": null,
+        "defaultLocation": "Miami, FL",
+        "trustLevel": "low",
+        "notes": "Craigslist Miami - all jobs"
+    },
+    {
+        "name": "Craigslist Dallas Jobs",
+        "feedUrl": "https://dallas.craigslist.org/search/jjj?format=rss",
+        "defaultCompany": null,
+        "defaultLocation": "Dallas, TX",
+        "trustLevel": "low",
+        "notes": "Craigslist Dallas - all jobs"
+    },
+    {
+        "name": "Craigslist Houston Jobs",
+        "feedUrl": "https://houston.craigslist.org/search/jjj?format=rss",
+        "defaultCompany": null,
+        "defaultLocation": "Houston, TX",
+        "trustLevel": "low",
+        "notes": "Craigslist Houston - all jobs"
+    },
+    {
+        "name": "Craigslist Phoenix Jobs",
+        "feedUrl": "https://phoenix.craigslist.org/search/jjj?format=rss",
+        "defaultCompany": null,
+        "defaultLocation": "Phoenix, AZ",
+        "trustLevel": "low",
+        "notes": "Craigslist Phoenix - all jobs"
+    },
+    {
+        "name": "Craigslist Philadelphia Jobs",
+        "feedUrl": "https://philadelphia.craigslist.org/search/jjj?format=rss",
+        "defaultCompany": null,
+        "defaultLocation": "Philadelphia, PA",
+        "trustLevel": "low",
+        "notes": "Craigslist Philadelphia - all jobs"
+    },
+    {
+        "name": "Craigslist Portland Jobs",
+        "feedUrl": "https://portland.craigslist.org/search/jjj?format=rss",
+        "defaultCompany": null,
+        "defaultLocation": "Portland, OR",
+        "trustLevel": "low",
+        "notes": "Craigslist Portland - all jobs"
+    },
+    {
+        "name": "Craigslist San Diego Jobs",
+        "feedUrl": "https://sandiego.craigslist.org/search/jjj?format=rss",
+        "defaultCompany": null,
+        "defaultLocation": "San Diego, CA",
+        "trustLevel": "low",
+        "notes": "Craigslist San Diego - all jobs"
+    },
+    {
+        "name": "Craigslist Minneapolis Jobs",
+        "feedUrl": "https://minneapolis.craigslist.org/search/jjj?format=rss",
+        "defaultCompany": null,
+        "defaultLocation": "Minneapolis, MN",
+        "trustLevel": "low",
+        "notes": "Craigslist Minneapolis - all jobs"
+    },
+    {
+        "name": "Craigslist Raleigh Jobs",
+        "feedUrl": "https://raleigh.craigslist.org/search/jjj?format=rss",
+        "defaultCompany": null,
+        "defaultLocation": "Raleigh, NC",
+        "trustLevel": "low",
+        "notes": "Craigslist Raleigh - all jobs"
+    },
+    {
+        "name": "Craigslist Detroit Jobs",
+        "feedUrl": "https://detroit.craigslist.org/search/jjj?format=rss",
+        "defaultCompany": null,
+        "defaultLocation": "Detroit, MI",
+        "trustLevel": "low",
+        "notes": "Craigslist Detroit - all jobs"
+    },
+    {
+        "name": "Craigslist Tampa Jobs",
+        "feedUrl": "https://tampa.craigslist.org/search/jjj?format=rss",
+        "defaultCompany": null,
+        "defaultLocation": "Tampa, FL",
+        "trustLevel": "low",
+        "notes": "Craigslist Tampa - all jobs"
+    },
+    {
+        "name": "Craigslist San Antonio Jobs",
+        "feedUrl": "https://sanantonio.craigslist.org/search/jjj?format=rss",
+        "defaultCompany": null,
+        "defaultLocation": "San Antonio, TX",
+        "trustLevel": "low",
+        "notes": "Craigslist San Antonio - all jobs"
+    },
+    {
+        "name": "Craigslist Orlando Jobs",
+        "feedUrl": "https://orlando.craigslist.org/search/jjj?format=rss",
+        "defaultCompany": null,
+        "defaultLocation": "Orlando, FL",
+        "trustLevel": "low",
+        "notes": "Craigslist Orlando - all jobs"
+    },
+    {
+        "name": "Craigslist Charlotte Jobs",
+        "feedUrl": "https://charlotte.craigslist.org/search/jjj?format=rss",
+        "defaultCompany": null,
+        "defaultLocation": "Charlotte, NC",
+        "trustLevel": "low",
+        "notes": "Craigslist Charlotte - all jobs"
+    },
+    {
+        "name": "Craigslist Salt Lake City Jobs",
+        "feedUrl": "https://saltlakecity.craigslist.org/search/jjj?format=rss",
+        "defaultCompany": null,
+        "defaultLocation": "Salt Lake City, UT",
+        "trustLevel": "low",
+        "notes": "Craigslist Salt Lake City - all jobs"
+    },
+    {
+        "name": "Craigslist Nashville Jobs",
+        "feedUrl": "https://nashville.craigslist.org/search/jjj?format=rss",
+        "defaultCompany": null,
+        "defaultLocation": "Nashville, TN",
+        "trustLevel": "low",
+        "notes": "Craigslist Nashville - all jobs"
     }
 ]
