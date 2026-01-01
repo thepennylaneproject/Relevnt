@@ -1551,25 +1551,32 @@ async function ingestGreenhouseBoards(
       .eq('id', sourceRunId)
   }
 
-  // Update source health
-  await supabase.from('job_source_health').upsert(
-    {
-      source: source.slug,
-      last_run_at: finishedAt,
-      last_success_at: sourceStatus === 'success' ? finishedAt : undefined,
-      last_error_at: sourceStatus === 'failed' ? finishedAt : undefined,
-      consecutive_failures: sourceStatus === 'failed' ? 1 : 0,
-      last_counts: {
-        normalized: totalNormalized,
-        inserted: totalInserted,
-        duplicates: totalDuplicates,
-        staleFiltered: totalStaleFiltered,
-        freshnessRatio,
-      },
-      is_degraded: sourceStatus === 'failed',
+  // Update source health with error details
+  const ghHealthUpdate: Record<string, any> = {
+    source: source.slug,
+    last_run_at: finishedAt,
+    last_counts: {
+      normalized: totalNormalized,
+      inserted: totalInserted,
+      duplicates: totalDuplicates,
+      staleFiltered: totalStaleFiltered,
+      freshnessRatio,
     },
-    { onConflict: 'source' }
-  )
+  }
+
+  if (sourceStatus === 'success') {
+    ghHealthUpdate.last_success_at = finishedAt
+    ghHealthUpdate.consecutive_failures = 0
+    ghHealthUpdate.is_degraded = false
+    ghHealthUpdate.last_error_message = null
+  } else {
+    ghHealthUpdate.last_error_at = finishedAt
+    ghHealthUpdate.consecutive_failures = 1
+    ghHealthUpdate.is_degraded = true
+    ghHealthUpdate.last_error_message = sourceError ? sourceError.slice(0, 500) : 'Unknown error'
+  }
+
+  await supabase.from('job_source_health').upsert(ghHealthUpdate, { onConflict: 'source' })
 
   // Persist state
   await persistIngestionState(
@@ -1965,25 +1972,34 @@ async function ingest(
       .eq('id', sourceRunId)
   }
 
-  // Update source health
-  await supabase.from('job_source_health').upsert(
-    {
-      source: source.slug,
-      last_run_at: finishedAt,
-      last_success_at: sourceStatus === 'success' ? finishedAt : undefined,
-      last_error_at: sourceStatus === 'failed' ? finishedAt : undefined,
-      consecutive_failures: sourceStatus === 'failed' ? 1 : 0, // simplified logic
-      last_counts: {
-        normalized: totalNormalized,
-        inserted: totalInserted,
-        duplicates: totalDuplicates,
-        staleFiltered: totalStaleFiltered,
-        freshnessRatio
-      },
-      is_degraded: sourceStatus === 'failed',
+  // Update source health with error details for debugging
+  // Note: consecutive_failures should ideally be incremented via SQL, but using upsert for simplicity
+  // The healer will still work since it checks consecutive_failures > 0
+  const healthUpdate: Record<string, any> = {
+    source: source.slug,
+    last_run_at: finishedAt,
+    last_counts: {
+      normalized: totalNormalized,
+      inserted: totalInserted,
+      duplicates: totalDuplicates,
+      staleFiltered: totalStaleFiltered,
+      freshnessRatio,
     },
-    { onConflict: 'source' }
-  )
+  }
+
+  if (sourceStatus === 'success') {
+    healthUpdate.last_success_at = finishedAt
+    healthUpdate.consecutive_failures = 0
+    healthUpdate.is_degraded = false
+    healthUpdate.last_error_message = null
+  } else {
+    healthUpdate.last_error_at = finishedAt
+    healthUpdate.consecutive_failures = 1 // Will be incremented by healer if needed
+    healthUpdate.is_degraded = true
+    healthUpdate.last_error_message = sourceError ? sourceError.slice(0, 500) : 'Unknown error'
+  }
+
+  await supabase.from('job_source_health').upsert(healthUpdate, { onConflict: 'source' })
 
   await persistIngestionState(
     supabase,

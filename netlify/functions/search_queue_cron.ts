@@ -19,8 +19,9 @@ import {
 } from './utils/searchQueue'
 import { ingestFromSource } from './ingest_jobs'
 
-const MAX_TASKS_PER_RUN = 15
-const MAX_CONCURRENT = 5
+// Increased for higher throughput - process more keyword searches per run
+const MAX_TASKS_PER_RUN = 50 // Increased from 15 for 3x more searches
+const MAX_CONCURRENT = 10 // Increased from 5 for parallel execution
 
 export default async () => {
     const startedAt = Date.now()

@@ -230,11 +230,11 @@ async function healFailingSources(
   const attempts: HealingAttempt[] = []
   
   // Find sources with failures that have auto-heal enabled
+  // Note: The ingestion sets is_degraded=true on failure, not is_healthy=false
   const { data: unhealthySources, error } = await supabase
     .from('job_source_health')
-    .select('source, consecutive_failures, last_failure_reason, last_failure_at, heal_attempts_24h')
-    .eq('is_healthy', false)
-    .eq('auto_heal_enabled', true)
+    .select('source, consecutive_failures, last_error_at, last_error_message, heal_attempts_24h')
+    .eq('is_degraded', true)
     .gt('consecutive_failures', 0)
     .lt('consecutive_failures', DISABLE_THRESHOLD)
   
@@ -251,7 +251,9 @@ async function healFailingSources(
   console.log(`ingestion_healer: found ${unhealthySources.length} sources to heal`)
   
   for (const source of unhealthySources) {
-    const failureType = classifyError(source.last_failure_reason)
+    // Classify error from stored error message if available
+    const errorMessage = (source as any).last_error_message as string | null
+    const failureType: FailureType = errorMessage ? classifyError(errorMessage) : 'consecutive_failures'
     const healAttempts = source.heal_attempts_24h || 0
     const action = determineHealingAction(failureType, source.consecutive_failures, healAttempts)
     
@@ -296,25 +298,25 @@ async function healFailingSources(
           // Disable the source
           await supabase
             .from('job_source_health')
-            .update({ 
-              auto_heal_enabled: false,
+            .update({
+              is_degraded: false, // Reset degraded status when disabling
               updated_at: new Date().toISOString(),
             })
             .eq('source', source.source)
-          
+
           await createEscalationAlert(
             supabase,
             source.source,
-            `Source disabled after ${source.consecutive_failures} consecutive failures. Last error: ${source.last_failure_reason}`
+            `Source disabled after ${source.consecutive_failures} consecutive failures. Last error at: ${source.last_error_at}`
           )
           result = 'escalated'
           break
-          
+
         case 'escalate':
           await createEscalationAlert(
             supabase,
             source.source,
-            `Auto-healing unable to recover source. Failure type: ${failureType}. Error: ${source.last_failure_reason}`
+            `Auto-healing unable to recover source. Failure type: ${failureType}. Consecutive failures: ${source.consecutive_failures}`
           )
           result = 'escalated'
           break
@@ -338,11 +340,12 @@ async function healFailingSources(
       source: source.source,
       failureType,
       action,
-      originalError: source.last_failure_reason || undefined,
+      originalError: errorMessage || `Consecutive failures: ${source.consecutive_failures}`,
       result,
-      meta: { 
+      meta: {
         consecutive_failures: source.consecutive_failures,
         heal_attempts_24h: healAttempts,
+        last_error_at: source.last_error_at,
       },
     }
     

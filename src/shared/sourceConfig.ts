@@ -57,33 +57,33 @@ export const GUARDRAIL_DEFAULTS = {
  */
 export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
     // =========================================================================
-    // KEEP, RESTRICT - Volume engine, needs strict freshness controls
+    // HIGH VOLUME - Jooble is a global aggregator with millions of jobs
     // =========================================================================
     jooble: {
         slug: 'jooble',
-        mode: 'fresh-only',
+        mode: 'wide-capped',
         enabled: true,
         maxAgeDays: 30,
-        maxPagesPerRun: 2,
-        resetPaginationEachRun: true,
-        trustLevel: 'low',
+        maxPagesPerRun: 10, // Increased from 2 - Jooble has huge inventory
+        resetPaginationEachRun: false, // Changed to resume for broader coverage
+        trustLevel: 'medium',
         trackFreshnessRatio: true,
-        notes: 'Jooble is a volume engine, not a freshness oracle. Treated incorrectly, it will poison relevance.',
+        notes: 'Jooble is a volume engine with global coverage. Use keyword rotation for diversity.',
     },
 
     // =========================================================================
-    // KEEP, CAP - Over-paginating archives, needs depth limits
+    // HIGH VOLUME - Reed UK is a major UK job board with deep archives
     // =========================================================================
     reed_uk: {
         slug: 'reed_uk',
         mode: 'wide-capped',
         enabled: true,
-        maxAgeDays: 21,
-        maxPagesPerRun: 5,
+        maxAgeDays: 30, // Increased from 21 for broader coverage
+        maxPagesPerRun: 15, // Increased from 5 - Reed has huge inventory
         resetPaginationEachRun: false,
         trustLevel: 'medium',
-        trackFreshnessRatio: false,
-        notes: 'Reed is excavating history. Cap pagination to prevent archive diving.',
+        trackFreshnessRatio: true,
+        notes: 'Reed UK is a major job board. Deep pagination with resume for maximum coverage.',
     },
 
     // =========================================================================
@@ -117,64 +117,64 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
     },
 
     // =========================================================================
-    // KEEP, LOW PRIORITY - Extremely low yield, high-quality niche input
+    // HIGH QUALITY - Himalayas is a curated remote job board
     // =========================================================================
     himalayas: {
         slug: 'himalayas',
-        mode: 'shallow-curated',
+        mode: 'wide-capped',
         enabled: true,
         maxAgeDays: 30,
-        maxPagesPerRun: 2,
+        maxPagesPerRun: 5, // Increased from 2 for better coverage
         resetPaginationEachRun: false,
-        cooldownMinutes: 360, // 6 hours between runs
+        // Removed cooldown - run with full frequency
         trustLevel: 'high',
-        trackFreshnessRatio: false,
-        notes: 'One good job is still one good job. Just not hourly.',
+        trackFreshnessRatio: true,
+        notes: 'Himalayas is a high-quality remote jobs board. No cooldown for maximum coverage.',
     },
 
     // =========================================================================
-    // KEEP, CONTROL - Bursty and inconsistent, needs cooldown
+    // HIGH VOLUME - Arbeitnow covers Europe + remote globally
     // =========================================================================
     arbeitnow: {
         slug: 'arbeitnow',
         mode: 'wide-capped',
         enabled: true,
         maxAgeDays: 30,
-        maxPagesPerRun: 3,
+        maxPagesPerRun: 10, // Increased from 3 for broader European coverage
         resetPaginationEachRun: false,
         trustLevel: 'medium',
         trackFreshnessRatio: true,
-        notes: 'Bursts are fine. Chaos is not.',
+        notes: 'Arbeitnow is a major European + remote job board. High volume potential.',
     },
 
     // =========================================================================
-    // FIX OR DISABLE - Returning zero, needs investigation
+    // HIGH VOLUME - RemoteOK is a popular remote job board with free API
     // =========================================================================
     remoteok: {
         slug: 'remoteok',
-        mode: 'fresh-only',
-        enabled: true, // ENABLED - API verified and working
+        mode: 'wide-capped',
+        enabled: true,
         maxAgeDays: 30,
-        maxPagesPerRun: 3,
+        maxPagesPerRun: 10, // Increased from 3 for deeper coverage
         resetPaginationEachRun: false,
         trustLevel: 'medium',
-        trackFreshnessRatio: false,
-        notes: 'RemoteOK free API. No authentication required. Returns remote-focused jobs.',
+        trackFreshnessRatio: true,
+        notes: 'RemoteOK free API with no auth. Popular remote-focused job board.',
     },
 
     // =========================================================================
-    // ENABLED - Credentials verified, API quota confirmed
+    // HIGH VOLUME - Adzuna is a major job aggregator with millions of listings
     // =========================================================================
     adzuna_us: {
         slug: 'adzuna_us',
         mode: 'wide-capped',
-        enabled: true, // ENABLED - Credentials verified
+        enabled: true,
         maxAgeDays: 30,
-        maxPagesPerRun: 1,
+        maxPagesPerRun: 5, // Increased from 1 - Adzuna has huge inventory
         resetPaginationEachRun: false,
         trustLevel: 'medium',
-        trackFreshnessRatio: false,
-        notes: 'Adzuna US aggregator. Requires ADZUNA_APP_ID and ADZUNA_APP_KEY env vars. Broad job coverage.',
+        trackFreshnessRatio: true,
+        notes: 'Adzuna is a major aggregator. API quota allows for higher volume.',
     },
 
     // =========================================================================
@@ -193,63 +193,63 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
     },
 
     // =========================================================================
-    // KEEP - US government jobs, stable source
+    // HIGH VOLUME - USAJobs has thousands of federal positions
     // =========================================================================
     usajobs: {
         slug: 'usajobs',
         mode: 'wide-capped',
         enabled: true,
         maxAgeDays: 30,
-        maxPagesPerRun: 3,
+        maxPagesPerRun: 10, // Increased from 3 - USAJobs has extensive inventory
         resetPaginationEachRun: false,
-        trustLevel: 'medium',
-        trackFreshnessRatio: false,
-        notes: 'US federal jobs. Stable and reliable.',
+        trustLevel: 'high', // Government source = high trust
+        trackFreshnessRatio: true,
+        notes: 'USAJobs federal jobs. Stable API with thousands of positions.',
     },
 
     // =========================================================================
-    // KEEP - Developer-focused, good quality
+    // HIGH VOLUME - FindWork is developer-focused with good inventory
     // =========================================================================
     findwork: {
         slug: 'findwork',
-        mode: 'shallow-curated',
+        mode: 'wide-capped',
         enabled: true,
         maxAgeDays: 30,
-        maxPagesPerRun: 3,
+        maxPagesPerRun: 10, // Increased from 3 for deeper coverage
         resetPaginationEachRun: false,
         trustLevel: 'medium',
-        trackFreshnessRatio: false,
-        notes: 'Developer-focused aggregator with decent quality.',
+        trackFreshnessRatio: true,
+        notes: 'FindWork is a developer-focused aggregator with good volume.',
     },
 
     // =========================================================================
-    // CareerOneStop - US government-backed job search aggregator
+    // HIGH VOLUME - CareerOneStop is US government-backed with nationwide coverage
     // =========================================================================
     careeronestop: {
         slug: 'careeronestop',
         mode: 'wide-capped',
-        enabled: true, // Controlled by ENABLE_SOURCE_CAREERONESTOP env var in ingest
+        enabled: true,
         maxAgeDays: 30,
-        maxPagesPerRun: 3, // Overridden by CAREERONESTOP_MAX_PAGES_PER_RUN env var
-        resetPaginationEachRun: true,
-        trustLevel: 'medium',
+        maxPagesPerRun: 10, // Increased from 3 - government source has extensive inventory
+        resetPaginationEachRun: false, // Changed to resume for broader coverage
+        trustLevel: 'high', // Government source = high trust
         trackFreshnessRatio: true,
-        notes: 'US government-backed job aggregator. Stable and reliable with nationwide coverage.',
+        notes: 'CareerOneStop is government-backed with nationwide coverage. High volume potential.',
     },
 
     // =========================================================================
-    // TheirStack - Tech job aggregator with technographic data
+    // HIGH VOLUME - TheirStack has tech job data with company technographics
     // =========================================================================
     theirstack: {
         slug: 'theirstack',
-        mode: 'fresh-only',
-        enabled: true, // Controlled by ENABLE_SOURCE_THEIRSTACK env var in ingest
+        mode: 'wide-capped',
+        enabled: true,
         maxAgeDays: 30,
-        maxPagesPerRun: 1, // Single request, uses limit param
-        resetPaginationEachRun: true,
+        maxPagesPerRun: 5, // Increased from 1 for more tech jobs
+        resetPaginationEachRun: false, // Resume pagination
         trustLevel: 'medium',
         trackFreshnessRatio: true,
-        notes: 'Tech job aggregator with technographic data. Uses POST body for search params.',
+        notes: 'TheirStack has tech job data with company technographics. Valuable for tech coverage.',
     },
 
     // =========================================================================
@@ -286,63 +286,63 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
     },
 
     // =========================================================================
-    // Fantastic Jobs - 10M+ jobs per month, hourly updates
+    // HIGHEST VOLUME - Fantastic Jobs has 10M+ jobs/month with hourly updates
     // =========================================================================
     fantastic: {
         slug: 'fantastic',
         mode: 'wide-capped',
         enabled: true,
         maxAgeDays: 30,
-        maxPagesPerRun: 5,
+        maxPagesPerRun: 20, // Increased from 5 - This is our highest volume source
         resetPaginationEachRun: false,
         trustLevel: 'medium',
         trackFreshnessRatio: true,
-        notes: 'Fantastic Jobs aggregator. 10M+ jobs/month with hourly updates. AI-enriched job data with 60+ fields.',
+        notes: 'Fantastic Jobs is our highest volume source. 10M+ jobs/month with AI-enriched data.',
     },
 
     // =========================================================================
-    // JobDataFeeds - 1-5K jobs per month aggregator
+    // HIGH VOLUME - JobDataFeeds has normalized job data with salary info
     // =========================================================================
     jobdatafeeds: {
         slug: 'jobdatafeeds',
         mode: 'wide-capped',
         enabled: true,
         maxAgeDays: 30,
-        maxPagesPerRun: 3,
+        maxPagesPerRun: 10, // Increased from 3 for better coverage
         resetPaginationEachRun: false,
         trustLevel: 'medium',
-        trackFreshnessRatio: false,
-        notes: 'JobDataFeeds aggregator with normalized job data and salary information.',
+        trackFreshnessRatio: true,
+        notes: 'JobDataFeeds has normalized job data with salary information.',
     },
 
     // =========================================================================
-    // CareerJet - 500-2K jobs per month aggregator
+    // HIGH VOLUME - CareerJet is a global job aggregator
     // =========================================================================
     careerjet: {
         slug: 'careerjet',
         mode: 'wide-capped',
         enabled: true,
         maxAgeDays: 30,
-        maxPagesPerRun: 3,
+        maxPagesPerRun: 10, // Increased from 3 for global coverage
         resetPaginationEachRun: false,
         trustLevel: 'medium',
         trackFreshnessRatio: true,
-        notes: 'CareerJet affiliate job aggregator. Multiple regions and job categories.',
+        notes: 'CareerJet is a global job aggregator with multiple regions.',
     },
 
     // =========================================================================
-    // WhatJobs - 500-1K jobs per month aggregator
+    // HIGH VOLUME - WhatJobs has diverse job postings globally
     // =========================================================================
     whatjobs: {
         slug: 'whatjobs',
         mode: 'wide-capped',
         enabled: true,
         maxAgeDays: 30,
-        maxPagesPerRun: 3,
+        maxPagesPerRun: 10, // Increased from 3 for better coverage
         resetPaginationEachRun: false,
         trustLevel: 'medium',
-        trackFreshnessRatio: false,
-        notes: 'WhatJobs API feed with diverse job postings.',
+        trackFreshnessRatio: true,
+        notes: 'WhatJobs API has diverse job postings globally.',
     },
 
     // =========================================================================

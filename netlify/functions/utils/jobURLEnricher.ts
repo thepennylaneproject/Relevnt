@@ -132,41 +132,55 @@ export async function enrichJobURL(
 
 /**
  * Batch enrich multiple jobs
+ * Results are returned in the same order as input jobs
  */
 export async function enrichJobURLs(
   jobs: NormalizedJob[],
   companyRegistry?: Map<string, Company>,
   concurrency: number = 5
 ): Promise<EnrichedJobURL[]> {
-  const results: EnrichedJobURL[] = []
-  const queue = [...jobs]
+  // Handle empty array case
+  if (jobs.length === 0) {
+    return []
+  }
+
+  // Pre-allocate results array to maintain order
+  const results: (EnrichedJobURL | null)[] = new Array(jobs.length).fill(null)
+  let nextIndex = 0
   let running = 0
+  let completed = 0
 
   return new Promise((resolve) => {
     const process = () => {
-      while (running < concurrency && queue.length > 0) {
+      while (running < concurrency && nextIndex < jobs.length) {
+        const currentIndex = nextIndex
+        const job = jobs[currentIndex]
+        nextIndex++
         running++
-        const job = queue.shift()!
 
         enrichJobURL(job, companyRegistry)
           .then((result) => {
-            results.push(result)
+            // Store result at the correct index to maintain order
+            results[currentIndex] = result
           })
           .catch((error) => {
             console.error('Batch enrichment error:', error)
-            results.push({
+            // Store fallback at the correct index
+            results[currentIndex] = {
               original_url: job.external_url,
               enriched_url: job.external_url,
               is_direct: false,
               enrichment_confidence: 0.0,
-            })
+            }
           })
           .finally(() => {
             running--
-            if (queue.length > 0 || running > 0) {
+            completed++
+            if (completed < jobs.length) {
               process()
             } else {
-              resolve(results)
+              // All jobs processed, resolve with results (filter out any remaining nulls as safety)
+              resolve(results.filter((r): r is EnrichedJobURL => r !== null))
             }
           })
       }
