@@ -237,7 +237,8 @@ function buildSourceUrl(
     const startRecord = (page - 1) * pageSize
 
     // Search parameters
-    const keyword = keywords !== 'software developer' ? keywords : '0' // '0' = all jobs
+    // '0' means all jobs in CareerOneStop API
+    const keyword = keywords && keywords !== 'software developer' ? keywords : '0'
     const locationParam = location || 'US' // Nationwide
     const radius = '0' // Not used for nationwide
     const sortColumns = 'DatePosted' // Sort by post date for freshness
