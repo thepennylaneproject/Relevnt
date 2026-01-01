@@ -9,6 +9,27 @@ import type { NormalizedJob } from '../../../src/shared/jobSources'
 import type { Company } from '../../../src/shared/companiesRegistry'
 import { detectATS } from './atsDetector'
 
+/**
+ * Sources that are aggregators - they already provide working apply links
+ * Skip expensive ATS detection for these sources since they return destination URLs
+ */
+const AGGREGATOR_SOURCES = new Set([
+  'himalayas',
+  'jooble',
+  'remotive',
+  'remoteok',
+  'findwork',
+  'arbeitnow',
+  'themuse',
+  'reed_uk',
+  'adzuna_us',
+  'careerjet',
+  'whatjobs',
+  'jobdatafeeds',
+  'fantastic',
+  'rss', // RSS feeds already have destination URLs
+])
+
 export interface EnrichedJobURL {
   original_url: string | null
   enriched_url: string | null
@@ -20,6 +41,7 @@ export interface EnrichedJobURL {
 
 /**
  * Check if a URL appears to be from a company's own ATS/careers site
+ * OR is from a known job board (which shouldn't trigger expensive ATS detection)
  */
 function isDirectCompanyURL(url: string | null, companyName: string | null): boolean {
   if (!url) return false
@@ -33,6 +55,27 @@ function isDirectCompanyURL(url: string | null, companyName: string | null): boo
   if (urlLower.includes('greenhouse.io/')) return true
   if (urlLower.includes('workday.com')) return true
   if (urlLower.includes('myworkdayjobs.com')) return true
+
+  // Known job boards - skip ATS detection (they're already aggregators, not direct)
+  // We treat these as "direct enough" to avoid expensive HTTP probing
+  if (urlLower.includes('jooble.org')) return true
+  if (urlLower.includes('himalayas.app')) return true
+  if (urlLower.includes('remotive.com')) return true
+  if (urlLower.includes('remoteok.com')) return true
+  if (urlLower.includes('findwork.dev')) return true
+  if (urlLower.includes('arbeitnow.com')) return true
+  if (urlLower.includes('themuse.com')) return true
+  if (urlLower.includes('reed.co.uk')) return true
+  if (urlLower.includes('indeed.com')) return true
+  if (urlLower.includes('linkedin.com')) return true
+  if (urlLower.includes('glassdoor.com')) return true
+  if (urlLower.includes('ziprecruiter.com')) return true
+  if (urlLower.includes('monster.com')) return true
+  if (urlLower.includes('careerbuilder.com')) return true
+  if (urlLower.includes('dice.com')) return true
+  if (urlLower.includes('stackoverflow.com/jobs')) return true
+  if (urlLower.includes('angel.co')) return true
+  if (urlLower.includes('wellfound.com')) return true
 
   // Career page patterns
   if (urlLower.includes('/careers')) return true
@@ -64,6 +107,18 @@ export async function enrichJobURL(
   const originalUrl = job.external_url
 
   try {
+    // Step 0: Skip enrichment for aggregator sources - they already provide working URLs
+    // This avoids expensive HTTP probing that causes function timeouts
+    if (job.source_slug && AGGREGATOR_SOURCES.has(job.source_slug)) {
+      return {
+        original_url: originalUrl,
+        enriched_url: originalUrl,
+        is_direct: false, // URLs from aggregators are not "direct" company URLs
+        enrichment_confidence: 0.8, // High confidence but not direct
+        enrichment_method: 'fallback',
+      }
+    }
+
     // Step 1: Check if already direct
     if (isDirectCompanyURL(originalUrl, job.company)) {
       return {
