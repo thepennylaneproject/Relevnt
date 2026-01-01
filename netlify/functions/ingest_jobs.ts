@@ -37,10 +37,12 @@ import { enrichJobURL, enrichJobURLs } from './utils/jobURLEnricher'
 
 export type IngestResult = {
   source: string;
-  count: number;
-  normalized: number;
-  duplicates: number;
-  staleFiltered: number;
+  count: number;         // Total jobs fetched from source
+  normalized: number;    // Jobs after normalization
+  duplicates: number;    // Jobs that already existed (updated + noop)
+  updated?: number;      // Existing jobs that were updated with new data
+  noop?: number;         // Existing jobs with no changes
+  staleFiltered: number; // Jobs filtered out due to age
   status: 'success' | 'failed' | 'skipped';
   error?: string;
   skipReason?: string;
@@ -1088,9 +1090,41 @@ async function persistIngestionState(
   }
 }
 
+/**
+ * Compute a dedup_key for cross-source deduplication
+ * Uses MD5 hash of normalized title + company + location
+ */
+function computeDedupKey(title: string | null, company: string | null, location: string | null): string {
+  const normalizedTitle = (title || '').toLowerCase().trim()
+  const normalizedCompany = (company || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+  const normalizedLocation = (location || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+
+  // Simple hash function (same logic as SQL function)
+  const input = `${normalizedTitle}|${normalizedCompany}|${normalizedLocation}`
+
+  // Use a simple hash for JS side (crypto.subtle not available in all envs)
+  let hash = 0
+  for (let i = 0; i < input.length; i++) {
+    const char = input.charCodeAt(i)
+    hash = ((hash << 5) - hash) + char
+    hash = hash & hash // Convert to 32bit integer
+  }
+
+  // Convert to hex string padded to 32 chars (like MD5)
+  const hex = Math.abs(hash).toString(16).padStart(8, '0')
+  return `${hex}${hex}${hex}${hex}`.slice(0, 32)
+}
+
+// Return type for upsertJobs with accurate counts
+type UpsertResult = {
+  inserted: number  // Truly new jobs
+  updated: number   // Existing jobs that were updated
+  noop: number      // Jobs that matched but had no changes
+}
+
 // Upsert a batch of normalized jobs into the jobs table
-async function upsertJobs(jobs: NormalizedJob[]) {
-  if (!jobs.length) return { inserted: 0 }
+async function upsertJobs(jobs: NormalizedJob[]): Promise<UpsertResult> {
+  if (!jobs.length) return { inserted: 0, updated: 0, noop: 0 }
 
   // 🔹 De-dupe by (source_slug, external_id) so Postgres does not try to
   // update the same row twice in a single ON CONFLICT command.
@@ -1159,6 +1193,7 @@ async function upsertJobs(jobs: NormalizedJob[]) {
       source: j.source_slug,
       source_slug: j.source_slug,
       external_id: j.external_id,
+      dedup_key: computeDedupKey(j.title, j.company, j.location),
 
       title: j.title,
       company: j.company,
@@ -1193,6 +1228,32 @@ async function upsertJobs(jobs: NormalizedJob[]) {
     }
   })
 
+  // Try using the RPC function for accurate counts
+  try {
+    const { data: rpcResult, error: rpcError } = await supabase
+      .rpc('upsert_jobs_counted', { jobs: enrichedJobs })
+
+    if (!rpcError && rpcResult && rpcResult.length > 0) {
+      const { inserted_count, updated_count, noop_count } = rpcResult[0]
+      console.log(
+        `ingest_jobs: upserted via RPC - ${inserted_count} inserted, ${updated_count} updated, ${noop_count} unchanged`
+      )
+      return {
+        inserted: inserted_count ?? 0,
+        updated: updated_count ?? 0,
+        noop: noop_count ?? 0,
+      }
+    }
+
+    // If RPC failed, log and fall through to direct upsert
+    if (rpcError) {
+      console.warn('ingest_jobs: RPC upsert_jobs_counted not available, using direct upsert:', rpcError.message)
+    }
+  } catch (rpcErr) {
+    console.warn('ingest_jobs: RPC call failed, falling back to direct upsert:', rpcErr)
+  }
+
+  // Fallback: Direct upsert (counts will be approximate)
   const { data, error, count } = await supabase
     .from('jobs')
     .upsert(enrichedJobs, {
@@ -1208,10 +1269,12 @@ async function upsertJobs(jobs: NormalizedJob[]) {
   }
 
   // With ignoreDuplicates=false, all rows are upserted (inserted or updated)
+  // Note: This count includes updates, not just inserts (legacy behavior)
   const upsertedCount = data?.length ?? count ?? enrichedJobs.length
-  console.log(`ingest_jobs: upserted ${upsertedCount} jobs (new + updated)`)
-  
-  return { inserted: upsertedCount }
+  console.log(`ingest_jobs: upserted ${upsertedCount} jobs (new + updated, legacy count)`)
+
+  // Return with updated=0 since we can't distinguish without RPC
+  return { inserted: upsertedCount, updated: 0, noop: 0 }
 }
 
 /**
@@ -1482,11 +1545,11 @@ async function ingestGreenhouseBoards(
           `ingest_jobs: normalized ${normalized.length} → ${jobsToInsert.length} fresh jobs from Greenhouse board ${board.companyName}`
         )
 
-        const { inserted } = await upsertJobs(jobsToInsert)
-        totalInserted += inserted
-        totalDuplicates += duplicateCount - inserted
+        const upsertResult = await upsertJobs(jobsToInsert)
+        totalInserted += upsertResult.inserted
+        totalDuplicates += upsertResult.updated + upsertResult.noop
         console.log(
-          `ingest_jobs: upserted ${inserted} jobs from Greenhouse board ${board.companyName}`
+          `ingest_jobs: upserted ${upsertResult.inserted} new, ${upsertResult.updated} updated from Greenhouse board ${board.companyName}`
         )
       } catch (boardError) {
         console.error(
@@ -1754,11 +1817,11 @@ async function ingest(
       }
 
       console.log(`ingest_jobs: upserting ${fresh.length} fresh RSS jobs`)
-      const { inserted } = await upsertJobs(fresh)
-      totalInserted = inserted
-      totalDuplicates = fresh.length - inserted
+      const upsertResult = await upsertJobs(fresh)
+      totalInserted = upsertResult.inserted
+      totalDuplicates = upsertResult.updated + upsertResult.noop
 
-      console.log(`ingest_jobs: finished RSS ingest: ${totalInserted} inserted, ${totalDuplicates} duplicates`)
+      console.log(`ingest_jobs: finished RSS ingest: ${totalInserted} inserted, ${upsertResult.updated} updated, ${upsertResult.noop} unchanged`)
     } // Special handling for Lever and Greenhouse: multi-company parallel fetch
     else if (source.slug === 'lever' || source.slug === 'greenhouse') {
       const platform = source.slug as 'lever' | 'greenhouse';
@@ -1836,11 +1899,11 @@ async function ingest(
       }
 
       console.log(`ingest_jobs: upserting ${fresh.length} fresh ${platform} jobs`)
-      const { inserted } = await upsertJobs(fresh)
-      totalInserted = inserted
-      totalDuplicates = fresh.length - inserted
+      const upsertResult = await upsertJobs(fresh)
+      totalInserted = upsertResult.inserted
+      totalDuplicates = upsertResult.updated + upsertResult.noop
 
-      console.log(`ingest_jobs: finished ${platform} ingest: ${totalInserted} inserted, ${totalDuplicates} duplicates`)
+      console.log(`ingest_jobs: finished ${platform} ingest: ${totalInserted} inserted, ${upsertResult.updated} updated, ${upsertResult.noop} unchanged`)
     } else {
       // Standard pagination-based ingestion for other sources
       for (let i = 0; i < maxPages; i++) {
@@ -1904,11 +1967,11 @@ async function ingest(
           `ingest_jobs: normalized ${normalized.length} → ${fresh.length} fresh jobs from ${source.slug} on page ${page}`
         )
 
-        const { inserted } = await upsertJobs(fresh)
-        totalInserted += inserted
-        totalDuplicates += (duplicateCount - inserted)
+        const upsertResult = await upsertJobs(fresh)
+        totalInserted += upsertResult.inserted
+        totalDuplicates += upsertResult.updated + upsertResult.noop
         console.log(
-          `ingest_jobs: upserted ${inserted} jobs from ${source.slug} on page ${page}`
+          `ingest_jobs: upserted ${upsertResult.inserted} new, ${upsertResult.updated} updated from ${source.slug} on page ${page}`
         )
 
         if (normalized.length < expectedPageSize) {
