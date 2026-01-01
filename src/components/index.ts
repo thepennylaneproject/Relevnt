@@ -8,4 +8,8 @@ export { AuthGuard } from './auth/AuthGuard';
 export { FeatureCard } from './features/FeatureCard';
 
 // Shared
-export { Button, Card, Container, LoadingSpinner, Input, Modal } from './shared';
+// MIGRATED: Button, Card, Input now imported from ui/
+export { Button } from './ui/Button';
+export { Card } from './ui/Card';
+export { Input } from './ui/Input';
+export { Container, LoadingSpinner, Modal } from './shared';
