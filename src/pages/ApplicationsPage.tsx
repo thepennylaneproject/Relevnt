@@ -41,7 +41,7 @@ const prettyStatusLabel = (status: ApplicationStatus | null | undefined): string
     case 'interviewing':
       return 'Interviewing'
     case 'in-progress':
-      return 'Active'
+      return 'In Review'
     case 'offer':
       return 'Offer'
     case 'accepted':
@@ -148,7 +148,7 @@ export default function ApplicationsPage() {
               </div>
               <div className="stat-item">
                 <span className="stat-value">{activeApplications}</span>
-                <span className="stat-label">Active</span>
+                <span className="stat-label">In Review</span>
               </div>
             </div>
 
@@ -170,7 +170,7 @@ export default function ApplicationsPage() {
                       statusKey === 'all'
                         ? 'All'
                         : statusKey === 'in-progress'
-                          ? 'Active'
+                          ? 'In Review'
                           : statusKey === 'interviewing'
                             ? 'Interview'
                             : statusKey.charAt(0).toUpperCase() + statusKey.slice(1)
@@ -236,7 +236,7 @@ export default function ApplicationsPage() {
                               <option value="">Untracked</option>
                               <option value="applied">Applied</option>
                               <option value="interviewing">Interviewing</option>
-                              <option value="in-progress">Active</option>
+                              <option value="in-progress">In Review</option>
                               <option value="offer">Offer</option>
                               <option value="accepted">Accepted</option>
                               <option value="rejected">Rejected</option>

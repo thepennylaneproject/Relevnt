@@ -1,10 +1,10 @@
 // src/components/onboarding/OnboardingWizard.tsx
 /**
  * Onboarding Wizard
- * Multi-step flow for new users to create their first persona
+ * Multi-step flow for new users to create their first job target
  * 
  * Steps:
- * 1. Welcome + Name your persona
+ * 1. Welcome + Name your job target
  * 2. Job titles/keywords
  * 3. Locations + Remote preference
  * 4. Salary expectations
@@ -126,7 +126,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
         navigate('/dashboard')
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create persona')
+      setError(err instanceof Error ? err.message : 'Failed to create job target')
     } finally {
       setLoading(false)
     }
@@ -169,10 +169,10 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
             </div>
             <h2>Welcome to Relevnt</h2>
             <p className="step-description">
-              Let's set up your job search persona. This helps our AI find the most relevant opportunities for you.
+              Let's set up your job target. This helps our AI find the most relevant opportunities for you.
             </p>
             <div className="form-group">
-              <label className="form-label">Name your search</label>
+              <label className="form-label">Name your job target</label>
               <input
                 type="text"
                 className="form-input"
@@ -180,7 +180,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
                 value={personaName}
                 onChange={(e) => setPersonaName(e.target.value)}
               />
-              <p className="form-hint">You can have multiple personas for different job types.</p>
+              <p className="form-hint">You can have multiple job targets for different types of roles.</p>
             </div>
           </div>
         )
@@ -371,7 +371,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
             </div>
             <h2>You're all set!</h2>
             <p className="step-description">
-              Here's a summary of your job search persona:
+              Here's a summary of your job target:
             </p>
             <div className="summary-card">
               <h3>{personaName}</h3>

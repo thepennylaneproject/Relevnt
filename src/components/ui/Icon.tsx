@@ -56,6 +56,7 @@ export type IconName =
   | 'wand'
   | 'list'
   | 'lighthouse'
+  | 'chevron-left'
   | 'external-link';
 
 export type IconSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'hero';
@@ -376,6 +377,13 @@ const iconDefinitions: Record<IconName, IconDefinition> = {
   'chevron-right': {
     paths: [
       'M24 16l16 16-16 16',
+    ],
+    dotPosition: { cx: 32, cy: 32 },
+  },
+
+  'chevron-left': {
+    paths: [
+      'M40 16l-16 16 16 16',
     ],
     dotPosition: { cx: 32, cy: 32 },
   },

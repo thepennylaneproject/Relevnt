@@ -6,9 +6,9 @@ import { Icon, IconName, IconSize } from './Icon';
  * HAND-DRAWN ICON COMPONENT
  * ═══════════════════════════════════════════════════════════════════════════
  * 
- * Supports two types of icons:
- * 1. SVG-based: Using the existing <Icon /> component which uses currentColor.
- * 2. PNG-based: Using the new hand-drawn charcoal assets with auto-inversion.
+ * @deprecated Use `Icon` from './Icon' for all standard icons.
+ * This component is kept only for ResumeBuilder PNG icons (resumeName prop).
+ * For SVG icons, import { Icon } from './Icon' directly.
  * 
  * Design System: "Midnight Journal" (Sketchbook/Chalkboard aesthetic)
  * ═══════════════════════════════════════════════════════════════════════════

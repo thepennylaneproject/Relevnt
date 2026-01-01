@@ -128,6 +128,16 @@ function AppInner() {
                   path="/admin"
                   element={isAuthed ? <AdminDashboard /> : <Navigate to="/login" replace />}
                 />
+
+                {/* Redirects for deprecated/moved routes */}
+                <Route
+                  path="/interview-prep"
+                  element={isAuthed ? <Navigate to="/settings#profile" replace /> : <Navigate to="/login" replace />}
+                />
+                <Route
+                  path="/profile-analyzer"
+                  element={isAuthed ? <Navigate to="/settings#profile" replace /> : <Navigate to="/login" replace />}
+                />
               </Routes>
             </Suspense>
           </AppLayout>

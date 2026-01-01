@@ -9,7 +9,6 @@ import { useApplications } from '../hooks/useApplications'
 import { useJobStats } from '../hooks/useJobStats'
 import { useWellnessMode } from '../hooks/useWellnessMode'
 import { WellnessCheckin } from '../components/dashboard/WellnessCheckin'
-import HandDrawnIcon from '../components/ui/HandDrawnIcon'
 import { getReadyUrl } from '../config/cross-product'
 import '../styles/dashboard-clarity.css'
 
@@ -127,7 +126,8 @@ export default function DashboardPage(): JSX.Element {
           title: `${interviewingCount} interview${interviewingCount !== 1 ? 's' : ''} scheduled`,
           description: 'Practice your responses and research each company.',
           cta: 'Practice interviews',
-          ctaLink: '/interview-prep',
+          ctaLink: getReadyUrl('/practice'),
+          ctaIsExternal: true,
           secondaryCta: 'View schedule',
           secondaryLink: '/applications',
         }
@@ -139,14 +139,14 @@ export default function DashboardPage(): JSX.Element {
           cta: 'Explore roles',
           ctaLink: '/jobs',
           secondaryCta: 'Improve profile',
-          secondaryLink: '/profile-analyzer',
+          secondaryLink: '/settings#profile',
         }
     }
   }
 
   // Today's Priority items
-  const getTodaysPriorities = (): { icon: IconName; label: string; action: string; link: string }[] => {
-    const priorities: { icon: IconName; label: string; action: string; link: string }[] = []
+  const getTodaysPriorities = (): { icon: IconName; label: string; action: string; link: string; isExternal?: boolean }[] => {
+    const priorities: { icon: IconName; label: string; action: string; link: string; isExternal?: boolean }[] = []
 
     if (userState === UserState.ZERO_APPLICATIONS) {
       priorities.push({
@@ -172,14 +172,16 @@ export default function DashboardPage(): JSX.Element {
         icon: 'microphone',
         label: 'Stay sharp',
         action: 'Practice top questions',
-        link: '/interview-prep',
+        link: getReadyUrl('/practice'),
+        isExternal: true,
       })
     } else if (userState === UserState.IN_INTERVIEWS) {
       priorities.push({
         icon: 'microphone',
         label: 'Interview prep',
         action: 'Review company research',
-        link: '/interview-prep',
+        link: getReadyUrl('/practice'),
+        isExternal: true,
       })
       priorities.push({
         icon: 'book',
@@ -195,7 +197,7 @@ export default function DashboardPage(): JSX.Element {
         icon: 'stars',
         label: 'Profile strength',
         action: `${profileCompletion}% → Improve`,
-        link: '/profile-analyzer',
+        link: '/settings#profile',
       })
     }
 
@@ -266,7 +268,7 @@ export default function DashboardPage(): JSX.Element {
               {/* Momentum message */}
               {momentumMessage && (
                 <p className="momentum-message">
-                  <HandDrawnIcon name="zap" size="sm" />
+                  <Icon name="zap" size="sm" />
                   {momentumMessage}
                 </p>
               )}
@@ -280,14 +282,26 @@ export default function DashboardPage(): JSX.Element {
                 <p className="primary-cta-description">{primaryCTA.description}</p>
               </div>
               <div className="primary-cta-actions">
-                <Button
-                  type="button"
-                  variant="primary"
-                  onClick={() => navigate(primaryCTA.ctaLink)}
-                >
-                  {primaryCTA.cta}
-                  <Icon name="chevron-right" size="sm" />
-                </Button>
+                {primaryCTA.ctaIsExternal ? (
+                  <a
+                    href={primaryCTA.ctaLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-primary"
+                  >
+                    {primaryCTA.cta}
+                    <Icon name="external-link" size="sm" />
+                  </a>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="primary"
+                    onClick={() => navigate(primaryCTA.ctaLink)}
+                  >
+                    {primaryCTA.cta}
+                    <Icon name="chevron-right" size="sm" />
+                  </Button>
+                )}
                 <Button
                   type="button"
                   variant="secondary"
@@ -305,21 +319,34 @@ export default function DashboardPage(): JSX.Element {
           {todaysPriorities.length > 0 && (
             <section className="todays-priority-section">
               <h3 className="section-header">
-                <HandDrawnIcon name="compass" size="sm" />
+                <Icon name="compass" size="sm" />
                 Today's priorities
               </h3>
               <div className="priority-cards">
                 {todaysPriorities.map((item, idx) => (
-                  <Link key={idx} to={item.link} className="priority-card">
-                    <div className="priority-card-icon">
-                      <HandDrawnIcon name={item.icon} size="md" />
-                    </div>
-                    <div className="priority-card-content">
-                      <span className="priority-card-label">{item.label}</span>
-                      <span className="priority-card-action">{item.action}</span>
-                    </div>
-                    <Icon name="chevron-right" size="sm" className="priority-arrow" />
-                  </Link>
+                  item.isExternal ? (
+                    <a key={idx} href={item.link} className="priority-card" target="_blank" rel="noopener noreferrer">
+                      <div className="priority-card-icon">
+                        <Icon name={item.icon} size="md" />
+                      </div>
+                      <div className="priority-card-content">
+                        <span className="priority-card-label">{item.label}</span>
+                        <span className="priority-card-action">{item.action}</span>
+                      </div>
+                      <Icon name="external-link" size="sm" className="priority-arrow" />
+                    </a>
+                  ) : (
+                    <Link key={idx} to={item.link} className="priority-card">
+                      <div className="priority-card-icon">
+                        <Icon name={item.icon} size="md" />
+                      </div>
+                      <div className="priority-card-content">
+                        <span className="priority-card-label">{item.label}</span>
+                        <span className="priority-card-action">{item.action}</span>
+                      </div>
+                      <Icon name="chevron-right" size="sm" className="priority-arrow" />
+                    </Link>
+                  )
                 ))}
               </div>
             </section>
@@ -330,20 +357,20 @@ export default function DashboardPage(): JSX.Element {
           ═══════════════════════════════════════════════════════════════════ */}
           <section className="quick-actions-section quick-actions-section--prominent">
             <h3 className="section-header">
-              <HandDrawnIcon name="zap" size="sm" />
+              <Icon name="zap" size="sm" />
               Quick actions
             </h3>
             <div className="quick-actions-row">
               {quickActions.map((action, idx) => (
                 action.isExternal ? (
                   <a key={idx} href={action.link} className="quick-action-btn" target="_blank" rel="noopener noreferrer">
-                    <HandDrawnIcon name={action.icon} size="sm" />
+                    <Icon name={action.icon} size="sm" />
                     <span>{action.label}</span>
                     <Icon name="external-link" size="xs" className="ml-1 opacity-60" />
                   </a>
                 ) : (
                   <Link key={idx} to={action.link} className="quick-action-btn">
-                    <HandDrawnIcon name={action.icon} size="sm" />
+                    <Icon name={action.icon} size="sm" />
                     <span>{action.label}</span>
                   </Link>
                 )
@@ -356,14 +383,14 @@ export default function DashboardPage(): JSX.Element {
           ═══════════════════════════════════════════════════════════════════ */}
           <section className="foundation-section">
             <h3 className="section-header">
-              <HandDrawnIcon name="seeds" size="sm" />
+              <Icon name="seeds" size="sm" />
               Build your foundation
             </h3>
             <div className="foundation-grid">
               {foundationCards.map((card, idx) => (
                 <div key={idx} className="foundation-card">
                   <div className="foundation-card-icon">
-                    <HandDrawnIcon name={card.icon} size="lg" />
+                    <Icon name={card.icon} size="lg" />
                   </div>
                   <h4 className="foundation-card-title">{card.title}</h4>
                   <p className="foundation-card-description">{card.description}</p>
@@ -381,7 +408,7 @@ export default function DashboardPage(): JSX.Element {
           ═══════════════════════════════════════════════════════════════════ */}
           <section className="pipeline-section">
             <h3 className="section-header">
-              <HandDrawnIcon name="gauge" size="sm" />
+              <Icon name="gauge" size="sm" />
               Where you are in your search
             </h3>
             <div className="pipeline-grid">
@@ -391,7 +418,7 @@ export default function DashboardPage(): JSX.Element {
                 className={`pipeline-stat pipeline-stat--clickable ${discoveredCount === 0 ? 'is-empty' : ''}`}
               >
                 <div className="pipeline-stat-icon">
-                  <HandDrawnIcon name="seeds" size="sm" />
+                  <Icon name="seeds" size="sm" />
                 </div>
                 <div className="pipeline-stat-content">
                   <span className="pipeline-stat-label">Discovered</span>
@@ -413,7 +440,7 @@ export default function DashboardPage(): JSX.Element {
                 className={`pipeline-stat pipeline-stat--clickable ${appliedCount === 0 ? 'is-empty' : ''}`}
               >
                 <div className="pipeline-stat-icon">
-                  <HandDrawnIcon name="paper-airplane" size="sm" />
+                  <Icon name="paper-airplane" size="sm" />
                 </div>
                 <div className="pipeline-stat-content">
                   <span className="pipeline-stat-label">Applied</span>
@@ -433,7 +460,7 @@ export default function DashboardPage(): JSX.Element {
                 className={`pipeline-stat pipeline-stat--clickable ${appliedCount - interviewingCount === 0 ? 'is-empty' : ''}`}
               >
                 <div className="pipeline-stat-icon">
-                  <HandDrawnIcon name="candle" size="sm" />
+                  <Icon name="candle" size="sm" />
                 </div>
                 <div className="pipeline-stat-content">
                   <span className="pipeline-stat-label">Awaiting</span>
@@ -453,7 +480,7 @@ export default function DashboardPage(): JSX.Element {
                 className={`pipeline-stat pipeline-stat--clickable ${interviewingCount === 0 ? 'is-empty' : 'is-active'}`}
               >
                 <div className="pipeline-stat-icon">
-                  <HandDrawnIcon name="flower" size="sm" />
+                  <Icon name="flower" size="sm" />
                 </div>
                 <div className="pipeline-stat-content">
                   <span className="pipeline-stat-label">Interviews</span>
@@ -497,7 +524,7 @@ export default function DashboardPage(): JSX.Element {
                       ? 'Almost there!'
                       : 'Looking great!'}
                 </span>
-                <Link to="/profile-analyzer" className="progress-cta">
+                <Link to="/settings#profile" className="progress-cta">
                   {profileCompletion < 80 ? 'Improve profile' : 'View profile'} →
                 </Link>
               </div>

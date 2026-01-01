@@ -138,12 +138,12 @@ export const copy = {
     pageSubtitle: "Track where you're at in each process, without losing the plot.",
     stats: {
       total: "Total",
-      active: "Active",
+      active: "In Review",
     },
     statuses: {
       all: "All",
       applied: "Applied",
-      inProgress: "In progress",
+      inProgress: "In Review",
       offer: "Offer",
       accepted: "Accepted",
       rejected: "Rejected",

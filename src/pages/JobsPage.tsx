@@ -41,7 +41,6 @@ type SortBy =
 const PAGE_SIZE = 50
 
 export default function JobsPage() {
-  const [activeTab, setActiveTab] = useState<'feed' | 'browse'>('feed')
   const { user } = useAuth()
   const { activePersona, personas, setActivePersona } = usePersonas()
   const { showToast } = useToast()
@@ -382,42 +381,30 @@ export default function JobsPage() {
     fetchSources()
   }, [fetchSources])
 
-  useEffect(() => {
-    if (activeTab === 'browse') {
-      fetchJobs()
-    }
-  }, [activeTab, fetchJobs])
+
 
   useEffect(() => {
     loadSavedJobs()
   }, [loadSavedJobs])
 
-  const renderFeedTab = () => {
-    if (!activePersona) {
-      return (
-        <div className="jobs-section-stack">
-          <section className="surface-card jobs-context">
-            <div className="jobs-context-main">
-              <div>
-                <h2 className="text-sm font-medium">No Active Persona</h2>
-                <p className="muted text-xs">
-                  Please select or create a persona using the switcher above to see your personalized feed.
-                </p>
-              </div>
-            </div>
-          </section>
-        </div>
-      )
-    }
-
+  const renderFeed = () => {
     return (
       <div className="feed-stack">
-        <div className="feed-header-explainer">
-          <p className="subtitle">
-            Jobs ranked by AI using your <strong>{activePersona.name}</strong> persona preferences.
-            Adjust the weights below to fine-tune your results.
-          </p>
-        </div>
+        {activePersona && (
+          <div className="feed-header-explainer">
+            <p className="subtitle">
+              Jobs ranked by AI using your <strong>{activePersona.name}</strong> job target.
+              {!personas.length && ' Create a job target to personalize your results.'}
+            </p>
+          </div>
+        )}
+        {!activePersona && (
+          <div className="feed-header-explainer">
+            <p className="subtitle">
+              Showing all available jobs. <a href="/settings#targeting" className="text-accent hover:underline">Set up a job target</a> to get AI-powered personalized rankings.
+            </p>
+          </div>
+        )}
 
         {/* Relevance Tuner with Feed Filters */}
         <RelevanceTuner 
@@ -724,54 +711,32 @@ export default function JobsPage() {
           {/* Page Header */}
           <div className="page-header">
             <div className="header-top">
-              <h1>Discover</h1>
+              <h1>Relevnt Feed</h1>
             </div>
-            <p>Let Relevnt bring the right roles to you.</p>
+            <p>Jobs matched to you, ranked by what matters most.</p>
           </div>
 
-          {/* Feed Controls: Persona + Tabs in one row */}
-          <div className="feed-controls">
-            <select
-              className="form-select"
-              value={activePersona?.id || ''}
-              onChange={(e) => setActivePersona(e.target.value)}
-            >
-              {personas.map(p => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-              {!personas.length && <option disabled>No personas found</option>}
-            </select>
-
-            <div className="tabs">
-              <button
-                type="button"
-                className={`tab ${activeTab === 'feed' ? 'active' : ''}`}
-                onClick={() => setActiveTab('feed')}
-                data-tooltip="AI-ranked jobs based on your persona, resume, and preferences"
-                aria-label="View your personalized Relevnt Feed"
-              >
-                {copy.jobs.tabs.feed}
-              </button>
-              <button
-                type="button"
-                className={`tab ${activeTab === 'browse' ? 'active' : ''}`}
-                onClick={() => setActiveTab('browse')}
-                data-tooltip="Browse all available jobs with filters — no AI ranking applied"
-                aria-label="Browse all jobs"
-              >
-                {copy.jobs.tabs.all}
-              </button>
+          {/* Job Target Selector (optional) */}
+          {personas.length > 0 && (
+            <div className="feed-controls">
+              <div className="job-target-selector">
+                <label className="text-xs font-medium muted mr-2">Job Target:</label>
+                <select
+                  className="form-select"
+                  value={activePersona?.id || ''}
+                  onChange={(e) => setActivePersona(e.target.value)}
+                >
+                  <option value="">All Jobs</option>
+                  {personas.map(p => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+              </div>
             </div>
-          </div>
-
-          {/* Transparency line for feed tab */}
-          {activeTab === 'feed' && activePersona && (
-            <p className="jobs-transparency-line">
-              {copy.jobs.transparencyLine}
-            </p>
           )}
 
-          {activeTab === 'feed' ? renderFeedTab() : renderBrowseTab()}
+          {/* Unified Feed */}
+          {renderFeed()}
         </div>
       </Container>
     </PageBackground>

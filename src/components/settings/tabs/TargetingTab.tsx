@@ -8,10 +8,12 @@
 import React, { useEffect, useState, useMemo } from 'react'
 import { usePersonas } from '../../../hooks/usePersonas'
 import { useJobPreferences, type JobPreferences } from '../../../hooks/useJobPreferences'
+import { useRelevanceTuner } from '../../../hooks/useRelevanceTuner'
 import { Button } from '../../ui/Button'
 import { useSettingsAutoSave, type AutoSaveStatus } from '../../../hooks/useSettingsAutoSave'
 import { Icon } from '../../ui/Icon'
 import type { UserPersona } from '../../../types/v2-personas'
+import type { WeightConfig } from '../../../types/v2-schema'
 
 interface TargetingTabProps {
     onAutoSaveStatusChange: (status: AutoSaveStatus) => void
@@ -43,6 +45,18 @@ export function TargetingTab({ onAutoSaveStatusChange }: TargetingTabProps) {
     const [skillInputFocused, setSkillInputFocused] = useState(false)
 
     const { status, triggerSave } = useSettingsAutoSave(save, { debounceMs: 800 })
+
+    // Ranking weights
+    const {
+        currentWeights,
+        setWeight,
+        loading: tunerLoading,
+    } = useRelevanceTuner()
+
+    const handleWeightChange = (field: keyof WeightConfig, value: number) => {
+        const normalizedValue = value / 100
+        setWeight(field, normalizedValue)
+    }
 
     useEffect(() => {
         onAutoSaveStatusChange(status)
@@ -306,6 +320,111 @@ export function TargetingTab({ onAutoSaveStatusChange }: TargetingTabProps) {
                 )}
             </section>
 
+            {/* ADVANCED: RANKING WEIGHTS */}
+            <section className="collapsible-section" style={{ marginTop: 24 }}>
+                <details>
+                    <summary className="collapsible-header" style={{ cursor: 'pointer' }}>
+                        <div className="collapsible-header-content">
+                            <Icon name="gauge" size="sm" />
+                            <div>
+                                <h2>Advanced: Ranking Weights</h2>
+                                <p className="muted text-sm">Fine-tune how jobs are ranked in your Relevnt Feed</p>
+                            </div>
+                        </div>
+                    </summary>
+
+                    <div className="collapsible-content">
+                        <div className="card">
+                            <p className="card-description" style={{ marginBottom: 16 }}>
+                                Adjust these sliders to prioritize what matters most. Higher values mean stronger influence on job rankings.
+                            </p>
+
+                            <div className="tuner-sliders">
+                                <div className="slider-group">
+                                    <div className="slider-header">
+                                        <label className="form-label">Skills Match</label>
+                                        <span className="slider-value">{Math.round(currentWeights.skill_weight * 100)}%</span>
+                                    </div>
+                                    <input 
+                                        type="range" 
+                                        className="form-slider" 
+                                        min="0" 
+                                        max="100" 
+                                        value={currentWeights.skill_weight * 100}
+                                        onChange={(e) => handleWeightChange('skill_weight', parseFloat(e.target.value))}
+                                    />
+                                    <p className="form-hint">Prioritize roles matching your skills</p>
+                                </div>
+
+                                <div className="slider-group">
+                                    <div className="slider-header">
+                                        <label className="form-label">Salary</label>
+                                        <span className="slider-value">{Math.round(currentWeights.salary_weight * 100)}%</span>
+                                    </div>
+                                    <input 
+                                        type="range" 
+                                        className="form-slider" 
+                                        min="0" 
+                                        max="100" 
+                                        value={currentWeights.salary_weight * 100}
+                                        onChange={(e) => handleWeightChange('salary_weight', parseFloat(e.target.value))}
+                                    />
+                                    <p className="form-hint">Higher pay floats to the top</p>
+                                </div>
+
+                                <div className="slider-group">
+                                    <div className="slider-header">
+                                        <label className="form-label">Location</label>
+                                        <span className="slider-value">{Math.round(currentWeights.location_weight * 100)}%</span>
+                                    </div>
+                                    <input 
+                                        type="range" 
+                                        className="form-slider" 
+                                        min="0" 
+                                        max="100" 
+                                        value={currentWeights.location_weight * 100}
+                                        onChange={(e) => handleWeightChange('location_weight', parseFloat(e.target.value))}
+                                    />
+                                    <p className="form-hint">Favor preferred cities or regions</p>
+                                </div>
+
+                                <div className="slider-group">
+                                    <div className="slider-header">
+                                        <label className="form-label">Remote-Friendly</label>
+                                        <span className="slider-value">{Math.round(currentWeights.remote_weight * 100)}%</span>
+                                    </div>
+                                    <input 
+                                        type="range" 
+                                        className="form-slider" 
+                                        min="0" 
+                                        max="100" 
+                                        value={currentWeights.remote_weight * 100}
+                                        onChange={(e) => handleWeightChange('remote_weight', parseFloat(e.target.value))}
+                                    />
+                                    <p className="form-hint">Remote-friendly roles rank higher</p>
+                                </div>
+
+                                <div className="slider-group">
+                                    <div className="slider-header">
+                                        <label className="form-label">Industry</label>
+                                        <span className="slider-value">{Math.round(currentWeights.industry_weight * 100)}%</span>
+                                    </div>
+                                    <input 
+                                        type="range" 
+                                        className="form-slider" 
+                                        min="0" 
+                                        max="100" 
+                                        value={currentWeights.industry_weight * 100}
+                                        onChange={(e) => handleWeightChange('industry_weight', parseFloat(e.target.value))}
+                                    />
+                                    <p className="form-hint">Lean toward industries you care about</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+            </section>
+
             <style>{targetingTabStyles}</style>
         </div>
     )
@@ -392,6 +511,50 @@ const targetingTabStyles = `
 
 .dropdown-item-new:hover {
     background: var(--color-accent-glow);
+}
+
+.tuner-sliders {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.slider-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.slider-value {
+    font-size: 0.875rem;
+    color: var(--color-accent);
+    font-weight: 600;
+}
+
+.form-hint {
+    font-size: 0.75rem;
+    color: var(--color-ink-tertiary);
+    margin: 0;
+}
+
+details summary::-webkit-details-marker {
+    display: none;
+}
+
+details summary::after {
+    content: '▸';
+    margin-left: auto;
+    transition: transform 0.2s;
+}
+
+details[open] summary::after {
+    transform: rotate(90deg);
 }
 `
 

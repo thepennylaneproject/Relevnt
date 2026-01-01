@@ -55,7 +55,7 @@ export default function ResumeFullViewPage() {
                     onClick={() => navigate('/resumes')}
                     className="gap-2"
                 >
-                    <Icon name="arrow-left" size="sm" />
+                    <Icon name="chevron-left" size="sm" />
                     Back to Library
                 </Button>
 
