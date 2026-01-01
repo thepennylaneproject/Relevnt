@@ -20,6 +20,7 @@ export interface EnrichedJobURL {
 
 /**
  * Check if a URL appears to be from a company's own ATS/careers site
+ * OR is from a known job board (which shouldn't trigger expensive ATS detection)
  */
 function isDirectCompanyURL(url: string | null, companyName: string | null): boolean {
   if (!url) return false
@@ -33,6 +34,27 @@ function isDirectCompanyURL(url: string | null, companyName: string | null): boo
   if (urlLower.includes('greenhouse.io/')) return true
   if (urlLower.includes('workday.com')) return true
   if (urlLower.includes('myworkdayjobs.com')) return true
+
+  // Known job boards - skip ATS detection (they're already aggregators, not direct)
+  // We treat these as "direct enough" to avoid expensive HTTP probing
+  if (urlLower.includes('jooble.org')) return true
+  if (urlLower.includes('himalayas.app')) return true
+  if (urlLower.includes('remotive.com')) return true
+  if (urlLower.includes('remoteok.com')) return true
+  if (urlLower.includes('findwork.dev')) return true
+  if (urlLower.includes('arbeitnow.com')) return true
+  if (urlLower.includes('themuse.com')) return true
+  if (urlLower.includes('reed.co.uk')) return true
+  if (urlLower.includes('indeed.com')) return true
+  if (urlLower.includes('linkedin.com')) return true
+  if (urlLower.includes('glassdoor.com')) return true
+  if (urlLower.includes('ziprecruiter.com')) return true
+  if (urlLower.includes('monster.com')) return true
+  if (urlLower.includes('careerbuilder.com')) return true
+  if (urlLower.includes('dice.com')) return true
+  if (urlLower.includes('stackoverflow.com/jobs')) return true
+  if (urlLower.includes('angel.co')) return true
+  if (urlLower.includes('wellfound.com')) return true
 
   // Career page patterns
   if (urlLower.includes('/careers')) return true
