@@ -90,12 +90,12 @@
 }
 
 .filter-btn:hover {
-  border-color: var(--color-accent);
+  border-color: var(--color-graphite-faint);
   background: var(--color-bg-tertiary);
 }
 
 .filter-btn.active {
-  border-color: var(--color-accent);
+  border-color: var(--color-graphite-faint);
   background: var(--color-bg-tertiary);
   color: var(--color-accent);
 }
@@ -191,7 +191,7 @@
 
 .app-status-select:focus {
   outline: none;
-  border-color: var(--color-accent);
+  border-color: var(--color-graphite-faint);
 }
 
 .app-timeline {
