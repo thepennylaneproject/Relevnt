@@ -9,6 +9,27 @@ import type { NormalizedJob } from '../../../src/shared/jobSources'
 import type { Company } from '../../../src/shared/companiesRegistry'
 import { detectATS } from './atsDetector'
 
+/**
+ * Sources that are aggregators - they already provide working apply links
+ * Skip expensive ATS detection for these sources since they return destination URLs
+ */
+const AGGREGATOR_SOURCES = new Set([
+  'himalayas',
+  'jooble',
+  'remotive',
+  'remoteok',
+  'findwork',
+  'arbeitnow',
+  'themuse',
+  'reed_uk',
+  'adzuna_us',
+  'careerjet',
+  'whatjobs',
+  'jobdatafeeds',
+  'fantastic',
+  'rss', // RSS feeds already have destination URLs
+])
+
 export interface EnrichedJobURL {
   original_url: string | null
   enriched_url: string | null
@@ -86,6 +107,18 @@ export async function enrichJobURL(
   const originalUrl = job.external_url
 
   try {
+    // Step 0: Skip enrichment for aggregator sources - they already provide working URLs
+    // This avoids expensive HTTP probing that causes function timeouts
+    if (job.source_slug && AGGREGATOR_SOURCES.has(job.source_slug)) {
+      return {
+        original_url: originalUrl,
+        enriched_url: originalUrl,
+        is_direct: false, // URLs from aggregators are not "direct" company URLs
+        enrichment_confidence: 0.8, // High confidence but not direct
+        enrichment_method: 'fallback',
+      }
+    }
+
     // Step 1: Check if already direct
     if (isDirectCompanyURL(originalUrl, job.company)) {
       return {
