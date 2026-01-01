@@ -339,7 +339,7 @@ export default function DashboardPage(): JSX.Element {
                   <a key={idx} href={action.link} className="quick-action-btn" target="_blank" rel="noopener noreferrer">
                     <HandDrawnIcon name={action.icon} size="sm" />
                     <span>{action.label}</span>
-                    <Icon name="external-link" size="xs" style={{ marginLeft: '4px', opacity: 0.6 }} />
+                    <Icon name="external-link" size="xs" className="ml-1 opacity-60" />
                   </a>
                 ) : (
                   <Link key={idx} to={action.link} className="quick-action-btn">

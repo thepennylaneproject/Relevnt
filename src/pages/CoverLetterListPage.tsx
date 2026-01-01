@@ -46,7 +46,7 @@ export default function CoverLetterListPage({ embedded = false }: { embedded?: b
                         onClick: () => navigate('/jobs'),
                         variant: 'secondary',
                     }}
-                    includePoetry={false}
+                    
                 />
             ) : (
                 <div className="resume-list">

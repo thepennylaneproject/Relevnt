@@ -52,6 +52,7 @@ export const HandDrawnIcon: React.FC<HandDrawnIconProps> = ({
   const getPixelSize = () => {
     if (typeof size === 'number') return size;
     switch (size) {
+      case 'xs': return 16;
       case 'sm': return 24;
       case 'md': return 32;
       case 'lg': return 48;

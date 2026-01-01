@@ -93,7 +93,7 @@ export function VoiceStyleTab({ onAutoSaveStatusChange }: VoiceStyleTabProps) {
             if (data) {
                 if (data.voice_preset === 'direct') setPreset('direct')
                 else if (data.voice_preset === 'professional_warm') setPreset('warm')
-                else if (data.voice_preset === 'academic') setPreset('technical')
+                else if (data.voice_preset === 'strategic') setPreset('strategic')
                 else setPreset('warm')
 
                 setFormality(data.voice_formality ?? 50)

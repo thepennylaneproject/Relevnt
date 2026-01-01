@@ -301,7 +301,7 @@ export function RelevntFeedPanel({
                     <Button
                       type="button"
                       variant="secondary"
-                      onClick={() => window.open(job.external_url, '_blank', 'noreferrer')}
+                      onClick={() => job.external_url && window.open(job.external_url, '_blank', 'noreferrer')}
                     >
                       View <Icon name="chevron-right" size="sm" />
                     </Button>

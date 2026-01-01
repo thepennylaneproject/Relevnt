@@ -55,9 +55,10 @@ export type IconName =
   | 'map-pin'
   | 'wand'
   | 'list'
-  | 'lighthouse';
+  | 'lighthouse'
+  | 'external-link';
 
-export type IconSize = 'sm' | 'md' | 'lg' | 'xl' | 'hero';
+export type IconSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'hero';
 
 export interface IconProps {
   name: IconName;
@@ -74,6 +75,7 @@ export interface IconProps {
 // ═══════════════════════════════════════════════════════════════════════════
 
 const sizeMap: Record<IconSize, { width: number; strokeWidth: number; dotSize: number }> = {
+  xs: { width: 16, strokeWidth: 1.5, dotSize: 1.5 },
   sm: { width: 20, strokeWidth: 1.5, dotSize: 2 },
   md: { width: 24, strokeWidth: 1.5, dotSize: 3 },
   lg: { width: 32, strokeWidth: 1.5, dotSize: 4 },
@@ -457,6 +459,14 @@ const iconDefinitions: Record<IconName, IconDefinition> = {
       'M22 13h30M22 32h30M22 51h30',
     ],
     dotPosition: { cx: 37, cy: 32 },
+  },
+  'external-link': {
+    paths: [
+      'M36 12h16v16', // Arrow head
+      'M32 32l20-20', // Arrow shaft
+      'M44 32v16a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4V12a4 4 0 0 1 4-4h16', // Box
+    ],
+    dotPosition: { cx: 52, cy: 12 },
   },
 };
 

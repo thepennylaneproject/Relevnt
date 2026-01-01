@@ -159,7 +159,7 @@ export default function ResumeListPage({ embedded = false }: { embedded?: boolea
               onClick: () => navigate('/resumes/builder'),
               variant: 'secondary',
             }}
-            includePoetry={false}
+            
           />
         ) : (
           <div className="resume-list">

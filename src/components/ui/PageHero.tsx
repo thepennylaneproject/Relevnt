@@ -88,7 +88,7 @@ export function PageHero({
                                         key={idx}
                                         type="button"
                                         variant={variant}
-                                        onClick={() => window.location.assign(action.href)}
+                                        onClick={() => action.href && window.location.assign(action.href)}
                                     >
                                         {action.icon}
                                         {action.label}

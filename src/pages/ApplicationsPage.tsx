@@ -200,7 +200,7 @@ export default function ApplicationsPage() {
                 {!loading && applications.length === 0 ? (
                   <EmptyState
                     type="applications"
-                    includePoetry={false}
+                    
                   />
                 ) : (
                   <div className="item-grid">

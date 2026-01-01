@@ -617,7 +617,7 @@ export default function JobsPage() {
                   ? "Try adjusting your filters to see more opportunities."
                   : "Your perfect role may be on its way. We're continuously searching."
               }
-              includePoetry={false}
+              
             />
           )}
 
@@ -692,7 +692,7 @@ export default function JobsPage() {
                           type="button"
                           variant="secondary"
                           size="sm"
-                          onClick={() => window.open(job.external_url, '_blank', 'noreferrer')}
+                          onClick={() => job.external_url && window.open(job.external_url, '_blank', 'noreferrer')}
                         >
                           View
                         </Button>

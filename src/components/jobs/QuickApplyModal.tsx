@@ -84,11 +84,11 @@ export function QuickApplyModal({
         }
 
         // Get resume data if persona has one linked
-        if (persona.resume_id) {
+        if (persona?.resume_id) {
           const { data: resume } = await supabase
             .from('resumes')
             .select('id, title, parsed_fields')
-            .eq('id', persona.resume_id)
+            .eq('id', persona?.resume_id)
             .single()
 
           if (resume) {
@@ -124,7 +124,7 @@ export function QuickApplyModal({
     try {
       // Get current user
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
+      if (!user || !persona?.id) throw new Error('Not authenticated')
 
       // Create application record
       const { error: appError } = await supabase
@@ -132,11 +132,13 @@ export function QuickApplyModal({
         .insert({
           user_id: user.id,
           job_id: job.id,
+          company: job.company,
+          position: job.title,
           persona_id: persona.id,
           resume_id: profile.resumeId,
           status: 'applied',
-          applied_at: new Date().toISOString(),
-          source: 'quick_apply',
+          applied_date: new Date().toISOString(),
+          submission_method: 'quick_apply',
         })
 
       if (appError) throw appError
