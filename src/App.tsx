@@ -18,6 +18,7 @@ import AdminDashboard from './pages/AdminDashboard'
 import { lazy, Suspense } from 'react'
 const Settings = lazy(() => import('./pages/Settings'))
 import ResumeWorkspacePage from './pages/ResumeWorkspacePage'
+import ResumeFullViewPage from './pages/ResumeFullViewPage'
 import SharedAuditPage from './pages/SharedAuditPage'
 import SidebarMarginNav from './components/chrome/SidebarMarginNav'
 import { OnboardingGate } from './components/onboarding'
@@ -71,6 +72,10 @@ function AppInner() {
                 <Route
                   path="/resumes"
                   element={isAuthed ? <ResumeWorkspacePage /> : <Navigate to="/login" replace />}
+                />
+                <Route
+                  path="/resumes/:id/view"
+                  element={isAuthed ? <ResumeFullViewPage /> : <Navigate to="/login" replace />}
                 />
 
                 <Route

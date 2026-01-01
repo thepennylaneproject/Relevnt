@@ -66,7 +66,7 @@ export default function ResumeListPage({ embedded = false }: { embedded?: boolea
       if (insertError || !data?.id) throw insertError || new Error('Failed to create resume')
 
       window.localStorage.setItem(LOCAL_STORAGE_KEY, data.id)
-      navigate(`/resumes/builder?id=${data.id}`)
+      navigate(`/resumes?id=${data.id}`)
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unable to create resume.'
       setError(message)
@@ -129,7 +129,7 @@ export default function ResumeListPage({ embedded = false }: { embedded?: boolea
           <Button
             type="button"
             variant="secondary"
-            onClick={() => navigate('/resumes/builder')}
+            onClick={() => navigate('/resumes')}
           >
             Open Builder
           </Button>
@@ -156,7 +156,7 @@ export default function ResumeListPage({ embedded = false }: { embedded?: boolea
             }}
             secondaryAction={{
               label: 'Open Builder',
-              onClick: () => navigate('/resumes/builder'),
+              onClick: () => navigate('/resumes'),
               variant: 'secondary',
             }}
             
@@ -187,7 +187,7 @@ export default function ResumeListPage({ embedded = false }: { embedded?: boolea
                     type="button"
                     variant="secondary"
                     size="sm"
-                    onClick={() => navigate(`/resumes/builder?id=${resume.id}`)}
+                    onClick={() => navigate(`/resumes?id=${resume.id}`)}
                   >
                     Edit
                   </Button>
@@ -195,7 +195,15 @@ export default function ResumeListPage({ embedded = false }: { embedded?: boolea
                     type="button"
                     variant="ghost"
                     size="sm"
-                    onClick={() => navigate(`/resumes/builder?id=${resume.id}`)}
+                    onClick={() => navigate(`/resumes/${resume.id}/view`)}
+                  >
+                    View
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate(`/resumes?id=${resume.id}`)}
                   >
                     Open
                   </Button>

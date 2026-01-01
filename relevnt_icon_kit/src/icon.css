@@ -1,7 +1,0 @@
-.rlv-icon{ display:inline-block; vertical-align:middle; color: var(--muted); }
-.rlv-icon--default{ color: var(--text); }
-.rlv-icon--muted{ color: var(--muted); }
-.rlv-icon--accent{ color: var(--tier-accent); }
-.rlv-icon--success{ color: #2F7D4E; }
-.rlv-icon--warning{ color: #A86500; }
-.rlv-icon--error{ color: #B3261E; }

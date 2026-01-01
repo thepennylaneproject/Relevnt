@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 600" fill="none" stroke="#C7A56A" stroke-width="2">
-  <path d="M40 120l30 30 30-30-10-20-20 10-20-10z" stroke-linejoin="round" />
-  <path d="M70 150v300" stroke-dasharray="10 12" />
-  <path d="M40 260l20-20 20 20-20 20z" />
-  <path d="M80 340l20-20 20 20-20 20z" />
-  <path d="M50 430l10-20 20 10-10 20z" />
-</svg>
