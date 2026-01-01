@@ -31,3 +31,5 @@ dist-ssr
 .env.example
 !ready/.env.example
 docs/DISCOVERY_ML.md
+tsconfig.node.tsbuildinfo
+*.tsbuildinfo
