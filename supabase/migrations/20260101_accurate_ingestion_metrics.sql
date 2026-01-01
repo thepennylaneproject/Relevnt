@@ -6,6 +6,37 @@
 -- Solution: Use xmax = 0 to distinguish true inserts from updates.
 
 -- ============================================================================
+-- 0. FIX DEDUP_KEY CONSTRAINT
+-- ============================================================================
+-- dedup_key should NOT be unique - multiple jobs from different sources can
+-- have the same dedup_key (that's how we detect cross-source duplicates).
+-- Drop the unique constraint if it exists.
+
+DO $$
+BEGIN
+  -- Drop unique constraint if it exists
+  IF EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'jobs_dedup_key_unique'
+  ) THEN
+    ALTER TABLE public.jobs DROP CONSTRAINT jobs_dedup_key_unique;
+    RAISE NOTICE 'Dropped unique constraint jobs_dedup_key_unique';
+  END IF;
+
+  -- Also check for index-based unique constraint
+  IF EXISTS (
+    SELECT 1 FROM pg_indexes
+    WHERE indexname = 'jobs_dedup_key_key'
+  ) THEN
+    DROP INDEX IF EXISTS jobs_dedup_key_key;
+    RAISE NOTICE 'Dropped unique index jobs_dedup_key_key';
+  END IF;
+END $$;
+
+-- Create non-unique index for fast dedup lookups (if not exists)
+CREATE INDEX IF NOT EXISTS idx_jobs_dedup_key ON public.jobs(dedup_key);
+
+-- ============================================================================
 -- 1. CREATE DEDUP_KEY COMPUTATION FUNCTION
 -- ============================================================================
 -- Computes a normalized dedup_key from title, company, and location
