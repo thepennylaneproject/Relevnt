@@ -22,17 +22,27 @@ export interface EnrichedJobURL {
  * Check if a URL appears to be from a company's own ATS/careers site
  */
 function isDirectCompanyURL(url: string | null, companyName: string | null): boolean {
-  if (!url || !companyName) return false
+  if (!url) return false
 
   const urlLower = url.toLowerCase()
-  const companyLower = (companyName || '').toLowerCase()
 
-  // Direct company ATS patterns
-  if (urlLower.includes(companyLower)) return true
-  if (urlLower.includes('jobs.lever.co') && urlLower.includes(companyLower)) return true
-  if (urlLower.includes('greenhouse.io') && urlLower.includes(companyLower)) return true
+  // URLs from ATS platforms are ALWAYS direct (no aggregator middleman)
+  if (urlLower.includes('jobs.lever.co')) return true
+  if (urlLower.includes('lever.co/')) return true
+  if (urlLower.includes('boards.greenhouse.io')) return true
+  if (urlLower.includes('greenhouse.io/')) return true
+  if (urlLower.includes('workday.com')) return true
+  if (urlLower.includes('myworkdayjobs.com')) return true
+
+  // Career page patterns
   if (urlLower.includes('/careers')) return true
   if (urlLower.includes('/jobs')) return true
+
+  // Company name match (if available)
+  if (companyName) {
+    const companyLower = companyName.toLowerCase()
+    if (urlLower.includes(companyLower)) return true
+  }
 
   return false
 }
