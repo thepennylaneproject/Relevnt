@@ -256,7 +256,8 @@ export async function seedDefaultSearches(
         'adzuna_us',        // US aggregator
         'usajobs',          // Federal jobs
         'careeronestop',    // US government aggregator
-        'jobdatafeeds',     // ✅ NOW INCLUDED - Global job aggregator with keyword support
+        'jobdatafeeds',     // Global job aggregator with keyword support
+        'jobspy',           // ✅ Multi-board web scraper (when enabled)
     ]
 
     const tasks: Partial<SearchTask>[] = []

@@ -346,6 +346,21 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
     },
 
     // =========================================================================
+    // JobSpy - Multi-board web scraper (Indeed, LinkedIn, Glassdoor, ZipRecruiter)
+    // =========================================================================
+    jobspy: {
+        slug: 'jobspy',
+        mode: 'wide-capped',
+        enabled: false, // DISABLED by default - requires ts-jobspy npm install
+        maxAgeDays: 7, // Jobs from last 7 days only (web scraping focus on fresh)
+        maxPagesPerRun: 1, // Background function handles all pages internally
+        resetPaginationEachRun: true,
+        trustLevel: 'medium',
+        trackFreshnessRatio: true,
+        notes: 'JobSpy multi-board scraper. Requires: npm install ts-jobspy. Runs as background function with 15-min timeout. Enable when ts-jobspy is installed.',
+    },
+
+    // =========================================================================
     // RSS/Atom Feeds - Generic RSS job feed support
     // =========================================================================
     rss: {

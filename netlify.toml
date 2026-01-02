@@ -91,7 +91,11 @@
 [functions."ingestion_healer-background"]
   schedule = "*/10 * * * *"
 
-
+# JobSpy web scraper - runs every 6 hours for intensive scraping (requires ts-jobspy)
+# Duration: 30-60 seconds | Potential: 2K-5K jobs/day
+# NOTE: Disabled by default - requires: npm install ts-jobspy
+[functions."jobspy_ingest-background"]
+  schedule = "0 */6 * * *"
 
 
 # =====================================================

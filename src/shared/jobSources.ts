@@ -1618,6 +1618,73 @@ export const WhatJobsSource: JobSource = {
 }
 
 // ---------------------------------------------------------------------------
+// JobSpy (Multi-board web scraper via ts-jobspy)
+// ---------------------------------------------------------------------------
+// Scrapes job postings from Indeed, LinkedIn, Glassdoor, ZipRecruiter, etc.
+// Runs as background function with 15-minute timeout for intensive scraping
+
+export const JobSpySource: JobSource = {
+  slug: 'jobspy',
+  displayName: 'JobSpy Multi-Board Scraper',
+  fetchUrl: 'internal://jobspy', // Not a real URL - handled by background function
+  type: 'scraper',
+  region: 'global',
+
+  normalize: (raw) => {
+    const rawAny = raw as any
+    const jobs = asArray<any>(rawAny?.data ?? rawAny?.jobs ?? rawAny)
+
+    if (!jobs.length) return []
+
+    const nowIso = new Date().toISOString()
+
+    return jobs
+      .map((job): NormalizedJob | null => {
+        if (!job || !job.title) return null
+
+        const title = job.title ?? ''
+        const company = job.company ?? null
+        const location = job.location ?? null
+
+        let remote_type: RemoteType = null
+        if (job.job_type === 'remote') {
+          remote_type = 'remote'
+        } else if (location && location.toLowerCase().includes('remote')) {
+          remote_type = 'remote'
+        } else {
+          remote_type = inferRemoteTypeFromLocation(location)
+        }
+
+        const posted = safeDate(job.date_posted ?? job.posted_at ?? job.created_at)
+        const url = job.url ?? job.apply_url ?? job.link ?? null
+
+        return {
+          source_slug: 'jobspy',
+          external_id: `jobspy:${job.id || url || Math.random()}`,
+
+          title,
+          company,
+          location,
+          employment_type: job.employment_type ?? job.job_type ?? null,
+          remote_type,
+
+          posted_date: posted,
+          created_at: nowIso,
+          external_url: url,
+
+          salary_min: parseNumber(job.salary_min ?? job.min_salary),
+          salary_max: parseNumber(job.salary_max ?? job.max_salary),
+          competitiveness_level: null,
+
+          description: job.description ?? job.job_description ?? null,
+          data_raw: job,
+        }
+      })
+      .filter((job): job is NormalizedJob => Boolean(job))
+  },
+}
+
+// ---------------------------------------------------------------------------
 // Combined export for ingest_jobs
 // ---------------------------------------------------------------------------
 
@@ -1641,6 +1708,7 @@ export const ALL_SOURCES: JobSource[] = [
   WhatJobsSource,
   GreenhouseSource,
   LeverSource,
+  JobSpySource,
   RSSSource,
 ]
 
