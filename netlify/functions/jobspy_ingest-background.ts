@@ -14,6 +14,30 @@ import { JobSpySource } from '../../src/shared/jobSources'
 import { upsertJobs } from './ingest_jobs'
 import { getSourceConfig } from '../../src/shared/sourceConfig'
 
+// Import computeDedupKey function from ingest_jobs for consistent dedup key generation
+// This ensures JobSpy jobs are properly deduplicated against other sources
+async function getComputeDedupKey() {
+  // Dynamic import to get computeDedupKey which is defined in ingest_jobs.ts
+  // Since it's not exported, we'll compute it inline here with the same logic
+  return (title: string | null, company: string | null, location: string | null): string => {
+    const normalizedTitle = (title || '').toLowerCase().trim()
+    const normalizedCompany = (company || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+    const normalizedLocation = (location || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+
+    const input = `${normalizedTitle}|${normalizedCompany}|${normalizedLocation}`
+
+    let hash = 0
+    for (let i = 0; i < input.length; i++) {
+      const char = input.charCodeAt(i)
+      hash = ((hash << 5) - hash) + char
+      hash = hash & hash
+    }
+
+    const hex = Math.abs(hash).toString(16).padStart(8, '0')
+    return `${hex}${hex}${hex}${hex}`.slice(0, 32)
+  }
+}
+
 // Dynamic import for ts-jobspy - optional fallback if not installed
 let JobSpyLibrary: any = null
 
@@ -152,9 +176,17 @@ export const handler: Handler = async (event, context: HandlerContext) => {
 
     console.log(`[JobSpy] Normalized ${normalized.length} jobs`)
 
+    // Enrich jobs with dedup_key before upsert (compute hash from title/company/location)
+    console.log('[JobSpy] Enriching jobs with dedup_key...')
+    const computeDedupKey = await getComputeDedupKey()
+    const enrichedJobs = normalized.map((j) => ({
+      ...j,
+      dedup_key: computeDedupKey(j.title, j.company, j.location),
+    }))
+
     // Upsert jobs to database
     console.log('[JobSpy] Upserting jobs to database...')
-    const upsertResult = await upsertJobs(normalized)
+    const upsertResult = await upsertJobs(enrichedJobs)
 
     console.log('[JobSpy] Upsert complete:', {
       inserted: upsertResult.inserted,

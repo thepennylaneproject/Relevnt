@@ -1567,7 +1567,13 @@ async function ingestGreenhouseBoards(
           `ingest_jobs: normalized ${normalized.length} → ${jobsToInsert.length} fresh jobs from Greenhouse board ${board.companyName}`
         )
 
-        const upsertResult = await upsertJobs(jobsToInsert)
+        // Enrich jobs with dedup_key before upsert
+        const enrichedJobsToInsert = jobsToInsert.map((j) => ({
+          ...j,
+          dedup_key: computeDedupKey(j.title, j.company, j.location),
+        }))
+
+        const upsertResult = await upsertJobs(enrichedJobsToInsert)
         totalInserted += upsertResult.inserted
         totalDuplicates += upsertResult.updated + upsertResult.noop
         console.log(
@@ -1839,7 +1845,14 @@ async function ingest(
       }
 
       console.log(`ingest_jobs: upserting ${fresh.length} fresh RSS jobs`)
-      const upsertResult = await upsertJobs(fresh)
+
+      // Enrich jobs with dedup_key before upsert
+      const enrichedFresh = fresh.map((j) => ({
+        ...j,
+        dedup_key: computeDedupKey(j.title, j.company, j.location),
+      }))
+
+      const upsertResult = await upsertJobs(enrichedFresh)
       totalInserted = upsertResult.inserted
       totalDuplicates = upsertResult.updated + upsertResult.noop
 
@@ -1921,7 +1934,14 @@ async function ingest(
       }
 
       console.log(`ingest_jobs: upserting ${fresh.length} fresh ${platform} jobs`)
-      const upsertResult = await upsertJobs(fresh)
+
+      // Enrich jobs with dedup_key before upsert
+      const enrichedFresh = fresh.map((j) => ({
+        ...j,
+        dedup_key: computeDedupKey(j.title, j.company, j.location),
+      }))
+
+      const upsertResult = await upsertJobs(enrichedFresh)
       totalInserted = upsertResult.inserted
       totalDuplicates = upsertResult.updated + upsertResult.noop
 
