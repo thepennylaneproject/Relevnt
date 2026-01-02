@@ -43,9 +43,9 @@ interface Props {
 // ============================================================================
 
 function getScoreColor(score: number): string {
-    if (score >= 80) return 'var(--success, #6ac7a5)'
-    if (score >= 60) return 'var(--warning, #c7a56a)'
-    return 'var(--danger, #c44a4a)'
+    if (score >= 80) return 'var(--color-success)'
+    if (score >= 60) return 'var(--color-warning)'
+    return 'var(--color-error)'
 }
 
 function getScoreLabel(score: number): string {

@@ -156,7 +156,7 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ id, skillGroups, o
     <SectionCard
       title="Skills"
       description="Group skills into themes: Core, Technical, Leadership, Tools, etc."
-      icon={<FileText className="w-4 h-4 text-[#1F2933]" />}
+      icon={<FileText className="w-4 h-4 text-[var(--color-ink)]" />}
     >
       <div className="space-y-4">
         {skillGroups.map((group, index) => (

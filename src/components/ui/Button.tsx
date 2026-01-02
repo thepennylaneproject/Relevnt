@@ -89,7 +89,7 @@ export const Button: React.FC<ButtonProps> = ({
 
     // Inline destructive styles (color override)
     const destructiveStyle: React.CSSProperties = variant === 'destructive'
-        ? { color: 'var(--color-error, #c44a4a)' }
+        ? { color: 'var(--color-error)' }
         : {};
 
     return (

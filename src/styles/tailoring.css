@@ -1,0 +1,233 @@
+/* Tailoring Overlay Styles */
+
+.tailoring-overlay {
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 360px;
+  background: var(--surface-card, #1a1a1a);
+  border-left: 1px solid var(--border-subtle, #333);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.tailoring-overlay__header {
+  padding: 20px;
+  border-bottom: 1px solid var(--border-subtle, #333);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  background: var(--surface-secondary, #252525);
+}
+
+.tailoring-overlay__job-info {
+  flex: 1;
+}
+
+.tailoring-overlay__title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary, #888);
+  margin: 0 0 6px 0;
+}
+
+.tailoring-overlay__job-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary, #fff);
+  margin: 0 0 4px 0;
+  line-height: 1.3;
+}
+
+.tailoring-overlay__company {
+  font-size: 13px;
+  color: var(--text-secondary, #888);
+  margin: 0;
+}
+
+.tailoring-overlay__close {
+  background: transparent;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--text-secondary, #888);
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.tailoring-overlay__close:hover {
+  background: var(--surface-tertiary, #2a2a2a);
+  color: var(--text-primary, #fff);
+}
+
+.tailoring-overlay__content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.tailoring-overlay__suggestions-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary, #fff);
+  margin: 0 0 16px 0;
+}
+
+/* Suggestion Card */
+
+.suggestion-card {
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.suggestion-card__reasoning {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--accent-primary, #d4af37);
+  margin: 0 0 12px 0;
+  line-height: 1.5;
+}
+
+.suggestion-card__text {
+  margin-bottom: 12px;
+}
+
+.suggestion-card__current,
+.suggestion-card__suggested {
+  margin-bottom: 10px;
+}
+
+.suggestion-card__label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary, #888);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.suggestion-card__current p {
+  font-size: 12px;
+  color: var(--text-secondary, #888);
+  text-decoration: line-through;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.suggestion-card__suggested {
+  background: rgba(212, 175, 55, 0.1);
+  padding: 10px;
+  border-radius: 6px;
+  border-left: 3px solid var(--accent-primary, #d4af37);
+}
+
+.suggestion-card__suggested p {
+  font-size: 13px;
+  color: var(--text-primary, #fff);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.suggestion-card__actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.suggestion-card__btn-dismiss,
+.suggestion-card__btn-apply {
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.suggestion-card__btn-dismiss {
+  background: transparent;
+  color: var(--text-secondary, #888);
+}
+
+.suggestion-card__btn-dismiss:hover {
+  background: var(--surface-tertiary, #2a2a2a);
+  color: var(--text-primary, #fff);
+}
+
+.suggestion-card__btn-apply {
+  background: var(--accent-primary, #d4af37);
+  color: #000;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.suggestion-card__btn-apply:hover {
+  background: var(--accent-hover, #c9a832);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+}
+
+.suggestion-card__confidence {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-muted, #666);
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(212, 175, 55, 0.1);
+}
+
+/* Floating Button (when overlay closed) */
+
+.floating-suggestions-button {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  padding: 12px 20px;
+  background: var(--accent-primary, #d4af37);
+  color: #000;
+  border: none;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.4);
+  transition: all 0.3s;
+  z-index: 99;
+}
+
+.floating-suggestions-button:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
+}
+
+/* Responsive */
+
+@media (max-width: 768px) {
+  .tailoring-overlay {
+    width: 100%;
+  }
+}

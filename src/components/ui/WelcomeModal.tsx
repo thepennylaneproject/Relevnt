@@ -39,7 +39,7 @@ const ONBOARDING_STEPS: OnboardingStep[] = [
         title: 'Set your preferences',
         description: 'Tell us what you\'re looking for so we can surface the right opportunities.',
         action: 'Set Preferences',
-        route: '/settings#career',
+        route: '/settings?section=targeting',
         icon: 'compass',
     },
     {
@@ -212,7 +212,7 @@ const welcomeModalStyles = `
 }
 
 .welcome-modal {
-  background: var(--color-surface, #fff);
+  background: var(--color-surface);
   border-radius: 20px;
   padding: 32px;
   max-width: 520px;
@@ -243,7 +243,7 @@ const welcomeModalStyles = `
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--color-border, #e0e0e0);
+  background: var(--color-graphite-faint);
   border: none;
   padding: 0;
   cursor: pointer;
@@ -253,11 +253,11 @@ const welcomeModalStyles = `
 .progress-dot.active {
   width: 24px;
   border-radius: 4px;
-  background: var(--color-accent, #6366f1);
+  background: var(--color-accent);
 }
 
 .progress-dot.complete {
-  background: var(--color-accent, #6366f1);
+  background: var(--color-accent);
 }
 
 .welcome-modal__content {
@@ -271,13 +271,13 @@ const welcomeModalStyles = `
 .welcome-modal__title {
   font-size: 24px;
   font-weight: 600;
-  color: var(--color-ink, #1a1a1a);
+  color: var(--color-ink);
   margin: 0 0 8px;
 }
 
 .welcome-modal__description {
   font-size: 15px;
-  color: var(--color-ink-secondary, #666);
+  color: var(--color-ink-secondary);
   margin: 0 0 24px;
   line-height: 1.5;
 }
@@ -295,16 +295,16 @@ const welcomeModalStyles = `
   align-items: center;
   gap: 16px;
   padding: 16px;
-  background: var(--color-bg, #fafafa);
-  border: 1px solid var(--color-border, #e5e5e5);
+  background: var(--color-bg);
+  border: 1px solid var(--color-graphite-faint);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.15s;
 }
 
 .welcome-step:hover {
-  background: var(--color-surface, #fff);
-  border-color: var(--color-accent, #6366f1);
+  background: var(--color-surface);
+  border-color: var(--color-accent);
   transform: translateX(4px);
 }
 
@@ -312,7 +312,7 @@ const welcomeModalStyles = `
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: var(--color-accent, #6366f1);
+  background: var(--color-accent);
   color: white;
   display: flex;
   align-items: center;
@@ -329,13 +329,13 @@ const welcomeModalStyles = `
 .welcome-step__text strong {
   display: block;
   font-size: 14px;
-  color: var(--color-ink, #1a1a1a);
+  color: var(--color-ink);
   margin-bottom: 2px;
 }
 
 .welcome-step__text span {
   font-size: 13px;
-  color: var(--color-ink-tertiary, #888);
+  color: var(--color-ink-tertiary);
 }
 
 .welcome-modal__actions {

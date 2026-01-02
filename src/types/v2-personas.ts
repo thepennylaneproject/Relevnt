@@ -67,6 +67,15 @@ export interface PersonaPreferences {
     /** Growth focus areas (e.g., 'leadership', 'technical depth') */
     growth_focus?: string[]
 
+    /** Voice formality level (0-100), null = use profile default */
+    voice_formality?: number | null
+
+    /** Voice playfulness level (0-100), null = use profile default */
+    voice_playfulness?: number | null
+
+    /** Voice conciseness level (0-100), null = use profile default */
+    voice_conciseness?: number | null
+
     /** Creation timestamp */
     created_at?: string
 
@@ -211,4 +220,7 @@ export const DEFAULT_PERSONA_PREFERENCES: Omit<PersonaPreferences, 'id' | 'perso
     excluded_companies: [],
     mission_values: [],
     growth_focus: [],
+    voice_formality: null,
+    voice_playfulness: null,
+    voice_conciseness: null,
 }

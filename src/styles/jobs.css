@@ -1,6 +1,6 @@
 /* src/styles/jobs.css */
 :root {
-  --color-accent-secondary: var(--color-secondary-accent, #A0826D);
+  --color-accent-secondary: var(--color-accent-hover);
 }
 
 .page-header {
@@ -773,14 +773,14 @@
 /* Remote tag styling */
 .tag-remote {
   background: rgba(16, 185, 129, 0.1);
-  color: #059669;
+  color: var(--color-success);
   border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
 :root.dark .tag-remote,
 [data-theme="dark"] .tag-remote {
   background: rgba(52, 211, 153, 0.15);
-  color: #34D399;
+  color: var(--color-success);
   border-color: rgba(52, 211, 153, 0.2);
 }
 
@@ -958,7 +958,7 @@
 }
 
 .quick-apply-modal {
-  background: var(--color-surface, #fff);
+  background: var(--color-surface);
   border-radius: var(--radius-lg, 12px);
   max-width: 480px;
   width: 100%;
@@ -984,7 +984,7 @@
   justify-content: space-between;
   align-items: flex-start;
   padding: 20px 24px;
-  border-bottom: 1px solid var(--border-subtle, #eee);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .quick-apply-title {
@@ -1116,7 +1116,7 @@
   justify-content: flex-end;
   gap: 12px;
   padding: 16px 24px;
-  border-top: 1px solid var(--border-subtle, #eee);
+  border-top: 1px solid var(--border-subtle);
 }
 
 /* Dark mode adjustments */

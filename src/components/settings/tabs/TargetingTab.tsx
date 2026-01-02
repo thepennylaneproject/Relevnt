@@ -9,6 +9,7 @@ import React, { useEffect, useState, useMemo } from 'react'
 import { usePersonas } from '../../../hooks/usePersonas'
 import { useJobPreferences, type JobPreferences } from '../../../hooks/useJobPreferences'
 import { useRelevanceTuner } from '../../../hooks/useRelevanceTuner'
+import { useFeedbackStats } from '../../../hooks/useFeedbackStats'
 import { Button } from '../../ui/Button'
 import { useSettingsAutoSave, type AutoSaveStatus } from '../../../hooks/useSettingsAutoSave'
 import { Icon } from '../../ui/Icon'
@@ -39,6 +40,9 @@ export function TargetingTab({ onAutoSaveStatusChange }: TargetingTabProps) {
 
     // Career targets state
     const { prefs, loading: prefsLoading, setField, save } = useJobPreferences()
+
+    // Feedback statistics
+    const { stats: feedbackStats, loading: statsLoading } = useFeedbackStats()
 
     // Type-to-add inputs
     const [skillInput, setSkillInput] = useState('')
@@ -201,6 +205,34 @@ export function TargetingTab({ onAutoSaveStatusChange }: TargetingTabProps) {
 
                             {(prefs.related_titles || []).length > 0 && (
                                 <p>{(prefs.related_titles || []).join(', ')}</p>
+                            )}
+
+                            {/* Feedback Indicator for Job Preferences */}
+                            {feedbackStats && (
+                                <div style={{ marginTop: 16, padding: 12, background: 'var(--color-accent-glow, rgba(212, 175, 55, 0.1))', borderRadius: 8 }}>
+                                    <p style={{ fontSize: '0.875rem', color: 'var(--color-ink-secondary)', marginBottom: 8 }}>
+                                        <strong>Your feedback is tuning this:</strong>
+                                    </p>
+                                    {Object.keys(feedbackStats.industries).length > 0 && (
+                                        <div style={{ fontSize: '0.75rem', color: 'var(--color-ink-tertiary)' }}>
+                                            {Object.entries(feedbackStats.industries).map(([industry, counts]) => (
+                                                <div key={industry} style={{ marginBottom: 4 }}>
+                                                    {industry}: {counts.positive} positive, {counts.negative} negative signals
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                    {Object.keys(feedbackStats.companySizes).length > 0 && (
+                                        <div style={{ fontSize: '0.75rem', color: 'var(--color-ink-tertiary)', marginTop: 8 }}>
+                                            <strong>Company sizes:</strong>
+                                            {Object.entries(feedbackStats.companySizes).map(([size, counts]) => (
+                                                <div key={size} style={{ marginBottom: 4 }}>
+                                                    {size}: {counts.positive} positive, {counts.negative} negative signals
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             )}
 
                             <div style={{ marginTop: 20 }}>

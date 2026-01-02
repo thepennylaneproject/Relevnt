@@ -490,7 +490,7 @@ export function RelevanceTuner({
                                         className="distribution-segment"
                                         style={{
                                             width: `${percentages.skill}%`,
-                                            backgroundColor: 'var(--color-accent, #d4af37)',
+                                            backgroundColor: 'var(--color-accent)',
                                         }}
                                         title={`Skills: ${Math.round(percentages.skill)}%`}
                                     >
@@ -500,7 +500,7 @@ export function RelevanceTuner({
                                         className="distribution-segment"
                                         style={{
                                             width: `${percentages.salary}%`,
-                                            backgroundColor: 'var(--color-success, #4ade80)',
+                                            backgroundColor: 'var(--color-success)',
                                         }}
                                         title={`Salary: ${Math.round(percentages.salary)}%`}
                                     >
@@ -510,7 +510,7 @@ export function RelevanceTuner({
                                         className="distribution-segment"
                                         style={{
                                             width: `${percentages.location}%`,
-                                            backgroundColor: 'var(--color-info, #60a5fa)',
+                                            backgroundColor: 'var(--color-info)',
                                         }}
                                         title={`Location: ${Math.round(percentages.location)}%`}
                                     >
@@ -520,7 +520,7 @@ export function RelevanceTuner({
                                         className="distribution-segment"
                                         style={{
                                             width: `${percentages.remote}%`,
-                                            backgroundColor: 'var(--color-warning, #fbbf24)',
+                                            backgroundColor: 'var(--color-warning)',
                                         }}
                                         title={`Remote: ${Math.round(percentages.remote)}%`}
                                     >
@@ -530,7 +530,7 @@ export function RelevanceTuner({
                                         className="distribution-segment"
                                         style={{
                                             width: `${percentages.industry}%`,
-                                            backgroundColor: 'var(--color-purple, #a78bfa)',
+                                            backgroundColor: 'var(--color-graphite-light)',
                                         }}
                                         title={`Industry: ${Math.round(percentages.industry)}%`}
                                     >
@@ -538,11 +538,11 @@ export function RelevanceTuner({
                                     </div>
                                 </div>
                                 <div className="distribution-legend">
-                                    <span className="legend-item" style={{ color: 'var(--color-accent, #d4af37)' }}>■ Skills</span>
-                                    <span className="legend-item" style={{ color: 'var(--color-success, #4ade80)' }}>■ Salary</span>
-                                    <span className="legend-item" style={{ color: 'var(--color-info, #60a5fa)' }}>■ Location</span>
-                                    <span className="legend-item" style={{ color: 'var(--color-warning, #fbbf24)' }}>■ Remote</span>
-                                    <span className="legend-item" style={{ color: 'var(--color-purple, #a78bfa)' }}>■ Industry</span>
+                                    <span className="legend-item" style={{ color: 'var(--color-accent)' }}>■ Skills</span>
+                                    <span className="legend-item" style={{ color: 'var(--color-success)' }}>■ Salary</span>
+                                    <span className="legend-item" style={{ color: 'var(--color-info)' }}>■ Location</span>
+                                    <span className="legend-item" style={{ color: 'var(--color-warning)' }}>■ Remote</span>
+                                    <span className="legend-item" style={{ color: 'var(--color-graphite-light)' }}>■ Industry</span>
                                 </div>
                             </>
                         )}

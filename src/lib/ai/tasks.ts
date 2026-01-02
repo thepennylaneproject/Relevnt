@@ -142,5 +142,14 @@ export const TASK_SPECS: Record<AITaskName, AITaskSpec> = {
     batchable: false,
     safety: 'medium',
   },
+  strategic_insights_generate: {
+    requires_json: true,
+    max_tokens_hint: 6_000,
+    max_output_tokens_hint: 4_000,
+    preferred_quality_default: 'high',
+    cache_ttl_seconds: 0, // Don't cache - always generate fresh insights
+    batchable: false,
+    safety: 'medium',
+  },
 }
 import type { AITaskName, AITaskSpec } from './types'

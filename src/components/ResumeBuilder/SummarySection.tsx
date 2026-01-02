@@ -45,7 +45,7 @@ export const SummarySection: React.FC<Props> = ({ summary, onChange, colors }) =
     <SectionCard
       title="Summary"
       description="A sharp, outcome focused snapshot that sets the frame for your story."
-      icon={<Stars className="w-4 h-4 text-[#1F2933]" />}
+      icon={<Stars className="w-4 h-4 text-[var(--color-ink)]" />}
       colors={colors}
     >
       <div className="space-y-4">

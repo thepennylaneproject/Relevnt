@@ -88,6 +88,12 @@ export function PersonaEditor({
     const [requiredSkills, setRequiredSkills] = useState('')
     const [industries, setIndustries] = useState('')
 
+    // Voice settings
+    const [useDefaultVoice, setUseDefaultVoice] = useState(true)
+    const [voiceFormality, setVoiceFormality] = useState(50)
+    const [voicePlayfulness, setVoicePlayfulness] = useState(50)
+    const [voiceConciseness, setVoiceConciseness] = useState(60)
+
     // UI state
     const [saving, setSaving] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -117,6 +123,13 @@ export function PersonaEditor({
                 setLocations(prefs.locations?.join(', ') || '')
                 setRequiredSkills(prefs.required_skills?.join(', ') || '')
                 setIndustries(prefs.industries?.join(', ') || '')
+
+                // Voice settings - if all null, use defaults
+                const hasCustomVoice = prefs.voice_formality != null || prefs.voice_playfulness != null || prefs.voice_conciseness != null
+                setUseDefaultVoice(!hasCustomVoice)
+                setVoiceFormality(prefs.voice_formality ?? 50)
+                setVoicePlayfulness(prefs.voice_playfulness ?? 50)
+                setVoiceConciseness(prefs.voice_conciseness ?? 60)
             }
         } else {
             // Reset form for create mode
@@ -131,6 +144,10 @@ export function PersonaEditor({
             setLocations('')
             setRequiredSkills('')
             setIndustries('')
+            setUseDefaultVoice(true)
+            setVoiceFormality(50)
+            setVoicePlayfulness(50)
+            setVoiceConciseness(60)
         }
     }, [persona])
 
@@ -179,6 +196,10 @@ export function PersonaEditor({
             excluded_companies: [],
             mission_values: [],
             growth_focus: [],
+            // Voice settings - null means use profile defaults
+            voice_formality: useDefaultVoice ? null : voiceFormality,
+            voice_playfulness: useDefaultVoice ? null : voicePlayfulness,
+            voice_conciseness: useDefaultVoice ? null : voiceConciseness,
         }
 
         try {
@@ -428,6 +449,92 @@ export function PersonaEditor({
                 )}
             </div>
 
+            {/* Voice Settings Section */}
+            {!compact && (
+                <div style={styles.section}>
+                    <h3 style={styles.sectionTitle}>Voice Settings</h3>
+                    <p style={styles.hint}>
+                        Customize how AI-generated content (cover letters, etc.) sounds for this persona.
+                    </p>
+
+                    <div style={styles.field}>
+                        <label style={styles.checkboxLabel}>
+                            <input
+                                type="checkbox"
+                                checked={useDefaultVoice}
+                                onChange={(e) => setUseDefaultVoice(e.target.checked)}
+                                style={styles.checkbox}
+                            />
+                            <span>Use my default voice settings</span>
+                        </label>
+                        <span style={styles.hint}>
+                            When checked, this persona will use your profile-level voice settings
+                        </span>
+                    </div>
+
+                    {!useDefaultVoice && (
+                        <>
+                            <div style={styles.field}>
+                                <div style={styles.sliderHeader}>
+                                    <label style={styles.label}>Formality</label>
+                                    <span style={styles.sliderValue}>{voiceFormality}</span>
+                                </div>
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max="100"
+                                    value={voiceFormality}
+                                    onChange={(e) => setVoiceFormality(parseInt(e.target.value))}
+                                    style={styles.slider}
+                                />
+                                <div style={styles.sliderLabels}>
+                                    <span>Casual</span>
+                                    <span>Formal</span>
+                                </div>
+                            </div>
+
+                            <div style={styles.field}>
+                                <div style={styles.sliderHeader}>
+                                    <label style={styles.label}>Playfulness</label>
+                                    <span style={styles.sliderValue}>{voicePlayfulness}</span>
+                                </div>
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max="100"
+                                    value={voicePlayfulness}
+                                    onChange={(e) => setVoicePlayfulness(parseInt(e.target.value))}
+                                    style={styles.slider}
+                                />
+                                <div style={styles.sliderLabels}>
+                                    <span>Serious</span>
+                                    <span>Expressive</span>
+                                </div>
+                            </div>
+
+                            <div style={styles.field}>
+                                <div style={styles.sliderHeader}>
+                                    <label style={styles.label}>Conciseness</label>
+                                    <span style={styles.sliderValue}>{voiceConciseness}</span>
+                                </div>
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max="100"
+                                    value={voiceConciseness}
+                                    onChange={(e) => setVoiceConciseness(parseInt(e.target.value))}
+                                    style={styles.slider}
+                                />
+                                <div style={styles.sliderLabels}>
+                                    <span>Detailed</span>
+                                    <span>Brief</span>
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </div>
+            )}
+
             {/* Actions */}
             <div style={styles.actions}>
                 {onCancel && (
@@ -468,7 +575,7 @@ const styles: Record<string, React.CSSProperties> = {
         backgroundColor: 'rgba(220, 53, 69, 0.1)',
         border: '1px solid rgba(220, 53, 69, 0.3)',
         borderRadius: '8px',
-        color: '#dc3545',
+        color: 'var(--color-error)',
         fontSize: '14px',
     },
 
@@ -481,10 +588,10 @@ const styles: Record<string, React.CSSProperties> = {
     sectionTitle: {
         fontSize: '16px',
         fontWeight: 600,
-        color: 'var(--text-primary, #fff)',
+        color: 'var(--color-ink)',
         margin: 0,
         paddingBottom: '8px',
-        borderBottom: '1px solid var(--border-subtle, #333)',
+        borderBottom: '1px solid var(--color-graphite-faint)',
     },
 
     field: {
@@ -502,19 +609,19 @@ const styles: Record<string, React.CSSProperties> = {
     label: {
         fontSize: '14px',
         fontWeight: 500,
-        color: 'var(--text-secondary, #888)',
+        color: 'var(--color-ink-secondary)',
     },
 
     required: {
-        color: '#dc3545',
+        color: 'var(--color-error)',
     },
 
     input: {
         padding: '10px 14px',
-        backgroundColor: 'var(--surface-tertiary, #252525)',
-        border: '1px solid var(--border-subtle, #333)',
+        backgroundColor: 'var(--color-surface)',
+        border: '1px solid var(--color-graphite-faint)',
         borderRadius: '6px',
-        color: 'var(--text-primary, #fff)',
+        color: 'var(--color-ink)',
         fontSize: '14px',
         outline: 'none',
         transition: 'border-color 0.2s ease',
@@ -522,10 +629,10 @@ const styles: Record<string, React.CSSProperties> = {
 
     textarea: {
         padding: '10px 14px',
-        backgroundColor: 'var(--surface-tertiary, #252525)',
-        border: '1px solid var(--border-subtle, #333)',
+        backgroundColor: 'var(--color-surface)',
+        border: '1px solid var(--color-graphite-faint)',
         borderRadius: '6px',
-        color: 'var(--text-primary, #fff)',
+        color: 'var(--color-ink)',
         fontSize: '14px',
         outline: 'none',
         resize: 'vertical',
@@ -534,10 +641,10 @@ const styles: Record<string, React.CSSProperties> = {
 
     select: {
         padding: '10px 14px',
-        backgroundColor: 'var(--surface-tertiary, #252525)',
-        border: '1px solid var(--border-subtle, #333)',
+        backgroundColor: 'var(--color-surface)',
+        border: '1px solid var(--color-graphite-faint)',
         borderRadius: '6px',
-        color: 'var(--text-primary, #fff)',
+        color: 'var(--color-ink)',
         fontSize: '14px',
         outline: 'none',
         cursor: 'pointer',
@@ -545,7 +652,7 @@ const styles: Record<string, React.CSSProperties> = {
 
     hint: {
         fontSize: '12px',
-        color: 'var(--text-tertiary, #666)',
+        color: 'var(--color-ink-tertiary)',
     },
 
     checkboxLabel: {
@@ -553,14 +660,44 @@ const styles: Record<string, React.CSSProperties> = {
         alignItems: 'center',
         gap: '8px',
         fontSize: '14px',
-        color: 'var(--text-primary, #fff)',
+        color: 'var(--color-ink)',
         cursor: 'pointer',
     },
 
     checkbox: {
         width: '18px',
         height: '18px',
-        accentColor: 'var(--accent-primary, #d4af37)',
+        accentColor: 'var(--color-accent)',
+    },
+
+    sliderHeader: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '8px',
+    },
+
+    sliderValue: {
+        fontSize: '14px',
+        fontWeight: 600,
+        color: 'var(--color-accent)',
+    },
+
+    slider: {
+        width: '100%',
+        height: '6px',
+        borderRadius: '3px',
+        background: 'var(--color-graphite-faint)',
+        outline: 'none',
+        accentColor: 'var(--color-accent)',
+    },
+
+    sliderLabels: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        fontSize: '12px',
+        color: 'var(--color-ink-tertiary)',
+        marginTop: '4px',
     },
 
     actions: {
@@ -568,15 +705,15 @@ const styles: Record<string, React.CSSProperties> = {
         justifyContent: 'flex-end',
         gap: '12px',
         paddingTop: '16px',
-        borderTop: '1px solid var(--border-subtle, #333)',
+        borderTop: '1px solid var(--color-graphite-faint)',
     },
 
     cancelButton: {
         padding: '10px 20px',
         backgroundColor: 'transparent',
-        border: '1px solid var(--border-subtle, #444)',
+        border: '1px solid var(--color-graphite-faint)',
         borderRadius: '6px',
-        color: 'var(--text-secondary, #888)',
+        color: 'var(--color-ink-secondary)',
         fontSize: '14px',
         fontWeight: 500,
         cursor: 'pointer',
@@ -585,10 +722,10 @@ const styles: Record<string, React.CSSProperties> = {
 
     saveButton: {
         padding: '10px 24px',
-        backgroundColor: 'var(--accent-primary, #d4af37)',
+        backgroundColor: 'var(--color-accent)',
         border: 'none',
         borderRadius: '6px',
-        color: '#000',
+        color: 'var(--color-ink)',
         fontSize: '14px',
         fontWeight: 600,
         cursor: 'pointer',

@@ -97,13 +97,13 @@ export function AlertsPanel() {
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
       case 'critical':
-        return <CustomIcon name="alert-circle" size={20} color="ink" style={{ color: '#dc2626' }} />
+        return <CustomIcon name="alert-circle" size={20} color="ink" style={{ color: 'var(--color-error)' }} />
       case 'high':
-        return <CustomIcon name="alert-circle" size={20} color="ink" style={{ color: '#ea580c' }} />
+        return <CustomIcon name="alert-circle" size={20} color="ink" style={{ color: 'var(--color-warning)' }} />
       case 'medium':
-        return <CustomIcon name="zap" size={20} color="ink" style={{ color: '#ca8a04' }} />
+        return <CustomIcon name="zap" size={20} color="ink" style={{ color: 'var(--color-accent)' }} />
       default:
-        return <CustomIcon name="check-circle" size={20} color="ink" style={{ color: '#2563eb' }} />
+        return <CustomIcon name="check-circle" size={20} color="ink" style={{ color: 'var(--color-info)' }} />
     }
   }
 
@@ -123,7 +123,7 @@ export function AlertsPanel() {
   if (loading) {
     return (
       <div className="p-6 text-center">
-        <div className="animate-spin inline-block w-5 h-5 border-2 border-emerald border-t-transparent rounded-full" style={{ borderColor: '#013E30', borderTopColor: 'transparent' }} />
+        <div className="animate-spin inline-block w-5 h-5 border-2 border-emerald border-t-transparent rounded-full" style={{ borderColor: 'var(--color-success)', borderTopColor: 'transparent' }} />
         <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Loading alerts…</p>
       </div>
     )
@@ -135,7 +135,7 @@ export function AlertsPanel() {
 
   if (alerts.length === 0) {
     return (
-      <div className="p-4 bg-emerald/10 text-emerald rounded-lg border border-emerald/20 flex items-center gap-2" style={{ backgroundColor: 'rgba(1, 62, 48, 0.1)', color: '#013E30', borderColor: 'rgba(1, 62, 48, 0.2)' }}>
+      <div className="p-4 bg-emerald/10 text-emerald rounded-lg border border-emerald/20 flex items-center gap-2" style={{ backgroundColor: 'var(--color-success-bg)', color: 'var(--color-success)', borderColor: 'var(--color-success)' }}>
         <CustomIcon name="check-circle" size={20} color="emerald" />
         <span>All systems operational - no active alerts</span>
       </div>

@@ -347,6 +347,19 @@ const LEGACY_CONFIG: Record<string, LegacyTaskConfig> = {
     },
     quality: 'high',
   },
+  'tailor-resume-for-job': {
+    instructions: 'Compare the resume against a specific job description. Extract 3-5 key requirements from the job. Identify missing keywords. For the top 2-3 most impactful bullets, suggest specific improvements that align with the job requirements. Each suggestion should include: bulletId (matching the input), currentText, suggestedText (enhanced version), reasoning (why this change matters for this job), relevantKeyword (what job requirement it addresses), and confidence (0-1). Focus on concrete, actionable suggestions.',
+    requiresJson: true,
+    schema: {
+      success: 'boolean',
+      data: {
+        keyRequirements: [],
+        missingKeywords: [],
+        suggestions: [],
+      },
+    },
+    quality: 'high',
+  },
 }
 
 function normalizeTaskKey(task: string): string {

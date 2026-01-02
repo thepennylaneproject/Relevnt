@@ -23,7 +23,6 @@ import SharedAuditPage from './pages/SharedAuditPage'
 import SidebarMarginNav from './components/chrome/SidebarMarginNav'
 import { OnboardingGate } from './components/onboarding'
 import './styles/margin-nav.css'
-import PersonaManagementPage from './pages/PersonaManagementPage'
 
 import './App.css'
 
@@ -88,7 +87,7 @@ function AppInner() {
                 />
                 <Route
                   path="/auto-apply"
-                  element={isAuthed ? <Navigate to="/settings#auto-apply" replace /> : <Navigate to="/login" replace />}
+                  element={isAuthed ? <Navigate to="/settings?section=system" replace /> : <Navigate to="/login" replace />}
                 />
 
 
@@ -101,27 +100,27 @@ function AppInner() {
                 {/* Legacy route redirects to Settings Hub tabs */}
                 <Route
                   path="/job-preferences"
-                  element={isAuthed ? <Navigate to="/settings#career" replace /> : <Navigate to="/login" replace />}
+                  element={isAuthed ? <Navigate to="/settings?section=targeting" replace /> : <Navigate to="/login" replace />}
                 />
                 <Route
                   path="/profile/personal"
-                  element={isAuthed ? <Navigate to="/settings#profile" replace /> : <Navigate to="/login" replace />}
+                  element={isAuthed ? <Navigate to="/settings?section=profile" replace /> : <Navigate to="/login" replace />}
                 />
                 <Route
                   path="/profile/professional"
-                  element={isAuthed ? <Navigate to="/settings#profile" replace /> : <Navigate to="/login" replace />}
+                  element={isAuthed ? <Navigate to="/settings?section=profile" replace /> : <Navigate to="/login" replace />}
                 />
                 <Route
                   path="/voice"
-                  element={isAuthed ? <Navigate to="/settings#voice" replace /> : <Navigate to="/login" replace />}
+                  element={isAuthed ? <Navigate to="/settings?section=profile" replace /> : <Navigate to="/login" replace />}
                 />
                 <Route
                   path="/settings/voice"
-                  element={isAuthed ? <Navigate to="/settings#voice" replace /> : <Navigate to="/login" replace />}
+                  element={isAuthed ? <Navigate to="/settings?section=profile" replace /> : <Navigate to="/login" replace />}
                 />
                 <Route
                   path="/personas"
-                  element={isAuthed ? <PersonaManagementPage /> : <Navigate to="/login" replace />}
+                  element={isAuthed ? <Navigate to="/settings?section=targeting" replace /> : <Navigate to="/login" replace />}
                 />
 
                 <Route
@@ -132,11 +131,11 @@ function AppInner() {
                 {/* Redirects for deprecated/moved routes */}
                 <Route
                   path="/interview-prep"
-                  element={isAuthed ? <Navigate to="/settings#profile" replace /> : <Navigate to="/login" replace />}
+                  element={isAuthed ? <Navigate to="/settings?section=profile" replace /> : <Navigate to="/login" replace />}
                 />
                 <Route
                   path="/profile-analyzer"
-                  element={isAuthed ? <Navigate to="/settings#profile" replace /> : <Navigate to="/login" replace />}
+                  element={isAuthed ? <Navigate to="/settings?section=profile" replace /> : <Navigate to="/login" replace />}
                 />
               </Routes>
             </Suspense>

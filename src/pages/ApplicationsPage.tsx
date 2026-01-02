@@ -20,11 +20,13 @@ import {
 import { ApplicationQuestionHelper } from '../components/Applications/ApplicationQuestionHelper'
 import { CoverLetterGenerator } from '../components/Applications/CoverLetterGenerator'
 import { AddApplicationModal } from '../components/Applications/AddApplicationModal'
+import { CompanySentimentDashboard } from '../components/Applications/CompanySentimentDashboard'
 import { formatRelativeTime } from '../lib/utils/time'
 import '../styles/applications.css'
 
 const STATUS_TABS: (ApplicationStatus | 'all')[] = [
   'all',
+  'staged',
   'applied',
   'interviewing',
   'in-progress',
@@ -36,6 +38,8 @@ const STATUS_TABS: (ApplicationStatus | 'all')[] = [
 
 const prettyStatusLabel = (status: ApplicationStatus | null | undefined): string => {
   switch (status) {
+    case 'staged':
+      return 'Staged'
     case 'applied':
       return 'Applied'
     case 'interviewing':
@@ -71,9 +75,11 @@ export default function ApplicationsPage() {
     loading,
     error,
     updateStatus,
+    updateApplication,
     deleteApplication,
     statusCounts,
     totalCount,
+    refetch,
   } = useApplications({
     status: selectedStatus,
   })
@@ -131,6 +137,37 @@ export default function ApplicationsPage() {
     return formatRelativeTime(raw)
   }
 
+  // Bulk action handlers for staged applications
+  const handleClearAllStaged = async () => {
+    const staged = applications.filter(a => a.status === 'staged')
+    if (staged.length === 0) return
+    
+    if (!window.confirm(`Remove ${staged.length} staged ${staged.length === 1 ? 'application' : 'applications'}?`)) {
+      return
+    }
+    
+    try {
+      await Promise.all(staged.map(a => deleteApplication(a.id)))
+      showToast('Cleared staged applications', 'success')
+      await refetch()
+    } catch (error) {
+      showToast('Failed to clear staged applications', 'error')
+    }
+  }
+
+  const handleMarkAllApplied = async () => {
+    const staged = applications.filter(a => a.status === 'staged')
+    if (staged.length === 0) return
+    
+    try {
+      await Promise.all(staged.map(a => updateApplication(a.id, { status: 'applied' })))
+      showToast(`Marked ${staged.length} as Applied`, 'success')
+      await refetch()
+    } catch (error) {
+      showToast('Failed to update applications', 'error')
+    }
+  }
+
   return (
     <PageBackground>
       {/* PrimaryActionRegistryProvider: Enforces single primary action per page view */}
@@ -162,18 +199,20 @@ export default function ApplicationsPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
             <div className="lg:col-span-2 space-y-6">
               <section className="surface-card">
-                <h3 className="text-sm font-semibold tracking-wider text-ink-tertiary mb-4">Filter by status</h3>
+                <h3 className="text-sm font-semibold text-ink-tertiary mb-4">Filter by status</h3>
 
                 <div className="filter-buttons">
                   {STATUS_TABS.map((statusKey) => {
                     const label =
                       statusKey === 'all'
                         ? 'All'
-                        : statusKey === 'in-progress'
-                          ? 'In Review'
-                          : statusKey === 'interviewing'
-                            ? 'Interview'
-                            : statusKey.charAt(0).toUpperCase() + statusKey.slice(1)
+                        : statusKey === 'staged'
+                          ? 'Recently viewed'
+                          : statusKey === 'in-progress'
+                            ? 'In review'
+                            : statusKey === 'interviewing'
+                              ? 'Interview'
+                              : statusKey.charAt(0).toUpperCase() + statusKey.slice(1)
 
                     const count =
                       statusKey === 'all'
@@ -184,6 +223,39 @@ export default function ApplicationsPage() {
                   })}
                 </div>
               </section>
+
+              {/* Company Sentiment Dashboard */}
+              <CompanySentimentDashboard />
+
+              {/* Staged Applications Section */}
+              {statusCounts.staged > 0 && !selectedStatus && (
+                <section className="surface-card staged-applications">
+                  <div className="staged-header">
+                    <h3 className="text-sm font-semibold text-ink-tertiary">
+                      Recently viewed ({statusCounts.staged})
+                    </h3>
+                    <div className="staged-actions">
+                      <button
+                        type="button"
+                        onClick={handleMarkAllApplied}
+                        className="staged-action-btn"
+                      >
+                        Mark all applied
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleClearAllStaged}
+                        className="staged-action-btn staged-action-btn--danger"
+                      >
+                        Clear all
+                      </button>
+                    </div>
+                  </div>
+                  <p className="muted text-xs mt-2">
+                    You clicked these roles. Update to "Applied" if you submitted an application.
+                  </p>
+                </section>
+              )}
 
               <section className="surface-card">
                 {loading && <p className="muted text-sm">Loading applications…</p>}
@@ -234,6 +306,7 @@ export default function ApplicationsPage() {
                               className="app-status-select w-full"
                             >
                               <option value="">Untracked</option>
+                              <option value="staged">Staged</option>
                               <option value="applied">Applied</option>
                               <option value="interviewing">Interviewing</option>
                               <option value="in-progress">In Review</option>
@@ -243,6 +316,15 @@ export default function ApplicationsPage() {
                               <option value="withdrawn">Withdrawn</option>
                             </select>
                           </div>
+                          {app.status === 'staged' && (
+                            <button
+                              type="button"
+                              className="quick-action-btn text-xs font-semibold text-accent hover:underline"
+                              onClick={() => updateApplication(app.id, { status: 'applied' })}
+                            >
+                              Mark Applied
+                            </button>
+                          )}
                           {app.status === 'interviewing' && (
                             <a
                               href={getReadyUrl('/practice')}

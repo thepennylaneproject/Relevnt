@@ -51,7 +51,7 @@ export const EducationSection: React.FC<EducationSectionProps> = ({
     <SectionCard
       title="Education"
       description="Formal education, bootcamps, and high impact training."
-      icon={<GraduationCap className="w-4 h-4 text-[#1F2933]" />}
+      icon={<GraduationCap className="w-4 h-4 text-[var(--color-ink)]" />}
     >
       <div className="space-y-4">
         {items.map((item, index) => (

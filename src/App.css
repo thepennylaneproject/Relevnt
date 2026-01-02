@@ -105,8 +105,8 @@
 .feed-match-pill {
   padding: 3px 8px;
   border-radius: 999px;
-  border: 1px solid #f0e1c4;
-  background: #f7ecda;
+  border: 1px solid var(--color-bg-alt);
+  background: var(--color-bg-alt);
   font-size: 11px;
   color: var(--text);
   white-space: nowrap;
@@ -152,9 +152,9 @@
 
 .feed-accent-link {
   text-decoration: none;
-  border-color: #d6a65c;
-  background: #f7ecda;
-  color: #4b3a1d;
+  border-color: var(--color-accent);
+  background: var(--color-bg-alt);
+  color: var(--color-ink);
 }
 
 .feed-accent-link:hover {

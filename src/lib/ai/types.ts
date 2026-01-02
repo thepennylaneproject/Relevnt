@@ -37,6 +37,8 @@ export type AITaskName =
   | 'portfolio_analysis'
   | 'interview_prepare'
   | 'interview_evaluate'
+  | 'strategic_insights_generate'
+
 
 export interface AIRunInput<T = unknown> {
   task: AITaskName

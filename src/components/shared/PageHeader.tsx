@@ -10,6 +10,7 @@
 
 import { CSSProperties } from 'react';
 import { useRelevntColors } from '../../hooks/useRelevntColors';
+import { useRelevntTheme } from '../../contexts/RelevntThemeProvider';
 import { getAsset } from '../../themes/assets';
 
 interface PageHeaderProps {
@@ -28,7 +29,8 @@ export function PageHeader({
   minHeight = '400px',
 }: PageHeaderProps): JSX.Element {
   const colors = useRelevntColors();
-  const isDark = colors.background === '#1A1A1A';
+  const { isDark } = useRelevntTheme();
+  const overlayBase = isDark ? 'var(--color-ink)' : 'var(--color-ivory)';
 
   // Get Hero image for current mode
   const mode = isDark ? 'dark' : 'light';
@@ -67,9 +69,7 @@ export function PageHeader({
   const overlayStyles: CSSProperties = {
     position: 'absolute',
     inset: 0,
-    background: isDark
-      ? 'linear-gradient(135deg, rgba(26, 26, 26, 0.85) 0%, rgba(26, 26, 26, 0.4) 100%)'
-      : 'linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.4) 100%)',
+    background: `linear-gradient(135deg, color-mix(in srgb, ${overlayBase} 85%, transparent) 0%, color-mix(in srgb, ${overlayBase} 40%, transparent) 100%)`,
     pointerEvents: 'none',
   };
 

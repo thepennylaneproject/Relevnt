@@ -8,7 +8,10 @@ import { useAuth } from "../contexts/AuthContext";
 import { useApplications } from "../hooks/useApplications";
 import { useJobStats } from "../hooks/useJobStats";
 import { useWellnessMode } from "../hooks/useWellnessMode";
+import { useStrategicPivot } from "../hooks/useStrategicPivot";
 import { WellnessCheckin } from "../components/dashboard/WellnessCheckin";
+import StrategicPivotReport from "../components/insights/StrategicPivotReport";
+import InsightsEmptyState from "../components/insights/InsightsEmptyState";
 import { getReadyUrl } from "../config/cross-product";
 import "../styles/dashboard-clarity.css";
 
@@ -40,7 +43,18 @@ export default function DashboardPage(): JSX.Element {
   const { applications } = useApplications();
   const { total } = useJobStats();
   const { mode: wellnessMode } = useWellnessMode();
+  const {
+    latestReport,
+    loading: insightsLoading,
+    canGenerateReport,
+    minApplicationsRequired,
+    currentApplicationCount,
+    generateReport,
+    applyRecommendation,
+    dismissRecommendation,
+  } = useStrategicPivot();
   const navigate = useNavigate();
+  const [generatingReport, setGeneratingReport] = React.useState(false);
 
   if (authLoading) {
     return (
@@ -146,7 +160,7 @@ export default function DashboardPage(): JSX.Element {
           cta: "Explore roles",
           ctaLink: "/jobs",
           secondaryCta: "Improve profile",
-          secondaryLink: "/settings#profile",
+          secondaryLink: "/settings?section=profile",
         };
     }
   };
@@ -216,7 +230,7 @@ export default function DashboardPage(): JSX.Element {
         icon: "stars",
         label: "Profile strength",
         action: `${profileCompletion}% → Improve`,
-        link: "/settings#profile",
+        link: "/settings?section=profile",
       });
     }
 
@@ -630,7 +644,7 @@ export default function DashboardPage(): JSX.Element {
                     ? "Almost there!"
                     : "Looking great!"}
                 </span>
-                <Link to="/settings#profile" className="progress-cta">
+                <Link to="/settings?section=profile" className="progress-cta">
                   {profileCompletion < 80 ? "Improve profile" : "View profile"}{" "}
                   →
                 </Link>
@@ -639,7 +653,56 @@ export default function DashboardPage(): JSX.Element {
           </section>
 
           {/* ═══════════════════════════════════════════════════════════════════
-              SECTION 5: WELLNESS CHECK (if gentle mode)
+              SECTION 5: STRATEGIC INSIGHTS
+          ═══════════════════════════════════════════════════════════════════ */}
+          <section className="your-progress-section">
+            <div className="section-header-with-action">
+              <h3 className="section-header">
+                <Icon name="stars" size="sm" />
+                Strategic Insights
+              </h3>
+              {canGenerateReport && (
+                <button
+                  className="btn btn-sm btn-link"
+                  onClick={async () => {
+                    setGeneratingReport(true);
+                    try {
+                      await generateReport();
+                    } catch (err) {
+                      console.error(err);
+                    } finally {
+                      setGeneratingReport(false);
+                    }
+                  }}
+                  disabled={generatingReport}
+                >
+                  {generatingReport ? 'Generating...' : 'Generate New Report'}
+                </button>
+              )}
+            </div>
+
+            {insightsLoading ? (
+              <div className="loading-spinner" />
+            ) : canGenerateReport && latestReport ? (
+              <StrategicPivotReport
+                report={latestReport}
+                onApplyRecommendation={async (recId) => {
+                  await applyRecommendation(latestReport.id, recId);
+                }}
+                onDismissRecommendation={async (recId) => {
+                  await dismissRecommendation(latestReport.id, recId);
+                }}
+              />
+            ) : (
+              <InsightsEmptyState
+                currentCount={currentApplicationCount}
+                requiredCount={minApplicationsRequired}
+              />
+            )}
+          </section>
+
+          {/* ═══════════════════════════════════════════════════════════════════
+              SECTION 6: WELLNESS CHECK (if gentle mode)
           ═══════════════════════════════════════════════════════════════════ */}
           {wellnessMode === "gentle" && (
             <section className="wellness-section">

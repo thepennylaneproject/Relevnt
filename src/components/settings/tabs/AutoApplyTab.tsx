@@ -37,8 +37,8 @@ export function AutoApplyTab({ onAutoSaveStatusChange }: AutoApplyTabProps) {
     if (error) {
         return (
             <div className="tab-pane">
-                <div className="card" style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-                    <p style={{ color: '#ef4444', margin: 0 }}>{error}</p>
+                <div className="card" style={{ background: 'var(--color-error-bg)', border: '1px solid var(--color-error)' }}>
+                    <p style={{ color: 'var(--color-error)', margin: 0 }}>{error}</p>
                 </div>
             </div>
         )

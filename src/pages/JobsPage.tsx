@@ -7,6 +7,7 @@ import { Container } from '../components/shared/Container'
 import { EmptyState } from '../components/ui/EmptyState'
 import { useToast } from '../components/ui/Toast'
 import { Button } from '../components/ui/Button'
+import { Icon } from '../components/ui/Icon'
 import { copy } from '../lib/copy'
 import type { JobRow } from '../shared/types'
 import { usePersonas } from '../hooks/usePersonas'
@@ -401,7 +402,7 @@ export default function JobsPage() {
         {!activePersona && (
           <div className="feed-header-explainer">
             <p className="subtitle">
-              Showing all available jobs. <a href="/settings#targeting" className="text-accent hover:underline">Set up a job target</a> to get AI-powered personalized rankings.
+              Showing all available jobs. <a href="/settings?section=targeting" className="text-accent hover:underline">Set up a job target</a> to get AI-powered personalized rankings.
             </p>
           </div>
         )}
@@ -712,6 +713,24 @@ export default function JobsPage() {
           <div className="page-header">
             <div className="header-top">
               <h1>Relevnt Feed</h1>
+              <a 
+                href="/settings?section=targeting"
+                className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '14px',
+                  color: 'var(--color-ink-tertiary)',
+                  textDecoration: 'none',
+                  transition: 'color 0.2s'
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-accent)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-ink-tertiary)' }}
+              >
+                <Icon name="pocket-watch" size="sm" hideAccent />
+                Edit targeting
+              </a>
             </div>
             <p>Jobs matched to you, ranked by what matters most.</p>
           </div>

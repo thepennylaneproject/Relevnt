@@ -287,7 +287,7 @@ export function useRelevntTheme(): RelevntThemeContextValue {
  * Example:
  * ```tsx
  * const isDark = useIsDarkMode()
- * return <div style={{ background: isDark ? '#000' : '#fff' }} />
+ * return <div style={{ background: isDark ? 'var(--color-bg)' : 'var(--color-surface)' }} />
  * ```
  */
 export function useIsDarkMode(): boolean {

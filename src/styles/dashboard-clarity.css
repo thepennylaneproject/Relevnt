@@ -402,7 +402,7 @@
 
 .pipeline-stat.is-active .pipeline-stat-icon {
   background: var(--color-accent);
-  color: #ffffff;
+  color: var(--color-ink-inverse);
 }
 
 .pipeline-stat.is-active .pipeline-stat-value {
@@ -858,7 +858,7 @@ button:focus-visible {
 
 .pipeline-stat--clickable:hover .pipeline-stat-icon {
   background: var(--color-accent);
-  color: #ffffff;
+  color: var(--color-ink-inverse);
 }
 
 .pipeline-stat--clickable:hover .pipeline-stat-value {
@@ -885,7 +885,7 @@ button:focus-visible {
 }
 
 .progress-value--warning {
-  color: #d97706;
+  color: var(--color-warning);
 }
 
 .progress-value--good {
@@ -961,7 +961,7 @@ button:focus-visible {
   font-family: var(--font-display);
   font-size: var(--text-sm);
   font-weight: 600;
-  color: #ffffff;
+  color: var(--color-ink-inverse);
   background: var(--color-accent);
   border-radius: var(--radius-full);
   text-decoration: none;
@@ -1010,7 +1010,7 @@ button:focus-visible {
 /* Ensure progress colors work in dark mode */
 :root.dark .progress-value--warning,
 [data-theme="dark"] .progress-value--warning {
-  color: #fbbf24;
+  color: var(--color-warning);
 }
 
 :root.dark .progress-value--good,

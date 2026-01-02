@@ -53,7 +53,7 @@ export const CertificationsSection: React.FC<CertificationsSectionProps> = ({
     <SectionCard
       title="Certifications"
       description="License, certs, and credentials that move the needle."
-      icon={<Award className="w-4 h-4 text-[#1F2933]" />}
+      icon={<Award className="w-4 h-4 text-[var(--color-ink)]" />}
     >
       <div className="space-y-4">
         {items.map((item, index) => (

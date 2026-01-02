@@ -70,15 +70,15 @@ export function IngestionActivityFeed() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'running':
-        return <CustomIcon name="zap" size={16} color="ink" style={{ color: '#2eac80' }} className="animate-pulse" />
+        return <CustomIcon name="zap" size={16} color="ink" style={{ color: 'var(--color-success)' }} className="animate-pulse" />
       case 'success':
-        return <CustomIcon name="check-circle" size={16} color="ink" style={{ color: '#2eac80' }} />
+        return <CustomIcon name="check-circle" size={16} color="ink" style={{ color: 'var(--color-success)' }} />
       case 'partial':
-        return <CustomIcon name="alert-circle" size={16} color="ink" style={{ color: '#D4A16C' }} />
+        return <CustomIcon name="alert-circle" size={16} color="ink" style={{ color: 'var(--color-warning)' }} />
       case 'failed':
-        return <CustomIcon name="alert-circle" size={16} color="ink" style={{ color: '#C86C6C' }} />
+        return <CustomIcon name="alert-circle" size={16} color="ink" style={{ color: 'var(--color-error)' }} />
       default:
-        return <CustomIcon name="compass" size={16} color="ink" style={{ color: '#8a8a8a' }} />
+        return <CustomIcon name="compass" size={16} color="ink" style={{ color: 'var(--color-ink-tertiary)' }} />
     }
   }
 
@@ -114,7 +114,7 @@ export function IngestionActivityFeed() {
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2 mb-4">
-        <CustomIcon name="compass" size={20} color="ink" style={{ color: '#013E30' }} />
+        <CustomIcon name="compass" size={20} color="ink" style={{ color: 'var(--color-success)' }} />
         <h3 className="font-semibold" style={{ color: 'var(--text)' }}>Recent Ingestion Activity</h3>
       </div>
 

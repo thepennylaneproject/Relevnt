@@ -52,7 +52,7 @@
   height: 28px;
   border-radius: 50%;
   background: var(--color-accent-glow, rgba(212, 165, 116, 0.15));
-  color: var(--color-accent, #D4A574);
+  color: var(--color-accent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -98,7 +98,7 @@
   bottom: 0;
   width: 280px;
   max-width: 85vw;
-  background: var(--surface, #1a1c23);
+  background: var(--color-surface);
   border-left: 1px solid var(--border);
   display: flex;
   flex-direction: column;

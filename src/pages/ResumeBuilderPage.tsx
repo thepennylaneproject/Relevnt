@@ -33,7 +33,6 @@ import { NewResumeWizard } from '../components/ResumeBuilder/NewResumeWizard'
 
 // UI components
 import { IconName } from '../components/ui/Icon'
-import { ResumeIconName } from '../components/ui/HandDrawnIcon'
 
 // Hooks and utilities
 import { copy } from '../lib/copy'
@@ -41,6 +40,12 @@ import { useResumeBuilder } from '../hooks/useResumeBuilder'
 import { useResumeAnalysis } from '../hooks/useResumeAnalysis'
 import type { ResumeDraft } from '../types/resume-builder.types'
 import '../styles/resume-builder.css'
+import '../styles/tailoring.css'
+
+// Tailoring feature
+import { generateTailoringSuggestions } from '../services/tailoringService'
+import { TailoringOverlay } from '../components/ResumeBuilder/TailoringOverlay'
+import type { TailoringContext, TailoringSuggestion } from '../types/tailoring'
 
 // ============================================================================
 // TYPES
@@ -60,15 +65,14 @@ type ActivePanel = 'preview' | 'ats' | 'targeting'
 const SECTION_META: {
   id: ActiveSection
   label: string
-  resumeIconName: ResumeIconName
 }[] = [
-  { id: 'contact', label: 'Contact', resumeIconName: 'contact' },
-  { id: 'summary', label: 'Summary', resumeIconName: 'summary' },
-  { id: 'skills', label: 'Skills', resumeIconName: 'skills' },
-  { id: 'experience', label: 'Experience', resumeIconName: 'experience' },
-  { id: 'education', label: 'Education', resumeIconName: 'education' },
-  { id: 'certifications', label: 'Certifications', resumeIconName: 'certifications' },
-  { id: 'projects', label: 'Projects', resumeIconName: 'projects' },
+  { id: 'contact', label: 'Contact' },
+  { id: 'summary', label: 'Summary' },
+  { id: 'skills', label: 'Skills' },
+  { id: 'experience', label: 'Experience' },
+  { id: 'education', label: 'Education' },
+  { id: 'certifications', label: 'Certifications' },
+  { id: 'projects', label: 'Projects' },
 ]
 
 // ============================================================================
@@ -111,6 +115,12 @@ const ResumeBuilderPage: React.FC<ResumeBuilderPageProps> = ({ embedded = false 
   const [showCoach, setShowCoach] = useState(true)
   const [showWizard, setShowWizard] = useState(false)
 
+  // Tailoring state
+  const jobId = searchParams.get('jobId')
+  const [tailoringContext, setTailoringContext] = useState<TailoringContext | null>(null)
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false)
+  const [showTailoringOverlay, setShowTailoringOverlay] = useState(true)
+
   // Resume data and autosave
   const {
     resumeId,
@@ -137,6 +147,26 @@ const ResumeBuilderPage: React.FC<ResumeBuilderPageProps> = ({ embedded = false 
       setSearchParams(next, { replace: true })
     }
   }, [resumeId, resumeIdFromUrl, searchParams, setSearchParams])
+
+  // Load tailoring suggestions when jobId is present
+  React.useEffect(() => {
+    if (jobId && resumeId) {
+      setIsLoadingSuggestions(true)
+      generateTailoringSuggestions(resumeId, jobId)
+        .then((context) => {
+          setTailoringContext(context)
+          if (context.suggestions.length > 0) {
+            setShowTailoringOverlay(true)
+          }
+        })
+        .catch((error) => {
+          console.error('Failed to load tailoring suggestions:', error)
+        })
+        .finally(() => setIsLoadingSuggestions(false))
+    } else {
+      setTailoringContext(null)
+    }
+  }, [jobId, resumeId])
 
   // ATS Analysis
   const { analysis, analyze, loading: analyzing } = useResumeAnalysis()
@@ -212,6 +242,66 @@ const ResumeBuilderPage: React.FC<ResumeBuilderPageProps> = ({ embedded = false 
     setActivePanel('ats')
   }, [analyze, draft])
 
+  // Handle accepting a tailoring suggestion
+  const handleAcceptSuggestion = useCallback((suggestion: TailoringSuggestion) => {
+    // Update the experience bullet with suggested text
+    // Note: This assumes bulletId format is "{experienceId}-{index}"
+    const [expId, bulletIndex] = suggestion.bulletId.split('-')
+    const bulletIdx = parseInt(bulletIndex, 10)
+
+    const nextExperience = draft.experience.map((exp) => {
+      if (exp.id !== expId) {
+        return exp
+      }
+
+      // Split bullets by line breaks or semicolons
+      const bullets = exp.bullets.split(/[\n;]/).map((b: string) => b.trim()).filter((b: string) => b)
+
+      // Replace the specific bullet
+      if (bulletIdx >= 0 && bulletIdx < bullets.length) {
+        bullets[bulletIdx] = suggestion.suggestedText
+      }
+
+      return {
+        ...exp,
+        bullets: bullets.join('\n'),
+      }
+    })
+
+    setExperience(nextExperience)
+
+    // Remove suggestion from list
+    setTailoringContext((prev) =>
+      prev
+        ? {
+            ...prev,
+            suggestions: prev.suggestions.filter((s) => s.id !== suggestion.id),
+          }
+        : null
+    )
+  }, [draft.experience, setExperience])
+
+  // Handle dismissing a suggestion
+  const handleDismissSuggestion = useCallback((suggestionId: string) => {
+    setTailoringContext((prev) =>
+      prev
+        ? {
+            ...prev,
+            suggestions: prev.suggestions.filter((s) => s.id !== suggestionId),
+          }
+        : null
+    )
+  }, [])
+
+  // Handle clearing job context
+  const handleClearJobContext = useCallback(() => {
+    const next = new URLSearchParams(searchParams)
+    next.delete('jobId')
+    setSearchParams(next)
+    setTailoringContext(null)
+    setShowTailoringOverlay(false)
+  }, [searchParams, setSearchParams])
+
   // Resume text for job targeting
   const resumeText = useMemo(() => draftToText(draft), [draft])
 
@@ -271,6 +361,53 @@ const ResumeBuilderPage: React.FC<ResumeBuilderPageProps> = ({ embedded = false 
                   )
                 })}
               </div>
+            </div>
+          )}
+
+          {/* Job Context Banner */}
+          {tailoringContext && (
+            <div style={{
+              padding: '12px 20px',
+              background: 'var(--color-bg-alt)',
+              borderBottom: '1px solid var(--color-graphite-faint)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}>
+              <div>
+                <strong style={{ color: 'var(--color-accent)' }}>
+                  Tailoring for:
+                </strong>{' '}
+                <span style={{ color: 'var(--color-ink)' }}>
+                  {tailoringContext.jobTitle}
+                </span>
+                <span className="muted"> at {tailoringContext.company}</span>
+              </div>
+              <button
+                onClick={handleClearJobContext}
+                className="link-accent"
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                }}
+              >
+                Clear job context
+              </button>
+            </div>
+          )}
+
+          {/* Loading Indicator */}
+          {isLoadingSuggestions && (
+            <div style={{
+              padding: '12px 20px',
+              background: 'var(--color-accent-glow)',
+              borderBottom: '1px solid var(--color-accent)',
+              color: 'var(--color-accent)',
+              fontSize: '14px',
+            }}>
+              ✨ Analyzing job requirements and generating suggestions...
             </div>
           )}
 
@@ -384,6 +521,26 @@ const ResumeBuilderPage: React.FC<ResumeBuilderPageProps> = ({ embedded = false 
               </div>
             </div>
           </div>
+
+          {/* Tailoring Overlay */}
+          {tailoringContext && tailoringContext.suggestions.length > 0 && showTailoringOverlay && (
+            <TailoringOverlay
+              context={tailoringContext}
+              onAcceptSuggestion={handleAcceptSuggestion}
+              onDismissSuggestion={handleDismissSuggestion}
+              onClose={() => setShowTailoringOverlay(false)}
+            />
+          )}
+
+          {/* Toggle button when overlay hidden */}
+          {tailoringContext && tailoringContext.suggestions.length > 0 && !showTailoringOverlay && (
+            <button
+              onClick={() => setShowTailoringOverlay(true)}
+              className="floating-suggestions-button"
+            >
+              💡 {tailoringContext.suggestions.length} Suggestions
+            </button>
+          )}
 
           {/* Wizard Modal */}
           {showWizard && (

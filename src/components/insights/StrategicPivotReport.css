@@ -1,0 +1,149 @@
+/* =============================================================================
+ * Strategic Pivot Report Styles
+ * ============================================================================= */
+
+.strategic-pivot-report {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.report-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.report-title h2 {
+  margin: 0 0 var(--space-1) 0;
+  font-size: var(--font-size-2xl);
+  font-weight: 600;
+}
+
+.report-period {
+  font-size: var(--font-size-sm);
+}
+
+/* Overview Stats */
+.report-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-4);
+}
+
+.stat-card {
+  padding: var(--space-4);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+.stat-card.highlighted {
+  background: var(--color-accent-subtle);
+  border-color: var(--color-accent);
+}
+
+.stat-value {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.trend-indicator {
+  font-size: var(--font-size-xl);
+}
+
+.stat-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.stat-change {
+  font-size: var(--font-size-xs);
+  margin-top: var(--space-1);
+}
+
+/* Report Sections */
+.report-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.report-section h3 {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Findings */
+.findings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-4);
+}
+
+.finding-card {
+  padding: var(--space-4);
+  background: var(--color-bg-elevated);
+  border-left: 3px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.finding-card.finding-positive {
+  border-left-color: var(--color-success);
+  background: var(--color-success-subtle, rgba(34, 197, 94, 0.05));
+}
+
+.finding-card.finding-negative {
+  border-left-color: var(--color-error);
+  background: var(--color-error-subtle, rgba(239, 68, 68, 0.05));
+}
+
+.finding-card.finding-neutral {
+  border-left-color: var(--color-accent);
+}
+
+.finding-pattern {
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+}
+
+.finding-description {
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-2);
+}
+
+.finding-stat {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+/* Recommendations */
+.recommendations-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: var(--space-8);
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-lg);
+  border: 1px dashed var(--color-border);
+}
+
+.empty-state p:first-child {
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--space-2);
+}

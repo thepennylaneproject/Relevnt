@@ -40,6 +40,12 @@ export interface TransparencyCardProps {
   onExportClick?: () => void;
 }
 
+const toSentenceCase = (value: string) => {
+  const trimmed = value.trim();
+  if (!trimmed) return trimmed;
+  return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
+};
+
 /**
  * Main transparency card component
  */
@@ -172,9 +178,9 @@ export function TransparencyCard({
  */
 function ScoreGauge({ score }: { score: number }) {
   const getColor = (s: number) => {
-    if (s >= 80) return 'text-green-600';
-    if (s >= 60) return 'text-yellow-600';
-    return 'text-red-600';
+    if (s >= 80) return 'text-[var(--color-success)]';
+    if (s >= 60) return 'text-[var(--color-warning)]';
+    return 'text-[var(--color-error)]';
   };
 
   const getLabel = (s: number) => {
@@ -182,6 +188,13 @@ function ScoreGauge({ score }: { score: number }) {
     if (s >= 60) return 'Good';
     return 'Needs work';
   };
+
+  const scoreStroke =
+    score >= 80
+      ? 'var(--color-success)'
+      : score >= 60
+        ? 'var(--color-warning)'
+        : 'var(--color-error)';
 
   return (
     <div className="flex items-center gap-2">
@@ -192,7 +205,7 @@ function ScoreGauge({ score }: { score: number }) {
             cy="50"
             r="40"
             fill="none"
-            stroke="#e5e7eb"
+            stroke="var(--color-graphite-faint)"
             strokeWidth="8"
           />
           <circle
@@ -200,9 +213,7 @@ function ScoreGauge({ score }: { score: number }) {
             cy="50"
             r="40"
             fill="none"
-            stroke={
-              score >= 80 ? '#10b981' : score >= 60 ? '#f59e0b' : '#ef4444'
-            }
+            stroke={scoreStroke}
             strokeWidth="8"
             strokeDasharray={`${(score / 100) * 251} 251`}
             strokeLinecap="round"
@@ -236,7 +247,7 @@ function CriterionBar({
   return (
     <div>
       <div className="flex justify-between mb-1">
-        <span className="text-sm text-gray-700 capitalize">{name}</span>
+        <span className="text-sm text-gray-700">{toSentenceCase(name)}</span>
         <span className="text-sm font-semibold text-gray-900">
           {Math.round(weight * 100)}%
         </span>

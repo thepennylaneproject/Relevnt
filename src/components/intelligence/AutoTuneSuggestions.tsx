@@ -76,7 +76,7 @@ export function AutoTuneSuggestions({ className = '' }: AutoTuneSuggestionsProps
             <style>{`
                 .autotune-suggestions {
                     background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
-                    border: 1px solid var(--accent-primary, #6366f1);
+                    border: 1px solid var(--color-accent);
                     border-radius: 16px;
                     padding: 20px;
                     margin-bottom: 16px;
@@ -96,19 +96,19 @@ export function AutoTuneSuggestions({ className = '' }: AutoTuneSuggestionsProps
                 }
                 
                 .autotune-icon {
-                    color: var(--accent-primary, #6366f1);
+                    color: var(--color-accent);
                 }
                 
                 .autotune-title {
                     font-size: 16px;
                     font-weight: 700;
-                    color: var(--text-primary, #fff);
+                    color: var(--color-ink);
                     margin: 0;
                 }
                 
                 .autotune-subtitle {
                     font-size: 13px;
-                    color: var(--text-secondary, #aaa);
+                    color: var(--color-ink-secondary);
                     margin: 0 0 16px;
                 }
                 
@@ -120,7 +120,7 @@ export function AutoTuneSuggestions({ className = '' }: AutoTuneSuggestionsProps
                 
                 .suggestion-card {
                     position: relative;
-                    background: var(--surface-elevated, #1a1a2e);
+                    background: var(--color-surface);
                     border: 1px solid var(--border-subtle, rgba(255,255,255,0.1));
                     border-radius: 12px;
                     padding: 16px;
@@ -133,7 +133,7 @@ export function AutoTuneSuggestions({ className = '' }: AutoTuneSuggestionsProps
                     right: 12px;
                     background: transparent;
                     border: none;
-                    color: var(--text-muted, #666);
+                    color: var(--color-ink-tertiary);
                     cursor: pointer;
                     padding: 4px;
                     border-radius: 4px;
@@ -142,7 +142,7 @@ export function AutoTuneSuggestions({ className = '' }: AutoTuneSuggestionsProps
                 
                 .suggestion-dismiss:hover {
                     background: var(--surface-hover, rgba(255,255,255,0.1));
-                    color: var(--text-primary, #fff);
+                    color: var(--color-ink);
                 }
                 
                 .suggestion-content {
@@ -154,13 +154,13 @@ export function AutoTuneSuggestions({ className = '' }: AutoTuneSuggestionsProps
                 .suggestion-title {
                     font-size: 14px;
                     font-weight: 700;
-                    color: var(--text-primary, #fff);
+                    color: var(--color-ink);
                     margin: 0;
                 }
                 
                 .suggestion-message {
                     font-size: 13px;
-                    color: var(--text-secondary, #aaa);
+                    color: var(--color-ink-secondary);
                     margin: 0;
                     line-height: 1.5;
                 }
@@ -175,7 +175,7 @@ export function AutoTuneSuggestions({ className = '' }: AutoTuneSuggestionsProps
                     display: flex;
                     align-items: center;
                     gap: 6px;
-                    background: var(--accent-primary, #6366f1);
+                    background: var(--color-accent);
                     color: white;
                     border: none;
                     border-radius: 8px;
@@ -187,13 +187,13 @@ export function AutoTuneSuggestions({ className = '' }: AutoTuneSuggestionsProps
                 }
                 
                 .suggestion-apply-btn:hover {
-                    background: var(--accent-primary-hover, #5558dd);
+                    background: var(--color-accent-hover);
                     transform: translateX(2px);
                 }
                 
                 .suggestion-skip-btn {
                     background: transparent;
-                    color: var(--text-muted, #888);
+                    color: var(--color-ink-tertiary);
                     border: 1px solid var(--border-subtle, rgba(255,255,255,0.1));
                     border-radius: 8px;
                     padding: 8px 14px;
@@ -205,7 +205,7 @@ export function AutoTuneSuggestions({ className = '' }: AutoTuneSuggestionsProps
                 
                 .suggestion-skip-btn:hover {
                     border-color: var(--border-default, rgba(255,255,255,0.2));
-                    color: var(--text-secondary, #aaa);
+                    color: var(--color-ink-secondary);
                 }
             `}</style>
         </div>

@@ -247,3 +247,88 @@
   background-color: var(--color-bg-alt) !important;
   color: var(--color-ink-tertiary) !important;
 }
+
+/* Staged Applications Section */
+.staged-applications {
+  margin-bottom: 24px;
+  padding: 20px;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--color-graphite-faint) !important;
+}
+
+.staged-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.staged-header h3 {
+  margin: 0;
+}
+
+.staged-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.staged-action-btn {
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-graphite-faint);
+  color: var(--color-ink);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.staged-action-btn:hover {
+  background: var(--color-accent-glow);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.staged-action-btn--danger:hover {
+  background: var(--color-error-bg);
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+
+/* Staged status pill */
+.app-status-pill--staged {
+  background-color: var(--color-bg-tertiary) !important;
+  color: var(--color-ink-tertiary) !important;
+  border: 1px dashed var(--color-graphite-faint) !important;
+}
+
+/* Quick action button */
+.quick-action-btn {
+  padding: 4px 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.quick-action-btn:hover {
+  opacity: 0.8;
+}
+
+@media (max-width: 640px) {
+  .staged-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .staged-actions {
+    width: 100%;
+  }
+  
+  .staged-action-btn {
+    flex: 1;
+  }
+}

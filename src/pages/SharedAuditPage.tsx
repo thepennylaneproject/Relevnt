@@ -7,6 +7,12 @@ import { Container } from '../components/shared/Container'
 import PageBackground from '../components/shared/PageBackground'
 import type { LinkedInAnalysis, PortfolioAnalysis } from '../shared/types'
 
+const toSentenceCase = (value: string) => {
+    const trimmed = value.trim()
+    if (!trimmed) return trimmed
+    return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase()
+}
+
 export default function SharedAuditPage() {
     const { type, token } = useParams<{ type?: string, token?: string }>()
     const navigate = useNavigate()
@@ -154,13 +160,13 @@ function LinkedInResults({ results }: { results: LinkedInAnalysis }) {
                 <div className="surface-card p-6">
                     <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
                         <Icon name="zap" size="sm" className="text-amber-500" />
-                        Key Improvements
+                        Key improvements
                     </h2>
                     <div className="space-y-6">
                         {results.suggestions.map((s, i) => (
                             <div key={i} className="border-l-4 border-amber-500/30 pl-4 py-1">
-                                <div className="text-xs font-bold text-amber-500 tracking-wider mb-1">
-                                    {s.section}
+                                <div className="text-xs font-bold text-amber-500 mb-1">
+                                    {toSentenceCase(s.section)}
                                 </div>
                                 <p className="font-bold text-lg mb-1">{s.improvement}</p>
                                 <p className="text-sm muted">{s.reason}</p>
@@ -172,7 +178,7 @@ function LinkedInResults({ results }: { results: LinkedInAnalysis }) {
                 <div className="space-y-6">
                     {results.optimized_headline && (
                         <div className="surface-card p-6 bg-accent-soft/5 border-accent-soft">
-                            <h2 className="text-xl font-bold mb-4">Strategic Headline</h2>
+                            <h2 className="text-xl font-bold mb-4">Strategic headline</h2>
                             <div className="text-lg italic font-display">
                                 "{results.optimized_headline}"
                             </div>
@@ -180,7 +186,7 @@ function LinkedInResults({ results }: { results: LinkedInAnalysis }) {
                     )}
                     {results.optimized_summary && (
                         <div className="surface-card p-6">
-                            <h2 className="text-xl font-bold mb-4">Narrative Strategy</h2>
+                            <h2 className="text-xl font-bold mb-4">Narrative strategy</h2>
                             <div className="text-sm leading-relaxed muted whitespace-pre-wrap">
                                 {results.optimized_summary}
                             </div>
@@ -197,11 +203,11 @@ function PortfolioResults({ results }: { results: PortfolioAnalysis }) {
         <div className="portfolio-optimizer__results">
             <div className="flex flex-col md:flex-row gap-6 mb-8">
                 <div className="flex-1 surface-card p-8 text-center bg-accent-soft/10">
-                    <span className="text-sm muted tracking-widest font-bold">Overall Impact</span>
+                    <span className="text-sm muted font-bold">Overall impact</span>
                     <div className="text-6xl font-display text-accent mt-2">{results.overall_score}</div>
                 </div>
                 <div className="flex-1 surface-card p-8 text-center">
-                    <span className="text-sm muted tracking-widest font-bold">Perceived Seniority</span>
+                    <span className="text-sm muted font-bold">Perceived seniority</span>
                     <div className="text-4xl font-display mt-4">{results.perceived_seniority}</div>
                 </div>
             </div>
@@ -213,7 +219,7 @@ function PortfolioResults({ results }: { results: PortfolioAnalysis }) {
             </div>
 
             <div className="surface-card p-8">
-                <h2 className="text-xl font-bold mb-6">Strategic Improvements</h2>
+                <h2 className="text-xl font-bold mb-6">Strategic improvements</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {results.suggestions.map((s, i) => (
                         <div key={i} className={`p-4 rounded-xl border-l-4 ${
@@ -222,9 +228,9 @@ function PortfolioResults({ results }: { results: PortfolioAnalysis }) {
                             'border-slate-500 bg-slate-500/5'
                         }`}>
                             <div className="flex justify-between items-center mb-1">
-                                <span className="text-xs font-bold tracking-wider">{s.category}</span>
+                                <span className="text-xs font-bold">{toSentenceCase(s.category)}</span>
                                 <span className="text-[10px] px-1.5 py-0.5 rounded bg-black/10 font-bold">
-                                    {s.impact} Impact
+                                    {toSentenceCase(s.impact)} impact
                                 </span>
                             </div>
                             <p className="font-medium">{s.improvement}</p>
@@ -266,7 +272,7 @@ function MetricBox({ label, score, icon }: { label: string, score: number, icon:
             <Icon name={icon} size="sm" className="text-accent" />
             <div className="flex-1">
                 <div className="flex justify-between items-center mb-1">
-                    <span className="text-xs font-bold tracking-wider">{label}</span>
+                    <span className="text-xs font-bold">{toSentenceCase(label)}</span>
                     <span className="text-sm font-bold">{score}</span>
                 </div>
                 <div className="h-1 bg-border-subtle rounded-full overflow-hidden">

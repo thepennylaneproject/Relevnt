@@ -4,6 +4,7 @@ import { useAuth } from '../../../contexts/AuthContext'
 import { useSettingsAutoSave, type AutoSaveStatus } from '../../../hooks/useSettingsAutoSave'
 import { useToast } from '../../ui/Toast'
 import { Button } from '../../ui/Button'
+import { VoicePreview } from '../VoicePreview'
 
 interface VoiceStyleTabProps {
     onAutoSaveStatusChange: (status: AutoSaveStatus) => void
@@ -178,6 +179,13 @@ export function VoiceStyleTab({ onAutoSaveStatusChange }: VoiceStyleTabProps) {
                         }}
                     />
                 </div>
+
+                {/* Voice Preview */}
+                <VoicePreview
+                    formality={formality}
+                    playfulness={100 - boldness}
+                    conciseness={50} // Default since we don't have conciseness slider in settings
+                />
             </div>
 
             <div className="card">

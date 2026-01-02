@@ -8,7 +8,7 @@ import { CollectionEmptyGuard } from '../components/ui/CollectionEmptyGuard'
 import { Button } from '../components/ui/Button'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
-import type { Database } from '../lib/database.types'
+import type { Database } from '../types/supabase'
 
 type ResumeRow = Pick<Database['public']['Tables']['resumes']['Row'], 'id' | 'title' | 'updated_at' | 'created_at'>
 

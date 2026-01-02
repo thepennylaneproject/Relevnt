@@ -22,6 +22,12 @@ export function SourcePerformanceMetrics() {
   const [error, setError] = useState<string | null>(null)
   const [sortBy, setSortBy] = useState<'health' | 'success' | 'jobs'>('health')
 
+  const toSentenceCase = (value: string) => {
+    const trimmed = value.trim()
+    if (!trimmed) return trimmed
+    return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase()
+  }
+
   useEffect(() => {
     fetchMetrics()
     const interval = setInterval(fetchMetrics, 30000) // Refresh every 30s
@@ -121,8 +127,8 @@ export function SourcePerformanceMetrics() {
             >
               <div className="flex items-start justify-between mb-3">
                 <div>
-                  <h4 className="font-semibold text-gray-900 capitalize">
-                    {metric.source_slug.replace(/_/g, ' ')}
+                  <h4 className="font-semibold text-gray-900">
+                    {toSentenceCase(metric.source_slug.replace(/_/g, ' '))}
                   </h4>
                   {metric.is_degraded && (
                     <div className="flex items-center gap-1 text-xs text-red-700 mt-1">

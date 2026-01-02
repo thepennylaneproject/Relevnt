@@ -197,7 +197,7 @@ export const ApplicationQuestionHelper: React.FC = () => {
                 )}
 
                 <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
-                    <p className="text-xs font-semibold muted mb-3 tracking-wider">Quick Rewrite</p>
+                    <p className="text-xs font-semibold muted mb-3">Quick rewrite</p>
                     {renderModeSelector(true)}
                 </div>
             </div>

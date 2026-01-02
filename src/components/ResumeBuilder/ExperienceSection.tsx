@@ -48,7 +48,7 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
     <SectionCard
       title="Experience"
       description="Roles where you did the most damage, quantified and structured."
-      icon={<Briefcase className="w-4 h-4 text-[#1F2933]" />}
+      icon={<Briefcase className="w-4 h-4 text-[var(--color-ink)]" />}
     >
       <div className="space-y-4">
         {items.map((item, index) => (

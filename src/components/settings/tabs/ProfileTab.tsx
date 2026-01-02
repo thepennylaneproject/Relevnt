@@ -3,6 +3,7 @@ import { useProfessionalProfile } from '../../../hooks/useProfessionalProfile'
 import { useSettingsAutoSave, type AutoSaveStatus } from '../../../hooks/useSettingsAutoSave'
 import { Icon } from '../../ui/Icon'
 import { Button } from '../../ui/Button'
+import { ExportDataButton } from '../ExportDataButton'
 
 interface ProfileTabProps {
     onAutoSaveStatusChange: (status: AutoSaveStatus) => void
@@ -270,6 +271,38 @@ export function ProfileTab({ onAutoSaveStatusChange }: ProfileTabProps) {
                             ))}
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <div className="card">
+                <h3>Data & Privacy</h3>
+                <p className="card-description">
+                    Download a complete copy of your career data for your records or to transfer to another service.
+                </p>
+                
+                <div style={{ 
+                    padding: '16px',
+                    background: 'var(--color-bg-tertiary)',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--color-graphite-faint)',
+                }}>
+                    <div style={{ marginBottom: '12px' }}>
+                        <strong>Included in export:</strong>
+                        <ul className="muted" style={{ 
+                            marginTop: '8px',
+                            marginLeft: '20px',
+                            fontSize: '14px',
+                            lineHeight: '1.6'
+                        }}>
+                            <li>Your profile information</li>
+                            <li>All resumes and their content</li>
+                            <li>All job search personas and preferences</li>
+                            <li>All job applications with timeline</li>
+                            <li>All feedback and activity signals</li>
+                        </ul>
+                    </div>
+                    
+                    <ExportDataButton />
                 </div>
             </div>
         </div>
