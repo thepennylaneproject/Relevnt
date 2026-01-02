@@ -1145,7 +1145,7 @@ type UpsertResult = {
 }
 
 // Upsert a batch of normalized jobs into the jobs table
-async function upsertJobs(jobs: NormalizedJob[]): Promise<UpsertResult> {
+export async function upsertJobs(jobs: NormalizedJob[]): Promise<UpsertResult> {
   if (!jobs.length) return { inserted: 0, updated: 0, noop: 0 }
 
   // 🔹 De-dupe by (source_slug, external_id) so Postgres does not try to
