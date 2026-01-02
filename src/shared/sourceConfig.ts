@@ -327,7 +327,7 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
         resetPaginationEachRun: false,
         trustLevel: 'medium',
         trackFreshnessRatio: true,
-        notes: 'CareerJet is a global job aggregator with multiple regions.',
+        notes: 'CareerJet is a global job aggregator with multiple regions. Requires API key registration with IP address(es) from which calls will be made.',
     },
 
     // =========================================================================
@@ -336,13 +336,13 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
     whatjobs: {
         slug: 'whatjobs',
         mode: 'wide-capped',
-        enabled: true,
+        enabled: false, // DISABLED - waiting for API key
         maxAgeDays: 30,
         maxPagesPerRun: 10, // Increased from 3 for better coverage
         resetPaginationEachRun: false,
         trustLevel: 'medium',
         trackFreshnessRatio: true,
-        notes: 'WhatJobs API has diverse job postings globally.',
+        notes: 'WhatJobs API has diverse job postings globally. Disabled pending API key acquisition.',
     },
 
     // =========================================================================
