@@ -300,12 +300,6 @@ function buildSourceUrl(
 
   // JobDataFeeds uses standard page/page_size pagination
   if (source.slug === 'jobdatafeeds') {
-    const apiKey = process.env.JOBDATAFEEDS_API_KEY
-    if (!apiKey) {
-      console.error('ingest_jobs: missing JOBDATAFEEDS_API_KEY - skipping source')
-      return null
-    }
-
     const config = SOURCE_PAGINATION[source.slug] || {}
     const page = cursor?.page ?? 1
     const pageSize = config.pageSize ?? 100
