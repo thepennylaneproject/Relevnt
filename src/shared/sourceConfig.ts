@@ -155,11 +155,11 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
         mode: 'wide-capped',
         enabled: true,
         maxAgeDays: 30,
-        maxPagesPerRun: 10, // Increased from 3 for deeper coverage
+        maxPagesPerRun: 20, // ⬆ Increased from 10 to 20 - huge capacity headroom (100k+/day)
         resetPaginationEachRun: false,
         trustLevel: 'medium',
         trackFreshnessRatio: true,
-        notes: 'RemoteOK free API with no auth. Popular remote-focused job board.',
+        notes: 'RemoteOK free API with no auth. Popular remote-focused job board. Maximizing pagination depth.',
     },
 
     // =========================================================================
@@ -182,14 +182,14 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
     // =========================================================================
     jobicy: {
         slug: 'jobicy',
-        mode: 'fresh-only',
-        enabled: false, // DISABLED - leave stub for future revisit
+        mode: 'wide-capped',
+        enabled: true, // ✅ RE-ENABLED - monitor for health
         maxAgeDays: 30,
-        maxPagesPerRun: 2,
+        maxPagesPerRun: 10, // ⬆ Increased from 2 to 10 for better coverage
         resetPaginationEachRun: false,
         trustLevel: 'medium',
-        trackFreshnessRatio: false,
-        notes: 'A dead source adds noise to your system thinking.',
+        trackFreshnessRatio: true,
+        notes: 'Jobicy remote jobs. Re-enabled with expanded pagination. Monitor health closely.',
     },
 
     // =========================================================================
@@ -200,11 +200,11 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
         mode: 'wide-capped',
         enabled: true,
         maxAgeDays: 30,
-        maxPagesPerRun: 10, // Increased from 3 - USAJobs has extensive inventory
+        maxPagesPerRun: 20, // ⬆ Increased from 10 - federal jobs have massive capacity
         resetPaginationEachRun: false,
         trustLevel: 'high', // Government source = high trust
         trackFreshnessRatio: true,
-        notes: 'USAJobs federal jobs. Stable API with thousands of positions.',
+        notes: 'USAJobs federal jobs. Stable API with thousands of positions. Maximizing pagination.',
     },
 
     // =========================================================================

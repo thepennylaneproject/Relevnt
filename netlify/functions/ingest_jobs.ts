@@ -298,17 +298,27 @@ function buildSourceUrl(
     return `${source.fetchUrl}?${params.toString()}`
   }
 
-  // JobDataFeeds uses standard page/page_size pagination
+  // JobDataFeeds uses standard page/page_size pagination WITH keyword rotation
   if (source.slug === 'jobdatafeeds') {
     const config = SOURCE_PAGINATION[source.slug] || {}
     const page = cursor?.page ?? 1
     const pageSize = config.pageSize ?? 100
 
+    // Use search rotation keywords, fallback to broad search
+    const title = searchParams?.keywords ? searchParams.keywords : 'all'
+    const location = searchParams?.location ? searchParams.location : null
+
     const params = new URLSearchParams({
       page: String(page),
       page_size: String(pageSize),
-      title: 'all',  // Search for all jobs
+      title: title,  // ✅ NOW USES KEYWORD ROTATION for targeted searches
     })
+
+    // Add optional location/city filter if provided and not remote
+    if (location && location.toLowerCase() !== 'remote') {
+      params.set('city', location)
+    }
+
     return `${source.fetchUrl}?${params.toString()}`
   }
 
