@@ -145,7 +145,7 @@ export async function seedDefaultSearches(
         { keywords: 'brand manager', location: 'US' },
         { keywords: 'communications manager', location: 'US' },
         { keywords: 'public relations', location: 'remote' },
-        
+
         // Creative & Design
         { keywords: 'graphic designer', location: 'remote' },
         { keywords: 'UI/UX designer', location: 'remote' },
@@ -154,7 +154,7 @@ export async function seedDefaultSearches(
         { keywords: 'photographer', location: 'US' },
         { keywords: 'art director', location: 'US' },
         { keywords: 'illustrator', location: 'remote' },
-        
+
         // Beauty & Cosmetology
         { keywords: 'cosmetology instructor', location: 'US' },
         { keywords: 'beauty school', location: 'US' },
@@ -166,7 +166,7 @@ export async function seedDefaultSearches(
         { keywords: 'nail technician', location: 'US' },
         { keywords: 'spa manager', location: 'US' },
         { keywords: 'beauty consultant', location: 'US' },
-        
+
         // Healthcare
         { keywords: 'registered nurse', location: 'US' },
         { keywords: 'healthcare administrator', location: 'US' },
@@ -174,7 +174,7 @@ export async function seedDefaultSearches(
         { keywords: 'physical therapist', location: 'US' },
         { keywords: 'mental health counselor', location: 'remote' },
         { keywords: 'pharmacy technician', location: 'US' },
-        
+
         // Education
         { keywords: 'teacher', location: 'US' },
         { keywords: 'instructional designer', location: 'remote' },
@@ -182,7 +182,7 @@ export async function seedDefaultSearches(
         { keywords: 'academic advisor', location: 'US' },
         { keywords: 'education coordinator', location: 'US' },
         { keywords: 'training specialist', location: 'remote' },
-        
+
         // Tech (diverse roles, not just engineering)
         { keywords: 'software engineer', location: 'remote' },
         { keywords: 'data analyst', location: 'remote' },
@@ -195,7 +195,11 @@ export async function seedDefaultSearches(
         { keywords: 'cybersecurity analyst', location: 'remote' },
         { keywords: 'customer success', location: 'remote' },
         { keywords: 'sales engineer', location: 'US' },
-        
+        { keywords: 'backend developer', location: 'remote' },
+        { keywords: 'frontend developer', location: 'remote' },
+        { keywords: 'machine learning engineer', location: 'remote' },
+        { keywords: 'systems engineer', location: 'remote' },
+
         // Business & Finance
         { keywords: 'accountant', location: 'US' },
         { keywords: 'financial analyst', location: 'remote' },
@@ -205,41 +209,55 @@ export async function seedDefaultSearches(
         { keywords: 'operations manager', location: 'US' },
         { keywords: 'executive assistant', location: 'remote' },
         { keywords: 'office manager', location: 'US' },
-        
+        { keywords: 'financial advisor', location: 'US' },
+        { keywords: 'tax consultant', location: 'remote' },
+
         // Hospitality & Retail
         { keywords: 'hotel manager', location: 'US' },
         { keywords: 'restaurant manager', location: 'US' },
         { keywords: 'event coordinator', location: 'US' },
         { keywords: 'retail manager', location: 'US' },
         { keywords: 'customer service', location: 'remote' },
-        
+
         // Trades & Skilled Labor
         { keywords: 'electrician', location: 'US' },
         { keywords: 'plumber', location: 'US' },
         { keywords: 'HVAC technician', location: 'US' },
         { keywords: 'maintenance technician', location: 'US' },
         { keywords: 'automotive technician', location: 'US' },
-        
+
         // Remote-first general
         { keywords: 'work from home', location: 'remote' },
         { keywords: 'remote', location: 'remote' },
         { keywords: 'hybrid', location: 'US' },
+
+        // Additional high-demand roles for diversity
+        { keywords: 'nurse practitioner', location: 'US' },
+        { keywords: 'therapist', location: 'remote' },
+        { keywords: 'consultant', location: 'remote' },
+        { keywords: 'architect', location: 'remote' },
+        { keywords: 'specialist', location: 'remote' },
+        { keywords: 'administrator', location: 'US' },
+        { keywords: 'coordinator', location: 'US' },
+        { keywords: 'analyst', location: 'remote' },
     ]
 
     // All sources that support keyword-based searches
     const sources = [
-        'jooble',       // Global aggregator with POST search
-        'reed_uk',      // UK jobs with keyword search
-        'careerjet',    // Global aggregator
-        'remoteok',     // Remote jobs
-        'remotive',     // Remote jobs
-        'himalayas',    // Remote jobs
-        'jobicy',       // Remote jobs
-        'arbeitnow',    // European jobs
-        'themuse',      // US jobs
-        'adzuna_us',    // US aggregator
-        'usajobs',      // Federal jobs
-        'careeronestop', // US government aggregator
+        'jooble',           // Global aggregator with POST search
+        'reed_uk',          // UK jobs with keyword search
+        'careerjet',        // Global aggregator
+        'remoteok',         // Remote jobs
+        'remotive',         // Remote jobs
+        'himalayas',        // Remote jobs
+        'jobicy',           // Remote jobs
+        'arbeitnow',        // European jobs
+        'themuse',          // US jobs
+        'adzuna_us',        // US aggregator
+        'usajobs',          // Federal jobs
+        'careeronestop',    // US government aggregator
+        'jobdatafeeds',     // Global job aggregator with keyword support
+        'jobspy',           // ✅ Multi-board web scraper (when enabled)
     ]
 
     const tasks: Partial<SearchTask>[] = []

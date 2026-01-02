@@ -102,8 +102,8 @@ const SOURCE_PAGINATION: Record<string, PaginationConfig> = {
   careerjet: { pageParam: 'page', pageSizeParam: 'pagesize', pageSize: 50, maxPagesPerRun: 3 },
   whatjobs: { pageParam: 'page', pageSizeParam: 'limit', pageSize: 50, maxPagesPerRun: 3 },
   reed_uk: { pageParam: 'resultsToSkip', pageSizeParam: 'resultsToTake', pageSize: 50, maxPagesPerRun: 2 },
-  // TheirStack uses POST with limit in body
-  theirstack: { pageParam: 'page', pageSizeParam: 'limit', pageSize: 100, maxPagesPerRun: 1 },
+  // TheirStack uses POST with limit in body - capped at 25 per API tier limit
+  theirstack: { pageParam: 'page', pageSizeParam: 'limit', pageSize: 25, maxPagesPerRun: 1 },
   // CareerOneStop uses path params with startRecord for pagination
   careeronestop: {
     pageParam: 'startRecord',
@@ -298,22 +298,38 @@ function buildSourceUrl(
     return `${source.fetchUrl}?${params.toString()}`
   }
 
-  // JobDataFeeds uses standard page/page_size pagination
+  // JobDataFeeds uses standard page/page_size pagination WITH keyword rotation
   if (source.slug === 'jobdatafeeds') {
     const config = SOURCE_PAGINATION[source.slug] || {}
     const page = cursor?.page ?? 1
     const pageSize = config.pageSize ?? 100
 
+    // Use search rotation keywords, fallback to broad search
+    const title = searchParams?.keywords ? searchParams.keywords : 'all'
+    const location = searchParams?.location ? searchParams.location : null
+
     const params = new URLSearchParams({
       page: String(page),
       page_size: String(pageSize),
-      title: 'all',  // Search for all jobs
+      title: title,  // ✅ NOW USES KEYWORD ROTATION for targeted searches
     })
+
+    // Add optional location/city filter if provided and not remote
+    if (location && location.toLowerCase() !== 'remote') {
+      params.set('city', location)
+    }
+
     return `${source.fetchUrl}?${params.toString()}`
   }
 
   // CareerJet v4 API - uses Basic Auth and specific parameters
   if (source.slug === 'careerjet') {
+    const apiKey = process.env.CAREERJET_API_KEY
+    if (!apiKey) {
+      console.error('ingest_jobs: missing CAREERJET_API_KEY - skipping source')
+      return null
+    }
+
     const config = SOURCE_PAGINATION[source.slug] || {}
     const page = cursor?.page ?? 1
     const pageSize = config.pageSize ?? 50
@@ -332,6 +348,12 @@ function buildSourceUrl(
 
   // WhatJobs uses page/limit pagination
   if (source.slug === 'whatjobs') {
+    const apiKey = process.env.WHATJOBS_API_KEY
+    if (!apiKey) {
+      console.error('ingest_jobs: missing WHATJOBS_API_KEY - skipping source')
+      return null
+    }
+
     const config = SOURCE_PAGINATION[source.slug] || {}
     const page = cursor?.page ?? 1
     const pageSize = config.pageSize ?? 50
@@ -657,7 +679,7 @@ async function fetchJson(
 
     // TheirStack requires POST with search parameters in body
     if (source?.slug === 'theirstack') {
-      const maxResults = parseInt(process.env.THEIRSTACK_MAX_RESULTS_PER_RUN || '25', 10)
+      const maxResults = Math.min(parseInt(process.env.THEIRSTACK_MAX_RESULTS_PER_RUN || '25', 10), 25)
       const config = SOURCE_PAGINATION[source.slug] || {}
       const maxAgeDays = config.maxAgeDays || 30
 

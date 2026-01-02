@@ -155,11 +155,11 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
         mode: 'wide-capped',
         enabled: true,
         maxAgeDays: 30,
-        maxPagesPerRun: 10, // Increased from 3 for deeper coverage
+        maxPagesPerRun: 20, // ⬆ Increased from 10 to 20 - huge capacity headroom (100k+/day)
         resetPaginationEachRun: false,
         trustLevel: 'medium',
         trackFreshnessRatio: true,
-        notes: 'RemoteOK free API with no auth. Popular remote-focused job board.',
+        notes: 'RemoteOK free API with no auth. Popular remote-focused job board. Maximizing pagination depth.',
     },
 
     // =========================================================================
@@ -182,14 +182,14 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
     // =========================================================================
     jobicy: {
         slug: 'jobicy',
-        mode: 'fresh-only',
-        enabled: false, // DISABLED - leave stub for future revisit
+        mode: 'wide-capped',
+        enabled: true, // ✅ RE-ENABLED - monitor for health
         maxAgeDays: 30,
-        maxPagesPerRun: 2,
+        maxPagesPerRun: 10, // ⬆ Increased from 2 to 10 for better coverage
         resetPaginationEachRun: false,
         trustLevel: 'medium',
-        trackFreshnessRatio: false,
-        notes: 'A dead source adds noise to your system thinking.',
+        trackFreshnessRatio: true,
+        notes: 'Jobicy remote jobs. Re-enabled with expanded pagination. Monitor health closely.',
     },
 
     // =========================================================================
@@ -200,11 +200,11 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
         mode: 'wide-capped',
         enabled: true,
         maxAgeDays: 30,
-        maxPagesPerRun: 10, // Increased from 3 - USAJobs has extensive inventory
+        maxPagesPerRun: 20, // ⬆ Increased from 10 - federal jobs have massive capacity
         resetPaginationEachRun: false,
         trustLevel: 'high', // Government source = high trust
         trackFreshnessRatio: true,
-        notes: 'USAJobs federal jobs. Stable API with thousands of positions.',
+        notes: 'USAJobs federal jobs. Stable API with thousands of positions. Maximizing pagination.',
     },
 
     // =========================================================================
@@ -277,12 +277,12 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
         slug: 'lever',
         mode: 'shallow-curated',
         enabled: true, // ENABLED after verification
-        maxAgeDays: 30,
+        maxAgeDays: 60,
         maxPagesPerRun: 1, // Lever uses company-based fetching, not pagination
         resetPaginationEachRun: true,
         trustLevel: 'high',
         trackFreshnessRatio: false,
-        notes: 'Premium job board. Companies configured via LEVER_SOURCES_JSON env var.',
+        notes: 'Premium job board. Companies configured via LEVER_SOURCES_JSON env var. Extended to 60 days to reduce aggressive staleness filtering.',
     },
 
     // =========================================================================
@@ -327,7 +327,7 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
         resetPaginationEachRun: false,
         trustLevel: 'medium',
         trackFreshnessRatio: true,
-        notes: 'CareerJet is a global job aggregator with multiple regions.',
+        notes: 'CareerJet is a global job aggregator with multiple regions. Requires API key registration with IP address(es) from which calls will be made.',
     },
 
     // =========================================================================
@@ -336,13 +336,28 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
     whatjobs: {
         slug: 'whatjobs',
         mode: 'wide-capped',
-        enabled: true,
+        enabled: false, // DISABLED - waiting for API key
         maxAgeDays: 30,
         maxPagesPerRun: 10, // Increased from 3 for better coverage
         resetPaginationEachRun: false,
         trustLevel: 'medium',
         trackFreshnessRatio: true,
-        notes: 'WhatJobs API has diverse job postings globally.',
+        notes: 'WhatJobs API has diverse job postings globally. Disabled pending API key acquisition.',
+    },
+
+    // =========================================================================
+    // JobSpy - Multi-board web scraper (Indeed, LinkedIn, Glassdoor, ZipRecruiter)
+    // =========================================================================
+    jobspy: {
+        slug: 'jobspy',
+        mode: 'wide-capped',
+        enabled: false, // DISABLED by default - requires ts-jobspy npm install
+        maxAgeDays: 7, // Jobs from last 7 days only (web scraping focus on fresh)
+        maxPagesPerRun: 1, // Background function handles all pages internally
+        resetPaginationEachRun: true,
+        trustLevel: 'medium',
+        trackFreshnessRatio: true,
+        notes: 'JobSpy multi-board scraper. Requires: npm install ts-jobspy. Runs as background function with 15-min timeout. Enable when ts-jobspy is installed.',
     },
 
     // =========================================================================
