@@ -104,10 +104,6 @@
     "leverSlug": "backerkit"
   },
   {
-    "companyName": "Mattermark",
-    "leverSlug": "mattermark"
-  },
-  {
     "companyName": "BuildZoom",
     "leverSlug": "buildzoom"
   },
@@ -188,16 +184,8 @@
     "leverSlug": "workramp"
   },
   {
-    "companyName": "Raptor Maps",
-    "leverSlug": "raptormaps"
-  },
-  {
     "companyName": "Hush",
     "leverSlug": "hush"
-  },
-  {
-    "companyName": "Instrumentl",
-    "leverSlug": "instrumentl"
   },
   {
     "companyName": "Multiply Labs",
@@ -222,10 +210,6 @@
   {
     "companyName": "Firsthand",
     "leverSlug": "firsthand"
-  },
-  {
-    "companyName": "Collectly",
-    "leverSlug": "collectlyinc"
   },
   {
     "companyName": "Skyways",
