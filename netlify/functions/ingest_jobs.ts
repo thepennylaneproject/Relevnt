@@ -2009,7 +2009,13 @@ async function ingest(
           `ingest_jobs: normalized ${normalized.length} → ${fresh.length} fresh jobs from ${source.slug} on page ${page}`
         )
 
-        const upsertResult = await upsertJobs(fresh)
+        // Enrich jobs with dedup_key before upsert
+        const enrichedFresh = fresh.map((j) => ({
+          ...j,
+          dedup_key: computeDedupKey(j.title, j.company, j.location),
+        }))
+
+        const upsertResult = await upsertJobs(enrichedFresh)
         totalInserted += upsertResult.inserted
         totalDuplicates += upsertResult.updated + upsertResult.noop
         console.log(
