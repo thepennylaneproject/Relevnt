@@ -1268,11 +1268,17 @@ export async function upsertJobs(jobs: NormalizedJob[]): Promise<UpsertResult> {
       else if (j.external_url.includes('workday.com')) atsType = 'workday'
     }
 
+    // Compute dedup_key - ensure it's NEVER null
+    const dedupKey = computeDedupKey(j.title, j.company, j.location)
+    if (!dedupKey) {
+      console.error(`ingest_jobs: computeDedupKey returned null for job: ${j.source_slug}:${j.external_id} (${j.title})`)
+    }
+
     return {
       source: j.source_slug,
       source_slug: j.source_slug,
       external_id: j.external_id,
-      dedup_key: computeDedupKey(j.title, j.company, j.location),
+      dedup_key: dedupKey || `${j.source_slug}:${j.external_id}`,  // Fallback to source:id if computation fails
 
       title: j.title,
       company: j.company,
