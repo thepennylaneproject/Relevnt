@@ -66,23 +66,42 @@ export default async () => {
         const results: { taskId: string; source: string; count: number; success: boolean }[] = []
         const executing: Promise<void>[] = []
 
+        // Per-source concurrency tracking to prevent hammering any single source
+        const sourceExecuting = new Map<string, number>()
+        const maxPerSource = 2 // Max 2 concurrent requests per source
+
         for (const [sourceSlug, sourceTasks] of tasksBySource) {
             const limit = rateLimits.get(sourceSlug)
             const cooldown = limit?.cooldown_minutes || 30
 
             for (const task of sourceTasks) {
-                // Wait if too many concurrent
+                // Wait if too many concurrent GLOBALLY
                 if (executing.length >= MAX_CONCURRENT) {
+                    await Promise.race(executing)
+                }
+
+                // Wait if too many concurrent for THIS SOURCE
+                const sourceCount = sourceExecuting.get(sourceSlug) || 0
+                if (sourceCount >= maxPerSource) {
+                    console.log(`[SearchQueueCron] Throttling ${sourceSlug} (${sourceCount}/${maxPerSource} active)`)
+                    // Wait for any source task to complete
                     await Promise.race(executing)
                 }
 
                 const taskPromise = executeTask(supabase, task, cooldown, results)
                 executing.push(taskPromise)
 
+                // Track per-source concurrency
+                sourceExecuting.set(sourceSlug, sourceCount + 1)
+
                 // Remove completed promises
                 taskPromise.finally(() => {
                     const idx = executing.indexOf(taskPromise)
                     if (idx > -1) executing.splice(idx, 1)
+
+                    // Decrement source counter
+                    const count = sourceExecuting.get(sourceSlug) || 1
+                    sourceExecuting.set(sourceSlug, Math.max(0, count - 1))
                 })
             }
         }

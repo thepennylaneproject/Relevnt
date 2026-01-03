@@ -1268,17 +1268,33 @@ export async function upsertJobs(jobs: NormalizedJob[]): Promise<UpsertResult> {
       else if (j.external_url.includes('workday.com')) atsType = 'workday'
     }
 
-    // Compute dedup_key - ensure it's NEVER null
-    const dedupKey = computeDedupKey(j.title, j.company, j.location)
-    if (!dedupKey) {
-      console.error(`ingest_jobs: computeDedupKey returned null for job: ${j.source_slug}:${j.external_id} (${j.title})`)
+    // Compute dedup_key with multi-layer fallback
+    // 1. Try hash of title|company|location
+    let dedupKey = computeDedupKey(j.title, j.company, j.location)
+
+    // 2. If that fails, try source:external_id (but validate external_id isn't literally "undefined")
+    if (!dedupKey || j.external_id === 'undefined' || j.external_id === 'null') {
+      if (j.external_id && j.external_id !== 'undefined' && j.external_id !== 'null') {
+        dedupKey = `${j.source_slug}:${j.external_id}`
+      } else {
+        // 3. Ultimate fallback: hash of url if available, else source + sequential
+        dedupKey = j.external_url
+          ? computeDedupKey(j.external_url, j.title, j.company)
+          : computeDedupKey(j.title, j.company, j.location)
+      }
+    }
+
+    // Validate we have something before the database sees it
+    if (!dedupKey || dedupKey.length === 0) {
+      console.error(`ingest_jobs: unable to compute dedup_key for ${j.source_slug}:${j.external_id} (${j.title} @ ${j.company})`)
+      dedupKey = `${j.source_slug}:${j.external_id}:${Date.now()}`
     }
 
     return {
       source: j.source_slug,
       source_slug: j.source_slug,
       external_id: j.external_id,
-      dedup_key: dedupKey || `${j.source_slug}:${j.external_id}`,  // Fallback to source:id if computation fails
+      dedup_key: dedupKey,
 
       title: j.title,
       company: j.company,
@@ -1340,18 +1356,41 @@ export async function upsertJobs(jobs: NormalizedJob[]): Promise<UpsertResult> {
 
   // Safety net: Ensure every job has dedup_key before upserting
   // This prevents NOT NULL constraint violations if enrichment failed somewhere
-  const safeJobs = enrichedJobs.map((j) => {
-    if (j.dedup_key) return j
-    const computedKey = computeDedupKey(j.title, j.company, j.location)
-    if (!computedKey) {
-      console.warn(
-        `ingest_jobs: job missing dedup_key and cannot compute (no title/company/location): ${j.source_slug}:${j.external_id}`
-      )
-    }
-    return { ...j, dedup_key: computedKey }
-  })
+  const invalidJobs: any[] = []
+  const safeJobs = enrichedJobs
+    .map((j) => {
+      if (j.dedup_key) return j
+      const computedKey = computeDedupKey(j.title, j.company, j.location)
+      if (!computedKey) {
+        // Invalid job - mark for filtering
+        invalidJobs.push({
+          source: j.source_slug,
+          external_id: j.external_id,
+          title: j.title,
+          company: j.company,
+          reason: 'no title/company/location for dedup_key'
+        })
+        return null
+      }
+      return { ...j, dedup_key: computedKey || `${j.source_slug}:${j.external_id}` }
+    })
+    .filter((j) => j !== null) as typeof enrichedJobs
+
+  // Log validation result
+  if (invalidJobs.length > 0) {
+    console.warn(`ingest_jobs: filtering ${invalidJobs.length} invalid jobs (missing dedup_key):`)
+    invalidJobs.slice(0, 3).forEach(job => {
+      console.warn(`  - ${job.source}:${job.external_id} (${job.title} @ ${job.company}): ${job.reason}`)
+    })
+  }
+
+  if (safeJobs.length === 0) {
+    console.warn('ingest_jobs: all jobs filtered out before insert, returning 0')
+    return { inserted: 0, updated: 0, noop: 0 }
+  }
 
   // Fallback: Direct upsert (counts will be approximate)
+  console.log(`ingest_jobs: upserting ${safeJobs.length} jobs to database`)
   const { data, error, count } = await supabase
     .from('jobs')
     .upsert(safeJobs, {
@@ -1366,9 +1405,12 @@ export async function upsertJobs(jobs: NormalizedJob[]): Promise<UpsertResult> {
     throw error
   }
 
+  // Log what we got back from Supabase
+  console.log(`ingest_jobs: upsert response - data.length=${data?.length}, count=${count}, safeJobs.length=${safeJobs.length}`)
+
   // With ignoreDuplicates=false, all rows are upserted (inserted or updated)
   // Note: This count includes updates, not just inserts (legacy behavior)
-  const upsertedCount = data?.length ?? count ?? enrichedJobs.length
+  const upsertedCount = data?.length ?? count ?? safeJobs.length
   console.log(`ingest_jobs: upserted ${upsertedCount} jobs (new + updated, legacy count)`)
 
   // Return with updated=0 since we can't distinguish without RPC
@@ -2039,8 +2081,20 @@ async function ingest(
         const result = await fetchJson(url, source, { page, since }, searchParams)
 
         if (!result.ok) {
+          // Classify the error type for better observability
+          let failureClassification = 'unknown'
+          if (result.status === 401 || result.status === 403) {
+            failureClassification = 'blocked (auth/access denied)'
+          } else if (result.status === 429) {
+            failureClassification = 'rate_limited'
+          } else if (result.kind === 'network') {
+            failureClassification = 'network_error'
+          } else if (result.kind === 'parse') {
+            failureClassification = 'parse_error'
+          }
+
           console.error(
-            `ingest_jobs: fetch failed for ${source.slug} on page ${page}`,
+            `ingest_jobs: fetch failed for ${source.slug} on page ${page} [${failureClassification}]`,
             {
               kind: result.kind,
               status: result.status,
@@ -2049,7 +2103,7 @@ async function ingest(
           )
           // Network/HTTP errors should stop the pagination loop for this source
           sourceStatus = 'failed'
-          sourceError = result.message
+          sourceError = `[${failureClassification}] ${result.message}`
           break
         }
 
@@ -2384,6 +2438,14 @@ export async function runIngestion(
   }, {})
   console.log('ingest_jobs: completed ingestion run', summary)
 
+  // Build detailed error summary for failed sources
+  const failedSources = results.filter(r => r.status === 'failed')
+  const errorDetails = failedSources.slice(0, 3).map(r => r.error).filter(e => e)
+  const errorSummary = failedSourceCount > 0 ? [
+    `${failedSourceCount}/${sourcesToRun.length} sources failed`,
+    ...errorDetails
+  ].join(' | ') : null
+
   // Update run record
   const finishedAt = new Date().toISOString()
   if (runId) {
@@ -2402,8 +2464,7 @@ export async function runIngestion(
         total_inserted: totalInserted,
         total_duplicates: totalDuplicates,
         total_failed_sources: failedSourceCount,
-        error_summary: failedSourceCount > 0 ?
-          `${failedSourceCount}/${sourcesToRun.length} sources failed` : null,
+        error_summary: errorSummary,
       })
       .eq('id', runId)
   }
@@ -2419,27 +2480,37 @@ export async function runIngestion(
     const adminSecret = process.env.ADMIN_SECRET
     if (adminSecret) {
       // Use Netlify-provided URL to avoid DNS issues with hardcoded domains
-      const baseUrl = process.env.URL || 'http://localhost:8888'
-      await fetch(`${baseUrl}/.netlify/functions/admin_log_ingestion`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-secret': adminSecret,
-        },
-        body: JSON.stringify({
-          sources_requested: sourcesToRun.map(s => s.slug),
-          trigger_type: triggeredBy === 'schedule' ? 'scheduled' : triggeredBy,
-          status: overallStatus,
-          total_inserted: totalInserted,
-          total_duplicates: totalDuplicates,
-          total_failed_sources: failedSourceCount,
-          started_at: startedAt,
-          finished_at: finishedAt,
-          error_message: failedSourceCount > 0 ? `${failedSourceCount} sources failed` : undefined,
-        }),
-      }).catch(err => {
-        console.warn('ingest_jobs: failed to log to admin dashboard', err)
-      })
+      const baseUrl = process.env.URL
+      if (!baseUrl) {
+        console.warn('ingest_jobs: ADMIN_SECRET set but process.env.URL is empty, cannot log to admin dashboard')
+      } else {
+        const adminLogUrl = `${baseUrl}/.netlify/functions/admin_log_ingestion`
+        console.log(`ingest_jobs: logging to admin dashboard: ${adminLogUrl}`)
+        await fetch(adminLogUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-admin-secret': adminSecret,
+          },
+          body: JSON.stringify({
+            sources_requested: sourcesToRun.map(s => s.slug),
+            trigger_type: triggeredBy === 'schedule' ? 'scheduled' : triggeredBy,
+            status: overallStatus,
+            total_inserted: totalInserted,
+            total_duplicates: totalDuplicates,
+            total_failed_sources: failedSourceCount,
+            started_at: startedAt,
+            finished_at: finishedAt,
+            error_message: failedSourceCount > 0 ? `${failedSourceCount} sources failed` : undefined,
+          }),
+        }).catch(err => {
+          console.warn('ingest_jobs: failed to log to admin dashboard', {
+            url: adminLogUrl,
+            error: err instanceof Error ? err.message : String(err),
+            code: (err as any)?.code,
+          })
+        })
+      }
     }
   } catch (err) {
     console.warn('ingest_jobs: exception while logging to admin dashboard', err)
