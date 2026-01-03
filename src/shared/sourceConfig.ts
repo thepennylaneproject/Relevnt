@@ -351,7 +351,7 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
     jobspy: {
         slug: 'jobspy',
         mode: 'wide-capped',
-        enabled: false, // DISABLED by default - requires ts-jobspy npm install
+        enabled: true, // DISABLED by default - requires ts-jobspy npm install
         maxAgeDays: 7, // Jobs from last 7 days only (web scraping focus on fresh)
         maxPagesPerRun: 1, // Background function handles all pages internally
         resetPaginationEachRun: true,
