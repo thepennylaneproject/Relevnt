@@ -202,7 +202,16 @@ export const HimalayasSource: JobSource = {
 
     const nowIso = new Date().toISOString()
 
-    return rows.map((row): NormalizedJob => {
+    return rows
+      .filter(row => {
+        // Validate that we have at least an ID or a slug
+        if (!row.id && !row.slug) {
+          console.warn('HimalayasSource: filtering job missing both id and slug')
+          return false
+        }
+        return true
+      })
+      .map((row): NormalizedJob => {
       const location = (row.location as string | undefined) ?? null
 
       const remote_type: RemoteType =
@@ -213,9 +222,12 @@ export const HimalayasSource: JobSource = {
         row.company_name ??
         null
 
+      // Use slug as primary ID, fall back to numeric id, use title+company hash as last resort
+      const externalId = row.slug || row.id || `${row.title}:${companyName}`
+
       return {
         source_slug: 'himalayas',
-        external_id: String(row.id),
+        external_id: String(externalId),
 
         title: row.role ?? row.title ?? '',
         company: companyName,

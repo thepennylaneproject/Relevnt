@@ -1268,17 +1268,33 @@ export async function upsertJobs(jobs: NormalizedJob[]): Promise<UpsertResult> {
       else if (j.external_url.includes('workday.com')) atsType = 'workday'
     }
 
-    // Compute dedup_key - ensure it's NEVER null (fixed: fallback to source_slug:external_id)
-    const dedupKey = computeDedupKey(j.title, j.company, j.location)
-    if (!dedupKey) {
-      console.error(`ingest_jobs: computeDedupKey returned null for job: ${j.source_slug}:${j.external_id} (${j.title}), using fallback`)
+    // Compute dedup_key with multi-layer fallback
+    // 1. Try hash of title|company|location
+    let dedupKey = computeDedupKey(j.title, j.company, j.location)
+
+    // 2. If that fails, try source:external_id (but validate external_id isn't literally "undefined")
+    if (!dedupKey || j.external_id === 'undefined' || j.external_id === 'null') {
+      if (j.external_id && j.external_id !== 'undefined' && j.external_id !== 'null') {
+        dedupKey = `${j.source_slug}:${j.external_id}`
+      } else {
+        // 3. Ultimate fallback: hash of url if available, else source + sequential
+        dedupKey = j.external_url
+          ? computeDedupKey(j.external_url, j.title, j.company)
+          : computeDedupKey(j.title, j.company, j.location)
+      }
+    }
+
+    // Validate we have something before the database sees it
+    if (!dedupKey || dedupKey.length === 0) {
+      console.error(`ingest_jobs: unable to compute dedup_key for ${j.source_slug}:${j.external_id} (${j.title} @ ${j.company})`)
+      dedupKey = `${j.source_slug}:${j.external_id}:${Date.now()}`
     }
 
     return {
       source: j.source_slug,
       source_slug: j.source_slug,
       external_id: j.external_id,
-      dedup_key: dedupKey || `${j.source_slug}:${j.external_id}`,  // Fallback to source:id if computation fails
+      dedup_key: dedupKey,
 
       title: j.title,
       company: j.company,
