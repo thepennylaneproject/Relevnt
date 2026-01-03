@@ -1332,10 +1332,23 @@ export async function upsertJobs(jobs: NormalizedJob[]): Promise<UpsertResult> {
     console.warn('ingest_jobs: RPC call failed, falling back to direct upsert:', rpcErr)
   }
 
+  // Safety net: Ensure every job has dedup_key before upserting
+  // This prevents NOT NULL constraint violations if enrichment failed somewhere
+  const safeJobs = enrichedJobs.map((j) => {
+    if (j.dedup_key) return j
+    const computedKey = computeDedupKey(j.title, j.company, j.location)
+    if (!computedKey) {
+      console.warn(
+        `ingest_jobs: job missing dedup_key and cannot compute (no title/company/location): ${j.source_slug}:${j.external_id}`
+      )
+    }
+    return { ...j, dedup_key: computedKey }
+  })
+
   // Fallback: Direct upsert (counts will be approximate)
   const { data, error, count } = await supabase
     .from('jobs')
-    .upsert(enrichedJobs, {
+    .upsert(safeJobs, {
       onConflict: 'source_slug,external_id',
       ignoreDuplicates: false,  // Update existing jobs with fresh data
       count: 'exact',
@@ -2399,7 +2412,9 @@ export async function runIngestion(
 
     const adminSecret = process.env.ADMIN_SECRET
     if (adminSecret) {
-      await fetch('https://api.relevnt.app/.netlify/functions/admin_log_ingestion', {
+      // Use Netlify-provided URL to avoid DNS issues with hardcoded domains
+      const baseUrl = process.env.URL || 'http://localhost:8888'
+      await fetch(`${baseUrl}/.netlify/functions/admin_log_ingestion`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
