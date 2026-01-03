@@ -2438,6 +2438,14 @@ export async function runIngestion(
   }, {})
   console.log('ingest_jobs: completed ingestion run', summary)
 
+  // Build detailed error summary for failed sources
+  const failedSources = results.filter(r => r.status === 'failed')
+  const errorDetails = failedSources.slice(0, 3).map(r => r.error).filter(e => e)
+  const errorSummary = failedSourceCount > 0 ? [
+    `${failedSourceCount}/${sourcesToRun.length} sources failed`,
+    ...errorDetails
+  ].join(' | ') : null
+
   // Update run record
   const finishedAt = new Date().toISOString()
   if (runId) {
@@ -2456,8 +2464,7 @@ export async function runIngestion(
         total_inserted: totalInserted,
         total_duplicates: totalDuplicates,
         total_failed_sources: failedSourceCount,
-        error_summary: failedSourceCount > 0 ?
-          `${failedSourceCount}/${sourcesToRun.length} sources failed` : null,
+        error_summary: errorSummary,
       })
       .eq('id', runId)
   }
