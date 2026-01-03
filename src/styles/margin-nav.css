@@ -181,7 +181,7 @@
 
 .margin-nav__item.active .margin-nav__label,
 .margin-nav__item.nav-item--active .margin-nav__label {
-  color: var(--color-accent);
+  color: inherit;
 }
 
 @keyframes navPulse {

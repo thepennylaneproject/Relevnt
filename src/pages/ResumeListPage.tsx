@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import PageBackground from '../components/shared/PageBackground'
-import { Container } from '../components/shared/Container'
+import { PageLayout } from '../components/layout/PageLayout'
+import { Card } from '../components/ui/Card'
+import { Heading, Text } from '../components/ui/Typography'
+import { Badge } from '../components/ui/Badge'
 import { Icon } from '../components/ui/Icon'
 import { EmptyState } from '../components/ui/EmptyState'
 import { CollectionEmptyGuard } from '../components/ui/CollectionEmptyGuard'
@@ -110,113 +112,109 @@ export default function ResumeListPage({ embedded = false }: { embedded?: boolea
   }, [loading, error])
 
   const content = (
-    <Container maxWidth="xl" padding="md">
-      <div className="tab-pane active">
-        <div className="section-header">
-          <h2>Your Resumes</h2>
-          <p>Create, edit, and organize multiple resumes.</p>
+    <div className="space-y-12">
+      <header className="flex justify-between items-end border-b border-border/30 pb-6">
+        <div>
+          <Heading level={4} className="uppercase tracking-widest text-xs">Resume Library</Heading>
+          <Text muted className="mt-1">Manage and access your stored professional records.</Text>
         </div>
-
-        <div className="section-actions">
-          <Button
-            type="button"
-            variant="primary"
+        <div className="flex gap-6">
+          <button 
+            className="text-[10px] uppercase tracking-widest font-bold text-accent border-b border-accent/20 hover:border-accent transition-colors"
             onClick={createResume}
             disabled={creating}
           >
-            {creating ? 'Creating…' : 'New Resume'}
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
+            {creating ? 'Creating…' : 'New Draft'}
+          </button>
+          <button 
+            className="text-[10px] uppercase tracking-widest font-bold text-text-muted hover:text-text transition-colors"
             onClick={() => navigate('/resumes')}
           >
-            Open Builder
-          </Button>
+            Active Editor
+          </button>
         </div>
+      </header>
 
-        {statusText && (
-          <div className="mb-4 text-sm text-slate-600">{statusText}</div>
-        )}
+      {statusText && (
+        <Text muted className="italic py-4 border-l border-border pl-4">{statusText}</Text>
+      )}
 
-        {/* DEV: Validate empty state compliance */}
-        <CollectionEmptyGuard
-          itemsCount={resumes.length}
-          hasEmptyState={true}
-          scopeId="resume-list"
-          expectedAction="Create first resume"
+      {/* DEV: Validate empty state compliance */}
+      <CollectionEmptyGuard
+        itemsCount={resumes.length}
+        hasEmptyState={true}
+        scopeId="resume-list"
+        expectedAction="Create first resume"
+      />
+
+      {resumes.length === 0 && !loading ? (
+        <EmptyState
+          type="resumes"
+          action={{
+            label: creating ? 'Creating…' : 'Create your first resume',
+            onClick: createResume,
+          }}
+          secondaryAction={{
+            label: 'Open Builder',
+            onClick: () => navigate('/resumes'),
+            variant: 'secondary',
+          }}
+          
         />
-
-        {resumes.length === 0 && !loading ? (
-          <EmptyState
-            type="resumes"
-            action={{
-              label: creating ? 'Creating…' : 'Create your first resume',
-              onClick: createResume,
-            }}
-            secondaryAction={{
-              label: 'Open Builder',
-              onClick: () => navigate('/resumes'),
-              variant: 'secondary',
-            }}
-            
-          />
-        ) : (
-          <div className="resume-list">
-            {resumes.map((resume) => (
-              <div key={resume.id} className="card-resume">
-                <div className="card-header">
-                  <h3 className="text-sm font-semibold">
-                    {resume.title || 'Untitled Resume'}
-                  </h3>
-                  <p className="meta">
-                    Updated {resume.updated_at ? new Date(resume.updated_at).toLocaleString() : '—'}
-                  </p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {resumes.map((resume) => (
+            <Card key={resume.id} className="group relative">
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <Heading level={4} className="group-hover:text-accent transition-colors">
+                    {resume.title || 'Untitled Record'}
+                  </Heading>
+                  <Text muted className="text-[10px] mt-1 tabular-nums">
+                    Updated {resume.updated_at ? new Date(resume.updated_at).toLocaleDateString() : '—'}
+                  </Text>
                 </div>
-                <div className="card-actions">
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => deleteResume(resume.id)}
-                    disabled={deletingId === resume.id}
-                  >
-                    {deletingId === resume.id ? 'Deleting…' : 'Delete'}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
+                <Badge variant="neutral">Draft</Badge>
+              </div>
+
+              <div className="flex justify-between items-center pt-6 border-t border-border/30">
+                <div className="flex gap-6">
+                  <button
+                    className="text-[10px] uppercase tracking-widest font-bold text-accent border-b border-accent/20 hover:border-accent transition-colors"
                     onClick={() => navigate(`/resumes?id=${resume.id}`)}
                   >
-                    Edit
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
+                    Modify
+                  </button>
+                  <button
+                    className="text-[10px] uppercase tracking-widest font-bold text-text-muted hover:text-text transition-colors"
                     onClick={() => navigate(`/resumes/${resume.id}/view`)}
                   >
-                    View
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => navigate(`/resumes?id=${resume.id}`)}
-                  >
-                    Open
-                  </Button>
+                    Review
+                  </button>
                 </div>
+                <button
+                  className="text-[10px] uppercase tracking-widest font-bold text-text-muted hover:text-error transition-colors"
+                  onClick={() => deleteResume(resume.id)}
+                  disabled={deletingId === resume.id}
+                >
+                  {deletingId === resume.id ? 'Deleting…' : 'Delete'}
+                </button>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </Container>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
   )
 
   if (embedded) return content
 
-  return <PageBackground>{content}</PageBackground>
+  return (
+    <PageLayout
+      title="Resume Library"
+      subtitle="Your collection of saved professional records."
+    >
+      {content}
+    </PageLayout>
+  )
 }

@@ -1,14 +1,16 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { PageLayout } from '../components/layout/PageLayout'
+import { Card } from '../components/ui/Card'
+import { Heading, Text } from '../components/ui/Typography'
 import { RelevntFeedPanel } from '../components/RelevntFeedPanel'
 import { useAuth } from '../contexts/AuthContext'
-import PageBackground from '../components/shared/PageBackground'
-import { Container } from '../components/shared/Container'
 import { EmptyState } from '../components/ui/EmptyState'
 import { useToast } from '../components/ui/Toast'
 import { Button } from '../components/ui/Button'
 import { Icon } from '../components/ui/Icon'
-import { copy } from '../lib/copy'
+import { Select } from '../components/forms/Select'
 import type { JobRow } from '../shared/types'
 import { usePersonas } from '../hooks/usePersonas'
 import { RelevanceTuner } from '../components/personas/RelevanceTuner'
@@ -42,6 +44,7 @@ type SortBy =
 const PAGE_SIZE = 50
 
 export default function JobsPage() {
+  const navigate = useNavigate()
   const { user } = useAuth()
   const { activePersona, personas, setActivePersona } = usePersonas()
   const { showToast } = useToast()
@@ -706,58 +709,40 @@ export default function JobsPage() {
   }
 
   return (
-    <PageBackground>
-      <Container maxWidth="xl" padding="md">
-        <div className="jobs-page">
-          {/* Page Header */}
-          <div className="page-header">
-            <div className="header-top">
-              <h1>Relevnt Feed</h1>
-              <a 
-                href="/settings?section=targeting"
-                className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  fontSize: '14px',
-                  color: 'var(--color-ink-tertiary)',
-                  textDecoration: 'none',
-                  transition: 'color 0.2s'
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-accent)' }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-ink-tertiary)' }}
-              >
-                <Icon name="pocket-watch" size="sm" hideAccent />
-                Edit targeting
-              </a>
-            </div>
-            <p>Jobs matched to you, ranked by what matters most.</p>
+    <PageLayout
+      title="Relevnt Feed"
+      subtitle="Jobs matched to you, ranked by what matters most."
+      actions={
+        <button 
+          onClick={() => navigate('/settings?section=targeting')}
+          className="text-xs uppercase tracking-widest font-bold text-text-muted hover:text-text transition-colors flex items-center gap-2"
+        >
+          <Icon name="pocket-watch" size="sm" hideAccent />
+          Edit targeting
+        </button>
+      }
+    >
+      <div className="space-y-12">
+        {/* Job Target Selector */}
+        {personas.length > 0 && (
+          <div className="flex items-center gap-4 border-b border-border pb-6">
+            <Text muted className="uppercase tracking-widest text-[10px] font-bold">Current Target:</Text>
+            <select
+              className="bg-transparent border-none text-sm font-bold focus:ring-0 p-0 cursor-pointer"
+              value={activePersona?.id || ''}
+              onChange={(e) => setActivePersona(e.target.value)}
+            >
+              <option value="">All Jobs</option>
+              {personas.map(p => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
           </div>
+        )}
 
-          {/* Job Target Selector (optional) */}
-          {personas.length > 0 && (
-            <div className="feed-controls">
-              <div className="job-target-selector">
-                <label className="text-xs font-medium muted mr-2">Job Target:</label>
-                <select
-                  className="form-select"
-                  value={activePersona?.id || ''}
-                  onChange={(e) => setActivePersona(e.target.value)}
-                >
-                  <option value="">All Jobs</option>
-                  {personas.map(p => (
-                    <option key={p.id} value={p.id}>{p.name}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          )}
-
-          {/* Unified Feed */}
-          {renderFeed()}
-        </div>
-      </Container>
-    </PageBackground>
+        {/* Unified Feed */}
+        {renderFeed()}
+      </div>
+    </PageLayout>
   )
 }

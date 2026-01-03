@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import { Container } from '../components/shared/Container'
+import { PageLayout } from '../components/layout/PageLayout'
+import { Heading, Text } from '../components/ui/Typography'
 import { AutoSaveIndicator } from '../components/settings/AutoSaveIndicator'
 import { SettingsSidebar } from '../components/settings/SettingsSidebar'
 import { TargetingSection } from '../components/settings/sections/TargetingSection'
@@ -65,169 +66,49 @@ export default function Settings(): JSX.Element {
     }, [])
 
     return (
-        <div className="page-wrapper">
-            <Container maxWidth="lg" padding="md">
-                <div className="page-header">
-                    <div style={{ marginLeft: 'auto' }}>
-                        <AutoSaveIndicator status={autoSaveStatus} />
-                    </div>
-                    <h1>Preferences</h1>
-                    <p>Customize how Relevnt matches and applies for you.</p>
+        <PageLayout
+            title="Preferences"
+            subtitle="Customize how Relevnt matches and applies for you."
+            actions={<AutoSaveIndicator status={autoSaveStatus} />}
+        >
+            <div className="flex flex-col lg:flex-row gap-16 mt-8">
+                {/* Sidebar - hidden on mobile */}
+                <aside className="hidden lg:block w-56 shrink-0 h-fit sticky top-32">
+                    <SettingsSidebar />
+                </aside>
+
+                {/* Mobile navigation dropdown */}
+                <div className="lg:hidden mb-8">
+                    <select
+                        onChange={(e) => {
+                            const element = document.getElementById(e.target.value)
+                            if (element) {
+                                element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                            }
+                        }}
+                        defaultValue=""
+                        className="w-full bg-ivory border border-border text-sm py-2 px-4 focus:ring-1 focus:ring-accent outline-none"
+                    >
+                        <option value="" disabled>Jump to section...</option>
+                        <option value="targeting">Targeting</option>
+                        <option value="profile">Profile & Voice</option>
+                        <option value="system">System & Auto-Apply</option>
+                    </select>
                 </div>
 
-                <div className="settings-layout">
-                    {/* Sidebar - hidden on mobile */}
-                    <aside className="settings-sidebar-wrapper">
-                        <SettingsSidebar />
-                    </aside>
-
-                    {/* Mobile navigation dropdown */}
-                    <div className="settings-mobile-nav">
-                        <select
-                            onChange={(e) => {
-                                const element = document.getElementById(e.target.value)
-                                if (element) {
-                                    element.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                                }
-                            }}
-                            defaultValue=""
-                            className="form-select"
-                        >
-                            <option value="" disabled>
-                                Jump to section...
-                            </option>
-                            <option value="targeting">Targeting</option>
-                            <option value="profile">Profile & Voice</option>
-                            <option value="system">System & Auto-Apply</option>
-                        </select>
-                    </div>
-
-                    {/* Main content - all sections */}
-                    <main className="settings-main">
+                {/* Main content - all sections */}
+                <main className="flex-1 max-w-2xl space-y-24">
+                    <section id="targeting" className="scroll-mt-32">
                         <TargetingSection onAutoSaveStatusChange={handleAutoSaveStatusChange} />
+                    </section>
+                    <section id="profile" className="scroll-mt-32 border-t border-border/10 pt-24">
                         <ProfileSection onAutoSaveStatusChange={handleAutoSaveStatusChange} />
+                    </section>
+                    <section id="system" className="scroll-mt-32 border-t border-border/10 pt-24">
                         <SystemSection onAutoSaveStatusChange={handleAutoSaveStatusChange} />
-                    </main>
-                </div>
-            </Container>
-
-            <style>{settingsStyles}</style>
-        </div>
+                    </section>
+                </main>
+            </div>
+        </PageLayout>
     )
 }
-
-const settingsStyles = `
-.settings-layout {
-    display: flex;
-    gap: 48px;
-    margin-top: 24px;
-}
-
-.settings-sidebar-wrapper {
-    flex-shrink: 0;
-    width: 220px;
-}
-
-.settings-sidebar {
-    position: sticky;
-    top: 80px;
-}
-
-.sidebar-title {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--color-ink-tertiary);
-    margin: 0 0 12px 0;
-    padding: 0 12px;
-}
-
-.sidebar-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.sidebar-link {
-    display: block;
-    width: 100%;
-    padding: 8px 12px;
-    border-radius: var(--radius-md);
-    text-align: left;
-    border: none;
-    background: transparent;
-    color: var(--color-ink-secondary);
-    font-size: 0.875rem;
-    cursor: pointer;
-    transition: all 0.15s ease;
-}
-
-.sidebar-link:hover {
-    color: var(--color-ink);
-    background: var(--color-bg-tertiary);
-}
-
-.sidebar-link.active {
-    color: var(--color-ink);
-    background: var(--color-bg-alt);
-    font-weight: 500;
-}
-
-.settings-mobile-nav {
-    display: none;
-    margin-bottom: 24px;
-}
-
-.settings-main {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 64px;
-}
-
-.settings-section {
-    scroll-margin-top: 80px;
-}
-
-.section-title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--color-ink);
-    margin: 0 0 8px 0;
-}
-
-.section-description {
-    font-size: 0.875rem;
-    color: var(--color-ink-secondary);
-    margin: 0 0 24px 0;
-}
-
-.section-content {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-}
-
-/* Mobile responsive */
-@media (max-width: 1024px) {
-    .settings-sidebar-wrapper {
-        display: none;
-    }
-    
-    .settings-mobile-nav {
-        display: block;
-    }
-    
-    .settings-layout {
-        gap: 0;
-    }
-}
-
-/* Smooth scroll behavior */
-html {
-    scroll-behavior: smooth;
-}
-`

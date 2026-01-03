@@ -1,4 +1,4 @@
-import React from 'react'
+import { Heading, Text } from '../../ui/Typography'
 import { SystemAutomationTab } from '../tabs/SystemAutomationTab'
 import { AutoApplyTab } from '../tabs/AutoApplyTab'
 import type { AutoSaveStatus } from '../../../hooks/useSettingsAutoSave'
@@ -9,11 +9,11 @@ interface SystemSectionProps {
 
 export function SystemSection({ onAutoSaveStatusChange }: SystemSectionProps) {
     return (
-        <section id="system" className="settings-section scroll-mt-20">
-            <h2 className="section-title">System & Auto-Apply</h2>
-            <p className="section-description">
+        <section id="system" className="scroll-mt-32">
+            <Heading level={2} className="mb-2">System & Auto-Apply</Heading>
+            <Text muted className="mb-10 text-xs">
                 Configure notifications, automation, and application rules.
-            </p>
+            </Text>
 
             <div className="section-content">
                 <SystemAutomationTab onAutoSaveStatusChange={onAutoSaveStatusChange} />

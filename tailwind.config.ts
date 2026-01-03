@@ -53,79 +53,41 @@ const config: Config = {
   theme: {
     extend: {
       /* ─────────────────────────────────────────────────────────────────────
-         COLORS
-         Maps to CSS custom properties for runtime theme switching
+         COLORS — Mapped to minimal 18-token system
          ───────────────────────────────────────────────────────────────────── */
       colors: {
-        // Core surfaces
-        bg: {
-          DEFAULT: 'var(--color-bg)',
-          alt: 'var(--color-bg-alt)',
-        },
+        // Core surfaces (3 tokens)
+        bg: 'var(--bg)',
         surface: {
-          DEFAULT: 'var(--color-surface)',
-          hover: 'var(--color-surface-hover)',
+          DEFAULT: 'var(--surface)',
+          2: 'var(--surface-2)',
         },
         
-        // Text (ink)
-        ink: {
-          DEFAULT: 'var(--color-ink)',
-          secondary: 'var(--color-ink-secondary)',
-          tertiary: 'var(--color-ink-tertiary)',
-          inverse: 'var(--color-ink-inverse)',
+        // Text (2 tokens)
+        text: {
+          DEFAULT: 'var(--text)',
+          muted: 'var(--text-muted)',
         },
         
-        // Lines & illustrations
-        graphite: {
-          DEFAULT: 'var(--color-graphite)',
-          light: 'var(--color-graphite-light)',
-          faint: 'var(--color-graphite-faint)',
-        },
+        // Border (1 token)
+        border: 'var(--border)',
         
-        // The Sacred Gold
+        // Accent (3 tokens)
         accent: {
-          DEFAULT: 'var(--color-accent)',
-          hover: 'var(--color-accent-hover)',
-          glow: 'var(--color-accent-glow)',
+          DEFAULT: 'var(--accent)',
+          hover: 'var(--accent-hover)',
+          glow: 'var(--accent-glow)',
         },
         
-        // Semantic
-        success: {
-          DEFAULT: 'var(--color-success)',
-          bg: 'var(--color-success-bg)',
-        },
-        warning: {
-          DEFAULT: 'var(--color-warning)',
-          bg: 'var(--color-warning-bg)',
-        },
-        error: {
-          DEFAULT: 'var(--color-error)',
-          bg: 'var(--color-error-bg)',
-        },
-        info: {
-          DEFAULT: 'var(--color-info)',
-          bg: 'var(--color-info-bg)',
-        },
+        // Semantic (3 tokens)
+        success: 'var(--success)',
+        warning: 'var(--warning)',
+        error: 'var(--error)',
         
-        // Raw values (for cases where CSS vars don't work)
-        ivory: {
-          50: '#FDFCFA',
-          100: '#FAF8F5',
-          200: '#F8F4ED',  // Our primary ivory
-          300: '#F3EDE4',
-          400: '#E8E2D7',
-          500: '#D4CEC3',
-        },
-        charcoal: {
-          900: '#11100E',  // Our dark mode bg
-          800: '#1A1917',
-          700: '#2A2826',
-          600: '#3D3A36',
-        },
+        // Raw champagne gold for cases where CSS vars don't work
         champagne: {
           DEFAULT: '#C7A56A',
-          light: '#D4B57A',
-          dark: '#B8956A',
+          hover: '#B8965B',
         },
       },
       
@@ -168,25 +130,21 @@ const config: Config = {
       },
       
       /* ─────────────────────────────────────────────────────────────────────
-         BORDER RADIUS
+         BORDER RADIUS — Editorial: sharp corners, minimal rounding
          ───────────────────────────────────────────────────────────────────── */
       borderRadius: {
-        'sm': '4px',
-        'md': '8px',
-        'lg': '12px',
-        'xl': '16px',
-        '2xl': '24px',
+        'none': '0',
+        'sm': '4px',      // 4px MAXIMUM — editorial restraint
+        // REMOVED: md, lg, xl, 2xl — too friendly, not editorial
       },
       
       /* ─────────────────────────────────────────────────────────────────────
-         BOX SHADOW
+         BOX SHADOW — Minimal, barely perceptible
          ───────────────────────────────────────────────────────────────────── */
       boxShadow: {
-        'sm': 'var(--shadow-sm)',
-        'md': 'var(--shadow-md)',
-        'lg': 'var(--shadow-lg)',
-        'glow': 'var(--shadow-glow)',
-        'glow-lg': '0 0 40px var(--color-accent-glow)',
+        'none': 'none',
+        'sm': 'var(--shadow)',  // Minimal shadow — 1px 3px barely visible
+        // REMOVED: md, lg, glow variants — decorative, not structural
       },
       
       /* ─────────────────────────────────────────────────────────────────────

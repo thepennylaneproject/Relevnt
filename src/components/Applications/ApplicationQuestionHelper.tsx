@@ -6,6 +6,7 @@ import { LoadingSpinner } from '../ui/Phase5UI'
 import { analytics } from '../../lib/analytics'
 import { usePersonas } from '../../hooks/usePersonas'
 import { supabase } from '../../lib/supabase'
+import '../../styles/apply.css'
 
 type HelperMode = "default" | "concise" | "confident" | "metrics" | "values"
 
@@ -27,12 +28,12 @@ interface HelperResponse {
     details?: string
 }
 
-const MODES: { value: HelperMode; label: string; icon: string }[] = [
-    { value: 'default', label: 'Standard', icon: 'check' },
-    { value: 'concise', label: 'Concise', icon: 'scroll' },
-    { value: 'confident', label: 'Confident', icon: 'lighthouse' },
-    { value: 'metrics', label: 'Metrics', icon: 'stars' },
-    { value: 'values', label: 'Values', icon: 'flower' },
+const MODES: { value: HelperMode; label: string; description: string; icon: string }[] = [
+    { value: 'default', label: 'Standard', description: 'Balanced & clear', icon: 'check' },
+    { value: 'concise', label: 'Concise', description: 'Tight & punchy', icon: 'scroll' },
+    { value: 'confident', label: 'Confident', description: 'Bold & direct', icon: 'lighthouse' },
+    { value: 'metrics', label: 'Metrics', description: 'Data-driven', icon: 'stars' },
+    { value: 'values', label: 'Values', description: 'Purpose-led', icon: 'flower' },
 ]
 
 export const ApplicationQuestionHelper: React.FC = () => {
@@ -120,18 +121,17 @@ export const ApplicationQuestionHelper: React.FC = () => {
 
     // Render Helpers
     const renderModeSelector = (mini = false) => (
-        <div className={mini ? 'mb-4' : 'button-group'}>
+        <div className={mini ? 'flex flex-wrap gap-2' : 'tone-selector'}>
             {MODES.map((m) => (
-                <Button
+                <div
                     key={m.value}
-                    type="button"
-                    variant={m.value === selectedMode ? 'secondary' : 'ghost'}
-                    size="sm"
+                    className={`${mini ? 'btn btn--ghost btn--sm' : 'tone-option'} ${m.value === selectedMode ? (mini ? 'btn--active' : 'selected') : ''}`}
                     onClick={() => !loading && setSelectedMode(m.value)}
                 >
-                    <Icon name={m.icon as any} size="sm" />
-                    {mini ? `Rewrite: ${m.label}` : m.label}
-                </Button>
+                    {!mini && <Icon name={m.icon as any} size="md" className="mb-2" />}
+                    <div className={mini ? '' : 'tone-option-label'}>{m.label}</div>
+                    {!mini && <div className="tone-option-description">{m.description}</div>}
+                </div>
             ))}
         </div>
     )
@@ -205,126 +205,140 @@ export const ApplicationQuestionHelper: React.FC = () => {
     }
 
     return (
-        <div className="card card-helper">
-            <header className="card-header mb-6">
-                <h3 className="text-lg font-semibold">Application Question Helper</h3>
-                <p className="subtitle">
+        <main className="apply-page">
+            <header className="apply-header">
+                <h1>Application Question Helper</h1>
+                <p className="apply-subtitle">
                     Paste a question from an application, add some context, and get a tailored draft based on your experience.
                 </p>
             </header>
 
-            <div className="space-y-4">
-                <div className="form-group">
-                    <label htmlFor="question" className="label">
-                        Question from application
-                    </label>
-                    <textarea
-                        id="question"
-                        value={question}
-                        onChange={(e) => setQuestion(e.target.value)}
-                        placeholder="e.g., 'Describe a time you failed and what you learned from it.'"
-                        className="input w-full min-h-[100px] resize-y"
-                        rows={4}
-                    />
-                </div>
+            <div className="apply-content">
+                <section className="apply-workspace">
+                    <div className="input-group">
+                        <label htmlFor="question" className="input-label">
+                            Question from application
+                        </label>
+                        <textarea
+                            id="question"
+                            value={question}
+                            onChange={(e) => setQuestion(e.target.value)}
+                            placeholder="e.g., 'Describe a time you failed and what you learned from it.'"
+                            className="input apply-textarea"
+                            rows={4}
+                        />
+                    </div>
 
-                <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => setContextOpen(!contextOpen)}
-                >
-                    <Icon name="plus" size="sm" className="mr-2" />
-                    Add Context (Optional)
-                </Button>
+                    <button
+                        type="button"
+                        className="context-toggle"
+                        onClick={() => setContextOpen(!contextOpen)}
+                    >
+                        <Icon name={contextOpen ? 'chevron-up' : 'plus'} size="sm" />
+                        {contextOpen ? 'Hide Context' : 'Add Context (Optional)'}
+                    </button>
 
-                {contextOpen && (
-                    <div className="p-4 space-y-4 bg-bg-secondary rounded-lg border border-graphite-faint animate-in fade-in slide-in-from-top-2">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="label text-xs text-ink-tertiary">Target Role</label>
-                                <input
-                                    type="text"
-                                    className="input w-full"
-                                    placeholder="e.g. Senior Product Designer"
-                                    value={roleTitle}
-                                    onChange={e => setRoleTitle(e.target.value)}
+                    {contextOpen && (
+                        <div className="p-6 space-y-6 bg-color-bg-interactive rounded-xl border border-color-border animate-in fade-in slide-in-from-top-2">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="input-group">
+                                    <label className="input-label">Target Role</label>
+                                    <input
+                                        type="text"
+                                        className="input"
+                                        placeholder="e.g. Senior Product Designer"
+                                        value={roleTitle}
+                                        onChange={e => setRoleTitle(e.target.value)}
+                                    />
+                                </div>
+                                <div className="input-group">
+                                    <label className="input-label">Company</label>
+                                    <input
+                                        type="text"
+                                        className="input"
+                                        placeholder="e.g. Acme Corp"
+                                        value={companyName}
+                                        onChange={e => setCompanyName(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="input-group">
+                                <label className="input-label">Job Description Excerpt</label>
+                                <textarea
+                                    className="input min-h-[80px]"
+                                    placeholder="Paste key requirements or duties..."
+                                    value={jobDescription}
+                                    onChange={e => setJobDescription(e.target.value)}
                                 />
                             </div>
-                            <div>
-                                <label className="label text-xs text-ink-tertiary">Company</label>
-                                <input
-                                    type="text"
-                                    className="input w-full"
-                                    placeholder="e.g. Acme Corp"
-                                    value={companyName}
-                                    onChange={e => setCompanyName(e.target.value)}
+
+                            <div className="input-group">
+                                <label className="input-label">Resume / Experience Context</label>
+                                <textarea
+                                    className="input min-h-[80px]"
+                                    placeholder="Paste relevant experience or resume summary..."
+                                    value={resumeContext}
+                                    onChange={e => setResumeContext(e.target.value)}
                                 />
+                                <p className="text-[10px] text-color-text-tertiary mt-1 italic">
+                                    We use this only to ground the answer in facts. It is not stored.
+                                </p>
                             </div>
-                        </div>
 
-                        <div>
-                            <label className="label text-xs text-ink-tertiary">Job Description Excerpt</label>
-                            <textarea
-                                className="input w-full min-h-[80px]"
-                                placeholder="Paste key requirements or duties..."
-                                value={jobDescription}
-                                onChange={e => setJobDescription(e.target.value)}
-                            />
+                            {personas.length > 0 && (
+                                <div className="input-group">
+                                    <label className="input-label">Persona</label>
+                                    <select
+                                        className="input"
+                                        value={selectedPersonaId}
+                                        onChange={e => setSelectedPersonaId(e.target.value)}
+                                    >
+                                        <option value="">Default Profile</option>
+                                        {personas.map(p => (
+                                            <option key={p.id} value={p.id}>{p.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
                         </div>
+                    )}
 
-                        <div>
-                            <label className="label text-xs text-ink-tertiary">Resume / Experience Context</label>
-                            <textarea
-                                className="input w-full min-h-[80px]"
-                                placeholder="Paste relevant experience or resume summary..."
-                                value={resumeContext}
-                                onChange={e => setResumeContext(e.target.value)}
-                            />
-                            <p className="text-[10px] text-ink-tertiary mt-1 italic">
-                                We use this only to ground the answer in facts. It is not stored.
-                            </p>
-                        </div>
-
-                        {personas.length > 0 && (
-                            <div>
-                                <label className="label text-xs text-ink-tertiary">Persona</label>
-                                <select
-                                    className="input w-full"
-                                    value={selectedPersonaId}
-                                    onChange={e => setSelectedPersonaId(e.target.value)}
-                                >
-                                    <option value="">Default Profile</option>
-                                    {personas.map(p => (
-                                        <option key={p.id} value={p.id}>{p.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        )}
+                    <div className="tone-group">
+                        <label className="section-label">Tone / Mode</label>
+                        {renderModeSelector()}
                     </div>
-                )}
 
-                <div className="tone-options">
-                    <label className="label">Tone / Mode</label>
-                    {renderModeSelector()}
-                </div>
+                    {error && (
+                        <div className="alert alert--error">
+                            {error}
+                        </div>
+                    )}
 
-                {error && (
-                    <div className="alert alert--error">
-                        {error}
-                    </div>
-                )}
+                    <Button
+                        type="button"
+                        variant="primary"
+                        size="lg"
+                        className="apply-cta"
+                        onClick={() => handleDraft()}
+                        disabled={!question.trim()}
+                    >
+                        Draft Answer
+                    </Button>
+                </section>
 
-                <Button
-                    type="button"
-                    variant="primary"
-                    size="lg"
-                    className="w-full"
-                    onClick={() => handleDraft()}
-                    disabled={!question.trim()}
-                >
-                    Draft Answer
-                </Button>
+                <aside className="apply-preview">
+                    {loading ? (
+                        <div className="flex h-full items-center justify-center">
+                            <LoadingSpinner message="Drafting your answer..." />
+                        </div>
+                    ) : (
+                        <div className="preview-empty">
+                            <p>Your draft will appear here</p>
+                        </div>
+                    )}
+                </aside>
             </div>
-        </div>
+        </main>
     )
 }

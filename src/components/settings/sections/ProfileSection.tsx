@@ -1,4 +1,4 @@
-import React from 'react'
+import { Heading, Text } from '../../ui/Typography'
 import { ProfileTab } from '../tabs/ProfileTab'
 import { VoiceStyleTab } from '../tabs/VoiceStyleTab'
 import type { AutoSaveStatus } from '../../../hooks/useSettingsAutoSave'
@@ -9,11 +9,11 @@ interface ProfileSectionProps {
 
 export function ProfileSection({ onAutoSaveStatusChange }: ProfileSectionProps) {
     return (
-        <section id="profile" className="settings-section scroll-mt-20">
-            <h2 className="section-title">Profile & Voice</h2>
-            <p className="section-description">
+        <section id="profile" className="scroll-mt-32">
+            <Heading level={2} className="mb-2">Profile & Voice</Heading>
+            <Text muted className="mb-10 text-xs">
                 Manage your professional identity and how you present yourself in applications.
-            </p>
+            </Text>
 
             <div className="section-content">
                 <ProfileTab onAutoSaveStatusChange={onAutoSaveStatusChange} />

@@ -1,0 +1,152 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * APPLICATION QUESTION HELPER — Route-specific styles
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+.apply-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.apply-header {
+  margin-bottom: 3rem;
+  text-align: center;
+}
+
+.apply-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.apply-subtitle {
+  font-size: 1.125rem;
+  color: var(--text-muted);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.apply-content {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 3rem;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .apply-content {
+    grid-template-columns: 1fr;
+  }
+}
+
+.apply-workspace {
+  background: var(--surface);
+  padding: 2.5rem;
+  border-radius: calc(var(--radius) * 2);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+
+.apply-preview {
+  position: sticky;
+  top: 2rem;
+  background: var(--surface-2);
+  padding: 2rem;
+  border-radius: calc(var(--radius) * 2);
+  min-height: 500px;
+  border: 1px dashed var(--border);
+}
+
+.preview-empty {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.input-group {
+  margin-bottom: 1.5rem;
+}
+
+.input-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-muted);
+}
+
+.section-label {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text);
+}
+
+.context-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--accent-hover);
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+}
+
+.context-toggle:hover {
+  text-decoration: underline;
+}
+
+/* Tone Selector (Cards) */
+.tone-selector {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.tone-option {
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all var(--transition);
+  text-align: left;
+}
+
+.tone-option:hover {
+  border-color: var(--text-muted);
+  background: var(--surface-2);
+  transform: translateY(-2px);
+}
+
+.tone-option.selected {
+  border-color: var(--accent);
+  background: var(--accent-glow);
+  box-shadow: 0 4px 12px var(--accent-glow);
+}
+
+.tone-option-label {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+}
+
+.tone-option-description {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.3;
+}

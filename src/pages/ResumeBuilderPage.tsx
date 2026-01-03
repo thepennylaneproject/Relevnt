@@ -5,9 +5,10 @@ import * as React from 'react'
 import { useState, useMemo, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
-// Layout components
-import PageBackground from '../components/shared/PageBackground'
-import { Container } from '../components/shared/Container'
+import { PageLayout } from '../components/layout/PageLayout'
+import { Card } from '../components/ui/Card'
+import { Heading, Text } from '../components/ui/Typography'
+import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 
 // Resume section editors
@@ -39,8 +40,6 @@ import { copy } from '../lib/copy'
 import { useResumeBuilder } from '../hooks/useResumeBuilder'
 import { useResumeAnalysis } from '../hooks/useResumeAnalysis'
 import type { ResumeDraft } from '../types/resume-builder.types'
-import '../styles/resume-builder.css'
-import '../styles/tailoring.css'
 
 // Tailoring feature
 import { generateTailoringSuggestions } from '../services/tailoringService'
@@ -306,221 +305,172 @@ const ResumeBuilderPage: React.FC<ResumeBuilderPageProps> = ({ embedded = false 
   const resumeText = useMemo(() => draftToText(draft), [draft])
 
   const content = (
-    <Container maxWidth="xl" padding="md">
-      <div className="tab-pane resume-builder active">
-          {!embedded && (
-            <div className="builder-header">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2>Build your resume</h2>
-                  <p className="text-xs muted">
-                    {hasContent ? 'Edit and optimize your resume' : 'Create a professional resume'}
-                  </p>
-                </div>
-
-                <div className="action-group">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => setShowWizard(true)}
-                  >
-                    New Resume
-                  </Button>
-
-                  <ResumeUpload onUploadComplete={handleUploadComplete} />
-
-                  {hasContent && <ResumeExport draft={draft} />}
-
-                  {isDirty && (
-                    <Button
-                      type="button"
-                      variant="primary"
-                      size="sm"
-                      onClick={manualSave}
-                      disabled={status === 'saving'}
-                    >
-                      Save
-                    </Button>
-                  )}
-                </div>
-              </div>
-
-              <div className="builder-tabs">
-                {SECTION_META.map((section) => {
-                  const isActive = section.id === activeSection
-                  return (
-                    <button
-                      key={section.id}
-                      type="button"
-                      onClick={() => setActiveSection(section.id)}
-                      className={`builder-tab ${isActive ? 'active' : ''}`}
-                    >
-                      {section.label}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Job Context Banner */}
-          {tailoringContext && (
-            <div style={{
-              padding: '12px 20px',
-              background: 'var(--color-bg-alt)',
-              borderBottom: '1px solid var(--color-graphite-faint)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-              <div>
-                <strong style={{ color: 'var(--color-accent)' }}>
-                  Tailoring for:
-                </strong>{' '}
-                <span style={{ color: 'var(--color-ink)' }}>
-                  {tailoringContext.jobTitle}
-                </span>
-                <span className="muted"> at {tailoringContext.company}</span>
-              </div>
-              <button
-                onClick={handleClearJobContext}
-                className="link-accent"
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '13px',
-                }}
+    <div className="space-y-12">
+      {/* Editorial Header Section (embedded mode handles its own header logic often via the parent, 
+          but we ensure the builder itself uses canonical patterns) */}
+      {!embedded && (
+        <header className="flex justify-between items-end border-b border-border/30 pb-6">
+          <div>
+            <Heading level={2}>{draft.contact.fullName || 'Untitled Draft'}</Heading>
+            <Text muted className="uppercase tracking-widest text-[10px] font-bold mt-1">
+              {hasContent ? 'Modify and refine active record' : 'Initialize professional record'}
+            </Text>
+          </div>
+          <div className="flex gap-8 items-center">
+            {saveStatusText && (
+              <Text muted className="text-[10px] uppercase tracking-widest font-bold tabular-nums">
+                {saveStatusText}
+              </Text>
+            )}
+            <div className="flex gap-4">
+              <button 
+                className="text-[10px] uppercase tracking-widest font-bold text-accent border-b border-accent/20 hover:border-accent transition-colors"
+                onClick={() => setShowWizard(true)}
               >
-                Clear job context
+                Reset Record
               </button>
-            </div>
-          )}
-
-          {/* Loading Indicator */}
-          {isLoadingSuggestions && (
-            <div style={{
-              padding: '12px 20px',
-              background: 'var(--color-accent-glow)',
-              borderBottom: '1px solid var(--color-accent)',
-              color: 'var(--color-accent)',
-              fontSize: '14px',
-            }}>
-              ✨ Analyzing job requirements and generating suggestions...
-            </div>
-          )}
-
-          {embedded && (
-             <div className="builder-header">
-                <div className="builder-tabs">
-                  {SECTION_META.map((section) => {
-                    const isActive = section.id === activeSection
-                    return (
-                      <button
-                        key={section.id}
-                        type="button"
-                        onClick={() => setActiveSection(section.id)}
-                        className={`builder-tab ${isActive ? 'active' : ''}`}
-                      >
-                        {section.label}
-                      </button>
-                    )
-                  })}
-                </div>
-             </div>
-          )}
-
-          <div className="builder-container">
-            <div className="builder-form">
-              <div className="resume-editor-content">
-                {activeSection === 'contact' && (
-                  <ContactSection contact={draft.contact} onChange={updateContact} />
-                )}
-                {activeSection === 'summary' && (
-                  <SummarySection summary={draft.summary} onChange={updateSummary} />
-                )}
-                {activeSection === 'skills' && (
-                  <SkillsSection id="skills" skillGroups={draft.skillGroups} onChange={setSkillGroups} />
-                )}
-                {activeSection === 'experience' && (
-                  <ExperienceSection id="experience" items={draft.experience} onChange={setExperience} />
-                )}
-                {activeSection === 'education' && (
-                  <EducationSection id="education" items={draft.education} onChange={setEducation} />
-                )}
-                {activeSection === 'certifications' && (
-                  <CertificationsSection id="certifications" items={draft.certifications} onChange={setCertifications} />
-                )}
-                {activeSection === 'projects' && (
-                  <ProjectsSection id="projects" items={draft.projects} onChange={setProjects} />
-                )}
-              </div>
-            </div>
-
-            <div className="builder-preview">
-              <div className="panel-tabs" style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant={activePanel === 'preview' ? 'primary' : 'ghost'}
-                  onClick={() => setActivePanel('preview')}
+              {hasContent && <ResumeExport draft={draft} />}
+              {isDirty && (
+                <button 
+                  className="text-[10px] uppercase tracking-widest font-bold text-text border-b border-text/20 hover:border-text transition-colors"
+                  onClick={manualSave}
+                  disabled={status === 'saving'}
                 >
-                  Preview
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant={activePanel === 'ats' ? 'primary' : 'ghost'}
-                  onClick={() => setActivePanel('ats')}
-                >
-                  ATS Score
-                  {analysis && (
-                    <span style={{ marginLeft: '4px', opacity: 0.8 }}>{analysis.overallScore}</span>
-                  )}
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant={activePanel === 'targeting' ? 'primary' : 'ghost'}
-                  onClick={() => setActivePanel('targeting')}
-                >
-                  Job Match
-                </Button>
-              </div>
-
-              <div className="at-panel-content">
-                {activePanel === 'preview' && (
-                  <ResumePreview draft={draft} />
-                )}
-
-                {activePanel === 'ats' && (
-                  <div className="ats-panel">
-                    <ATSScoreCard
-                      analysis={analysis}
-                      loading={analyzing}
-                      onAnalyze={handleAnalyze}
-                    />
-                    {analysis && analysis.suggestions.length > 0 && (
-                      <ATSSuggestions suggestions={analysis.suggestions} />
-                    )}
-                  </div>
-                )}
-
-                {activePanel === 'targeting' && (
-                  <div className="targeting-panel">
-                    <JobTargetingPanel resumeText={resumeText} />
-                    <div className="card-info" style={{ marginTop: '16px' }}>
-                      <p className="text-xs muted">
-                        Paste a job description above to see how well your resume matches
-                        and get tailoring suggestions.
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
+                  Commit Changes
+                </button>
+              )}
             </div>
           </div>
+        </header>
+      )}
+
+      {/* Navigation Triggers - Internal Sections */}
+      <div className="flex flex-wrap gap-8 border-b border-border/10 pb-4">
+        {SECTION_META.map((section) => (
+          <button
+            key={section.id}
+            type="button"
+            onClick={() => setActiveSection(section.id)}
+            className={`text-[10px] uppercase tracking-widest font-bold transition-colors ${
+              activeSection === section.id ? 'text-accent border-b border-accent pb-4 -mb-[17px]' : 'text-text-muted hover:text-text'
+            }`}
+          >
+            {section.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Job Context Integration */}
+      {tailoringContext && (
+        <div className="bg-black/[0.02] border border-border px-8 py-6 flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <Badge variant="neutral">Tailoring Active</Badge>
+            <Text className="text-xs">
+              Optimizing for <span className="font-bold">{tailoringContext.jobTitle}</span> <span className="text-text-muted">at {tailoringContext.company}</span>
+            </Text>
+          </div>
+          <button
+            onClick={handleClearJobContext}
+            className="text-[10px] uppercase tracking-widest font-bold text-text-muted hover:text-text transition-colors"
+          >
+            Reset Job Context
+          </button>
+        </div>
+      )}
+
+      {isLoadingSuggestions && (
+        <Text className="italic text-accent animate-pulse px-8 text-xs">
+          ✨ Analyzing market fit and generating suggestions...
+        </Text>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+        {/* Editor Pane */}
+        <div className="lg:col-span-5 space-y-8">
+          <Card className="min-h-[500px]">
+            <header className="mb-8 border-b border-border/30 pb-4">
+              <Heading level={4} className="uppercase tracking-widest text-[10px] text-text-muted">Editor View</Heading>
+            </header>
+            <div className="resume-editor-content">
+              {activeSection === 'contact' && (
+                <ContactSection contact={draft.contact} onChange={updateContact} />
+              )}
+              {activeSection === 'summary' && (
+                <SummarySection summary={draft.summary} onChange={updateSummary} />
+              )}
+              {activeSection === 'skills' && (
+                <SkillsSection id="skills" skillGroups={draft.skillGroups} onChange={setSkillGroups} />
+              )}
+              {activeSection === 'experience' && (
+                <ExperienceSection id="experience" items={draft.experience} onChange={setExperience} />
+              )}
+              {activeSection === 'education' && (
+                <EducationSection id="education" items={draft.education} onChange={setEducation} />
+              )}
+              {activeSection === 'certifications' && (
+                <CertificationsSection id="certifications" items={draft.certifications} onChange={setCertifications} />
+              )}
+              {activeSection === 'projects' && (
+                <ProjectsSection id="projects" items={draft.projects} onChange={setProjects} />
+              )}
+            </div>
+          </Card>
+        </div>
+
+        {/* Intelligence / Preview Pane */}
+        <div className="lg:col-span-7 space-y-8">
+          <div className="flex gap-10 border-b border-border/30 pb-4">
+            {[
+              { id: 'preview', label: 'Draft Preview' },
+              { id: 'ats', label: 'Market Analytics' },
+              { id: 'targeting', label: 'Match Intelligence' },
+            ].map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                className={`text-[10px] uppercase tracking-widest font-bold transition-colors ${
+                  activePanel === p.id ? 'text-text border-b border-text pb-4 -mb-[17px]' : 'text-text-muted hover:text-text'
+                }`}
+                onClick={() => setActivePanel(p.id as ActivePanel)}
+              >
+                {p.label} {p.id === 'ats' && analysis && <span className="ml-1 opacity-50">({analysis.overallScore})</span>}
+              </button>
+            ))}
+          </div>
+
+          <div className="pt-8">
+            {activePanel === 'preview' && (
+              <div className="bg-ivory shadow-shadow p-12 border border-border min-h-[800px]">
+                <ResumePreview draft={draft} />
+              </div>
+            )}
+
+            {activePanel === 'ats' && (
+              <Card className="space-y-10">
+                <ATSScoreCard
+                  analysis={analysis}
+                  loading={analyzing}
+                  onAnalyze={handleAnalyze}
+                />
+                {analysis && analysis.suggestions.length > 0 && (
+                  <div className="pt-8 border-t border-border/30">
+                    <ATSSuggestions suggestions={analysis.suggestions} />
+                  </div>
+                )}
+              </Card>
+            )}
+
+            {activePanel === 'targeting' && (
+              <Card>
+                <JobTargetingPanel resumeText={resumeText} />
+                <Text muted className="mt-8 italic py-4 border-t border-border/30">
+                  Paste a job description above to analyze market alignment.
+                </Text>
+              </Card>
+            )}
+          </div>
+        </div>
+      </div>
 
           {/* Tailoring Overlay */}
           {tailoringContext && tailoringContext.suggestions.length > 0 && showTailoringOverlay && (
@@ -548,14 +498,20 @@ const ResumeBuilderPage: React.FC<ResumeBuilderPageProps> = ({ embedded = false 
               onCancel={() => setShowWizard(false)}
               onComplete={handleWizardComplete}
             />
-          )}
-      </div>
-    </Container>
-  )
+      )}
+    </div>
+  );
 
-  if (embedded) return content
+  if (embedded) return content;
 
-  return <PageBackground>{content}</PageBackground>
+  return (
+    <PageLayout
+      title="Drafting Desk"
+      subtitle="Assemble and optimize your professional record for market entry."
+    >
+      {content}
+    </PageLayout>
+  );
 }
 
 export default ResumeBuilderPage
