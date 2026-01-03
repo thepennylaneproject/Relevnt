@@ -50,6 +50,18 @@ export type IngestResult = {
 type IngestionCursor = { page?: number; since?: string | null }
 type IngestionState = { cursor: IngestionCursor; last_run_at: string | null }
 
+// Discriminated union for fetch results - makes network failures unambiguous
+type FetchOk = { ok: true; data: any; status: number }
+type FetchErr = {
+  ok: false
+  kind: 'http' | 'parse' | 'network'
+  status?: number
+  message: string
+  url: string
+  sourceSlug?: string
+}
+type FetchResult = FetchOk | FetchErr
+
 type PaginationConfig = {
   pageParam?: string
   pageSizeParam?: string
@@ -640,21 +652,23 @@ async function fetchJson(
   source?: JobSource,
   cursor?: IngestionCursor,
   searchParams?: { keywords?: string; location?: string }
-): Promise<any | null> {
+): Promise<FetchResult> {
   const keywords = searchParams?.keywords || 'software developer'
+  const sourceSlug = source?.slug
+
   try {
     const headers: Record<string, string> = buildHeaders(source)
 
     // Jooble requires POST with keywords and pagination in body
-    if (source?.slug === 'jooble') {
-      const config = SOURCE_PAGINATION[source.slug] || {}
+    if (sourceSlug === 'jooble') {
+      const config = SOURCE_PAGINATION[sourceSlug] || {}
       const page = cursor?.page ?? 1
       const pageSize = config.pageSize ?? DEFAULT_PAGE_SIZE
 
       const body = JSON.stringify({
-        keywords: keywords,
+        keywords,
         location: searchParams?.location || '',
-        page: page,
+        page,
         ResultOnPage: pageSize,
       })
 
@@ -665,32 +679,43 @@ async function fetchJson(
       })
 
       if (!res.ok) {
-        console.error(`ingest_jobs: fetch failed for ${url}`, res.status, res.statusText)
-        return null
+        const errorText = await res.text().catch(() => '')
+        return {
+          ok: false,
+          kind: 'http',
+          status: res.status,
+          message: `HTTP ${res.status} ${res.statusText} ${errorText}`.trim(),
+          url,
+          sourceSlug,
+        }
       }
 
-      const data = await res.json().catch((err) => {
-        console.error(`ingest_jobs: failed to parse JSON for ${url}`, err)
-        return null
-      })
-
-      return data
+      try {
+        const data = await res.json()
+        return { ok: true, data, status: res.status }
+      } catch (e: any) {
+        return {
+          ok: false,
+          kind: 'parse',
+          status: res.status,
+          message: `Failed to parse JSON: ${e?.message || String(e)}`,
+          url,
+          sourceSlug,
+        }
+      }
     }
 
     // TheirStack requires POST with search parameters in body
-    if (source?.slug === 'theirstack') {
+    if (sourceSlug === 'theirstack') {
       const maxResults = Math.min(parseInt(process.env.THEIRSTACK_MAX_RESULTS_PER_RUN || '25', 10), 25)
-      const config = SOURCE_PAGINATION[source.slug] || {}
+      const config = SOURCE_PAGINATION[sourceSlug] || {}
       const maxAgeDays = config.maxAgeDays || 30
 
       const body = JSON.stringify({
         limit: maxResults,
         order_by: [{ desc: true, field: 'date_posted' }],
-        posted_at_max_age_days: maxAgeDays, // Required by TheirStack API
-        // Include tech jobs broadly - the pipeline will filter
+        posted_at_max_age_days: maxAgeDays,
       })
-
-      console.log(`ingest_jobs: TheirStack POST body:`, body)
 
       const res = await fetch(url, {
         method: 'POST',
@@ -699,18 +724,31 @@ async function fetchJson(
       })
 
       if (!res.ok) {
-        const errorText = await res.text().catch(() => 'unknown error')
-        console.error(`ingest_jobs: TheirStack fetch failed`, res.status, res.statusText, errorText)
-        return null
+        const errorText = await res.text().catch(() => '')
+        return {
+          ok: false,
+          kind: 'http',
+          status: res.status,
+          message: `TheirStack HTTP ${res.status} ${res.statusText} ${errorText}`.trim(),
+          url,
+          sourceSlug,
+        }
       }
 
-      const data = await res.json().catch((err) => {
-        console.error(`ingest_jobs: failed to parse JSON for TheirStack`, err)
-        return null
-      })
-
-      console.log(`ingest_jobs: TheirStack response keys:`, data ? Object.keys(data) : 'null')
-      return data
+      try {
+        const data = await res.json()
+        console.log(`ingest_jobs: TheirStack response keys:`, data ? Object.keys(data) : 'null')
+        return { ok: true, data, status: res.status }
+      } catch (e: any) {
+        return {
+          ok: false,
+          kind: 'parse',
+          status: res.status,
+          message: `TheirStack failed to parse JSON: ${e?.message || String(e)}`,
+          url,
+          sourceSlug,
+        }
+      }
     }
 
     // Default: GET request
@@ -720,19 +758,38 @@ async function fetchJson(
     })
 
     if (!res.ok) {
-      console.error(`ingest_jobs: fetch failed for ${url}`, res.status, res.statusText)
-      return null
+      const errorText = await res.text().catch(() => '')
+      return {
+        ok: false,
+        kind: 'http',
+        status: res.status,
+        message: `HTTP ${res.status} ${res.statusText} ${errorText}`.trim(),
+        url,
+        sourceSlug,
+      }
     }
 
-    const data = await res.json().catch((err) => {
-      console.error(`ingest_jobs: failed to parse JSON for ${url}`, err)
-      return null
-    })
-
-    return data
-  } catch (err) {
-    console.error(`ingest_jobs: network error for ${url}`, err)
-    return null
+    try {
+      const data = await res.json()
+      return { ok: true, data, status: res.status }
+    } catch (e: any) {
+      return {
+        ok: false,
+        kind: 'parse',
+        status: res.status,
+        message: `Failed to parse JSON: ${e?.message || String(e)}`,
+        url,
+        sourceSlug,
+      }
+    }
+  } catch (err: any) {
+    return {
+      ok: false,
+      kind: 'network',
+      message: err?.message || String(err),
+      url,
+      sourceSlug,
+    }
   }
 }
 
@@ -1960,7 +2017,24 @@ async function ingest(
           `ingest_jobs: fetching from ${source.slug} (${url}) [page ${page}]`
         )
 
-        const raw = await fetchJson(url, source, { page, since }, searchParams)
+        const result = await fetchJson(url, source, { page, since }, searchParams)
+
+        if (!result.ok) {
+          console.error(
+            `ingest_jobs: fetch failed for ${source.slug} on page ${page}`,
+            {
+              kind: result.kind,
+              status: result.status,
+              message: result.message,
+            }
+          )
+          // Network/HTTP errors should stop the pagination loop for this source
+          sourceStatus = 'failed'
+          sourceError = result.message
+          break
+        }
+
+        const raw = result.data
         if (!raw) {
           console.warn(`ingest_jobs: no data from ${source.slug} on page ${page}`)
           break
