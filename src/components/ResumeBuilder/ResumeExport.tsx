@@ -118,10 +118,14 @@ function generateResumeHTML(draft: ResumeDraft): string {
         <html>
         <head>
             <style>
+                :root {
+                    --color-ink: rgb(51 51 51);
+                    --color-ink-secondary: rgb(102 102 102);
+                }
                 body { 
                     font-family: Arial, sans-serif; 
                     line-height: 1.5; 
-                    color: #333;
+                    color: var(--color-ink);
                     max-width: 800px;
                     margin: 0 auto;
                     padding: 40px;
@@ -130,18 +134,18 @@ function generateResumeHTML(draft: ResumeDraft): string {
                 h2 { 
                     font-size: 14px; 
 
-                    border-bottom: 1px solid #333; 
+                    border-bottom: 1px solid var(--color-ink); 
                     padding-bottom: 4px;
                     margin: 20px 0 10px;
                 }
-                .headline { margin: 0 0 8px; color: #666; font-size: 14px; }
-                .contact-info { font-size: 12px; color: #666; }
+                .headline { margin: 0 0 8px; color: var(--color-ink-secondary); font-size: 14px; }
+                .contact-info { font-size: 12px; color: var(--color-ink-secondary); }
                 .contact-info span { margin-right: 16px; }
                 .resume-section { margin-bottom: 16px; }
                 .experience-item, .education-item { margin-bottom: 12px; }
                 .exp-header { display: flex; justify-content: space-between; }
-                .exp-company { color: #666; font-size: 14px; }
-                .dates { color: #666; font-size: 12px; }
+                .exp-company { color: var(--color-ink-secondary); font-size: 14px; }
+                .dates { color: var(--color-ink-secondary); font-size: 12px; }
                 ul { margin: 6px 0; padding-left: 20px; }
                 li { margin-bottom: 4px; font-size: 14px; }
                 p { margin: 4px 0; font-size: 14px; }

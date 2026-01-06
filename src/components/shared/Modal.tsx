@@ -175,7 +175,7 @@ function getModalStyles(colors: any, size: string) {
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '24px',
-            borderBottom: `1px solid ${colors.borderColor || '#e0e0e0'}`,
+            borderBottom: `1px solid ${colors.borderColor || 'var(--color-graphite-faint)'}`,
         } as CSSProperties,
 
         title: {
@@ -210,7 +210,7 @@ function getModalStyles(colors: any, size: string) {
             gap: '12px',
             justifyContent: 'flex-end',
             padding: '24px',
-            borderTop: `1px solid ${colors.borderColor || '#e0e0e0'}`,
+            borderTop: `1px solid ${colors.borderColor || 'var(--color-graphite-faint)'}`,
         } as CSSProperties,
     }
 }

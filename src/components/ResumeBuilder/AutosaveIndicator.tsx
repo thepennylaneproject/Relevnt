@@ -38,8 +38,8 @@ export const AutosaveIndicator: React.FC<Props> = ({
 
   const toneStyles: Record<typeof tone, { container: string; dot: string }> = {
     neutral: {
-      container: 'border-[#D6C8AA] bg-white/80 text-[#1F2933]',
-      dot: 'bg-[#9CA3AF]',
+      container: 'border-[var(--color-graphite-light)] bg-white/80 text-[var(--color-ink)]',
+      dot: 'bg-[var(--color-ink-tertiary)]',
     },
     warning: {
       container: 'border-amber-200 bg-amber-50 text-amber-700',

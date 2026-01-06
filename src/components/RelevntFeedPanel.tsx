@@ -7,10 +7,12 @@ import { NetworkingOverlay } from './networking/NetworkingOverlay'
 import { QuickApplyModal } from './jobs/QuickApplyModal'
 import type { MatchJobsResult } from '../hooks/useMatchJobs'
 import type { MatchFactors } from '../lib/matchJobs'
+import { Card } from './ui/Card'
+import { Heading, Text } from './ui/Typography'
+import { Badge } from './ui/Badge'
 import Icon from './ui/Icon'
 import { Button } from './ui/Button'
 import { useToast } from './ui/Toast'
-import { copy } from '../lib/copy'
 
 type JobLike = {
   id?: string
@@ -152,11 +154,11 @@ export function RelevntFeedPanel({
     <>
       <div className="feed-stack">
         {/* top controls: explainer (formerly feed-controls) */}
-        <div className="feed-header-explainer">
-          <p className="subtitle">
+        <div className="mb-12">
+          <Text className="italic text-text-muted border-l-2 border-border pl-6 max-w-2xl py-2">
             {activePersona ? (
               <>
-                Showing matches for <strong>{activePersona.name}</strong>. Relevnt uses this
+                Matches for <span className="font-bold text-text">{activePersona.name}</span>. Relevnt uses this
                 persona's preferences, your resume, and market data to score roles.
               </>
             ) : (
@@ -165,24 +167,19 @@ export function RelevntFeedPanel({
                 recommendations based on your profile.
               </>
             )}
-          </p>
+          </Text>
         </div>
 
 
         {/* status bar */}
-        <div className="feed-status-bar text-xs muted">
-          {feedLoading && 'Scanning the market for matches…'}
-          {!feedLoading && feedError && (
-            <span className="feed-error">
-              {feedError.message}
-            </span>
-          )}
-          {!feedLoading && !feedError && (
-            <>
-              {visibleMatches} of {totalMatches}{' '}
-              matches visible with your filters.
-            </>
-          )}
+        <div className="flex justify-end mb-4">
+          <Text muted className="text-[10px] uppercase tracking-widest font-bold">
+            {feedLoading ? 'Scanning market…' : (
+              <>
+                {visibleMatches} / {totalMatches} matches found
+              </>
+            )}
+          </Text>
         </div>
 
         {/* list of matches */}
@@ -205,7 +202,6 @@ export function RelevntFeedPanel({
 
           {filteredMatches.map((m) => {
             const job = (m.job as JobLike) || {}
-
             const salaryMin = job.salary_min || null
             const salaryMax = job.salary_max || null
             let salaryLabel = ''
@@ -216,117 +212,103 @@ export function RelevntFeedPanel({
               salaryLabel = `$${Number(n).toLocaleString()}`
             }
 
-            const isRemote =
-              job.remote_type === 'remote' ||
-              (job.location || '')
-                .toLowerCase()
-                .includes('remote')
-
-            const mainReasons = Array.isArray(m.reasons)
-              ? m.reasons.slice(0, 3)
-              : []
-
+            const isRemote = job.remote_type === 'remote' || (job.location || '').toLowerCase().includes('remote')
+            const mainReasons = Array.isArray(m.reasons) ? m.reasons.slice(0, 3) : []
             const isSaved = savedJobIds.has(m.job_id)
             const isApplied = appliedJobIds.has(m.job_id)
-            const isBeingDismissed = recentlyDismissed === m.job_id
-            const wasJustSaved = recentlySaved === m.job_id
 
             return (
-              <div
-                key={m.job_id}
-                className={`card card-job-feed ${isBeingDismissed ? 'is-dismissing' : ''} ${wasJustSaved ? 'just-saved' : ''}`}
+              <Card 
+                key={m.job_id} 
+                className="group relative overflow-hidden"
               >
-                <div className="card-header">
-                  <h3>{job.title}</h3>
-                </div>
+                <header className="flex justify-between items-start mb-6">
+                  <div>
+                    <Heading level={3} className="group-hover:text-accent transition-colors">{job.title}</Heading>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Text muted className="font-bold">{job.company}</Text>
+                      <Text muted>•</Text>
+                      <Text muted>{job.location}</Text>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <Badge variant="neutral">{Math.round(m.score)}% Match</Badge>
+                  </div>
+                </header>
 
-                <div className="card-meta">
-                  {job.company && (
-                    <span className="meta-item">
-                      <Icon name="briefcase" size="sm" /> {job.company}
-                    </span>
-                  )}
-                  {job.location && (
-                    <span className="meta-item">
-                      <Icon name="map-pin" size="sm" /> {job.location}
-                    </span>
-                  )}
-                  {salaryLabel && (
-                    <span className="meta-item">
-                      <Icon name="dollar" size="sm" /> {salaryLabel}
-                    </span>
-                  )}
-                  {isRemote && (
-                    <span className="meta-item">
-                      <Icon name="zap" size="sm" /> Remote
-                    </span>
-                  )}
-                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                  <div className="space-y-4">
+                    <div className="flex flex-wrap gap-4">
+                      {salaryLabel && (
+                        <div className="flex items-center gap-2 text-xs">
+                          <Icon name="dollar" size="xs" className="text-text-muted" />
+                          <span className="font-medium">{salaryLabel}</span>
+                        </div>
+                      )}
+                      {isRemote && (
+                        <div className="flex items-center gap-2 text-xs">
+                          <Icon name="zap" size="xs" className="text-accent" />
+                          <span className="font-medium">Remote</span>
+                        </div>
+                      )}
+                    </div>
+                    {mainReasons.length > 0 && (
+                      <ul className="space-y-2 border-l border-border pl-4 py-1">
+                        {mainReasons.map((reason, idx) => (
+                          <li key={idx} className="text-xs text-text-muted italic flex items-start gap-2">
+                            <span className="text-accent">→</span>
+                            {reason}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
 
-                {mainReasons.length > 0 && (
-                  <ul className="card-reasons">
-                    {mainReasons.map((reason, idx) => (
-                      <li key={idx} className="positive">{reason}</li>
-                    ))}
-                    {/* Placeholder for missing requirements to match template style if needed, 
-                        but we stick to what the data provides */}
-                  </ul>
-                )}
-
-                <div className="card-footer">
-                  {/* Quick Apply / Applied button */}
-                  {isApplied ? (
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      disabled
-                    >
-                      <Icon name="check" size="sm" /> Applied
-                    </Button>
-                  ) : (
-                    <Button
-                      type="button"
-                      variant="primary"
-                      onClick={() => setQuickApplyJob({
-                        id: m.job_id,
-                        title: job.title || 'Job',
-                        company: job.company || 'Company',
-                        external_url: job.external_url,
-                      })}
-                    >
-                      <Icon name="paper-airplane" size="sm" /> Quick Apply
-                    </Button>
-                  )}
-                  {job.external_url && (
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      onClick={() => job.external_url && window.open(job.external_url, '_blank', 'noreferrer')}
-                    >
-                      View <Icon name="chevron-right" size="sm" />
-                    </Button>
-                  )}
-                  <Button
-                    type="button"
-                    variant={isSaved ? 'secondary' : 'ghost'}
-                    onClick={() => handleSaveJob(m.job_id, m.score)}
-                    aria-label={isSaved ? 'Remove from saved jobs' : 'Save job'}
-                  >
-                    <Icon name="bookmark" size="sm" /> {isSaved ? 'Saved' : 'Save'}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => handleDismissJob(m.job_id, m.score)}
-                    aria-label="Not interested in this job"
-                  >
-                    <Icon name="x" size="sm" /> Not Interested
-                  </Button>
-                  {/* Keep "Why this match" as a ghost button? The prompt didn't include it in the template, 
-                      but it's good functionality. I'll omit it to strictly follow the template unless it's critical. 
-                      Actually, "Why this match" is usually helpful. I'll leave it out to match the prompt template exactly. */}
+                  <div className="flex flex-col justify-end gap-3">
+                    <div className="flex gap-4 items-center justify-end">
+                      {isApplied ? (
+                        <Text className="text-xs font-bold uppercase tracking-widest text-success flex items-center gap-2">
+                          <Icon name="check" size="xs" /> Applied
+                        </Text>
+                      ) : (
+                        <button
+                          className="text-xs font-bold uppercase tracking-widest text-accent border-b border-accent/20 hover:border-accent transition-colors"
+                          onClick={() => setQuickApplyJob({
+                            id: m.job_id,
+                            title: job.title || 'Job',
+                            company: job.company || 'Company',
+                            external_url: job.external_url,
+                          })}
+                        >
+                          Quick Apply
+                        </button>
+                      )}
+                      {job.external_url && (
+                        <button
+                          className="text-xs font-bold uppercase tracking-widest text-text-muted border-b border-border/20 hover:border-text transition-colors"
+                          onClick={() => job.external_url && window.open(job.external_url, '_blank', 'noreferrer')}
+                        >
+                          View Source
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex justify-end gap-6 items-center pt-2 border-t border-border/50">
+                      <button
+                        className={`text-[10px] uppercase tracking-widest font-bold transition-colors ${isSaved ? 'text-accent' : 'text-text-muted hover:text-text'}`}
+                        onClick={() => handleSaveJob(m.job_id, m.score)}
+                      >
+                        {isSaved ? 'Job Saved' : 'Save Record'}
+                      </button>
+                      <button
+                        className="text-[10px] uppercase tracking-widest font-bold text-text-muted hover:text-error transition-colors"
+                        onClick={() => handleDismissJob(m.job_id, m.score)}
+                      >
+                        Dismiss
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </Card>
             )
           })}
         </div>

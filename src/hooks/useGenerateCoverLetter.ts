@@ -1,8 +1,10 @@
 import { useCallback } from 'react';
 import { useAITask } from './useAITask';
+import { usePersonas } from './usePersonas';
 import type {
   CoverLetterResponse,
 } from '../types/ai-responses.types';
+import type { UserVoiceProfile } from '../lib/voicePrompt';
 
 // ============================================================================
 // useGenerateCoverLetter
@@ -10,6 +12,10 @@ import type {
 
 /**
  * Generate a tailored cover letter for a job
+ * 
+ * Voice settings priority:
+ * 1. Active persona voice settings (if set)
+ * 2. Profile-level voice settings (fallback)
  */
 export interface UseGenerateCoverLetterReturn {
   generate: (
@@ -23,7 +29,9 @@ export interface UseGenerateCoverLetterReturn {
 }
 
 export function useGenerateCoverLetter(): UseGenerateCoverLetterReturn {
-  const { execute, loading, error, retry, voiceProfile } = useAITask();
+  const { execute, loading, error, retry, voiceProfile: profileVoice } = useAITask();
+  const { activePersona } = usePersonas();
+
 
   const generate = useCallback(
     async (
@@ -32,6 +40,18 @@ export function useGenerateCoverLetter(): UseGenerateCoverLetterReturn {
       companyName: string
     ): Promise<CoverLetterResponse | null> => {
       try {
+        // Build merged voice profile: persona settings override profile defaults
+        const personaPrefs = activePersona?.preferences
+        const mergedVoice: UserVoiceProfile | undefined = profileVoice
+          ? {
+              ...profileVoice,
+              // Persona voice overrides (if set, otherwise use profile defaults)
+              voice_formality: personaPrefs?.voice_formality ?? profileVoice.voice_formality,
+              voice_playfulness: personaPrefs?.voice_playfulness ?? profileVoice.voice_playfulness,
+              voice_conciseness: personaPrefs?.voice_conciseness ?? profileVoice.voice_conciseness,
+            }
+          : undefined
+
         return (await execute(
           'generate-cover-letter',
           {
@@ -40,7 +60,7 @@ export function useGenerateCoverLetter(): UseGenerateCoverLetterReturn {
             companyName,
           },
           {
-            voiceProfile: voiceProfile || undefined,
+            voiceProfile: mergedVoice,
             taskType: 'cover_letter',
           }
         )) as CoverLetterResponse;
@@ -48,7 +68,7 @@ export function useGenerateCoverLetter(): UseGenerateCoverLetterReturn {
         return null;
       }
     },
-    [execute, voiceProfile]
+    [execute, profileVoice, activePersona]
   );
 
   return {

@@ -17,7 +17,12 @@
  */
 
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Icon } from '../ui/Icon'
+import { useExternalJobLink } from '../../hooks/useExternalJobLink'
+import { useCompanySentiment } from '../../hooks/useCompanySentiment'
+import { CompanySentimentBadge } from '../Applications/CompanySentimentBadge'
+import { FeedbackButtons } from '../jobs/FeedbackButtons'
 import type { MatchedJob } from '../../lib/matchJobs'
 
 // =============================================================================
@@ -53,6 +58,14 @@ export function JobFeed({
     onJobClick,
 }: JobFeedProps) {
     const [expandedJobId, setExpandedJobId] = useState<string | null>(null)
+    const { handleExternalClick } = useExternalJobLink()
+    const navigate = useNavigate()
+    const { companySentiments } = useCompanySentiment()
+
+    // Create a map of company names to sentiment tags for quick lookup
+    const companySentimentMap = new Map(
+        companySentiments.map(s => [s.companyName.toLowerCase(), s.tag])
+    )
 
     const toggleExpanded = (jobId: string) => {
         setExpandedJobId(prev => prev === jobId ? null : jobId)
@@ -132,10 +145,11 @@ export function JobFeed({
                 {matches.map(match => (
                     <div
                         key={match.job_id}
+                        className="group"
                         style={styles.jobCard}
                         onClick={() => onJobClick?.(match)}
                     >
-                        {/* Header with Score */}
+                        {/* Header with Score and Feedback Buttons */}
                         <div style={styles.jobHeader}>
                             <div style={styles.jobTitleArea}>
                                 <h3 style={styles.jobTitle}>{match.job.title}</h3>
@@ -144,8 +158,30 @@ export function JobFeed({
                                     {match.job.location && (
                                         <> · {match.job.location}</>
                                     )}
+                                    {/* Show sentiment badge if user has applied to this company */}
+                                    {match.job.company && companySentimentMap.has(match.job.company.toLowerCase()) && (
+                                        <span style={{ marginLeft: '8px' }}>
+                                            <CompanySentimentBadge 
+                                                tag={companySentimentMap.get(match.job.company.toLowerCase())!} 
+                                                size="sm" 
+                                            />
+                                        </span>
+                                    )}
                                 </div>
                             </div>
+                            {/* Feedback Buttons */}
+                            <FeedbackButtons 
+                                job={{
+                                    id: match.job_id,
+                                    title: match.job.title,
+                                    company: match.job.company,
+                                    industry: match.job.industry,
+                                    company_size: match.job.company_size,
+                                    remote_type: match.job.remote_type,
+                                    location: match.job.location,
+                                }}
+                                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                            />
                         </div>
 
                         {/* Job Details */}
@@ -258,18 +294,40 @@ export function JobFeed({
                             </div>
                         )}
 
-                        {/* External Link */}
-                        {match.job.external_url && (
-                            <a
-                                href={match.job.external_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={styles.externalLink}
-                                onClick={(e) => e.stopPropagation()}
+                        {/* Actions */}
+                        <div style={styles.jobActions}>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    navigate(`/resumes?jobId=${match.job_id}`)
+                                }}
+                                style={styles.tailorButton}
                             >
-                                View Job →
-                            </a>
-                        )}
+                                <Icon name="scroll" size="sm" hideAccent />
+                                Tailor Resume
+                            </button>
+                            
+                            {match.job.external_url && (
+                                <a
+                                    href={match.job.external_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={styles.externalLink}
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        // Fire and forget - stage application asynchronously
+                                        handleExternalClick({
+                                            jobId: match.job_id,
+                                            jobTitle: match.job.title,
+                                            company: match.job.company || 'Unknown',
+                                            externalUrl: match.job.external_url!,
+                                        })
+                                    }}
+                                >
+                                    View Job →
+                                </a>
+                            )}
+                        </div>
                     </div>
                 ))}
             </div>
@@ -283,15 +341,15 @@ export function JobFeed({
 
 function getScoreBadgeStyle(score: number): React.CSSProperties {
     if (score >= 80) {
-        return { backgroundColor: 'var(--color-success, #4ade80)', color: '#000' }
+        return { backgroundColor: 'var(--color-success)', color: 'var(--color-ink)' }
     }
     if (score >= 60) {
-        return { backgroundColor: 'var(--accent-primary, #d4af37)', color: '#000' }
+        return { backgroundColor: 'var(--color-accent)', color: 'var(--color-ink)' }
     }
     if (score >= 40) {
-        return { backgroundColor: 'var(--color-warning, #fbbf24)', color: '#000' }
+        return { backgroundColor: 'var(--color-warning)', color: 'var(--color-ink)' }
     }
-    return { backgroundColor: 'var(--color-error, #ef4444)', color: '#fff' }
+    return { backgroundColor: 'var(--color-error)', color: 'var(--color-ink-inverse)' }
 }
 
 function formatSalary(min: number | null, max: number | null): string {
@@ -322,7 +380,7 @@ const styles: Record<string, React.CSSProperties> = {
 
     resultsCount: {
         fontSize: '14px',
-        color: 'var(--text-secondary, #888)',
+        color: 'var(--color-ink-secondary)',
         fontWeight: 500,
     },
 
@@ -333,8 +391,8 @@ const styles: Record<string, React.CSSProperties> = {
     },
 
     jobCard: {
-        backgroundColor: 'var(--surface-card, #1a1a1a)',
-        border: '1px solid var(--border-subtle, #333)',
+        backgroundColor: 'var(--color-surface)',
+        border: '1px solid var(--color-graphite-faint)',
         borderRadius: '12px',
         padding: '20px',
         cursor: 'pointer',
@@ -357,13 +415,13 @@ const styles: Record<string, React.CSSProperties> = {
         margin: 0,
         fontSize: '18px',
         fontWeight: 600,
-        color: 'var(--text-primary, #fff)',
+        color: 'var(--color-ink)',
         marginBottom: '4px',
     },
 
     jobCompany: {
         fontSize: '14px',
-        color: 'var(--text-secondary, #888)',
+        color: 'var(--color-ink-secondary)',
     },
 
     matchBadge: {
@@ -386,15 +444,15 @@ const styles: Record<string, React.CSSProperties> = {
         alignItems: 'center',
         gap: '4px',
         padding: '4px 10px',
-        backgroundColor: 'var(--surface-tertiary, #2a2a2a)',
+        backgroundColor: 'var(--color-bg-alt)',
         borderRadius: '4px',
         fontSize: '12px',
-        color: 'var(--text-secondary, #888)',
+        color: 'var(--color-ink-secondary)',
     },
 
     explanation: {
         fontSize: '14px',
-        color: 'var(--text-primary, #fff)',
+        color: 'var(--color-ink)',
         lineHeight: 1.5,
         marginBottom: '12px',
     },
@@ -405,7 +463,7 @@ const styles: Record<string, React.CSSProperties> = {
         gap: '4px',
         backgroundColor: 'transparent',
         border: 'none',
-        color: 'var(--accent-primary, #d4af37)',
+        color: 'var(--color-accent)',
         fontSize: '13px',
         cursor: 'pointer',
         padding: '4px 0',
@@ -422,7 +480,7 @@ const styles: Record<string, React.CSSProperties> = {
     factorsBreakdown: {
         marginTop: '12px',
         padding: '16px',
-        backgroundColor: 'var(--surface-secondary, #252525)',
+        backgroundColor: 'var(--color-surface)',
         borderRadius: '8px',
         display: 'flex',
         flexDirection: 'column',
@@ -437,7 +495,7 @@ const styles: Record<string, React.CSSProperties> = {
 
     factorLabel: {
         fontSize: '13px',
-        color: 'var(--text-secondary, #888)',
+        color: 'var(--color-ink-secondary)',
         width: '80px',
         flexShrink: 0,
     },
@@ -445,20 +503,20 @@ const styles: Record<string, React.CSSProperties> = {
     factorBar: {
         flex: 1,
         height: '8px',
-        backgroundColor: 'var(--surface-tertiary, #2a2a2a)',
+        backgroundColor: 'var(--color-bg-alt)',
         borderRadius: '4px',
         overflow: 'hidden',
     },
 
     factorBarFill: {
         height: '100%',
-        backgroundColor: 'var(--accent-primary, #d4af37)',
+        backgroundColor: 'var(--color-accent)',
         transition: 'width 0.3s ease',
     },
 
     factorValue: {
         fontSize: '13px',
-        color: 'var(--text-primary, #fff)',
+        color: 'var(--color-ink)',
         fontWeight: 500,
         width: '50px',
         textAlign: 'right',
@@ -469,8 +527,8 @@ const styles: Record<string, React.CSSProperties> = {
         display: 'inline-block',
         marginTop: '12px',
         padding: '8px 16px',
-        backgroundColor: 'var(--accent-primary, #d4af37)',
-        color: '#000',
+        backgroundColor: 'var(--color-accent)',
+        color: 'var(--color-ink)',
         borderRadius: '6px',
         textDecoration: 'none',
         fontSize: '14px',
@@ -478,10 +536,32 @@ const styles: Record<string, React.CSSProperties> = {
         transition: 'opacity 0.2s',
     },
 
+    jobActions: {
+        display: 'flex',
+        gap: '12px',
+        alignItems: 'center',
+        marginTop: '12px',
+    },
+
+    tailorButton: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '6px',
+        padding: '8px 16px',
+        backgroundColor: 'transparent',
+        border: '1px solid var(--color-accent)',
+        color: 'var(--color-accent)',
+        borderRadius: '6px',
+        fontSize: '14px',
+        fontWeight: 500,
+        cursor: 'pointer',
+        transition: 'all 0.2s',
+    },
+
     // Loading skeleton
     skeletonCard: {
-        backgroundColor: 'var(--surface-card, #1a1a1a)',
-        border: '1px solid var(--border-subtle, #333)',
+        backgroundColor: 'var(--color-surface)',
+        border: '1px solid var(--color-graphite-faint)',
         borderRadius: '12px',
         padding: '20px',
         marginBottom: '16px',
@@ -490,7 +570,7 @@ const styles: Record<string, React.CSSProperties> = {
     skeletonHeader: {
         height: '24px',
         width: '70%',
-        backgroundColor: 'var(--surface-tertiary, #2a2a2a)',
+        backgroundColor: 'var(--color-bg-alt)',
         borderRadius: '4px',
         marginBottom: '12px',
     },
@@ -498,7 +578,7 @@ const styles: Record<string, React.CSSProperties> = {
     skeletonText: {
         height: '16px',
         width: '90%',
-        backgroundColor: 'var(--surface-tertiary, #2a2a2a)',
+        backgroundColor: 'var(--color-bg-alt)',
         borderRadius: '4px',
         marginBottom: '8px',
     },
@@ -517,19 +597,19 @@ const styles: Record<string, React.CSSProperties> = {
     errorIcon: {
         display: 'flex',
         alignItems: 'center',
-        color: 'var(--color-error, #ef4444)',
+        color: 'var(--color-error)',
     },
 
     errorTitle: {
         fontSize: '16px',
         fontWeight: 600,
-        color: 'var(--color-error, #ef4444)',
+        color: 'var(--color-error)',
         marginBottom: '4px',
     },
 
     errorMessage: {
         fontSize: '14px',
-        color: 'var(--text-secondary, #888)',
+        color: 'var(--color-ink-secondary)',
     },
 
     // Empty state
@@ -548,13 +628,13 @@ const styles: Record<string, React.CSSProperties> = {
     emptyTitle: {
         fontSize: '18px',
         fontWeight: 600,
-        color: 'var(--text-primary, #fff)',
+        color: 'var(--color-ink)',
         marginBottom: '8px',
     },
 
     emptyMessage: {
         fontSize: '14px',
-        color: 'var(--text-secondary, #888)',
+        color: 'var(--color-ink-secondary)',
         maxWidth: '400px',
         margin: '0 auto',
     },

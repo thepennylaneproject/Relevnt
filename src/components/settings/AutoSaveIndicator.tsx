@@ -13,7 +13,7 @@ export function AutoSaveIndicator({ status }: AutoSaveIndicatorProps) {
         idle: { text: '', color: '' },
         pending: { text: 'Unsaved changes', color: 'var(--text-secondary)' },
         saving: { text: 'Saving...', color: 'var(--text-secondary)' },
-        saved: { text: 'Saved', color: 'var(--color-success, #22c55e)', icon: 'check' },
+        saved: { text: 'Saved', color: 'var(--color-success)', icon: 'check' },
         error: { text: 'Failed to save', color: 'var(--color-error)', icon: 'compass-cracked' },
     }
 

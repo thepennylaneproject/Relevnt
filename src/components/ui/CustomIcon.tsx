@@ -113,13 +113,21 @@ export const CustomIcon: React.FC<CustomIconWrapperProps> = ({
   if (!IconComponent) {
     // Fallback if icon not found - render a question mark or compass
     console.warn(`Icon "${name}" not found in custom icon library, using fallback`)
+    const fallbackStroke =
+      color === 'emerald'
+        ? 'var(--color-emerald)'
+        : color === 'ivory'
+          ? 'var(--color-ivory)'
+          : color === 'gray'
+            ? 'var(--color-gray)'
+            : 'var(--color-ink)'
     return (
       <svg
         width={size}
         height={size}
         viewBox="0 0 24 24"
         fill="none"
-        stroke={color === 'emerald' ? '#013E30' : color === 'ivory' ? '#f5f1e8' : color === 'gray' ? '#8a8a8a' : '#1a1a1a'}
+        stroke={fallbackStroke}
         strokeWidth="1.75"
         strokeLinecap="round"
         strokeLinejoin="round"

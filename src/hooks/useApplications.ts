@@ -5,6 +5,7 @@ import { useAuth } from './useAuth'
 import type { ResumeRow } from '../shared/types'
 
 export type ApplicationStatus =
+  | 'staged'
   | 'applied'
   | 'interviewing'
   | 'in-progress'
@@ -56,6 +57,18 @@ export interface Application {
   target_salary_min?: number | null
   target_salary_max?: number | null
 
+  // Company responsiveness tracking
+  company_response_time?: number | null
+  last_status_update: string
+  response_received: boolean
+
+  // Job characteristics for pattern analysis
+  job_skills_required?: string[] | null
+  job_experience_level?: 'entry' | 'mid' | 'senior' | 'lead' | 'executive' | null
+  job_company_size?: 'startup' | 'small' | 'medium' | 'large' | 'enterprise' | null
+  job_industry?: string | null
+  application_source?: string | null
+
   created_at: string
   updated_at: string
 
@@ -99,6 +112,7 @@ export function useApplications(options: UseApplicationsOptions = {}): UseApplic
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [statusCounts, setStatusCounts] = useState<Record<ApplicationStatus, number>>({
+    staged: 0,
     applied: 0,
     interviewing: 0,
     'in-progress': 0,
@@ -178,6 +192,7 @@ export function useApplications(options: UseApplicationsOptions = {}): UseApplic
       setTotalCount(count || 0)
 
       const counts: Record<ApplicationStatus, number> = {
+        staged: 0,
         applied: 0,
         interviewing: 0,
         'in-progress': 0,
@@ -233,12 +248,32 @@ export function useApplications(options: UseApplicationsOptions = {}): UseApplic
     async (applicationId: string, newStatus: ApplicationStatus) => {
       if (!user) return
 
+      // Determine fields to update based on status
+      const now = new Date().toISOString()
+      const updateData: any = {
+        status: newStatus,
+        updated_at: now,
+        last_status_update: now,
+      }
+
+      // Check if this status indicates a company response
+      const responseStatuses: ApplicationStatus[] = ['interviewing', 'in-progress', 'offer', 'accepted', 'rejected']
+      if (responseStatuses.includes(newStatus)) {
+        updateData.response_received = true
+
+        // Calculate response time if not already set
+        const app = applications.find(a => a.id === applicationId)
+        if (app && !app.company_response_time) {
+          const appliedDate = new Date(app.applied_date)
+          const responseDate = new Date(now)
+          const daysDiff = Math.floor((responseDate.getTime() - appliedDate.getTime()) / (1000 * 60 * 60 * 24))
+          updateData.company_response_time = daysDiff
+        }
+      }
+
       const { error: updateError } = await supabase
         .from('applications')
-        .update({
-          status: newStatus,
-          updated_at: new Date().toISOString(),
-        })
+        .update(updateData)
         .eq('id', applicationId)
         .eq('user_id', user.id)
 
@@ -249,12 +284,34 @@ export function useApplications(options: UseApplicationsOptions = {}): UseApplic
 
       await addEvent(applicationId, 'status_change', `Status to ${newStatus}`)
     },
-    [user, addEvent],
+    [user, addEvent, applications],
   )
 
   const createApplication = useCallback(
     async (jobId: string | null, data: Partial<Application>) => {
       if (!user) return
+
+      // Check for existing application for this job to prevent duplicates
+      if (jobId) {
+        const { data: existing } = await supabase
+          .from('applications')
+          .select('id, status')
+          .eq('user_id', user.id)
+          .eq('job_id', jobId)
+          .maybeSingle()
+
+        if (existing) {
+          // Update timestamp instead of creating duplicate
+          await supabase
+            .from('applications')
+            .update({ updated_at: new Date().toISOString() })
+            .eq('id', existing.id)
+            .eq('user_id', user.id)
+
+          await fetchApplications()
+          return
+        }
+      }
 
       const today = (data.applied_date || new Date().toISOString()).slice(0, 10)
 
@@ -279,6 +336,11 @@ export function useApplications(options: UseApplicationsOptions = {}): UseApplic
         interview_date: data.interview_date ?? null,
         offer_date: data.offer_date ?? null,
         response_deadline: data.response_deadline ?? null,
+        job_skills_required: data.job_skills_required ?? null,
+        job_experience_level: data.job_experience_level ?? null,
+        job_company_size: data.job_company_size ?? null,
+        job_industry: data.job_industry ?? null,
+        application_source: data.application_source ?? null,
       }
 
       const { data: newApp, error: createError } = await supabase

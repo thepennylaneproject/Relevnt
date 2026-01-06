@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 
 // Shape taken from your job_sources table
-import { Database } from '../lib/database.types'
+import type { Database } from '../types/supabase'
 export type JobSource = Database['public']['Tables']['job_sources']['Row']
 
 interface UseJobSourcesReturn {

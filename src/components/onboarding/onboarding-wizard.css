@@ -20,7 +20,7 @@
 
 /* Wizard container */
 .onboarding-wizard {
-  background: var(--surface, #1a1c23);
+  background: var(--color-surface);
   border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
   border-radius: 16px;
   max-width: 560px;
@@ -60,12 +60,12 @@
 }
 
 .progress-dot.active {
-  background: var(--color-accent, #D4A574);
+  background: var(--color-accent);
   transform: scale(1.2);
 }
 
 .progress-dot.complete {
-  background: var(--color-accent, #D4A574);
+  background: var(--color-accent);
   opacity: 0.5;
 }
 
@@ -99,18 +99,18 @@
 .step-icon svg {
   width: 48px;
   height: 48px;
-  color: var(--color-accent, #D4A574);
+  color: var(--color-text-secondary);
 }
 
 .step-icon.success svg {
-  color: var(--color-success, #2D5A4A);
+  color: var(--color-success);
 }
 
 .wizard-step h2 {
   font-family: var(--font-heading, 'Crimson Text', serif);
   font-size: 24px;
   font-weight: 600;
-  color: var(--text, #f0f0f0);
+  color: var(--color-ink);
   text-align: center;
   margin-bottom: 12px;
 }
@@ -142,14 +142,14 @@
   background: var(--surface-soft, rgba(255, 255, 255, 0.03));
   border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
   border-radius: 8px;
-  color: var(--text, #f0f0f0);
+  color: var(--color-ink);
   font-size: 15px;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: var(--color-accent, #D4A574);
+  border-color: var(--color-accent);
   box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.15);
 }
 
@@ -188,7 +188,7 @@
 }
 
 .radio-card.selected {
-  border-color: var(--color-accent, #D4A574);
+  border-color: var(--color-accent);
   background: rgba(212, 165, 116, 0.08);
 }
 
@@ -199,7 +199,7 @@
 .radio-card-label {
   font-size: 14px;
   font-weight: 600;
-  color: var(--text, #f0f0f0);
+  color: var(--color-ink);
   margin-bottom: 4px;
 }
 
@@ -225,7 +225,7 @@
   border: 1px solid rgba(212, 165, 116, 0.25);
   border-radius: 6px;
   font-size: 13px;
-  color: var(--color-accent, #D4A574);
+  color: var(--color-text-secondary);
 }
 
 .tag-remove {
@@ -248,7 +248,7 @@
 .summary-card {
   background: var(--surface-soft, rgba(255, 255, 255, 0.03));
   border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
-  border-left: 3px solid var(--color-accent, #D4A574);
+  border-left: 3px solid var(--color-border);
   border-radius: 10px;
   padding: 20px;
 }
@@ -256,7 +256,7 @@
 .summary-card h3 {
   font-family: var(--font-heading, 'Crimson Text', serif);
   font-size: 18px;
-  color: var(--color-accent, #D4A574);
+  color: var(--color-text-primary);
   margin-bottom: 16px;
 }
 
@@ -278,7 +278,7 @@
 
 .summary-value {
   font-size: 13px;
-  color: var(--text, #f0f0f0);
+  color: var(--color-ink);
   text-align: right;
   max-width: 60%;
 }
@@ -297,7 +297,7 @@
 
 /* Error */
 .error-text {
-  color: var(--color-error, #cb4b4b);
+  color: var(--color-error);
   font-size: 13px;
   text-align: center;
   margin-top: 16px;

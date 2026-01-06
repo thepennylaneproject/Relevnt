@@ -127,7 +127,7 @@ const loadingStyles = `
 
 .loading-state__message {
   font-size: 14px;
-  color: var(--color-ink-tertiary, #888);
+  color: var(--color-ink-tertiary);
   font-style: italic;
 }
 
@@ -139,7 +139,7 @@ const loadingStyles = `
   position: fixed;
   inset: 0;
   z-index: 9998;
-  background: var(--color-bg, #fafafa);
+  background: var(--color-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -148,7 +148,7 @@ const loadingStyles = `
 /* Skeleton loaders */
 .skeleton-line {
   height: 12px;
-  background: linear-gradient(90deg, var(--color-border, #e5e5e5) 25%, var(--color-bg, #f5f5f5) 50%, var(--color-border, #e5e5e5) 75%);
+  background: linear-gradient(90deg, var(--color-graphite-faint) 25%, var(--color-bg) 50%, var(--color-graphite-faint) 75%);
   background-size: 200% 100%;
   animation: skeleton-shimmer 1.5s infinite;
   border-radius: 4px;
@@ -156,8 +156,8 @@ const loadingStyles = `
 
 .skeleton-card {
   padding: 16px;
-  background: var(--color-surface, #fff);
-  border: 1px solid var(--color-border, #e5e5e5);
+  background: var(--color-surface);
+  border: 1px solid var(--color-graphite-faint);
   border-radius: 12px;
 }
 

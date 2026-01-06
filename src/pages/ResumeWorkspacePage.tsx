@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import PageBackground from '../components/shared/PageBackground'
-import { Container } from '../components/shared/Container'
+import { PageLayout } from '../components/layout/PageLayout'
+import { Heading, Text } from '../components/ui/Typography'
 import ResumeBuilderPage from './ResumeBuilderPage'
 import ResumeListPage from './ResumeListPage'
 import CoverLetterListPage from './CoverLetterListPage'
@@ -33,37 +33,40 @@ export default function ResumeWorkspacePage(): JSX.Element {
   )
 
   return (
-    <PageBackground>
-      <Container maxWidth="xl" padding="md">
-        <div className="page-header">
-          <h1>Resumes</h1>
-          <p>Build, refine, and keep multiple resumes organized. Toggle between your builder and library without losing your place.</p>
-        </div>
-
-        <div className="tabs">
+    <PageLayout
+      title="Resumes & Letters"
+      subtitle="Build, refine, and keep multiple professional records organized."
+    >
+      <div className="space-y-12">
+        {/* Navigation Triggers */}
+        <div className="flex gap-10 border-b border-border pb-6">
           {tabs.map((tab) => {
             const isActive = view === tab.id
             return (
               <button
                 key={tab.id}
                 type="button"
-                className={`tab ${isActive ? 'active' : ''}`}
+                className={`text-[10px] uppercase tracking-[0.2em] font-bold transition-colors ${
+                  isActive ? 'text-text border-b border-accent pb-6 -mb-[25px]' : 'text-text-muted hover:text-text'
+                }`}
                 onClick={() => toggle(tab.id as View)}
               >
-                <span>{tab.label}</span>
+                {tab.label}
               </button>
             )
           })}
         </div>
-      </Container>
 
-      {view === 'builder' ? (
-        <ResumeBuilderPage embedded />
-      ) : view === 'library' ? (
-        <ResumeListPage embedded />
-      ) : (
-        <CoverLetterListPage embedded />
-      )}
-    </PageBackground>
+        <div className="pt-4">
+          {view === 'builder' ? (
+            <ResumeBuilderPage embedded />
+          ) : view === 'library' ? (
+            <ResumeListPage embedded />
+          ) : (
+            <CoverLetterListPage embedded />
+          )}
+        </div>
+      </div>
+    </PageLayout>
   )
 }

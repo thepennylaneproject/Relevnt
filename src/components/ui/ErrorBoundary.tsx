@@ -115,7 +115,7 @@ const errorBoundaryStyles = `
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: var(--color-bg, #fafafa);
+  background: var(--color-bg);
 }
 
 .error-boundary__content {
@@ -131,13 +131,13 @@ const errorBoundaryStyles = `
 .error-boundary__title {
   font-size: 24px;
   font-weight: 600;
-  color: var(--color-ink, #1a1a1a);
+  color: var(--color-ink);
   margin: 0 0 12px;
 }
 
 .error-boundary__message {
   font-size: 15px;
-  color: var(--color-ink-secondary, #666);
+  color: var(--color-ink-secondary);
   margin: 0 0 32px;
   line-height: 1.5;
 }
@@ -152,8 +152,8 @@ const errorBoundaryStyles = `
 .error-boundary__details {
   margin-top: 32px;
   text-align: left;
-  background: var(--color-surface, #fff);
-  border: 1px solid var(--color-border, #e5e5e5);
+  background: var(--color-surface);
+  border: 1px solid var(--color-graphite-faint);
   border-radius: 8px;
   padding: 12px;
 }
@@ -161,7 +161,7 @@ const errorBoundaryStyles = `
 .error-boundary__details summary {
   cursor: pointer;
   font-size: 12px;
-  color: var(--color-ink-tertiary, #999);
+  color: var(--color-ink-tertiary);
   margin-bottom: 8px;
 }
 
@@ -172,7 +172,7 @@ const errorBoundaryStyles = `
   word-break: break-word;
   margin: 8px 0;
   padding: 8px;
-  background: var(--color-bg, #f5f5f5);
+  background: var(--color-bg);
   border-radius: 4px;
 }
 `

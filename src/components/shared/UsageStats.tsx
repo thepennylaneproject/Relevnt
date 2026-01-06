@@ -51,16 +51,14 @@ export function UsageStats({
   customStyles,
 }: UsageStatsProps): JSX.Element | null {
   const { user } = useAuth();
-  const { mode } = useTheme();
-
-  const isDark = mode === 'Dark';
+  useTheme();
 
   // Color palette
   const colors = useMemo(() => ({
-    starter: { bg: isDark ? '#2a2a2a' : '#f5f5f5', text: isDark ? '#e0e0e0' : '#333', accent: '#999' },
-    pro: { bg: isDark ? '#0d3a3a' : '#e0f2f1', text: isDark ? '#4db8c4' : '#009b9b', accent: '#009b9b' },
-    premium: { bg: isDark ? '#3d3d1a' : '#fef9e7', text: isDark ? '#e6d580' : '#b8860b', accent: '#d4a574' },
-  }), [isDark]);
+    starter: { bg: 'var(--color-bg-alt)', text: 'var(--color-ink)', accent: 'var(--color-ink-tertiary)' },
+    pro: { bg: 'var(--color-info-bg)', text: 'var(--color-info)', accent: 'var(--color-info)' },
+    premium: { bg: 'var(--color-accent-glow)', text: 'var(--color-accent)', accent: 'var(--color-accent)' },
+  }), []);
 
   if (!user || !user.tier) return null;
 
@@ -71,6 +69,9 @@ export function UsageStats({
   const analysesUsed = user.tier === 'starter' ? 3 : user.tier === 'pro' ? 35 : 0;
   const analysesLimit = tierConfig.limits.analysesPerMonth;
   const usagePercent = Math.min((analysesUsed / analysesLimit) * 100, 100);
+  const tierLabel = tierConfig.name
+    ? tierConfig.name.charAt(0).toUpperCase() + tierConfig.name.slice(1).toLowerCase()
+    : tierConfig.name;
 
   // ============================================================
   // STYLES
@@ -90,7 +91,6 @@ export function UsageStats({
     fontWeight: 700,
     marginBottom: variant === 'compact' ? 0 : '8px',
     color: tierColors.accent,
-    textTransform: 'capitalize',
   };
 
   const usageBarContainerStyles: CSSProperties = {
@@ -101,7 +101,7 @@ export function UsageStats({
   const usageBarStyles: CSSProperties = {
     width: '100%',
     height: '4px',
-    backgroundColor: isDark ? '#444' : '#ddd',
+    backgroundColor: 'var(--color-graphite-faint)',
     borderRadius: '2px',
     overflow: 'hidden',
     marginBottom: '4px',
@@ -116,7 +116,7 @@ export function UsageStats({
 
   const usageTextStyles: CSSProperties = {
     fontSize: '12px',
-    color: isDark ? '#999' : '#666',
+    color: 'var(--color-ink-tertiary)',
     display: variant === 'compact' ? 'none' : 'block',
   };
 
@@ -132,7 +132,7 @@ export function UsageStats({
   return (
     <div style={containerStyles}>
       <div style={tierNameStyles}>
-        {tierConfig.name}
+        {tierLabel}
         <span style={compactTextStyles}>
           • {analysesUsed}/{analysesLimit}
         </span>
@@ -156,7 +156,7 @@ export function UsageStats({
               <button
                 style={{
                   backgroundColor: tierColors.accent,
-                  color: isDark ? '#000' : '#fff',
+                  color: 'var(--color-ink-inverse)',
                   border: 'none',
                   borderRadius: '4px',
                   padding: '4px 8px',

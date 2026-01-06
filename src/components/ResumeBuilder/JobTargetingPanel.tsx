@@ -129,9 +129,9 @@ export const JobTargetingPanel: React.FC<Props> = ({ resumeText, onOptimize }) =
     }, [jobDescription, resumeText])
 
     const getMatchColor = (percentage: number) => {
-        if (percentage >= 70) return 'var(--success, #6ac7a5)'
-        if (percentage >= 40) return 'var(--warning, #c7a56a)'
-        return 'var(--danger, #c44a4a)'
+        if (percentage >= 70) return 'var(--color-success)'
+        if (percentage >= 40) return 'var(--color-warning)'
+        return 'var(--color-error)'
     }
 
     return (

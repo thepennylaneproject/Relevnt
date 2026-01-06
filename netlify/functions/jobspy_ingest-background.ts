@@ -10,9 +10,9 @@
 
 import type { Handler, HandlerContext } from '@netlify/functions'
 import { createAdminClient } from './utils/supabase'
-import { JobSpySource } from '../src/shared/jobSources'
+import { JobSpySource } from '../../src/shared/jobSources'
 import { upsertJobs } from './ingest_jobs'
-import { getSourceConfig } from '../src/shared/sourceConfig'
+import { getSourceConfig } from '../../src/shared/sourceConfig'
 
 // Import computeDedupKey function from ingest_jobs for consistent dedup key generation
 // This ensures JobSpy jobs are properly deduplicated against other sources

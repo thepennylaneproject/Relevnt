@@ -17,7 +17,7 @@
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database } from './database.types'
+import type { Database } from '../types/supabase'
 import type { UserPersona, PersonaPreferences } from '../types/v2-personas'
 import type { WeightConfig } from '../types/v2-schema'
 import { DEFAULT_RELEVANCE_WEIGHTS } from '../types/v2-schema'
@@ -40,6 +40,8 @@ export interface JobDetails {
     title: string
     company: string | null
     location: string | null
+    industry: string | null
+    company_size: string | null
     employment_type: string | null
     remote_type: string | null
     source_slug: string | null
@@ -561,6 +563,8 @@ export async function matchJobsForPersona(
                 title: job.title,
                 company: job.company,
                 location: job.location,
+                industry: job.industry,
+                company_size: job.company_size,
                 employment_type: job.employment_type,
                 remote_type: job.remote_type,
                 source_slug: job.source_slug,

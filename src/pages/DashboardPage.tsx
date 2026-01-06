@@ -1,16 +1,21 @@
-import React from "react";
-import { Navigate, Link, useNavigate } from "react-router-dom";
-import PageBackground from "../components/shared/PageBackground";
-import { IconName, Icon } from "../components/ui/Icon";
-import { Container } from "../components/shared/Container";
+import React, { useState, useEffect, useMemo } from 'react'
+import { supabase } from "../lib/supabase";
+import { PageLayout } from "../components/layout/PageLayout";
+import { Navigate, useNavigate } from "react-router-dom";
+import { Card } from "../components/ui/Card";
+import { Heading, Text } from "../components/ui/Typography";
+import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
+import { Icon, IconName } from "../components/ui/Icon";
 import { useAuth } from "../contexts/AuthContext";
 import { useApplications } from "../hooks/useApplications";
 import { useJobStats } from "../hooks/useJobStats";
 import { useWellnessMode } from "../hooks/useWellnessMode";
+import { useStrategicPivot } from "../hooks/useStrategicPivot";
 import { WellnessCheckin } from "../components/dashboard/WellnessCheckin";
+import StrategicPivotReport from "../components/insights/StrategicPivotReport";
+import InsightsEmptyState from "../components/insights/InsightsEmptyState";
 import { getReadyUrl } from "../config/cross-product";
-import "../styles/dashboard-clarity.css";
 
 // User state enum for adaptive UI
 enum UserState {
@@ -40,18 +45,27 @@ export default function DashboardPage(): JSX.Element {
   const { applications } = useApplications();
   const { total } = useJobStats();
   const { mode: wellnessMode } = useWellnessMode();
+  const {
+    latestReport,
+    loading: insightsLoading,
+    canGenerateReport,
+    minApplicationsRequired,
+    currentApplicationCount,
+    generateReport,
+    applyRecommendation,
+    dismissRecommendation,
+  } = useStrategicPivot();
   const navigate = useNavigate();
+  const [generatingReport, setGeneratingReport] = React.useState(false);
 
   if (authLoading) {
     return (
-      <PageBackground>
-        <Container maxWidth="lg" padding="md">
-          <div className="dashboard-loading">
-            <div className="loading-spinner" />
-            <span>Loading your dashboard...</span>
-          </div>
-        </Container>
-      </PageBackground>
+      <div className="min-h-screen bg-bg flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-8 h-8 border-2 border-accent/20 border-t-accent animate-spin mx-auto" />
+          <Text muted className="uppercase tracking-widest text-[10px] font-bold">Initialising your desk...</Text>
+        </div>
+      </div>
     );
   }
 
@@ -146,7 +160,7 @@ export default function DashboardPage(): JSX.Element {
           cta: "Explore roles",
           ctaLink: "/jobs",
           secondaryCta: "Improve profile",
-          secondaryLink: "/settings#profile",
+          secondaryLink: "/settings?section=profile",
         };
     }
   };
@@ -216,7 +230,7 @@ export default function DashboardPage(): JSX.Element {
         icon: "stars",
         label: "Profile strength",
         action: `${profileCompletion}% → Improve`,
-        link: "/settings#profile",
+        link: "/settings?section=profile",
       });
     }
 
@@ -297,357 +311,199 @@ export default function DashboardPage(): JSX.Element {
   // ───────────────────────────────────────────────────────────────────────────
 
   return (
-    <PageBackground>
-      <Container maxWidth="lg" padding="md">
-        <div className="dashboard-enhanced selection-gold">
-          {/* ═══════════════════════════════════════════════════════════════════
-              SECTION 1: CENTERED HERO + PRIMARY CTA
-          ═══════════════════════════════════════════════════════════════════ */}
-          <section className="hero-section gold-dust">
-            <div className="hero-content">
-              <h1 className="hero-greeting">{getGreeting()}</h1>
-
-              {/* Momentum message */}
-              {momentumMessage && (
-                <p className="momentum-message">
-                  <Icon name="zap" size="sm" />
-                  {momentumMessage}
-                </p>
-              )}
-            </div>
-
-            {/* Primary CTA Card - Elevated, centered */}
-            <div className="primary-cta-card">
-              <div className="primary-cta-header">
-                <span className="primary-cta-label">{primaryCTA.heading}</span>
-                <h2 className="primary-cta-title">{primaryCTA.title}</h2>
-                <p className="primary-cta-description">
-                  {primaryCTA.description}
-                </p>
-              </div>
-              <div className="primary-cta-actions">
-                {primaryCTA.ctaIsExternal ? (
-                  <a
-                    href={primaryCTA.ctaLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn btn-primary"
-                  >
-                    {primaryCTA.cta}
-                    <Icon name="external-link" size="sm" />
-                  </a>
-                ) : (
-                  <Button
-                    type="button"
-                    variant="primary"
-                    onClick={() => navigate(primaryCTA.ctaLink)}
-                  >
-                    {primaryCTA.cta}
-                    <Icon name="chevron-right" size="sm" />
-                  </Button>
-                )}
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => navigate(primaryCTA.secondaryLink)}
-                >
+    <PageLayout
+      title={`Welcome, ${user.email?.split('@')[0] || 'Friend'}.`}
+      subtitle={momentumMessage || "Your career records are up to date."}
+      actions={
+        <Button variant="primary" onClick={() => navigate(primaryCTA.ctaLink)}>
+          {primaryCTA.cta}
+        </Button>
+      }
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <div className="lg:col-span-2 space-y-12">
+          {/* Primary Directive */}
+          <section>
+            <Card className="border-accent/20 bg-accent-glow/5">
+              <header className="mb-6">
+                <Text muted className="uppercase tracking-widest text-xs font-bold mb-1">{primaryCTA.heading}</Text>
+                <Heading level={2}>{primaryCTA.title}</Heading>
+              </header>
+              <Text className="mb-8 max-w-xl italic">{primaryCTA.description}</Text>
+              <div className="flex gap-4">
+                <Button variant="primary" onClick={() => navigate(primaryCTA.ctaLink)}>
+                  {primaryCTA.cta}
+                </Button>
+                <Button variant="secondary" onClick={() => navigate(primaryCTA.secondaryLink)}>
                   {primaryCTA.secondaryCta}
                 </Button>
               </div>
-            </div>
+            </Card>
           </section>
 
-          {/* ═══════════════════════════════════════════════════════════════════
-              SECTION 2: NEXT STEPS (Merged: Priority + Quick Actions)
-          ═══════════════════════════════════════════════════════════════════ */}
-          <section className="next-steps-section">
-            <h3 className="section-header">
-              <Icon name="compass" size="sm" />
-              Next steps
-            </h3>
-
-            {/* Priority items (adaptive based on user state) */}
-            {todaysPriorities.length > 0 && (
-              <div className="next-steps-priorities">
-                {todaysPriorities.map((item, idx) =>
-                  item.isExternal ? (
-                    <a
-                      key={idx}
-                      href={item.link}
-                      className="priority-card"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <div className="priority-card-icon">
-                        <Icon name={item.icon} size="md" />
-                      </div>
-                      <div className="priority-card-content">
-                        <span className="priority-card-label">
-                          {item.label}
-                        </span>
-                        <span className="priority-card-action">
-                          {item.action}
-                        </span>
-                      </div>
-                      <Icon
-                        name="external-link"
-                        size="sm"
-                        className="priority-arrow"
-                      />
-                    </a>
-                  ) : (
-                    <Link key={idx} to={item.link} className="priority-card">
-                      <div className="priority-card-icon">
-                        <Icon name={item.icon} size="md" />
-                      </div>
-                      <div className="priority-card-content">
-                        <span className="priority-card-label">
-                          {item.label}
-                        </span>
-                        <span className="priority-card-action">
-                          {item.action}
-                        </span>
-                      </div>
-                      <Icon
-                        name="chevron-right"
-                        size="sm"
-                        className="priority-arrow"
-                      />
-                    </Link>
-                  )
-                )}
-              </div>
-            )}
-
-            {/* Quick actions row */}
-            <div className="quick-actions-row">
-              {quickActions.map((action, idx) =>
-                action.isExternal ? (
-                  <a
-                    key={idx}
-                    href={action.link}
-                    className="quick-action-btn"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Icon name={action.icon} size="sm" />
-                    <span>{action.label}</span>
-                    <Icon
-                      name="external-link"
-                      size="xs"
-                      className="ml-1 opacity-60"
-                    />
-                  </a>
-                ) : (
-                  <Link key={idx} to={action.link} className="quick-action-btn">
-                    <Icon name={action.icon} size="sm" />
-                    <span>{action.label}</span>
-                  </Link>
-                )
-              )}
-            </div>
-          </section>
-
-          {/* ═══════════════════════════════════════════════════════════════════
-              SECTION 4: FOUNDATION CARDS (Two-column grid)
-          ═══════════════════════════════════════════════════════════════════ */}
-          <section className="foundation-section">
-            <h3 className="section-header">
-              <Icon name="seeds" size="sm" />
-              Build your foundation
-            </h3>
-            <div className="foundation-grid">
-              {foundationCards.map((card, idx) => (
-                <div key={idx} className="foundation-card">
-                  <div className="foundation-card-icon">
-                    <Icon name={card.icon} size="lg" />
+          {/* Priorities & Quick Actions */}
+          <section className="space-y-6">
+            <header className="flex items-baseline justify-between border-b border-border pb-2">
+              <Heading level={4} className="uppercase tracking-wider text-text-muted">Next Steps</Heading>
+            </header>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {todaysPriorities.map((item, idx) => (
+                <Card 
+                  key={idx} 
+                  className="p-4 flex flex-col justify-between group hover:border-text transition-colors"
+                  onClick={() => item.isExternal ? window.open(item.link, '_blank') : navigate(item.link)}
+                >
+                  <div>
+                    <Text className="font-bold mb-1 group-hover:underline underline-offset-4">{item.label}</Text>
+                    <Text muted className="text-xs italic">{item.action}</Text>
                   </div>
-                  <h4 className="foundation-card-title">{card.title}</h4>
-                  <p className="foundation-card-description">
-                    {card.description}
-                  </p>
-                  <Link to={card.ctaLink} className="foundation-card-cta">
-                    {card.cta}
-                    <Icon name="chevron-right" size="sm" />
-                  </Link>
-                </div>
+                  <Icon name={item.icon} size="sm" className="mt-4 text-text-muted group-hover:text-text transition-colors" />
+                </Card>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap gap-x-8 gap-y-4 pt-4">
+              {quickActions.map((action, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => action.isExternal ? window.open(action.link, '_blank') : navigate(action.link)}
+                  className="flex items-center gap-2 text-xs uppercase tracking-widest font-bold text-text-muted hover:text-text transition-colors"
+                >
+                  <Icon name={action.icon} size="xs" />
+                  {action.label}
+                  {action.isExternal && <Icon name="external-link" size="xs" className="opacity-40" />}
+                </button>
               ))}
             </div>
           </section>
 
-          {/* ═══════════════════════════════════════════════════════════════════
-              SECTION 4: YOUR PROGRESS (Merged: Pipeline + Progress Tracker)
-          ═══════════════════════════════════════════════════════════════════ */}
-          <section className="your-progress-section">
-            <h3 className="section-header">
-              <Icon name="gauge" size="sm" />
-              Your progress
-            </h3>
-            <div className="pipeline-grid">
-              {/* Pipeline stats would be refactored here to use HandDrawnIcon as well */}
-              <Link
-                to="/jobs"
-                className={`pipeline-stat pipeline-stat--clickable ${
-                  discoveredCount === 0 ? "is-empty" : ""
-                }`}
-              >
-                <div className="pipeline-stat-icon">
-                  <Icon name="seeds" size="sm" />
-                </div>
-                <div className="pipeline-stat-content">
-                  <span className="pipeline-stat-label">Discovered</span>
-                  {discoveredCount === 0 ? (
-                    <span className="pipeline-empty-cta">
-                      Start with 5 picks →
-                    </span>
-                  ) : (
-                    <>
-                      <span className="pipeline-stat-value">
-                        {discoveredCount}
-                      </span>
-                      <span className="pipeline-stat-subtext">
-                        roles explored
-                      </span>
-                    </>
-                  )}
-                </div>
-              </Link>
+          {/* Strategic Insights */}
+          <section className="space-y-6">
+            <header className="flex items-baseline justify-between border-b border-border pb-2">
+              <Heading level={4} className="uppercase tracking-wider text-text-muted">Strategic Analysis</Heading>
+              {canGenerateReport && (
+                <button
+                  className="text-[10px] uppercase tracking-widest font-bold border-b border-text/20 hover:border-text transition-colors disabled:opacity-50"
+                  onClick={async () => {
+                    setGeneratingReport(true);
+                    try {
+                      await generateReport();
+                    } catch (err) {
+                      console.error(err);
+                    } finally {
+                      setGeneratingReport(false);
+                    }
+                  }}
+                  disabled={generatingReport}
+                >
+                  {generatingReport ? 'Generating...' : 'Refresh Report'}
+                </button>
+              )}
+            </header>
 
-              <Link
-                to="/applications"
-                className={`pipeline-stat pipeline-stat--clickable ${
-                  appliedCount === 0 ? "is-empty" : ""
-                }`}
-              >
-                <div className="pipeline-stat-icon">
-                  <Icon name="paper-airplane" size="sm" />
-                </div>
-                <div className="pipeline-stat-content">
-                  <span className="pipeline-stat-label">Applied</span>
-                  {appliedCount === 0 ? (
-                    <span className="pipeline-empty-hint">
-                      Waiting for your signal.
-                    </span>
-                  ) : (
-                    <>
-                      <span className="pipeline-stat-value">
-                        {appliedCount}
-                      </span>
-                      <span className="pipeline-stat-subtext">
-                        applications sent
-                      </span>
-                    </>
-                  )}
-                </div>
-              </Link>
+            {insightsLoading ? (
+              <Text muted className="py-12 text-center uppercase tracking-widest text-[10px] font-bold">Analysing application patterns...</Text>
+            ) : canGenerateReport && latestReport ? (
+              <StrategicPivotReport
+                report={latestReport}
+                onApplyRecommendation={async (recId) => {
+                  await applyRecommendation(latestReport.id, recId);
+                }}
+                onDismissRecommendation={async (recId) => {
+                  await dismissRecommendation(latestReport.id, recId);
+                }}
+              />
+            ) : (
+              <InsightsEmptyState
+                currentCount={currentApplicationCount}
+                requiredCount={minApplicationsRequired}
+              />
+            )}
+          </section>
 
-              <Link
-                to="/applications?status=awaiting"
-                className={`pipeline-stat pipeline-stat--clickable ${
-                  appliedCount - interviewingCount === 0 ? "is-empty" : ""
-                }`}
-              >
-                <div className="pipeline-stat-icon">
-                  <Icon name="candle" size="sm" />
+          {/* Foundation */}
+          <section className="space-y-6">
+            <header className="flex items-baseline justify-between border-b border-border pb-2">
+              <Heading level={4} className="uppercase tracking-wider text-text-muted">Foundation</Heading>
+            </header>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {foundationCards.map((card, idx) => (
+                <div key={idx} className="space-y-3">
+                  <div className="flex items-center gap-4">
+                    <div className="p-2 border border-border">
+                      <Icon name={card.icon} size="md" />
+                    </div>
+                    <Heading level={3}>{card.title}</Heading>
+                  </div>
+                  <Text muted className="italic">{card.description}</Text>
+                  <button
+                    onClick={() => navigate(card.ctaLink)}
+                    className="text-xs uppercase tracking-widest font-bold text-accent border-b border-accent/20 hover:border-accent transition-colors"
+                  >
+                    {card.cta} →
+                  </button>
+                  {card.sublabel && <Text className="text-[10px] uppercase tracking-widest text-text-muted">{card.sublabel}</Text>}
                 </div>
-                <div className="pipeline-stat-content">
-                  <span className="pipeline-stat-label">Awaiting</span>
-                  {appliedCount - interviewingCount === 0 ? (
-                    <span className="pipeline-empty-hint">—</span>
-                  ) : (
-                    <>
-                      <span className="pipeline-stat-value">
-                        {appliedCount - interviewingCount}
-                      </span>
-                      <span className="pipeline-stat-subtext">
-                        responses pending
-                      </span>
-                    </>
-                  )}
-                </div>
-              </Link>
+              ))}
+            </div>
+          </section>
+        </div>
 
-              <Link
-                to="/applications?status=interviewing"
-                className={`pipeline-stat pipeline-stat--clickable ${
-                  interviewingCount === 0 ? "is-empty" : "is-active"
-                }`}
-              >
-                <div className="pipeline-stat-icon">
-                  <Icon name="flower" size="sm" />
+        {/* Sidebar */}
+        <div className="lg:col-span-1 space-y-12">
+          {/* Progress Ledger */}
+          <section className="space-y-6">
+            <header className="border-b border-border pb-2">
+              <Heading level={4} className="uppercase tracking-wider text-text-muted">Career Ledger</Heading>
+            </header>
+            <div className="space-y-1">
+              {[
+                { label: 'Discovered', count: discoveredCount, link: '/jobs' },
+                { label: 'Applied', count: appliedCount, link: '/applications' },
+                { label: 'Awaiting', count: appliedCount - interviewingCount, link: '/applications?status=awaiting' },
+                { label: 'Interviews', count: interviewingCount, link: '/applications?status=interviewing' },
+              ].map((stat, idx) => (
+                <div 
+                  key={idx}
+                  onClick={() => navigate(stat.link)}
+                  className="flex justify-between items-baseline py-2 border-b border-border/50 cursor-pointer group hover:bg-surface-2 px-2 -mx-2 transition-colors"
+                >
+                  <Text className="group-hover:font-medium transition-all">{stat.label}</Text>
+                  <Heading level={3} className="text-text-muted group-hover:text-text">{stat.count}</Heading>
                 </div>
-                <div className="pipeline-stat-content">
-                  <span className="pipeline-stat-label">Interviews</span>
-                  {interviewingCount === 0 ? (
-                    <span className="pipeline-empty-hint">
-                      Milestones await.
-                    </span>
-                  ) : (
-                    <>
-                      <span className="pipeline-stat-value">
-                        {interviewingCount}
-                      </span>
-                      <span className="pipeline-stat-subtext">
-                        active conversations
-                      </span>
-                    </>
-                  )}
-                </div>
-              </Link>
+              ))}
             </div>
 
-            {/* Profile progress bar */}
-            <div className="progress-card">
-              <div className="progress-header">
-                <span className="progress-label">Profile completeness</span>
-                <span
-                  className={`progress-value ${
-                    profileCompletion < 80
-                      ? "progress-value--warning"
-                      : "progress-value--good"
-                  }`}
-                >
-                  {profileCompletion}%
-                </span>
+            {/* Profile Integrity */}
+            <div className="space-y-2 mt-8">
+              <div className="flex justify-between items-baseline mb-4">
+                <Text className="uppercase tracking-widest text-[10px] font-bold">Profile Integrity</Text>
+                <Text className="font-bold font-mono">{profileCompletion}%</Text>
               </div>
-              <div className="progress-bar">
-                <div
-                  className={`progress-fill ${
-                    profileCompletion < 50
-                      ? "progress-fill--low"
-                      : profileCompletion < 80
-                      ? "progress-fill--medium"
-                      : "progress-fill--high"
-                  }`}
-                  style={{ width: `${profileCompletion}%` }}
-                />
+              <div className="h-1 bg-border w-full">
+                <div className="h-full bg-text transition-all duration-1000" style={{ width: `${profileCompletion}%` }} />
               </div>
-              <div className="progress-footer">
-                <span className="progress-hint">
-                  {profileCompletion < 50
-                    ? "Add more details to stand out"
-                    : profileCompletion < 80
-                    ? "Almost there!"
-                    : "Looking great!"}
-                </span>
-                <Link to="/settings#profile" className="progress-cta">
-                  {profileCompletion < 80 ? "Improve profile" : "View profile"}{" "}
-                  →
-                </Link>
-              </div>
+              <button 
+                onClick={() => navigate('/settings?section=profile')}
+                className="text-[10px] uppercase tracking-widest font-bold text-text-muted hover:text-text transition-colors"
+              >
+                Refine profile →
+              </button>
             </div>
           </section>
 
-          {/* ═══════════════════════════════════════════════════════════════════
-              SECTION 5: WELLNESS CHECK (if gentle mode)
-          ═══════════════════════════════════════════════════════════════════ */}
+          {/* Wellness Check */}
           {wellnessMode === "gentle" && (
-            <section className="wellness-section">
+            <section className="space-y-6">
+              <header className="border-b border-border pb-2">
+                <Heading level={4} className="uppercase tracking-wider text-text-muted">Observation</Heading>
+              </header>
               <WellnessCheckin />
             </section>
           )}
         </div>
-      </Container>
-    </PageBackground>
+      </div>
+    </PageLayout>
   );
 }

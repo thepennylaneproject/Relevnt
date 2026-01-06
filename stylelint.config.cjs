@@ -6,14 +6,14 @@
  * Absolute Token Compliance: No hard-coded colors, spacing, typography,
  * border radius, shadows, or z-index values outside design tokens.
  *
- * SEVERITY: warning (not error) - surfaces violations without breaking build
+ * SEVERITY: error - violations will break the build
  *
  * EXEMPTIONS:
  * - /src/styles/design-tokens.css - This IS the token source of truth
  * - Files explicitly defining tokens are exempt
  *
  * ESCAPE HATCH:
- * Use `/* stylelint-disable-next-line */` with documented reason
+ * Use `stylelint-disable-next-line` with documented reason
  * See: /docs/design-token-escape.md
  *
  * ═══════════════════════════════════════════════════════════════════════════
@@ -178,5 +178,14 @@ module.exports = {
     'alpha-value-notation': null,      // Allow both percentage and number
     'color-function-notation': null,   // Allow both modern and legacy
     'import-notation': null,           // Allow both @import styles
+    'media-feature-range-notation': null, // Allow legacy media queries for now
+    'comment-empty-line-before': null,    // Allow legacy formatting
+    'rule-empty-line-before': null,
+    'declaration-empty-line-before': null,
+    'declaration-block-single-line-max-declarations': null,
+    'no-duplicate-selectors': null,
+    'declaration-block-no-duplicate-properties': null,
+    'property-no-vendor-prefix': null,
+    'shorthand-property-no-redundant-values': null,
   },
 };

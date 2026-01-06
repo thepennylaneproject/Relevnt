@@ -371,6 +371,48 @@ export interface SuggestSkillsResponse {
 }
 
 // ============================================================================
+// STRATEGIC INSIGHTS
+// ============================================================================
+
+/**
+ * Strategic insights - AI-driven analysis of application patterns
+ */
+export interface Recommendation {
+  id: string
+  type: 'skill_gap' | 'targeting' | 'resume' | 'strategy' | 'timing'
+  priority: 'high' | 'medium' | 'low'
+  title: string
+  description: string
+  action: string
+  linkedSection?: string // e.g., "settings/targeting", "resume/skills"
+  linkedSectionLabel?: string // e.g., "Update Targeting Settings"
+  confidence: number // 0-100
+}
+
+export interface PatternFinding {
+  pattern: string
+  description: string
+  impact: 'positive' | 'negative' | 'neutral'
+  statistic?: string // e.g., "25% interview rate"
+}
+
+export interface StrategicInsightsResponse {
+  success: boolean
+  data: {
+    overview: {
+      totalApplications: number
+      interviewRate: number
+      previousInterviewRate?: number
+      trend: 'improving' | 'declining' | 'stable'
+    }
+    patterns: PatternFinding[]
+    recommendations: Recommendation[]
+    skillGaps: string[]
+  }
+  error?: string
+}
+
+// ============================================================================
 // UNION TYPE FOR ALL RESPONSES
 // ============================================================================
 
@@ -399,6 +441,7 @@ export type AITaskResponse =
   | CareerNarrativeResponse
   | SalaryNegotiationResponse
   | NetworkingDraftResponse
+  | StrategicInsightsResponse
 
 /**
  * Task name to response type mapping
@@ -424,6 +467,7 @@ export const TASK_RESPONSE_TYPES = {
   'generate-career-narrative': {} as CareerNarrativeResponse,
   'salary-negotiation': {} as SalaryNegotiationResponse,
   'networking-draft': {} as NetworkingDraftResponse,
+  'generate-strategic-insights': {} as StrategicInsightsResponse,
 } as const
 
 /**

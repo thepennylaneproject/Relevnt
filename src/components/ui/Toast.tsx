@@ -19,10 +19,14 @@ export interface Toast {
     message: string
     variant: ToastVariant
     duration?: number
+    action?: {
+        label: string
+        onClick: () => void
+    }
 }
 
 interface ToastContextValue {
-    showToast: (message: string, variant?: ToastVariant, duration?: number) => void
+    showToast: (message: string, variant?: ToastVariant, duration?: number, action?: { label: string; onClick: () => void }) => void
     dismissToast: (id: string) => void
 }
 
@@ -55,9 +59,9 @@ interface ToastProviderProps {
 export function ToastProvider({ children }: ToastProviderProps): JSX.Element {
     const [toasts, setToasts] = useState<Toast[]>([])
 
-    const showToast = useCallback((message: string, variant: ToastVariant = 'info', duration = 4000) => {
+    const showToast = useCallback((message: string, variant: ToastVariant = 'info', duration = 4000, action?: { label: string; onClick: () => void }) => {
         const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2)}`
-        const toast: Toast = { id, message, variant, duration }
+        const toast: Toast = { id, message, variant, duration, action }
 
         setToasts(prev => [...prev, toast])
 
@@ -112,6 +116,18 @@ function ToastContainer({ toasts, onDismiss }: ToastContainerProps): JSX.Element
                     >
                         <Icon name={config.icon} size="sm" hideAccent />
                         <span className="toast__message">{toast.message}</span>
+                        {toast.action && (
+                            <button
+                                type="button"
+                                className="toast__action"
+                                onClick={() => {
+                                    toast.action!.onClick()
+                                    onDismiss(toast.id)
+                                }}
+                            >
+                                {toast.action.label}
+                            </button>
+                        )}
                         <button
                             type="button"
                             className="toast__dismiss"
@@ -150,7 +166,7 @@ const toastStyles = `
   gap: 12px;
   padding: 14px 16px;
   border-radius: 10px;
-  background: var(--color-surface, #fff);
+  background: var(--color-surface);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   border-left: 4px solid transparent;
   animation: toast-slide-in 0.3s ease-out;
@@ -168,26 +184,43 @@ const toastStyles = `
 }
 
 .toast--success {
-  border-left-color: var(--color-success, #22c55e);
+  border-left-color: var(--color-success);
 }
 
 .toast--error {
-  border-left-color: var(--color-error, #ef4444);
+  border-left-color: var(--color-error);
 }
 
 .toast--warning {
-  border-left-color: var(--color-warning, #f59e0b);
+  border-left-color: var(--color-warning);
 }
 
 .toast--info {
-  border-left-color: var(--color-accent, #6366f1);
+  border-left-color: var(--color-accent);
 }
 
 .toast__message {
   flex: 1;
   font-size: 14px;
-  color: var(--color-ink, #1a1a1a);
+  color: var(--color-ink);
   line-height: 1.4;
+}
+
+.toast__action {
+  padding: 4px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 6px;
+  background: var(--color-accent);
+  color: var(--color-ink);
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+
+.toast__action:hover {
+  opacity: 0.8;
 }
 
 .toast__dismiss {
@@ -195,7 +228,7 @@ const toastStyles = `
   border: none;
   padding: 4px 8px;
   font-size: 18px;
-  color: var(--color-ink-tertiary, #888);
+  color: var(--color-ink-tertiary);
   cursor: pointer;
   opacity: 0.6;
   transition: opacity 0.15s;

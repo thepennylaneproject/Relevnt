@@ -11,7 +11,6 @@
 import React from 'react'
 import { Button } from './Button'
 import { FeatureIcon, type FeatureIconName } from './FeatureIcon'
-import type { TextureType } from './TexturedBg'
 
 export type PageCategory = 'track' | 'optimize' | 'grow'
 
@@ -34,8 +33,6 @@ export interface PageHeroProps {
     contextLine?: string
     /** Action buttons to show on right side */
     actions?: PageHeroAction[]
-    /** Optional texture overlay (watercolor default for hero) */
-    texture?: TextureType | false
     /** Additional content below subtitle */
     children?: React.ReactNode
 }
@@ -53,13 +50,10 @@ export function PageHero({
     subtitle,
     contextLine,
     actions,
-    texture = 'watercolor',
     children,
 }: PageHeroProps) {
-    const textureClass = texture ? `textured-bg--${texture}` : ''
-
     return (
-        <section className={`page-hero ${textureClass}`}>
+        <section className="page-hero">
             {/* Category Pill */}
             {category && (
                 <div className="page-hero__category-pill">

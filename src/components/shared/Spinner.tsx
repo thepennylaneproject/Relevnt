@@ -13,7 +13,7 @@ export interface LoadingSpinnerProps {
 
 export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
     size = 'md',
-    color = '#4E808D',
+    color = 'var(--color-accent)',
     fullScreen = false,    // ✅ ADD THIS
     text,                  // ✅ ADD THIS
 }) => {
@@ -61,7 +61,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 
                 {/* ✅ FIX: Use text prop properly */}
                 {text && (
-                    <p style={{ marginTop: '1rem', color: '#666' }}>
+                    <p style={{ marginTop: '1rem', color: 'var(--color-ink-secondary)' }}>
                         {text}
                     </p>
                 )}

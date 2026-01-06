@@ -1,106 +1,114 @@
-import React, { useEffect, useState, useCallback, useTransition } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { Container } from '../components/shared/Container'
-import { SettingsTabNav, type SettingsTab } from '../components/settings/SettingsTabNav'
+import React, { useEffect, useState, useCallback } from 'react'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { PageLayout } from '../components/layout/PageLayout'
+import { Heading, Text } from '../components/ui/Typography'
 import { AutoSaveIndicator } from '../components/settings/AutoSaveIndicator'
-import { TargetingTab } from '../components/settings/tabs/TargetingTab'
-import { ProfileTab } from '../components/settings/tabs/ProfileTab'
-import { VoiceStyleTab } from '../components/settings/tabs/VoiceStyleTab'
-import { SystemAutomationTab } from '../components/settings/tabs/SystemAutomationTab'
-import { AutoApplyTab } from '../components/settings/tabs/AutoApplyTab'
+import { SettingsSidebar } from '../components/settings/SettingsSidebar'
+import { TargetingSection } from '../components/settings/sections/TargetingSection'
+import { ProfileSection } from '../components/settings/sections/ProfileSection'
+import { SystemSection } from '../components/settings/sections/SystemSection'
 import type { AutoSaveStatus } from '../hooks/useSettingsAutoSave'
 
-const VALID_TABS: SettingsTab[] = ['targeting', 'profile', 'system']
+const SECTIONS = ['targeting', 'profile', 'system'] as const
+type SectionId = (typeof SECTIONS)[number]
 
-function getTabFromHash(hash: string): SettingsTab {
-    const tab = hash.replace('#', '')
-    // Handle legacy tab names
-    if (tab === 'persona' || tab === 'career') return 'targeting'
-    if (tab === 'voice') return 'profile'
-    if (tab === 'auto-apply') return 'system'
-    return VALID_TABS.includes(tab as SettingsTab) ? (tab as SettingsTab) : 'targeting'
+// Legacy hash mapping for backwards compatibility
+const LEGACY_HASH_MAP: Record<string, SectionId> = {
+    persona: 'targeting',
+    career: 'targeting',
+    voice: 'profile',
+    'auto-apply': 'system',
 }
-
 
 export default function Settings(): JSX.Element {
     const location = useLocation()
     const navigate = useNavigate()
+    const [searchParams] = useSearchParams()
 
-
-    const [isPending, startTransition] = useTransition()
-    const [activeTab, setActiveTab] = useState<SettingsTab>(() =>
-        getTabFromHash(location.hash)
-    )
     const [autoSaveStatus, setAutoSaveStatus] = useState<AutoSaveStatus>('idle')
 
-    // Sync tab with URL hash
-    useEffect(() => {
-        const tab = getTabFromHash(location.hash)
-        setActiveTab(tab)
-    }, [location.hash])
+    // Handle deep links from query parameters: /settings?section=profile
+    React.useLayoutEffect(() => {
+        const section = searchParams.get('section')
+        if (section && SECTIONS.includes(section as SectionId)) {
+            // Use requestAnimationFrame to ensure DOM is fully rendered
+            requestAnimationFrame(() => {
+                const element = document.getElementById(section)
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                }
+            })
+        }
+    }, [searchParams])
 
-    const handleTabChange = useCallback((tab: SettingsTab) => {
-        startTransition(() => {
-            setActiveTab(tab)
-        })
-        navigate(`#${tab}`, { replace: true })
-    }, [navigate])
+    // Handle legacy hash routes for backwards compatibility: /settings#targeting
+    React.useLayoutEffect(() => {
+        const hash = window.location.hash
+        if (hash) {
+            const hashValue = hash.slice(1) // Remove #
+            const mappedSection = LEGACY_HASH_MAP[hashValue] || (SECTIONS.includes(hashValue as SectionId) ? hashValue : null)
+
+            if (mappedSection) {
+                requestAnimationFrame(() => {
+                    const element = document.getElementById(mappedSection)
+                    if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                    }
+                    // Clean up URL (replace hash with clean /settings)
+                    window.history.replaceState(null, '', '/settings')
+                })
+            }
+        }
+    }, [location.hash])
 
     const handleAutoSaveStatusChange = useCallback((status: AutoSaveStatus) => {
         setAutoSaveStatus(status)
     }, [])
 
-    const renderTabContent = () => {
-        switch (activeTab) {
-            case 'targeting':
-                return <TargetingTab onAutoSaveStatusChange={handleAutoSaveStatusChange} />
-            case 'profile':
-                return (
-                    <>
-                        <ProfileTab onAutoSaveStatusChange={handleAutoSaveStatusChange} />
-                        <VoiceStyleTab onAutoSaveStatusChange={handleAutoSaveStatusChange} />
-                    </>
-                )
-            case 'system':
-                return (
-                    <>
-                        <SystemAutomationTab onAutoSaveStatusChange={handleAutoSaveStatusChange} />
-                        <AutoApplyTab onAutoSaveStatusChange={handleAutoSaveStatusChange} />
-                    </>
-                )
-            default:
-                return null
-        }
-    }
-
     return (
-        <div className="page-wrapper">
-            <Container maxWidth="lg" padding="md">
-                <div className="page-header">
-                    <div style={{ marginLeft: 'auto' }}>
-                        <AutoSaveIndicator status={autoSaveStatus} />
-                    </div>
-                    <h1>Preferences</h1>
-                    <p>Customize how Relevnt matches and applies for you.</p>
+        <PageLayout
+            title="Preferences"
+            subtitle="Customize how Relevnt matches and applies for you."
+            actions={<AutoSaveIndicator status={autoSaveStatus} />}
+        >
+            <div className="flex flex-col lg:flex-row gap-16 mt-8">
+                {/* Sidebar - hidden on mobile */}
+                <aside className="hidden lg:block w-56 shrink-0 h-fit sticky top-32">
+                    <SettingsSidebar />
+                </aside>
+
+                {/* Mobile navigation dropdown */}
+                <div className="lg:hidden mb-8">
+                    <select
+                        onChange={(e) => {
+                            const element = document.getElementById(e.target.value)
+                            if (element) {
+                                element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                            }
+                        }}
+                        defaultValue=""
+                        className="w-full bg-ivory border border-border text-sm py-2 px-4 focus:ring-1 focus:ring-accent outline-none"
+                    >
+                        <option value="" disabled>Jump to section...</option>
+                        <option value="targeting">Targeting</option>
+                        <option value="profile">Profile & Voice</option>
+                        <option value="system">System & Auto-Apply</option>
+                    </select>
                 </div>
 
-                <SettingsTabNav activeTab={activeTab} onTabChange={handleTabChange} />
-
-                <div
-                    className={`page-stack ${isPending ? 'is-pending' : ''}`}
-                    role="tabpanel"
-                    id={`panel-${activeTab}`}
-                    aria-labelledby={`tab-${activeTab}`}
-                    style={{ 
-                        marginTop: 24,
-                        opacity: isPending ? 0.6 : 1,
-                        transition: 'opacity 0.2s ease',
-                        pointerEvents: isPending ? 'none' : 'auto'
-                    }}
-                >
-                    {renderTabContent()}
-                </div>
-            </Container>
-        </div>
+                {/* Main content - all sections */}
+                <main className="flex-1 max-w-2xl space-y-24">
+                    <section id="targeting" className="scroll-mt-32">
+                        <TargetingSection onAutoSaveStatusChange={handleAutoSaveStatusChange} />
+                    </section>
+                    <section id="profile" className="scroll-mt-32 border-t border-border/10 pt-24">
+                        <ProfileSection onAutoSaveStatusChange={handleAutoSaveStatusChange} />
+                    </section>
+                    <section id="system" className="scroll-mt-32 border-t border-border/10 pt-24">
+                        <SystemSection onAutoSaveStatusChange={handleAutoSaveStatusChange} />
+                    </section>
+                </main>
+            </div>
+        </PageLayout>
     )
 }

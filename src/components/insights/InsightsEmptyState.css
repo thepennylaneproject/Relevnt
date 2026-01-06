@@ -1,0 +1,92 @@
+/* =============================================================================
+ * Insights Empty State Styles
+ * ============================================================================= */
+
+.insights-empty-state {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: var(--space-8);
+  text-align: center;
+}
+
+.empty-state-icon {
+  font-size: 64px;
+  margin-bottom: var(--space-4);
+}
+
+.insights-empty-state h3 {
+  font-size: var(--font-size-2xl);
+  font-weight: 600;
+  margin: 0 0 var(--space-3) 0;
+}
+
+.insights-empty-state > p {
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  margin-bottom: var(--space-6);
+}
+
+/* Progress */
+.progress-container {
+  margin-bottom: var(--space-6);
+}
+
+.progress-bar {
+  height: 8px;
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-bottom: var(--space-2);
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--color-border-strong);
+  border-radius: var(--radius-full);
+  transition: width 0.3s ease;
+}
+
+.progress-label {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+/* Tips */
+.empty-state-tips {
+  text-align: left;
+  padding: var(--space-4);
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-6);
+}
+
+.empty-state-tips h4 {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  margin: 0 0 var(--space-3) 0;
+}
+
+.empty-state-tips ul {
+  margin: 0;
+  padding-left: var(--space-5);
+  list-style: disc;
+}
+
+.empty-state-tips li {
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  margin-bottom: var(--space-2);
+}
+
+.empty-state-tips li:last-child {
+  margin-bottom: 0;
+}
+
+/* CTA */
+.empty-state-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+}

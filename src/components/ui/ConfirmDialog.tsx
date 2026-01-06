@@ -122,7 +122,7 @@ const confirmDialogStyles = `
 }
 
 .confirm-dialog {
-  background: var(--color-surface, #fff);
+  background: var(--color-surface);
   border-radius: 16px;
   padding: 32px;
   max-width: 400px;
@@ -150,13 +150,13 @@ const confirmDialogStyles = `
 .confirm-dialog__title {
   font-size: 18px;
   font-weight: 600;
-  color: var(--color-ink, #1a1a1a);
+  color: var(--color-ink);
   margin: 0 0 8px;
 }
 
 .confirm-dialog__message {
   font-size: 14px;
-  color: var(--color-ink-secondary, #666);
+  color: var(--color-ink-secondary);
   margin: 0 0 24px;
   line-height: 1.5;
 }

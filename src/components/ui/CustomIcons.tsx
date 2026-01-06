@@ -4,7 +4,7 @@
  *
  * Design System:
  * - Stroke width: 1.5-2px for premium feel
- * - Color: Ink (#1a1a1a), Emerald (#013E30)
+ * - Color: Ink, Emerald (design tokens)
  * - Size: 24x24 viewBox (scales to any size)
  * - Style: Slightly organic, hand-drawn quality without being sketchy
  */
@@ -20,10 +20,10 @@ export interface CustomIconProps {
 
 // Color map matching design system
 const colorMap: Record<string, string> = {
-  ink: '#1a1a1a',
-  emerald: '#013E30',
-  ivory: '#f5f1e8',
-  gray: '#8a8a8a',
+  ink: 'var(--color-ink)',
+  emerald: 'var(--color-emerald)',
+  ivory: 'var(--color-ivory)',
+  gray: 'var(--color-gray)',
 }
 
 /**

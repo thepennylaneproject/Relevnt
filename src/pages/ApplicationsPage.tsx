@@ -1,30 +1,30 @@
 
-import React, { useState } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import PageBackground from '../components/shared/PageBackground'
-import { Container } from '../components/shared/Container'
+import { supabase } from '../lib/supabase'
+import { PageLayout } from '../components/layout/PageLayout'
+import { Card } from '../components/ui/Card'
+import { Heading, Text } from '../components/ui/Typography'
+import { Badge } from '../components/ui/Badge'
+import { Select } from '../components/forms/Select'
 import { Button } from '../components/ui/Button'
-import { Icon } from '../components/ui/Icon'
+import { AddApplicationModal } from '../components/Applications/AddApplicationModal'
+import { ApplicationStatus, useApplications } from '../hooks/useApplications'
+import { CompanySentimentDashboard } from '../components/Applications/CompanySentimentDashboard'
+import { ApplicationQuestionHelper } from '../components/Applications/ApplicationQuestionHelper'
+import { CoverLetterGenerator } from '../components/Applications/CoverLetterGenerator'
 import { getReadyUrl } from '../config/cross-product'
 import { PrimaryActionRegistryProvider } from '../components/ui/PrimaryActionRegistry'
-import { PageHero } from '../components/ui/PageHero'
 import { EmptyState } from '../components/ui/EmptyState'
 import { CollectionEmptyGuard } from '../components/ui/CollectionEmptyGuard'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
+import { Icon } from '../components/ui/Icon'
 import { useToast } from '../components/ui/Toast'
-import { copy } from '../lib/copy'
-import {
-  useApplications,
-  type ApplicationStatus,
-} from '../hooks/useApplications'
-import { ApplicationQuestionHelper } from '../components/Applications/ApplicationQuestionHelper'
-import { CoverLetterGenerator } from '../components/Applications/CoverLetterGenerator'
-import { AddApplicationModal } from '../components/Applications/AddApplicationModal'
 import { formatRelativeTime } from '../lib/utils/time'
-import '../styles/applications.css'
 
 const STATUS_TABS: (ApplicationStatus | 'all')[] = [
   'all',
+  'staged',
   'applied',
   'interviewing',
   'in-progress',
@@ -36,6 +36,8 @@ const STATUS_TABS: (ApplicationStatus | 'all')[] = [
 
 const prettyStatusLabel = (status: ApplicationStatus | null | undefined): string => {
   switch (status) {
+    case 'staged':
+      return 'Staged'
     case 'applied':
       return 'Applied'
     case 'interviewing':
@@ -71,9 +73,11 @@ export default function ApplicationsPage() {
     loading,
     error,
     updateStatus,
+    updateApplication,
     deleteApplication,
     statusCounts,
     totalCount,
+    refetch,
   } = useApplications({
     status: selectedStatus,
   })
@@ -131,221 +135,283 @@ export default function ApplicationsPage() {
     return formatRelativeTime(raw)
   }
 
+  // Bulk action handlers for staged applications
+  const handleClearAllStaged = async () => {
+    const staged = applications.filter(a => a.status === 'staged')
+    if (staged.length === 0) return
+    
+    if (!window.confirm(`Remove ${staged.length} staged ${staged.length === 1 ? 'application' : 'applications'}?`)) {
+      return
+    }
+    
+    try {
+      await Promise.all(staged.map((a: any) => deleteApplication(a.id)))
+      showToast('Cleared staged applications', 'success')
+      await refetch()
+    } catch (error) {
+      showToast('Failed to clear staged applications', 'error')
+    }
+  }
+
+  const handleMarkAllApplied = async () => {
+    const staged = applications.filter(a => a.status === 'staged')
+    if (staged.length === 0) return
+    
+    try {
+      await Promise.all(staged.map((a: any) => updateApplication(a.id, { status: 'applied' })))
+      showToast(`Marked ${staged.length} as Applied`, 'success')
+      await refetch()
+    } catch (error) {
+      showToast('Failed to update applications', 'error')
+    }
+  }
+
   return (
-    <PageBackground>
-      {/* PrimaryActionRegistryProvider: Enforces single primary action per page view */}
-      <PrimaryActionRegistryProvider scopeId="applications-page">
-      <Container maxWidth="xl" padding="md">
-        <div className="apps-page">
-          <header className="page-header">
-            <h1>Track where you're at in each process, without losing the plot.</h1>
-            <p className="subtitle">Keep cada role, status, and timeline in one place. Future You has the receipts.</p>
-
-            <div className="stats">
-              <div className="stat-item">
-                <span className="stat-value">{totalApplications}</span>
-                <span className="stat-label">Total</span>
+    <PrimaryActionRegistryProvider scopeId="applications-page">
+      <PageLayout
+        title="Track where you're at in each process, without losing the plot."
+        subtitle="Keep cada role, status, and timeline in one place. Future You has the receipts."
+        actions={
+          <Button variant="primary" onClick={handleAddApplication} primaryLabel="Log a new application">
+            Log a new application
+          </Button>
+        }
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+          <div className="lg:col-span-2 space-y-12">
+            <div className="flex gap-12">
+              <div className="text-center">
+                <Text muted className="uppercase tracking-widest text-xs font-bold">Total</Text>
+                <Heading level={2}>{totalApplications}</Heading>
               </div>
-              <div className="stat-item">
-                <span className="stat-value">{activeApplications}</span>
-                <span className="stat-label">In Review</span>
+              <div className="text-center">
+                <Text muted className="uppercase tracking-widest text-xs font-bold">In Review</Text>
+                <Heading level={2}>{activeApplications}</Heading>
               </div>
             </div>
 
-            <div className="mt-8">
-              <Button variant="primary" onClick={handleAddApplication} primaryLabel="Log a new application">
-                Log a new application
-              </Button>
-            </div>
-          </header>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-            <div className="lg:col-span-2 space-y-6">
-              <section className="surface-card">
-                <h3 className="text-sm font-semibold tracking-wider text-ink-tertiary mb-4">Filter by status</h3>
-
-                <div className="filter-buttons">
-                  {STATUS_TABS.map((statusKey) => {
-                    const label =
-                      statusKey === 'all'
-                        ? 'All'
+            <section>
+              <Heading level={4} className="uppercase tracking-wider text-text-muted mb-4">Filter by status</Heading>
+              <div className="filter-buttons flex flex-wrap gap-2">
+                {STATUS_TABS.map((statusKey) => {
+                  const isActive = (statusKey === 'all' && !selectedStatus) || statusKey === selectedStatus
+                  const label =
+                    statusKey === 'all'
+                      ? 'All'
+                      : statusKey === 'staged'
+                        ? 'Recently viewed'
                         : statusKey === 'in-progress'
-                          ? 'In Review'
+                          ? 'In review'
                           : statusKey === 'interviewing'
                             ? 'Interview'
                             : statusKey.charAt(0).toUpperCase() + statusKey.slice(1)
 
-                    const count =
-                      statusKey === 'all'
-                        ? totalApplications
-                        : statusCounts[statusKey as ApplicationStatus] ?? 0
+                  const count =
+                    statusKey === 'all'
+                      ? totalApplications
+                      : statusCounts[statusKey as ApplicationStatus] ?? 0
 
-                    return renderStatusChip(statusKey, label, count)
-                  })}
-                </div>
-              </section>
-
-              <section className="surface-card">
-                {loading && <p className="muted text-sm">Loading applications…</p>}
-                {error && <p className="muted text-sm text-danger">{error}</p>}
-
-                {/* DEV: Validate empty state compliance */}
-                <CollectionEmptyGuard
-                  itemsCount={applications.length}
-                  hasEmptyState={true}
-                  scopeId="applications-list"
-                  expectedAction="Log first application"
-                />
-
-                {!loading && applications.length === 0 ? (
-                  <EmptyState
-                    type="applications"
-                    
-                  />
-                ) : (
-                  <div className="item-grid">
-                    {applications.map((app) => (
-                      <article key={app.id} className="item-card enhanced-app-card">
-                        <header className="item-card-header">
-                          <div>
-                            <h2 className="text-sm font-semibold">{app.position}</h2>
-                            <p className="muted text-xs">
-                              {app.company}
-                              {app.location ? ` • ${app.location}` : ''}
-                            </p>
-                          </div>
-
-                          <div className="flex flex-col items-end gap-2">
-                            <span>{prettyStatusLabel(app.status)}</span>
-                          </div>
-                        </header>
-
-                        <div className="flex items-center gap-4 py-2 border-b border-subtle">
-                          <div className="status-field flex-1">
-                            <label className="muted text-[10px] font-bold" htmlFor={`status-${app.id}`}>
-                              Change Status
-                            </label>
-                            <select
-                              id={`status-${app.id}`}
-                              value={app.status || ''}
-                              onChange={(e) =>
-                                updateStatus(app.id, e.target.value as ApplicationStatus)
-                              }
-                              className="app-status-select w-full"
-                            >
-                              <option value="">Untracked</option>
-                              <option value="applied">Applied</option>
-                              <option value="interviewing">Interviewing</option>
-                              <option value="in-progress">In Review</option>
-                              <option value="offer">Offer</option>
-                              <option value="accepted">Accepted</option>
-                              <option value="rejected">Rejected</option>
-                              <option value="withdrawn">Withdrawn</option>
-                            </select>
-                          </div>
-                          {app.status === 'interviewing' && (
-                            <a
-                              href={getReadyUrl('/practice')}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-xs font-semibold text-accent hover:underline flex items-center gap-1"
-                            >
-                              Practice interviews
-                              <Icon name="external-link" size="xs" />
-                            </a>
-                          )}
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              if (expandedId === app.id) {
-                                setExpandedId(null)
-                              } else {
-                                setExpandedId(app.id)
-                                setExpandedTab('timeline')
-                              }
-                            }}
-                          >
-                            {expandedId === app.id ? 'Collapse' : 'Details'}
-                          </Button>
-                        </div>
-
-                        {expandedId === app.id && (
-                          <div className="mt-4 animate-in slide-in-from-top-2">
-                            <div className="flex gap-2 mb-4 border-b border-graphite-faint pb-3">
-                              <Button
-                                type="button"
-                                variant={expandedTab === 'timeline' ? 'secondary' : 'ghost'}
-                                size="sm"
-                                onClick={() => setExpandedTab('timeline')}
-                              >
-                                Timeline
-                              </Button>
-                              <Button
-                                type="button"
-                                variant={expandedTab === 'letter' ? 'secondary' : 'ghost'}
-                                size="sm"
-                                onClick={() => setExpandedTab('letter')}
-                              >
-                                Cover Letter
-                              </Button>
-                            </div>
-
-                            {expandedTab === 'timeline' && (
-                              <div className="app-timeline">
-                                 <h4 className="text-[10px] font-bold muted mb-2">History</h4>
-                                <div className="space-y-3">
-                                  {(app.events || []).map(event => (
-                                    <div key={event.id} className="timeline-event flex gap-3 text-xs">
-                                      <div className="timeline-dot" />
-                                      <div className="flex-1">
-                                        <div className="flex justify-between">
-                                          <span className="font-semibold">{event.title}</span>
-                                          <span className="muted">{formatRelativeTime(event.created_at)}</span>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  ))}
-                                  {(app.events || []).length === 0 && (
-                                    <p className="muted text-center py-4 italic">No timeline events yet.</p>
-                                  )}
-                                </div>
-                              </div>
-                            )}
-                            {expandedTab === 'letter' && <CoverLetterGenerator application={app} />}
-                          </div>
-                        )}
-
-                        <footer className="item-card-footer mt-4 pt-4 border-t border-graphite-faint flex justify-between">
-                          <p className="muted text-[11px]">Updated {formatUpdated(app)}</p>
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => handleDeleteClick(app.id, app.position)}
-                          >
-                            Delete
-                          </Button>
-                        </footer>
-                      </article>
-                    ))}
-                  </div>
-                )}
-              </section>
-            </div>
-
-            <div className="lg:col-span-1">
-              <div className="sticky top-6">
-                <ApplicationQuestionHelper />
+                  return (
+                    <button
+                      key={statusKey}
+                      type="button"
+                      className={`px-3 py-1 text-xs border border-border tracking-wide uppercase transition-colors ${isActive ? 'bg-text text-bg border-text' : 'hover:border-text-muted text-text-muted'}`}
+                      onClick={() => handleStatusClick(statusKey)}
+                    >
+                      {label} ({count})
+                    </button>
+                  )
+                })}
               </div>
+            </section>
+
+            {/* Company Sentiment Dashboard */}
+            <CompanySentimentDashboard />
+
+            {/* Staged Applications Block */}
+            {statusCounts.staged > 0 && !selectedStatus && (
+              <Card className="border-accent/30 bg-accent-glow/5">
+                <div className="flex justify-between items-center">
+                  <Heading level={4} className="text-accent underline decoration-accent/30 underline-offset-4">Recently viewed ({statusCounts.staged})</Heading>
+                  <div className="flex gap-4">
+                    <button
+                      type="button"
+                      onClick={handleMarkAllApplied}
+                      className="text-xs uppercase tracking-widest font-bold text-accent hover:border-b border-accent"
+                    >
+                      Mark all applied
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleClearAllStaged}
+                      className="text-xs uppercase tracking-widest font-bold text-error hover:border-b border-error"
+                    >
+                      Clear all
+                    </button>
+                  </div>
+                </div>
+                <Text muted className="italic mt-4 text-xs">
+                  You clicked these roles. Update to "Applied" if you submitted an application.
+                </Text>
+              </Card>
+            )}
+
+            <section className="space-y-8">
+              {loading && <Text muted>Loading applications…</Text>}
+              {error && <Text className="text-error italic">{error}</Text>}
+
+              <CollectionEmptyGuard
+                itemsCount={applications.length}
+                hasEmptyState={true}
+                scopeId="applications-list"
+                expectedAction="Log first application"
+              />
+
+              {!loading && applications.length === 0 ? (
+                <EmptyState type="applications" />
+              ) : (
+                <div className="space-y-8">
+                  {applications.map((app: any) => (
+                    <Card key={app.id} className="group">
+                      <header className="flex justify-between items-start mb-6">
+                        <div>
+                          <Heading level={3}>{app.position}</Heading>
+                          <Text muted>{app.company}{app.location ? ` • ${app.location}` : ''}</Text>
+                        </div>
+                        <Badge variant={app.status === 'rejected' ? 'error' : app.status === 'offer' ? 'success' : 'neutral'}>
+                          {prettyStatusLabel(app.status)}
+                        </Badge>
+                      </header>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-6 border-y border-border">
+                        <Select
+                          label="Workflow Status"
+                          value={app.status || ''}
+                          onChange={(e) => updateStatus(app.id, e.target.value as ApplicationStatus)}
+                        >
+                          <option value="">Untracked</option>
+                          <option value="staged">Staged</option>
+                          <option value="applied">Applied</option>
+                          <option value="interviewing">Interviewing</option>
+                          <option value="in-progress">In Review</option>
+                          <option value="offer">Offer</option>
+                          <option value="accepted">Accepted</option>
+                          <option value="rejected">Rejected</option>
+                          <option value="withdrawn">Withdrawn</option>
+                        </Select>
+
+                        <div className="flex flex-col justify-end gap-3">
+                          <div className="flex gap-4">
+                            {app.status === 'staged' && (
+                              <button
+                                type="button"
+                                className="text-xs font-bold uppercase tracking-widest text-accent border-b border-accent/20 hover:border-accent"
+                                onClick={() => updateApplication(app.id, { status: 'applied' })}
+                              >
+                                Mark Applied
+                              </button>
+                            )}
+                            {app.status === 'interviewing' && (
+                              <a
+                                href={getReadyUrl('/practice')}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs font-bold uppercase tracking-widest text-accent border-b border-accent/20 hover:border-accent flex items-center gap-1"
+                              >
+                                Practice
+                                <Icon name="external-link" size="xs" />
+                              </a>
+                            )}
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="uppercase tracking-widest px-0 hover:bg-transparent hover:underline"
+                              onClick={() => {
+                                if (expandedId === app.id) {
+                                  setExpandedId(null)
+                                } else {
+                                  setExpandedId(app.id)
+                                  setExpandedTab('timeline')
+                                }
+                              }}
+                            >
+                              {expandedId === app.id ? 'Close Details' : 'View Details'}
+                            </Button>
+                            <Text muted className="text-[10px] italic">Updated {formatUpdated(app)}</Text>
+                          </div>
+                        </div>
+                      </div>
+
+                      {expandedId === app.id && (
+                        <div className="mt-8 animate-in fade-in slide-in-from-top-4 duration-500">
+                          <div className="flex gap-8 mb-8 border-b border-border pb-4">
+                            <button
+                              type="button"
+                              className={`text-xs uppercase tracking-widest font-bold ${expandedTab === 'timeline' ? 'text-text border-b-2 border-text' : 'text-text-muted'}`}
+                              onClick={() => setExpandedTab('timeline')}
+                            >
+                              Timeline
+                            </button>
+                            <button
+                              type="button"
+                              className={`text-xs uppercase tracking-widest font-bold ${expandedTab === 'letter' ? 'text-text border-b-2 border-text' : 'text-text-muted'}`}
+                              onClick={() => setExpandedTab('letter')}
+                            >
+                              Cover Letter
+                            </button>
+                          </div>
+
+                          {expandedTab === 'timeline' ? (
+                            <div className="space-y-6">
+                              {(app.events || []).map((event: any) => (
+                                <div key={event.id} className="flex gap-4 items-baseline">
+                                  <div className="w-2 h-2 rounded-full bg-border" />
+                                  <div className="flex-1 border-l border-border pl-4">
+                                    <div className="flex justify-between">
+                                      <Text className="font-semibold">{event.title}</Text>
+                                      <Text muted className="text-xs italic">{formatRelativeTime(event.created_at)}</Text>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                              {(app.events || []).length === 0 && (
+                                <Text muted className="italic py-8 text-center bg-surface-2">No timeline events recorded.</Text>
+                              )}
+                            </div>
+                          ) : (
+                            <CoverLetterGenerator application={app} />
+                          )}
+                        </div>
+                      )}
+
+                      <footer className="mt-6 flex justify-end">
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="px-0 uppercase tracking-widest text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => handleDeleteClick(app.id, app.position)}
+                        >
+                          Delete Application
+                        </Button>
+                      </footer>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </section>
+          </div>
+
+          <div className="lg:col-span-1">
+            <div className="sticky top-12">
+              <ApplicationQuestionHelper />
             </div>
           </div>
         </div>
-      </Container>
-      </PrimaryActionRegistryProvider>
-
-      {/* Delete Confirmation Dialog */}
+      </PageLayout>
+      {/* Modal Layers */}
       <ConfirmDialog
         isOpen={!!deleteConfirm}
         title="Delete Application"
@@ -361,6 +427,6 @@ export default function ApplicationsPage() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
       />
-    </PageBackground>
+    </PrimaryActionRegistryProvider>
   )
 }

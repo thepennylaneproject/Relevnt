@@ -77,15 +77,15 @@ interface RelevntThemeProviderProps {
  * and it updates everywhere automatically.
  */
 
-// Brand Colors (from your design system)
+// Canonical Editorial Tokens
 const BRAND_COLORS = {
-  deepBlack: '#0D0D0D',
-  softIvory: '#F5F1E8',
-  surfaceIvory: '#FDFCF9',
-  accentTerracotta: '#A0715C',
-  accentTerracottaHover: '#8A5A42',
-  supportSage: '#5C7A6A',
-  supportSageHover: '#3D5A4C',
+  deepBlack: '#0D0D0D',   // Deepest ink
+  softIvory: '#F5F1E8',   // Paper background
+  surfaceIvory: '#FDFCF9', // Document surface
+  champagne: '#C7A56A',   // Sacred accent
+  champagneHover: '#B8965B',
+  graphite: '#4A4A4A',    // Secondary text
+  ink: '#1A1A1A',         // Primary text
 } as const
 
 // Light Mode Palette
@@ -96,29 +96,29 @@ const LIGHT_COLORS: ThemeColors = {
   surfaceHover: '#F1ECE2',
 
   // Text
-  text: '#0F0F0F',
-  textSecondary: '#4A4A4A',
+  text: BRAND_COLORS.ink,
+  textSecondary: BRAND_COLORS.graphite,
   mutedText: '#8A8378',
 
   // Borders
-  border: 'rgba(13, 13, 13, 0.08)',
-  borderLight: 'rgba(13, 13, 13, 0.15)',
+  border: 'rgba(26, 26, 26, 0.08)',
+  borderLight: 'rgba(26, 26, 26, 0.15)',
 
   // Interactive
-  primary: BRAND_COLORS.accentTerracotta,
-  primaryHover: BRAND_COLORS.accentTerracottaHover,
-  secondary: BRAND_COLORS.supportSage,
-  secondaryHover: BRAND_COLORS.supportSageHover,
+  primary: BRAND_COLORS.champagne,
+  primaryHover: BRAND_COLORS.champagneHover,
+  secondary: BRAND_COLORS.graphite,
+  secondaryHover: BRAND_COLORS.ink,
 
   // Feedback
-  success: '#10B981',
-  warning: '#F59E0B',
-  error: '#EF4444',
-  info: BRAND_COLORS.supportSage,
+  success: '#8A9B8E', // Muted sage
+  warning: '#C5A059', // Gold-ish
+  error: '#A05C5C',   // Muted clay
+  info: BRAND_COLORS.graphite,
 
   // Special
-  overlay: 'rgba(11, 11, 11, 0.5)',
-  focus: 'rgba(160, 113, 92, 0.25)',
+  overlay: 'rgba(13, 13, 13, 0.5)',
+  focus: 'rgba(199, 165, 106, 0.25)',
 }
 
 // Dark Mode Palette
@@ -138,20 +138,20 @@ const DARK_COLORS: ThemeColors = {
   borderLight: 'rgba(247, 243, 234, 0.24)',
 
   // Interactive
-  primary: BRAND_COLORS.accentTerracotta,
-  primaryHover: '#B88A76',
-  secondary: BRAND_COLORS.supportSage,
-  secondaryHover: '#7A9A8A',
+  primary: BRAND_COLORS.champagne,
+  primaryHover: '#B8965B',
+  secondary: '#D7D0C5',
+  secondaryHover: '#F7F3EA',
 
   // Feedback
   success: '#7AA28F',
   warning: '#C48B73',
   error: '#C18686',
-  info: BRAND_COLORS.supportSage,
+  info: '#B8B0A2',
 
   // Special
   overlay: 'rgba(13, 13, 13, 0.65)',
-  focus: 'rgba(184, 138, 118, 0.3)',
+  focus: 'rgba(199, 165, 106, 0.3)',
 }
 
 // ============================================================================
@@ -287,7 +287,7 @@ export function useRelevntTheme(): RelevntThemeContextValue {
  * Example:
  * ```tsx
  * const isDark = useIsDarkMode()
- * return <div style={{ background: isDark ? '#000' : '#fff' }} />
+ * return <div style={{ background: isDark ? 'var(--color-bg)' : 'var(--color-surface)' }} />
  * ```
  */
 export function useIsDarkMode(): boolean {

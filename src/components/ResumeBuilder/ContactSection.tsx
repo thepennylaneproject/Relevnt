@@ -51,7 +51,7 @@ export const ContactSection: React.FC<Props> = ({ contact, onChange, colors }) =
     <SectionCard
       title="Contact"
       description="Who you are and how people should reach you."
-      icon={<User className="w-4 h-4 text-[#1F2933]" />}
+      icon={<User className="w-4 h-4 text-[var(--color-ink)]" />}
       colors={colors}
     >
       <div className="space-y-4">

@@ -45,7 +45,7 @@ export function Header({ userInitial }: HeaderProps) {
         <div className="header-left">
           <Link to="/" className="header-logo">
             <div className="header-logo-icon" />
-            <span className="header-logo-text">relevnt</span>
+            <span className="header-logo-text font-display">relevnt</span>
           </Link>
         </div>
 
