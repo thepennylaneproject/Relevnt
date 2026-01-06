@@ -71,9 +71,15 @@
 # Optimized for maximum job volume (100K+ target)
 # Run more frequently with higher pagination limits
 
-# Premium sources (Greenhouse + Lever) - runs every 30 minutes
-# Duration: 2-5 minutes | Potential: 5K+ jobs/day
+# Premium sources - Greenhouse only (Lever moved to background function)
+# Duration: <30 seconds | Potential: 1.5K+ jobs/day
 [functions."ingest_premium_sources"]
+  schedule = "*/30 * * * *"
+
+# Lever background ingestion - runs every 30 minutes with 15-min timeout
+# Duration: 30-60 seconds | Potential: 3.5K+ jobs/day
+# Uses background function to handle large job volumes without timing out
+[functions."ingest_lever-background"]
   schedule = "*/30 * * * *"
 
 # Aggregators (remotive, himalayas, arbeitnow, etc.) - runs every 1 hour
