@@ -65,6 +65,11 @@
 [functions."search_queue_cron"]
   schedule = "*/15 * * * *"
 
+# Jobs table cleanup - runs daily at 3am UTC
+# Deletes jobs older than 90 days to maintain database size and performance
+[functions."cleanup_jobs-background"]
+  schedule = "0 3 * * *"
+
 # ============================================
 # HIGH-VOLUME JOB INGESTION SCHEDULES
 # ============================================

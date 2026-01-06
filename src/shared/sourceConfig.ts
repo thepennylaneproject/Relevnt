@@ -277,12 +277,12 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
         slug: 'lever',
         mode: 'shallow-curated',
         enabled: true, // ENABLED after verification
-        maxAgeDays: 60,
+        maxAgeDays: 30,
         maxPagesPerRun: 1, // Lever uses company-based fetching, not pagination
         resetPaginationEachRun: true,
         trustLevel: 'high',
         trackFreshnessRatio: false,
-        notes: 'Premium job board. Companies configured via LEVER_SOURCES_JSON env var. Extended to 60 days to reduce aggressive staleness filtering.',
+        notes: 'Premium job board. Companies configured via LEVER_SOURCES_JSON env var. 30-day freshness matches standard ingestion cutoff.',
     },
 
     // =========================================================================
