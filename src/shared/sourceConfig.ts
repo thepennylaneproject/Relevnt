@@ -277,12 +277,12 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
         slug: 'lever',
         mode: 'shallow-curated',
         enabled: true, // ENABLED after verification
-        maxAgeDays: 60,
+        maxAgeDays: 30,
         maxPagesPerRun: 1, // Lever uses company-based fetching, not pagination
         resetPaginationEachRun: true,
         trustLevel: 'high',
         trackFreshnessRatio: false,
-        notes: 'Premium job board. Companies configured via LEVER_SOURCES_JSON env var. Extended to 60 days to reduce aggressive staleness filtering.',
+        notes: 'Premium job board. Companies configured via LEVER_SOURCES_JSON env var. 30-day freshness matches standard ingestion cutoff.',
     },
 
     // =========================================================================
@@ -351,13 +351,13 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
     jobspy: {
         slug: 'jobspy',
         mode: 'wide-capped',
-        enabled: true, // DISABLED by default - requires ts-jobspy npm install
+        enabled: true, // ENABLED - ts-jobspy installed
         maxAgeDays: 7, // Jobs from last 7 days only (web scraping focus on fresh)
         maxPagesPerRun: 1, // Background function handles all pages internally
         resetPaginationEachRun: true,
         trustLevel: 'medium',
         trackFreshnessRatio: true,
-        notes: 'JobSpy multi-board scraper. Requires: npm install ts-jobspy. Runs as background function with 15-min timeout. Enable when ts-jobspy is installed.',
+        notes: 'JobSpy multi-board scraper (Indeed, LinkedIn, Glassdoor, ZipRecruiter). Runs every 6 hours as background function. Filters to 7-day-old jobs only.',
     },
 
     // =========================================================================
