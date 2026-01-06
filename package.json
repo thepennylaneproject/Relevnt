@@ -29,7 +29,8 @@
     "pdfjs-dist": "^5.4.394",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.20.0"
+    "react-router-dom": "^6.20.0",
+    "ts-jobspy": "^1.0.13"
   },
   "devDependencies": {
     "@netlify/functions": "^5.1.0",
