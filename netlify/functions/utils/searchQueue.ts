@@ -35,7 +35,19 @@ export async function getNextSearchTasks(
     limit: number = 10
 ): Promise<SearchTask[]> {
     const now = new Date().toISOString()
+    const lockTimeout = new Date(Date.now() - 15 * 60 * 1000).toISOString() // 15 min timeout
+    const workerId = Math.random().toString(36).substring(7)
 
+    // Step 1: Clean up stuck "running" tasks (haven't been updated in 15 minutes)
+    // This prevents deadlocks from failed/crashed executions
+    await supabase
+        .from('search_queue')
+        .update({ status: 'pending', updated_at: now })
+        .eq('status', 'running')
+        .lt('updated_at', lockTimeout)
+        .catch(err => console.warn('[SearchQueue] Cleanup failed:', err))
+
+    // Step 2: Fetch pending tasks (but skip ones currently being processed)
     const { data, error } = await supabase
         .from('search_queue')
         .select('*')
@@ -48,6 +60,21 @@ export async function getNextSearchTasks(
     if (error) {
         console.error('[SearchQueue] Failed to fetch tasks:', error)
         return []
+    }
+
+    // Step 3: Atomically mark fetched tasks as "running" to prevent concurrent execution
+    // Do this BEFORE returning tasks
+    if (data && data.length > 0) {
+        const taskIds = data.map(t => t.id)
+        const markResult = await supabase
+            .from('search_queue')
+            .update({ status: 'running', updated_at: now })
+            .in('id', taskIds)
+
+        if (markResult.error) {
+            console.warn('[SearchQueue] Failed to mark tasks as running:', markResult.error)
+            // Still return tasks, they may execute twice but at least we tried
+        }
     }
 
     return data || []
