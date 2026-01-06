@@ -1,10 +1,14 @@
 // netlify/functions/ingest_premium_sources.ts
 /**
- * Premium source ingestion (Greenhouse + Lever)
- * These are high-value sources that need frequent updates
- * Runs every 1 hour via cron
+ * Premium source ingestion (Greenhouse only)
  *
- * Expected duration: 1-3 minutes
+ * NOTE: Lever has been moved to ingest_lever-background.ts
+ * because it requires a longer timeout (15 min) due to large job volumes
+ *
+ * Greenhouse completes in <30 seconds, so uses standard function timeout
+ * Runs every 30 minutes via cron
+ *
+ * Expected duration: 5-30 seconds
  */
 
 import type { Handler, HandlerEvent, HandlerContext } from '@netlify/functions'
@@ -17,14 +21,12 @@ export const handler: Handler = async (
   const workerId = Math.random().toString(36).substring(7)
   const startTime = Date.now()
 
-  console.log(`[PremiumIngest:${workerId}] Starting premium source ingestion (Greenhouse + Lever)`)
+  console.log(`[PremiumIngest:${workerId}] Starting premium source ingestion (Greenhouse only)`)
 
   try {
-    // Run only premium sources (Greenhouse + Lever)
-    // These are run separately to avoid timeout issues
+    // Run only Greenhouse here (Lever moved to background function)
     const results = await Promise.all([
       runIngestion('greenhouse', 'schedule'),
-      runIngestion('lever', 'schedule'),
     ])
 
     const flatResults = results.flat()
@@ -38,7 +40,7 @@ export const handler: Handler = async (
       body: JSON.stringify({
         success: true,
         message: 'Premium source ingestion completed',
-        sources: ['greenhouse', 'lever'],
+        sources: ['greenhouse'],
         totalInserted,
         durationMs: duration,
       }),
