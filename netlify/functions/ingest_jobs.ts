@@ -1331,10 +1331,19 @@ export async function upsertJobs(jobs: NormalizedJob[]): Promise<UpsertResult> {
 
   // Try using the RPC function for accurate counts
   try {
-    const { data: rpcResult, error: rpcError } = await supabase
+    const { data: rpcResult, error: rpcError, status } = await supabase
       .rpc('upsert_jobs_counted', { jobs: enrichedJobs })
 
-    if (!rpcError && rpcResult && rpcResult.length > 0) {
+    if (rpcError) {
+      console.error(`ingest_jobs: RPC upsert_jobs_counted failed [status=${status}]:`, {
+        message: rpcError.message,
+        code: (rpcError as any)?.code,
+        details: (rpcError as any)?.details,
+        hint: (rpcError as any)?.hint,
+      })
+    } else if (!rpcResult || rpcResult.length === 0) {
+      console.error('ingest_jobs: RPC returned empty result:', { rpcResult, jobsCount: enrichedJobs.length })
+    } else {
       const { inserted_count, updated_count, noop_count } = rpcResult[0]
       console.log(
         `ingest_jobs: upserted via RPC - ${inserted_count} inserted, ${updated_count} updated, ${noop_count} unchanged`
@@ -1346,12 +1355,13 @@ export async function upsertJobs(jobs: NormalizedJob[]): Promise<UpsertResult> {
       }
     }
 
-    // If RPC failed, log and fall through to direct upsert
-    if (rpcError) {
-      console.warn('ingest_jobs: RPC upsert_jobs_counted not available, using direct upsert:', rpcError.message)
-    }
+    // If RPC failed, log that we're falling back
+    console.warn(`ingest_jobs: RPC upsert_jobs_counted not available, using direct upsert (counts will be inaccurate)`)
   } catch (rpcErr) {
-    console.warn('ingest_jobs: RPC call failed, falling back to direct upsert:', rpcErr)
+    console.error('ingest_jobs: RPC call threw exception, falling back to direct upsert:', {
+      error: rpcErr instanceof Error ? rpcErr.message : String(rpcErr),
+      stack: rpcErr instanceof Error ? rpcErr.stack : undefined,
+    })
   }
 
   // Validate all jobs have source_slug BEFORE enrichment
@@ -1399,8 +1409,8 @@ export async function upsertJobs(jobs: NormalizedJob[]): Promise<UpsertResult> {
     return { inserted: 0, updated: 0, noop: 0 }
   }
 
-  // Fallback: Direct upsert (counts will be approximate)
-  console.log(`ingest_jobs: upserting ${safeJobs.length} jobs to database`)
+  // Fallback: Direct upsert (counts will be inaccurate because we can't distinguish inserts from updates)
+  console.log(`ingest_jobs: FALLBACK - upserting ${safeJobs.length} jobs without RPC accuracy`)
   const { data, error, count } = await supabase
     .from('jobs')
     .upsert(safeJobs, {
@@ -1411,17 +1421,18 @@ export async function upsertJobs(jobs: NormalizedJob[]): Promise<UpsertResult> {
     .select('id')
 
   if (error) {
-    console.error('ingest_jobs: upsert error', error)
+    console.error('ingest_jobs: fallback upsert error', error)
     throw error
   }
 
   // Log what we got back from Supabase
-  console.log(`ingest_jobs: upsert response - data.length=${data?.length}, count=${count}, safeJobs.length=${safeJobs.length}`)
+  console.log(`ingest_jobs: fallback upsert response - data.length=${data?.length}, count=${count}, safeJobs.length=${safeJobs.length}`)
 
-  // With ignoreDuplicates=false, all rows are upserted (inserted or updated)
-  // Note: This count includes updates, not just inserts (legacy behavior)
+  // CRITICAL: This count includes BOTH inserts and updates
+  // We cannot distinguish between them without RPC, so table growth will appear stalled
+  // if most jobs are updates of existing records
   const upsertedCount = data?.length ?? count ?? safeJobs.length
-  console.log(`ingest_jobs: upserted ${upsertedCount} jobs (new + updated, legacy count)`)
+  console.error(`ingest_jobs: CRITICAL - Reported ${upsertedCount} "inserted" but this includes updates. Actual new inserts unknown (RPC unavailable)`)
 
   // Return with updated=0 since we can't distinguish without RPC
   return { inserted: upsertedCount, updated: 0, noop: 0 }
