@@ -63,6 +63,23 @@ export default function MastheadNav() {
     navigate('/login');
   };
 
+  const getDisplayName = () => {
+    if (!user) return 'Account';
+
+    // 1. Try full_name from extended User type
+    if (user.full_name) return user.full_name;
+
+    // 2. Try firstName/lastName from Supabase user_metadata
+    const meta = user.user_metadata;
+    if (meta?.firstName || meta?.lastName) {
+      return [meta.firstName, meta.lastName].filter(Boolean).join(' ');
+    }
+
+    // 3. Fallback to email prefix with capitalization
+    const emailPrefix = user.email?.split('@')[0] || 'Account';
+    return emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
+  };
+
   return (
     <>
       {/* Mobile hamburger */}
@@ -122,7 +139,7 @@ export default function MastheadNav() {
                 }}
                 aria-expanded={accountOpen}
               >
-                {user.email?.split('@')[0] || 'Account'}
+                {getDisplayName()}
                 <ChevronDown size={14} />
               </button>
 
