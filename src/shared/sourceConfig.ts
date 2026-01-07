@@ -64,11 +64,11 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
         mode: 'wide-capped',
         enabled: true,
         maxAgeDays: 30,
-        maxPagesPerRun: 10, // Increased from 2 - Jooble has huge inventory
-        resetPaginationEachRun: false, // Changed to resume for broader coverage
+        maxPagesPerRun: 20, // Increased from 10 - Jooble has virtually unlimited inventory
+        resetPaginationEachRun: false, // Resume for broader coverage across runs
         trustLevel: 'medium',
         trackFreshnessRatio: true,
-        notes: 'Jooble is a volume engine with global coverage. Use keyword rotation for diversity.',
+        notes: 'Jooble is a volume engine with global coverage. High pagination depth for maximum job capture.',
     },
 
     // =========================================================================
@@ -78,12 +78,12 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
         slug: 'reed_uk',
         mode: 'wide-capped',
         enabled: true,
-        maxAgeDays: 30, // Increased from 21 for broader coverage
-        maxPagesPerRun: 15, // Increased from 5 - Reed has huge inventory
+        maxAgeDays: 30,
+        maxPagesPerRun: 25, // Increased from 15 - Reed has massive UK/EU inventory
         resetPaginationEachRun: false,
         trustLevel: 'medium',
         trackFreshnessRatio: true,
-        notes: 'Reed UK is a major job board. Deep pagination with resume for maximum coverage.',
+        notes: 'Reed UK is a major job board. Very deep pagination with resume for maximum coverage.',
     },
 
     // =========================================================================
@@ -109,11 +109,11 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
         mode: 'shallow-curated',
         enabled: true,
         maxAgeDays: 30,
-        maxPagesPerRun: 2,
+        maxPagesPerRun: 5, // Increased from 2 for better coverage
         resetPaginationEachRun: false,
         trustLevel: 'high',
         trackFreshnessRatio: false,
-        notes: 'This is a signal source, not a firehose.',
+        notes: 'This is a high-quality editorial source. Moderate pagination for signal quality.',
     },
 
     // =========================================================================
