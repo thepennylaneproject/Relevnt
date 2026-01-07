@@ -64,11 +64,11 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
         mode: 'wide-capped',
         enabled: true,
         maxAgeDays: 30,
-        maxPagesPerRun: 10, // Increased from 2 - Jooble has huge inventory
-        resetPaginationEachRun: false, // Changed to resume for broader coverage
+        maxPagesPerRun: 20, // Increased from 10 - Jooble has virtually unlimited inventory
+        resetPaginationEachRun: false, // Resume for broader coverage across runs
         trustLevel: 'medium',
         trackFreshnessRatio: true,
-        notes: 'Jooble is a volume engine with global coverage. Use keyword rotation for diversity.',
+        notes: 'Jooble is a volume engine with global coverage. High pagination depth for maximum job capture.',
     },
 
     // =========================================================================
@@ -78,12 +78,12 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
         slug: 'reed_uk',
         mode: 'wide-capped',
         enabled: true,
-        maxAgeDays: 30, // Increased from 21 for broader coverage
-        maxPagesPerRun: 15, // Increased from 5 - Reed has huge inventory
+        maxAgeDays: 30,
+        maxPagesPerRun: 25, // Increased from 15 - Reed has massive UK/EU inventory
         resetPaginationEachRun: false,
         trustLevel: 'medium',
         trackFreshnessRatio: true,
-        notes: 'Reed UK is a major job board. Deep pagination with resume for maximum coverage.',
+        notes: 'Reed UK is a major job board. Very deep pagination with resume for maximum coverage.',
     },
 
     // =========================================================================
@@ -109,11 +109,11 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
         mode: 'shallow-curated',
         enabled: true,
         maxAgeDays: 30,
-        maxPagesPerRun: 2,
+        maxPagesPerRun: 5, // Increased from 2 for better coverage
         resetPaginationEachRun: false,
         trustLevel: 'high',
         trackFreshnessRatio: false,
-        notes: 'This is a signal source, not a firehose.',
+        notes: 'This is a high-quality editorial source. Moderate pagination for signal quality.',
     },
 
     // =========================================================================
@@ -193,18 +193,18 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
     },
 
     // =========================================================================
-    // HIGH VOLUME - USAJobs has thousands of federal positions
+    // DISABLED - USAJobs returns 401 Unauthorized (invalid credentials)
     // =========================================================================
     usajobs: {
         slug: 'usajobs',
         mode: 'wide-capped',
-        enabled: true,
+        enabled: false, // DISABLED - consistently returns 401 Unauthorized
         maxAgeDays: 30,
-        maxPagesPerRun: 20, // ⬆ Increased from 10 - federal jobs have massive capacity
+        maxPagesPerRun: 20,
         resetPaginationEachRun: false,
-        trustLevel: 'high', // Government source = high trust
+        trustLevel: 'high',
         trackFreshnessRatio: true,
-        notes: 'USAJobs federal jobs. Stable API with thousands of positions. Maximizing pagination.',
+        notes: 'USAJobs disabled - returns 401 Unauthorized on every run. Credentials invalid or API endpoint changed.',
     },
 
     // =========================================================================
@@ -223,33 +223,33 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
     },
 
     // =========================================================================
-    // HIGH VOLUME - CareerOneStop is US government-backed with nationwide coverage
+    // DISABLED - CareerOneStop returns 401 Unauthorized on every run
     // =========================================================================
     careeronestop: {
         slug: 'careeronestop',
         mode: 'wide-capped',
-        enabled: true,
+        enabled: false, // DISABLED - consistently returns 401 Unauthorized
         maxAgeDays: 30,
-        maxPagesPerRun: 10, // Increased from 3 - government source has extensive inventory
-        resetPaginationEachRun: false, // Changed to resume for broader coverage
-        trustLevel: 'high', // Government source = high trust
+        maxPagesPerRun: 10,
+        resetPaginationEachRun: false,
+        trustLevel: 'high',
         trackFreshnessRatio: true,
-        notes: 'CareerOneStop is government-backed with nationwide coverage. High volume potential.',
+        notes: 'CareerOneStop disabled - returns 401 Unauthorized on every run. Credentials invalid or API changed.',
     },
 
     // =========================================================================
-    // HIGH VOLUME - TheirStack has tech job data with company technographics
+    // DISABLED - TheirStack returns 402 Payment Required (subscription expired)
     // =========================================================================
     theirstack: {
         slug: 'theirstack',
         mode: 'wide-capped',
-        enabled: true,
+        enabled: false, // DISABLED - consistently returns 402 Payment Required
         maxAgeDays: 30,
-        maxPagesPerRun: 5, // Increased from 1 for more tech jobs
-        resetPaginationEachRun: false, // Resume pagination
+        maxPagesPerRun: 5,
+        resetPaginationEachRun: false,
         trustLevel: 'medium',
         trackFreshnessRatio: true,
-        notes: 'TheirStack has tech job data with company technographics. Valuable for tech coverage.',
+        notes: 'TheirStack disabled - returns 402 Payment Required. Subscription not active.',
     },
 
     // =========================================================================
@@ -286,48 +286,48 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
     },
 
     // =========================================================================
-    // HIGHEST VOLUME - Fantastic Jobs has 10M+ jobs/month with hourly updates
+    // DISABLED - Fantastic Jobs endpoint returns 404 (service no longer available)
     // =========================================================================
     fantastic: {
         slug: 'fantastic',
         mode: 'wide-capped',
-        enabled: true,
+        enabled: false, // DISABLED - returns 404 Not Found
         maxAgeDays: 30,
-        maxPagesPerRun: 20, // Increased from 5 - This is our highest volume source
+        maxPagesPerRun: 20,
         resetPaginationEachRun: false,
         trustLevel: 'medium',
         trackFreshnessRatio: true,
-        notes: 'Fantastic Jobs is our highest volume source. 10M+ jobs/month with AI-enriched data.',
+        notes: 'Fantastic Jobs disabled - endpoint returns 404 Not Found. Service may no longer be available.',
     },
 
     // =========================================================================
-    // HIGH VOLUME - JobDataFeeds has normalized job data with salary info
+    // DISABLED - JobDataFeeds returns 403 Forbidden (subscription required)
     // =========================================================================
     jobdatafeeds: {
         slug: 'jobdatafeeds',
         mode: 'wide-capped',
-        enabled: true,
+        enabled: false, // DISABLED - consistently returns 403 Forbidden
         maxAgeDays: 30,
-        maxPagesPerRun: 10, // Increased from 3 for better coverage
+        maxPagesPerRun: 10,
         resetPaginationEachRun: false,
         trustLevel: 'medium',
         trackFreshnessRatio: true,
-        notes: 'JobDataFeeds has normalized job data with salary information.',
+        notes: 'JobDataFeeds disabled - returns 403 Forbidden. Subscription or API access not active.',
     },
 
     // =========================================================================
-    // HIGH VOLUME - CareerJet is a global job aggregator
+    // DISABLED - CareerJet returns 403 Forbidden (IP blocked, requires registration)
     // =========================================================================
     careerjet: {
         slug: 'careerjet',
         mode: 'wide-capped',
-        enabled: true,
+        enabled: false, // DISABLED - consistently returns 403 Forbidden (IP blocked)
         maxAgeDays: 30,
-        maxPagesPerRun: 10, // Increased from 3 for global coverage
+        maxPagesPerRun: 10,
         resetPaginationEachRun: false,
         trustLevel: 'medium',
         trackFreshnessRatio: true,
-        notes: 'CareerJet is a global job aggregator with multiple regions. Requires API key registration with IP address(es) from which calls will be made.',
+        notes: 'CareerJet disabled - returns 403 Forbidden. IP not whitelisted or API key invalid.',
     },
 
     // =========================================================================
