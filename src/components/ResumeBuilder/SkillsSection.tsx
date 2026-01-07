@@ -5,7 +5,6 @@ import { ResumeSkillGroup } from '../../types/resume-builder.types'
 import { RelevntColors } from '../../hooks/useRelevntColors'
 import { AIButton } from './AIButton'
 import { useAITask } from '../../hooks/useAITask'
-import { Button } from '../ui/Button'
 import { inputClass, itemCardClass, labelClass } from './sectionStyles'
 import { FileText } from "lucide-react"
 
@@ -164,7 +163,7 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ id, skillGroups, o
             key={getGroupKey(group, index)}
             className={itemCardClass}
           >
-            <div className="flex gap-3">
+            <div className="flex gap-3 items-start">
               <div className="flex-1">
                 <label className={labelClass}>Group title</label>
                 <input
@@ -174,17 +173,17 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ id, skillGroups, o
                   placeholder="Core Skills"
                 />
               </div>
-              <Button
+              <button
                 type="button"
-                variant="destructive"
-                size="sm"
+                className="action-remove"
                 onClick={() => removeGroup(index)}
+                aria-label="Remove skill group"
               >
-                ✕
-              </Button>
+                Remove
+              </button>
             </div>
 
-            <div>
+            <div className="mt-4">
               <div className="mb-1 flex items-center justify-between gap-3">
                 <label className={labelClass}>Skills (comma separated)</label>
                 <AIButton
@@ -204,21 +203,21 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ id, skillGroups, o
               {/* Pending Suggestions */}
               {pendingSuggestions[getGroupKey(group, index)]?.length > 0 && (
                 <div className="mt-2 text-sm">
-                  <span className="mb-1 block text-xs font-medium text-muted-foreground">Detailed Suggestions (Click to add):</span>
+                  <span className="mb-1 block text-xs font-medium text-muted-foreground">Suggestions (click to add):</span>
                   <div className="flex flex-wrap gap-2">
                     {pendingSuggestions[getGroupKey(group, index)].map((skill) => (
-                      <div key={skill} className="flex overflow-hidden rounded-md border border-[var(--color-accent-glow)] bg-[var(--color-accent-glow)] text-[var(--color-accent)] animate-in slide-in-from-bottom-1">
+                      <div key={skill} className="flex overflow-hidden rounded-md border border-[var(--color-border)] text-[var(--color-text-muted)] animate-in slide-in-from-bottom-1">
                         <button
                           type="button"
                           onClick={() => handleAddSkill(index, skill)}
-                          className="px-2 py-1 text-xs font-medium hover:bg-[var(--color-accent)] hover:text-[var(--color-ink-inverse)] transition-colors"
+                          className="px-2 py-1 text-xs hover:bg-[var(--surface-2)] hover:text-[var(--color-text)] transition-colors"
                         >
                           + {skill}
                         </button>
                         <button
                           type="button"
                           onClick={() => handleDismissSkill(index, skill)}
-                          className="border-l border-[var(--color-accent-glow)] px-1.5 py-1 text-xs hover:bg-[var(--color-accent)] hover:text-[var(--color-ink-inverse)] transition-colors"
+                          className="border-l border-[var(--color-border)] px-1.5 py-1 text-xs hover:bg-[var(--surface-2)] hover:text-[var(--color-text)] transition-colors"
                           title="Dismiss"
                         >
                           ×
@@ -247,15 +246,15 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ id, skillGroups, o
           </div>
         ))}
 
-        <Button
+        <button
           type="button"
-          variant="secondary"
-          size="sm"
+          className="action-add"
           onClick={addGroup}
         >
           + Add skill group
-        </Button>
+        </button>
       </div>
     </SectionCard>
   )
 }
+

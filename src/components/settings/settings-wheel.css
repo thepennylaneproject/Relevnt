@@ -1,0 +1,198 @@
+/* ============================================
+   SETTINGS WHEEL - SCROLLABLE MATTE PAPER
+   ============================================ */
+
+.settings-wheel-container {
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  position: relative;
+  background: transparent;
+}
+
+/* Scroll container - MUST be scrollable */
+.settings-wheel-scroll-driver {
+  position: absolute;
+  inset: 0;
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  z-index: 10; /* Above stage to capture scroll */
+  /* Hide scrollbar but keep scrollable */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.settings-wheel-scroll-driver::-webkit-scrollbar {
+  display: none;
+}
+
+/* 3D Stage - below scroll driver, receives pointer events only for cards */
+.settings-wheel-stage {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-index-base, 5);
+  perspective: 1200px;
+  perspective-origin: center 50%;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Cylinder container */
+.settings-wheel-cylinder {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Individual card - constrained width, matte paper */
+.settings-wheel-card {
+  position: absolute;
+  width: 100%;
+  max-width: 560px;
+  padding: 0 var(--space-4);
+  box-sizing: border-box;
+  transform-origin: center center;
+  transform-style: preserve-3d;
+  will-change: transform, filter, opacity;
+  pointer-events: auto;
+}
+
+.settings-wheel-card.inert {
+  pointer-events: none;
+  user-select: none;
+}
+
+.settings-wheel-card.inert * {
+  pointer-events: none !important;
+}
+
+/* ============================================
+   SETTING CARD - MATTE PAPER (NO WHITE CARDS)
+   ============================================ */
+.setting-card {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  padding: 0.875rem 0;
+  min-height: auto;
+  box-shadow: none;
+}
+
+.setting-card.inert {
+  pointer-events: none;
+}
+
+.setting-card-title {
+  display: none;
+}
+
+.setting-card-body {
+  font-size: var(--text-sm);
+  color: var(--text);
+}
+
+/* ============================================
+   FACT STYLING - TEXT LINE ITEMS, NOT BUTTONS
+   ============================================ */
+.setting-card .settings-fact {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+  line-height: 1.5;
+  width: 100%;
+}
+
+.setting-card .settings-fact:hover:not(:disabled) {
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: 3px;
+}
+
+.setting-card .settings-fact:focus-visible {
+  outline: 1px solid var(--border);
+  outline-offset: 4px;
+}
+
+.setting-card .settings-fact:disabled {
+  opacity: 0.4;
+  cursor: default;
+  text-decoration: none;
+}
+
+/* Fact row: label (meta) + value (body) */
+.setting-card .settings-fact-label {
+  font-size: var(--type-meta-size);
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.setting-card .settings-fact-value {
+  font-size: var(--type-body-size);
+  color: var(--text);
+  font-weight: 400;
+}
+
+/* ============================================
+   LOADING STATE
+   ============================================ */
+.settings-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+/* ============================================
+   REDUCED MOTION FALLBACK
+   ============================================ */
+.settings-wheel-reduced-motion {
+  overflow-y: auto;
+  padding: var(--space-8) var(--space-4);
+}
+
+.settings-wheel-reduced-motion .settings-wheel-stage,
+.settings-wheel-reduced-motion .settings-wheel-scroll-driver {
+  display: none;
+}
+
+.settings-wheel-fallback-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.settings-wheel-fallback-card {
+  pointer-events: auto;
+}
+
+/* ============================================
+   LEGACY COMPAT (unused)
+   ============================================ */
+.setting-card .settings-options-inline { display: none; }
+.setting-card .settings-option { display: none; }
+.setting-card .settings-toggles { display: none; }
+.setting-card .settings-checkbox { display: none; }
+.setting-card .settings-tags { display: none; }
+.setting-card .settings-tag { display: none; }

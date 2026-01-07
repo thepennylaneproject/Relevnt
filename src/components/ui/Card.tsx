@@ -1,13 +1,16 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * RELEVNT CARD COMPONENT
+ * RELEVNT CARD COMPONENT — Ledger System
  * ═══════════════════════════════════════════════════════════════════════════
  * 
- * Card component with surface background and subtle shadow.
+ * DEFAULT: Transparent, no chrome (no border, shadow, or background).
+ * Use for layout grouping without visual containers.
+ * 
+ * ELEVATED: Visible container for modals, popovers only (rare).
  * 
  * Usage:
- *   <Card>Content here</Card>
- *   <Card elevated>Elevated card</Card>
+ *   <Card>Content with no visual container</Card>
+ *   <Card elevated>Elevated card for modals</Card>
  *   <Card hoverable onClick={handleClick}>Clickable card</Card>
  * 
  * ═══════════════════════════════════════════════════════════════════════════
@@ -25,15 +28,15 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 export const Card: React.FC<CardProps> = ({
     elevated = false,
     hoverable = false,
-    padding = 'md',
+    padding = 'none',
     children,
     className = '',
     ...props
 }) => {
     const paddingClasses: Record<string, string> = {
-        none: 'card--no-padding',
+        none: '',
         sm: 'card--padding-sm',
-        md: '',
+        md: 'card--padding-md',
         lg: 'card--padding-lg',
     };
 

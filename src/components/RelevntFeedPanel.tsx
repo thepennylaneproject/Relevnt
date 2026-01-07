@@ -58,6 +58,7 @@ export function RelevntFeedPanel({
   const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set())
   const [recentlySaved, setRecentlySaved] = useState<string | null>(null)
   const [recentlyDismissed, setRecentlyDismissed] = useState<string | null>(null)
+  const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const [selectedMatch, setSelectedMatch] = useState<MatchJobsResult | null>(null)
   const [showWhyModal, setShowWhyModal] = useState(false)
@@ -216,99 +217,117 @@ export function RelevntFeedPanel({
             const mainReasons = Array.isArray(m.reasons) ? m.reasons.slice(0, 3) : []
             const isSaved = savedJobIds.has(m.job_id)
             const isApplied = appliedJobIds.has(m.job_id)
+            const isExpanded = expandedId === m.job_id
 
             return (
-              <Card 
+              <div 
                 key={m.job_id} 
-                className="group relative overflow-hidden"
+                className="group border-b border-border py-6 hover:bg-surface-2/30 transition-colors"
               >
-                <header className="flex justify-between items-start mb-6">
-                  <div>
-                    <Heading level={3} className="group-hover:text-accent transition-colors">{job.title}</Heading>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Text muted className="font-bold">{job.company}</Text>
-                      <Text muted>•</Text>
-                      <Text muted>{job.location}</Text>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <Badge variant="neutral">{Math.round(m.score)}% Match</Badge>
-                  </div>
-                </header>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                  <div className="space-y-4">
-                    <div className="flex flex-wrap gap-4">
+                {/* Ledger Row */}
+                <div className="flex items-center justify-between gap-4">
+                  {/* Left: Job info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-baseline gap-3 flex-wrap">
+                      <a
+                        href={job.external_url || '#'}
+                        target={job.external_url ? '_blank' : undefined}
+                        rel={job.external_url ? 'noreferrer' : undefined}
+                        className="font-semibold hover:text-accent transition-colors cursor-pointer"
+                        onClick={(e) => {
+                          if (!job.external_url) {
+                            e.preventDefault()
+                            setExpandedId(isExpanded ? null : m.job_id)
+                          }
+                        }}
+                      >
+                        {job.title}
+                      </a>
+                      <Text muted className="text-sm">
+                        {job.company}
+                        {job.location && ` • ${job.location}`}
+                      </Text>
                       {salaryLabel && (
-                        <div className="flex items-center gap-2 text-xs">
-                          <Icon name="dollar" size="xs" className="text-text-muted" />
-                          <span className="font-medium">{salaryLabel}</span>
-                        </div>
+                        <Text muted className="text-xs">
+                          {salaryLabel}
+                        </Text>
                       )}
                       {isRemote && (
-                        <div className="flex items-center gap-2 text-xs">
-                          <Icon name="zap" size="xs" className="text-accent" />
-                          <span className="font-medium">Remote</span>
-                        </div>
+                        <span className="text-xs text-accent">Remote</span>
                       )}
                     </div>
-                    {mainReasons.length > 0 && (
-                      <ul className="space-y-2 border-l border-border pl-4 py-1">
-                        {mainReasons.map((reason, idx) => (
-                          <li key={idx} className="text-xs text-text-muted italic flex items-start gap-2">
-                            <span className="text-accent">→</span>
-                            {reason}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
                   </div>
 
-                  <div className="flex flex-col justify-end gap-3">
-                    <div className="flex gap-4 items-center justify-end">
-                      {isApplied ? (
-                        <Text className="text-xs font-bold uppercase tracking-widest text-success flex items-center gap-2">
-                          <Icon name="check" size="xs" /> Applied
-                        </Text>
-                      ) : (
-                        <button
-                          className="text-xs font-bold uppercase tracking-widest text-accent border-b border-accent/20 hover:border-accent transition-colors"
-                          onClick={() => setQuickApplyJob({
-                            id: m.job_id,
-                            title: job.title || 'Job',
-                            company: job.company || 'Company',
-                            external_url: job.external_url,
-                          })}
-                        >
-                          Quick Apply
-                        </button>
-                      )}
-                      {job.external_url && (
-                        <button
-                          className="text-xs font-bold uppercase tracking-widest text-text-muted border-b border-border/20 hover:border-text transition-colors"
-                          onClick={() => job.external_url && window.open(job.external_url, '_blank', 'noreferrer')}
-                        >
-                          View Source
-                        </button>
-                      )}
-                    </div>
-                    <div className="flex justify-end gap-6 items-center pt-2 border-t border-border/50">
-                      <button
-                        className={`text-[10px] uppercase tracking-widest font-bold transition-colors ${isSaved ? 'text-accent' : 'text-text-muted hover:text-text'}`}
-                        onClick={() => handleSaveJob(m.job_id, m.score)}
+                  {/* Right: Match score + Primary action */}
+                  <div className="flex items-center gap-6 flex-shrink-0">
+                    <Text muted className="text-xs">
+                      {Math.round(m.score)}% match
+                    </Text>
+                    
+                    {/* Primary action */}
+                    {isApplied ? (
+                      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-success">
+                        <Icon name="check" size="xs" /> Applied
+                      </div>
+                    ) : (
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => setQuickApplyJob({
+                          id: m.job_id,
+                          title: job.title || 'Job',
+                          company: job.company || 'Company',
+                          external_url: job.external_url,
+                        })}
                       >
-                        {isSaved ? 'Job Saved' : 'Save Record'}
+                        Quick Apply
+                      </Button>
+                    )}
+
+                    {/* Secondary actions - hover only */}
+                    <div className="flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        className="text-[10px] uppercase tracking-widest font-bold text-text-muted hover:text-accent transition-colors"
+                        onClick={() => handleSaveJob(m.job_id, m.score)}
+                        title={isSaved ? 'Unsave' : 'Save'}
+                      >
+                        {isSaved ? '★' : '☆'}
                       </button>
                       <button
                         className="text-[10px] uppercase tracking-widest font-bold text-text-muted hover:text-error transition-colors"
                         onClick={() => handleDismissJob(m.job_id, m.score)}
+                        title="Dismiss"
                       >
-                        Dismiss
+                        ✕
+                      </button>
+                      <button
+                        className="text-[10px] uppercase tracking-widest font-bold text-text-muted hover:text-text transition-colors"
+                        onClick={() => setExpandedId(isExpanded ? null : m.job_id)}
+                        title={isExpanded ? 'Collapse' : 'Expand'}
+                      >
+                        {isExpanded ? '−' : '+'}
                       </button>
                     </div>
                   </div>
                 </div>
-              </Card>
+
+                {/* Expanded area - match reasons */}
+                {isExpanded && mainReasons.length > 0 && (
+                  <div className="mt-6 pl-6 border-l-2 border-accent/20">
+                    <Text muted className="text-xs uppercase tracking-widest font-bold mb-3">
+                      Why this matches
+                    </Text>
+                    <ul className="space-y-2">
+                      {mainReasons.map((reason, idx) => (
+                        <li key={idx} className="text-sm text-text-muted italic flex items-start gap-2">
+                          <span className="text-accent">→</span>
+                          {reason}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
             )
           })}
         </div>

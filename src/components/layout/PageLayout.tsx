@@ -34,11 +34,17 @@ export const PageLayout = ({
   children 
 }: PageLayoutProps) => {
   return (
-    <article className="max-w-4xl mx-auto px-8 py-12">
-      <header className="mb-12 border-b border-border pb-6">
-        <div className="flex items-baseline justify-between">
+    <article className="max-w-4xl mx-auto px-8 pb-12">
+      <header 
+        className="border-b border-border pb-6"
+        style={{ marginBottom: 'var(--masthead-to-body, 2.5rem)' }}
+      >
+        <div 
+          className="flex items-baseline justify-between flex-wrap gap-4"
+          style={{ marginBottom: actions ? 'var(--masthead-title-gap, 1.25rem)' : '0' }}
+        >
           <Heading level={1}>{title}</Heading>
-          {actions}
+          {actions && <div style={{ marginTop: 'var(--masthead-cta-gap, 1rem)' }}>{actions}</div>}
         </div>
         {subtitle && (
           <Text muted className="mt-2 max-w-2xl">

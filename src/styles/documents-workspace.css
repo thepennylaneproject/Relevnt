@@ -1,0 +1,742 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * DOCUMENTS WORKSPACE STYLES
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * Implements the "Writer's Desk" metaphor:
+ * - Document Rail (left): quiet file tray
+ * - Canvas (center): editing surface
+ * - Preview Pane (right, slide-out): light-box for review
+ * 
+ * No cards. No tabs. Text-first.
+ * 
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+/* ==========================================================================
+   DOCUMENTS WORKSPACE LAYOUT
+   ========================================================================== */
+
+.documents-workspace {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 0;
+  min-height: calc(100vh - var(--masthead-height, 80px));
+}
+
+/* ==========================================================================
+   DOCUMENT RAIL
+   ========================================================================== */
+
+.document-rail {
+  position: sticky;
+  top: var(--masthead-height, 80px);
+  height: calc(100vh - var(--masthead-height, 80px));
+  padding: var(--space-8) var(--space-6);
+  border-right: 1px solid var(--border);
+  background: var(--bg);
+  overflow-y: auto;
+}
+
+.document-rail__section {
+  margin-bottom: var(--space-6);
+}
+
+.document-rail__label {
+  font-size: var(--type-section-size);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  margin-bottom: var(--space-3);
+  display: block;
+}
+
+.document-rail__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.document-rail__list li {
+  margin-bottom: 0.25rem;
+}
+
+.document-rail__item {
+  display: block;
+  width: 100%;
+  padding: var(--space-2) 0;
+  text-align: left;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.15s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.document-rail__item:hover {
+  color: var(--text);
+}
+
+.document-rail__item--active {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.document-rail__create {
+  font-size: var(--text-xs);
+  color: var(--accent);
+  background: none;
+  border: none;
+  padding: var(--space-2) 0;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.document-rail__create:hover {
+  opacity: 0.8;
+}
+
+.document-rail__divider {
+  height: 1px;
+  background: var(--border);
+  margin: var(--space-6) 0;
+}
+
+.document-rail__loading,
+.document-rail__empty {
+  font-size: var(--type-label-size);
+  font-style: italic;
+}
+
+.document-rail__insights-link {
+  display: block;
+  font-size: var(--type-label-size);
+  color: var(--accent);
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.document-rail__insights-link:hover {
+  opacity: 0.8;
+}
+
+/* ==========================================================================
+   CANVAS
+   ========================================================================== */
+
+.document-canvas {
+  padding: var(--space-10) var(--space-12);
+  max-width: 800px;
+}
+
+/* ==========================================================================
+   CANVAS HEADER
+   ========================================================================== */
+
+.canvas-header {
+  margin-bottom: var(--space-10);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--border);
+}
+
+.canvas-header__title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-4);
+}
+
+.canvas-header__subtitle {
+  font-size: var(--type-label-size);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: var(--space-1);
+}
+
+.canvas-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.canvas-header__status {
+  font-size: var(--type-meta-size);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.canvas-header__action {
+  font-size: var(--type-meta-size);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  border-bottom: 1px solid transparent;
+  padding: 0;
+  cursor: pointer;
+  transition: color var(--transition), border-color var(--transition);
+}
+
+.canvas-header__action:hover {
+  color: var(--text);
+  border-bottom-color: var(--text);
+}
+
+/* ==========================================================================
+   SECTION NAVIGATION — Table of Contents Style
+   ========================================================================== */
+
+/*
+ * Inline text links, not buttons.
+ * No background, no border, no padding.
+ * Hover: underline. Active: underline only.
+ */
+
+.section-nav {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0;
+  margin-top: var(--space-2);
+}
+
+.section-nav__sep {
+  color: var(--border);
+  font-size: var(--type-meta-size);
+  margin: 0 0.625rem;
+  user-select: none;
+}
+
+.section-nav__item {
+  font-size: var(--text-sm);
+  font-weight: 400;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.15s ease;
+  line-height: inherit;
+  font-family: inherit;
+}
+
+.section-nav__item:hover {
+  color: var(--text);
+}
+
+.section-nav__item:focus-visible {
+  outline: 1px solid var(--text-muted);
+  outline-offset: 4px;
+}
+
+/* Active state: champagne dot centered below, no weight change */
+.section-nav__item--active {
+  color: var(--text);
+  position: relative;
+}
+
+.section-nav__item--active::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background-color: var(--accent);
+}
+
+/* ==========================================================================
+   CHAPTER HEADER — Manuscript Section Headers
+   ========================================================================== */
+
+/*
+ * Typographic chapter headers for resume sections.
+ * Generous spacing, hairline rule, no card containers.
+ */
+
+.chapter-section {
+  /* Generous top spacing after section nav */
+  padding-top: var(--space-10);
+}
+
+.chapter-header {
+  margin-bottom: var(--space-8);
+}
+
+.chapter-header__title {
+  font-family: var(--font-serif, Georgia, serif);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 0.375rem 0;
+  letter-spacing: -0.01em;
+}
+
+.chapter-header__description {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0 0 var(--space-5) 0;
+}
+
+/* Very subtle hairline divider */
+.chapter-header__rule {
+  height: 1px;
+  background: var(--border);
+  opacity: 0.6;
+  margin-top: var(--space-1);
+}
+
+.chapter-content {
+  /* Clear gap between header and first form field */
+}
+
+/* Reduce form loudness — first field breathes */
+.chapter-content > div:first-child {
+  margin-top: 0;
+}
+
+/* ==========================================================================
+   LINKS SUBSECTION — Quiet rows for Contact links
+   ========================================================================== */
+
+.links-subsection {
+  margin-top: var(--space-6);
+}
+
+.links-subsection__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.links-subsection__add {
+  font-size: var(--text-xs);
+  color: var(--accent);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: opacity var(--transition);
+}
+
+.links-subsection__add:hover {
+  opacity: 0.8;
+}
+
+.links-subsection__list {
+  /* No card — just quiet rows */
+}
+
+.links-subsection__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.links-subsection__row:last-child {
+  border-bottom: none;
+}
+
+.links-subsection__label-input {
+  flex: 1;
+  min-width: 100px;
+}
+
+.links-subsection__url-input {
+  flex: 2;
+  min-width: 200px;
+}
+
+.links-subsection__remove {
+  font-size: var(--type-label-size);
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: color var(--transition);
+}
+
+.links-subsection__remove:hover {
+  color: var(--error);
+}
+
+/* ==========================================================================
+   DOCUMENT ACTIONS MENU
+   ========================================================================== */
+
+.document-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.document-actions__btn {
+  font-size: var(--type-meta-size);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  padding: 0.25rem 0;
+  cursor: pointer;
+  transition: color var(--transition);
+}
+
+.document-actions__btn:hover {
+  color: var(--text);
+}
+
+.document-actions__btn--more {
+  font-size: 1rem;
+  letter-spacing: 0;
+  padding: 0.25rem 0.5rem;
+}
+
+.document-actions__more-wrapper {
+  position: relative;
+}
+
+.document-actions__menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: var(--space-2);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  min-width: 140px;
+  z-index: 50;
+  animation: fadeIn 0.1s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.document-actions__menu-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font-size: var(--text-xs);
+  color: var(--text);
+  background: none;
+  border: none;
+  padding: 0.625rem 1rem;
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+
+.document-actions__menu-item:hover {
+  background: var(--color-black-alpha-2, rgba(0, 0, 0, 0.02));
+}
+
+.document-actions__menu-item--danger {
+  color: var(--error);
+}
+
+.document-actions__menu-item--confirming {
+  background: var(--error);
+  color: var(--color-ink-inverse);
+}
+
+.document-actions__menu-item--confirming:hover {
+  background: var(--error);
+}
+
+.document-actions__menu-divider {
+  height: 1px;
+  background: var(--border);
+  margin: var(--space-1) 0;
+}
+
+.document-actions__rename-input {
+  font-size: var(--text-xs);
+  padding: 0.375rem var(--space-2);
+  border: 1px solid var(--border);
+  background: transparent;
+  margin-right: 0.5rem;
+  min-width: 120px;
+}
+
+.document-actions__rename-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* ==========================================================================
+   SECTION EDITOR
+   ========================================================================== */
+
+.section-editor {
+  /* Clean editing surface — no Cards or containers */
+}
+
+/* ==========================================================================
+   PREVIEW PANE (Slide-out)
+   ========================================================================== */
+
+.preview-pane {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+}
+
+.preview-pane__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(2px);
+}
+
+.preview-pane__content {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 600px;
+  max-width: 90vw;
+  background: var(--bg);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  animation: slideInFromRight 0.2s ease-out;
+}
+
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.preview-pane__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-6) var(--space-8);
+  border-bottom: 1px solid var(--border);
+}
+
+.preview-pane__title {
+  font-size: var(--text-tiny);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+}
+
+.preview-pane__close {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: color 0.15s ease;
+}
+
+.preview-pane__close:hover {
+  color: var(--text);
+}
+
+.preview-pane__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-8);
+}
+
+/* ==========================================================================
+   LETTER VIEWER (inside canvas)
+   ========================================================================== */
+
+.letter-viewer {
+  max-width: 640px;
+}
+
+.letter-viewer__header {
+  margin-bottom: var(--space-8);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.letter-viewer__content {
+  font-family: var(--font-serif, Georgia, serif);
+  font-size: 1rem;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  color: var(--text);
+}
+
+.letter-viewer__actions {
+  margin-top: var(--space-8);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: var(--space-6);
+}
+
+/* ==========================================================================
+   ITEM CARD SURFACE — Chrome-free grouping for repeatable items
+   ========================================================================== */
+
+/*
+ * Transparent grouping for education, experience, certification entries.
+ * No background, no shadow. Separation via spacing and hairline.
+ * Spacing follows 8/16/24/40 rhythm.
+ */
+
+.item-card-surface {
+  padding: var(--space-6) 0;  /* 24px — on rhythm */
+  border-bottom: 1px solid var(--border);
+}
+
+.item-card-surface:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* ==========================================================================
+   FORM ELEMENTS — Document Canvas Context Override
+   ========================================================================== */
+
+/*
+ * TYPOGRAPHY HIERARCHY:
+ * - Section Anchor (chapter title): serif, 600, largest
+ * - Functional Label: uppercase, 400, small, muted — NEVER louder than values
+ * - Primary Content (inputs): normal weight, comfortable size
+ * - Secondary Actions: text-link style, recede visually
+ */
+
+/* Functional Label — subdued utility text */
+.document-canvas .form-label {
+  display: block;
+  font-size: 0.6875rem;  /* 11px */
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: var(--space-1);
+}
+
+/* Primary Content — what the eye lands on */
+.document-canvas .form-input,
+.document-canvas .form-textarea {
+  width: 100%;
+  padding: 0.5rem 0;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  font-size: 0.9375rem;
+  font-family: inherit;
+  transition: border-color 0.15s ease;
+}
+
+.document-canvas .form-input::placeholder,
+.document-canvas .form-textarea::placeholder {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.document-canvas .form-input:focus,
+.document-canvas .form-textarea:focus {
+  outline: none;
+  border-bottom-color: var(--text-muted);
+}
+
+/* ==========================================================================
+   SECONDARY ACTIONS — Helper text-links that recede visually
+   ========================================================================== */
+
+/*
+ * These actions should never pull attention before content.
+ * Text-link style, no filled backgrounds, footnote energy.
+ */
+
+/* Helper action — "Suggest Skills", "Rewrite Stronger" */
+.document-canvas .action-helper {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.document-canvas .action-helper:hover:not(:disabled) {
+  color: var(--text);
+}
+
+.document-canvas .action-helper:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Remove action — quieter than content */
+.document-canvas .action-remove {
+  font-size: var(--type-label-size);
+  font-weight: 400;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  padding: var(--space-1) 0;
+  cursor: pointer;
+  transition: color var(--transition);
+}
+
+.document-canvas .action-remove:hover {
+  color: var(--error);
+}
+
+/* Add action — footnote energy */
+.document-canvas .action-add {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  padding: 0.5rem 0;
+  cursor: pointer;
+  margin-top: var(--space-4);
+  transition: color var(--transition);
+}
+
+.document-canvas .action-add:hover {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ==========================================================================
+   WRITING COLUMN — Readable content width
+   ========================================================================== */
+
+.writing-column {
+  max-width: 64ch;
+}
+

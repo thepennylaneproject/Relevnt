@@ -1248,25 +1248,9 @@ export async function upsertJobs(jobs: NormalizedJob[]): Promise<UpsertResult> {
   }
 
   // Enrich jobs with ATS metadata and URL enrichment data
-  const enrichedJobs = urlEnrichedJobs.map((j) => {
-    const enrichment = enrichJob(j.title, j.description || '')
-
-    // Determine if URL is direct (from company careers page)
-    const isDirect = j.external_url && (
-      j.external_url.includes('greenhouse.io') ||
-      j.external_url.includes('jobs.lever.co') ||
-      j.external_url.includes('workday.com') ||
-      j.external_url.includes('/careers') ||
-      j.external_url.includes('/jobs')
-    )
-
-    // Detect ATS type from URL
-    let atsType = null
-    if (j.external_url) {
-      if (j.external_url.includes('greenhouse.io')) atsType = 'greenhouse'
-      else if (j.external_url.includes('jobs.lever.co')) atsType = 'lever'
-      else if (j.external_url.includes('workday.com')) atsType = 'workday'
-    }
+  const enrichedJobs = urlEnrichedJobs.map((j, index) => {
+    const atsEnrichment = enrichJob(j.title, j.description || '')
+    const urlEnrichment = enrichmentResults[index]
 
     // Compute dedup_key with multi-layer fallback
     // 1. Try hash of title|company|location
@@ -1313,19 +1297,19 @@ export async function upsertJobs(jobs: NormalizedJob[]): Promise<UpsertResult> {
       description: j.description,
       is_active: true,
 
-      // URL enrichment fields (direct apply tracking)
-      is_direct: isDirect,
-      ats_type: atsType,
-      enrichment_confidence: isDirect ? 0.9 : 0.5,
+      // URL enrichment fields (from jobURLEnricher)
+      is_direct: urlEnrichment?.is_direct ?? false,
+      ats_type: urlEnrichment?.ats_type ?? null,
+      enrichment_confidence: urlEnrichment?.enrichment_confidence ?? 0.5,
 
       // ATS enrichment fields
-      seniority_level: enrichment.seniority_level,
-      experience_years_min: enrichment.experience_years_min,
-      experience_years_max: enrichment.experience_years_max,
-      required_skills: enrichment.required_skills.length > 0 ? enrichment.required_skills : null,
-      preferred_skills: enrichment.preferred_skills.length > 0 ? enrichment.preferred_skills : null,
-      education_level: enrichment.education_level,
-      industry: enrichment.industry,
+      seniority_level: atsEnrichment.seniority_level,
+      experience_years_min: atsEnrichment.experience_years_min,
+      experience_years_max: atsEnrichment.experience_years_max,
+      required_skills: atsEnrichment.required_skills.length > 0 ? atsEnrichment.required_skills : null,
+      preferred_skills: atsEnrichment.preferred_skills.length > 0 ? atsEnrichment.preferred_skills : null,
+      education_level: atsEnrichment.education_level,
+      industry: atsEnrichment.industry,
     }
   })
 

@@ -3,7 +3,6 @@ import React, { ChangeEvent } from 'react'
 import { SectionCard } from './SectionCard'
 import { ResumeCertificationItem } from '../../types/resume-builder.types'
 import { RelevntColors } from '../../hooks/useRelevntColors'
-import { Button } from '../ui/Button'
 import { inputClass, itemCardClass, labelClass } from './sectionStyles'
 import { Award } from "lucide-react"
 
@@ -82,7 +81,7 @@ export const CertificationsSection: React.FC<CertificationsSectionProps> = ({
               </div>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-3 sm:grid-cols-2 mt-4">
               <div>
                 <label className={labelClass}>Issued</label>
                 <input
@@ -103,7 +102,7 @@ export const CertificationsSection: React.FC<CertificationsSectionProps> = ({
               </div>
             </div>
 
-            <div>
+            <div className="mt-4">
               <label className={labelClass}>URL (optional)</label>
               <input
                 className={inputClass}
@@ -113,26 +112,26 @@ export const CertificationsSection: React.FC<CertificationsSectionProps> = ({
               />
             </div>
 
-            <Button
+            <button
               type="button"
-              variant="destructive"
-              size="sm"
+              className="action-remove mt-4"
               onClick={() => removeItem(index)}
+              aria-label="Remove certification"
             >
-              ✕ Remove certification
-            </Button>
+              Remove certification
+            </button>
           </div>
         ))}
 
-        <Button
+        <button
           type="button"
-          variant="secondary"
-          size="sm"
+          className="action-add"
           onClick={addItem}
         >
           + Add certification
-        </Button>
+        </button>
       </div>
     </SectionCard>
   )
 }
+

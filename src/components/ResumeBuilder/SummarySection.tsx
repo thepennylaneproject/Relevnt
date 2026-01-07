@@ -5,6 +5,8 @@ import { AIButton } from './AIButton'
 import { useAITask } from '../../hooks/useAITask'
 import { inputClass, labelClass, textareaClass } from './sectionStyles'
 import { Stars } from "lucide-react"
+import { InlineQuestionHelper } from '../Applications/InlineQuestionHelper'
+
 
 interface Props {
   summary: ResumeSummary
@@ -75,6 +77,11 @@ export const SummarySection: React.FC<Props> = ({ summary, onChange, colors }) =
             value={summary.summary}
             onChange={handleFieldChange('summary')}
             placeholder="2 to 4 lines that describe who you are, what you do best, and the value you create."
+          />
+          <InlineQuestionHelper
+            questionText="Write a professional summary describing who you are, what you do best, and the value you create."
+            fieldValue={summary.summary || ''}
+            onInsert={(text) => onChange({ summary: text })}
           />
           {error && <div className="text-xs text-rose-600">{error.message}</div>}
         </div>

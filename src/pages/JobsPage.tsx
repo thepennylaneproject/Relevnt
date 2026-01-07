@@ -1,21 +1,32 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * JOBS PAGE — Running Logbook Blueprint
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Physical metaphor: A running logbook of opportunities — each row a single
+ * pencil entry on a ruled page, read top to bottom.
+ *
+ * Three Zones:
+ * 1. Masthead (sticky) — page title + inline text filters
+ * 2. Ledger (scrollable) — continuous list of job rows
+ * 3. Footnote (bottom) — end-of-results marker
+ *
+ * Constraints:
+ * - No cards, no panels, no tiles, no shadows
+ * - Jobs as ledger rows, not cards
+ * - One primary action (View →) always visible
+ * - Secondary actions hidden, revealed on hover/focus
+ * - No salary, match score, badges, tags in default row view
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+import React, { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
-import { PageLayout } from '../components/layout/PageLayout'
-import { Card } from '../components/ui/Card'
-import { Heading, Text } from '../components/ui/Typography'
-import { RelevntFeedPanel } from '../components/RelevntFeedPanel'
 import { useAuth } from '../contexts/AuthContext'
-import { EmptyState } from '../components/ui/EmptyState'
 import { useToast } from '../components/ui/Toast'
-import { Button } from '../components/ui/Button'
-import { Icon } from '../components/ui/Icon'
-import { Select } from '../components/forms/Select'
 import type { JobRow } from '../shared/types'
-import { usePersonas } from '../hooks/usePersonas'
-import { RelevanceTuner } from '../components/personas/RelevanceTuner'
-import { AutoTuneSuggestions } from '../components/intelligence/AutoTuneSuggestions'
-import { useNetworkingCompanies, checkCompanyMatch } from '../hooks/useNetworkLookup'
+import './JobsPage.css'
 
 type JobSourceRow = {
   id: string
@@ -24,7 +35,7 @@ type JobSourceRow = {
   enabled: boolean
 }
 
-// cheap structural guard so we never treat an error array as jobs
+// Structural guard to ensure we have valid job data
 function isJobRowArray(data: unknown): data is JobRow[] {
   if (!Array.isArray(data)) return false
   return data.every((item) => {
@@ -34,45 +45,38 @@ function isJobRowArray(data: unknown): data is JobRow[] {
   })
 }
 
-type SortBy =
-  | 'recent'
-  | 'salary-high'
-  | 'salary-low'
-  | 'match'
-  | 'company'
-
 const PAGE_SIZE = 50
 
 export default function JobsPage() {
-  const navigate = useNavigate()
   const { user } = useAuth()
-  const { activePersona, personas, setActivePersona } = usePersonas()
   const { showToast } = useToast()
 
-  // browse side (jobs list from Supabase)
+  // Job data state
   const [jobs, setJobs] = useState<JobRow[]>([])
   const [jobsLoading, setJobsLoading] = useState(false)
   const [jobsError, setJobsError] = useState<string | null>(null)
 
-  const [search, setSearch] = useState('')
-  const [locationFilter, setLocationFilter] = useState('')
-  const [remoteOnlyBrowse, setRemoteOnlyBrowse] = useState(false)
+  // Filter state
   const [sourceKey, setSourceKey] = useState<string | ''>('')
   const [employmentType, setEmploymentType] = useState<string | ''>('')
   const [postedSince, setPostedSince] = useState<'7d' | '30d' | '90d' | ''>('')
-  const [minSalaryBrowse, setMinSalaryBrowse] = useState(0)
+  const [remoteOnly, setRemoteOnly] = useState(false)
+  const [minSalary, setMinSalary] = useState(0)
   const [page, setPage] = useState(0)
-  const [sortBy, setSortBy] = useState<SortBy>('recent')
 
-  // feed filters (lifted from RelevntFeedPanel)
-  const [minSalaryFeed, setMinSalaryFeed] = useState(0)
-  const [remoteOnlyFeed, setRemoteOnlyFeed] = useState(false)
-  const [sourceFeed, setSourceFeed] = useState('')
-  const [employmentTypeFeed, setEmploymentTypeFeed] = useState('')
+  // Popover state for filter menus
+  const [activePopover, setActivePopover] = useState<'source' | 'posted' | 'type' | 'salary' | null>(null)
 
+  // Sources for filter options
   const [sources, setSources] = useState<JobSourceRow[]>([])
   const [savedJobIds, setSavedJobIds] = useState<string[]>([])
-  const [refreshKey, setRefreshKey] = useState(0)
+
+  // Expansion state for inline details
+  const [expandedJobId, setExpandedJobId] = useState<string | null>(null)
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // DATA FETCHING
+  // ─────────────────────────────────────────────────────────────────────────
 
   const fetchSources = useCallback(async () => {
     try {
@@ -113,44 +117,12 @@ export default function JobsPage() {
             'competitiveness_level',
             'match_score',
             'probability_estimate',
+            'is_direct',
           ].join(', ')
         )
         .eq('is_active', true)
         .order('posted_date', { ascending: false, nullsFirst: false })
         .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1)
-
-      // Persona-based filtering: augment search with persona keywords if search is empty
-      let effectiveSearch = search.trim()
-      if (!effectiveSearch && activePersona?.preferences?.job_title_keywords?.length) {
-        // Use first keyword from persona as default search
-        effectiveSearch = activePersona.preferences.job_title_keywords[0]
-      }
-
-      if (effectiveSearch) {
-        const term = `%${effectiveSearch}%`
-        query = query.or(
-          `title.ilike.${term},company.ilike.${term},location.ilike.${term}`
-        )
-      }
-
-      // Persona-based location filtering
-      let effectiveLocation = locationFilter.trim()
-      if (!effectiveLocation && activePersona?.preferences?.locations?.length) {
-        effectiveLocation = activePersona.preferences.locations[0]
-      }
-
-      if (effectiveLocation) {
-        const loc = `%${effectiveLocation}%`
-        query = query.ilike('location', loc)
-      }
-
-      // Persona-based remote filtering
-      const shouldFilterRemote = remoteOnlyBrowse ||
-        (!remoteOnlyBrowse && activePersona?.preferences?.remote_preference === 'remote')
-
-      if (shouldFilterRemote) {
-        query = query.or('remote_type.eq.remote,location.ilike.%Remote%')
-      }
 
       if (sourceKey) {
         query = query.eq('source_slug', sourceKey)
@@ -159,44 +131,34 @@ export default function JobsPage() {
       if (employmentType) {
         switch (employmentType) {
           case 'full-time':
-            // matches "full time", "full-time", "full_time", "Full Time", etc.
             query = query.ilike('employment_type', '%full%')
             break
-
           case 'part-time':
             query = query.ilike('employment_type', '%part%')
             break
-
           case 'contract':
             query = query.ilike('employment_type', '%contract%')
             break
-
           case 'temporary':
             query = query.ilike('employment_type', '%temp%')
-            break
-
-          default:
-            // future-proof fallback: no filter
             break
         }
       }
 
       if (postedSince) {
         const now = new Date()
-        const days =
-          postedSince === '7d' ? 7 : postedSince === '30d' ? 30 : 90
+        const days = postedSince === '7d' ? 7 : postedSince === '30d' ? 30 : 90
         const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000)
         const isoDate = cutoff.toISOString().slice(0, 10)
         query = query.gte('posted_date', isoDate)
       }
 
-      // Persona-based minimum salary filtering
-      const effectiveMinSalary = minSalaryBrowse > 0
-        ? minSalaryBrowse
-        : (activePersona?.preferences?.min_salary || 0)
+      if (remoteOnly) {
+        query = query.or('remote_type.eq.remote,location.ilike.%Remote%')
+      }
 
-      if (effectiveMinSalary > 0) {
-        query = query.gte('salary_max', effectiveMinSalary)
+      if (minSalary > 0) {
+        query = query.gte('salary_max', minSalary)
       }
 
       const { data, error } = await query
@@ -214,31 +176,7 @@ export default function JobsPage() {
         return
       }
 
-      const jobsList = data as JobRow[]
-
-      // Enrich with company metrics
-      const companyNames = Array.from(new Set(jobsList.map(j => j.company).filter(Boolean))) as string[]
-      const { data: companiesData } = await (supabase as any)
-        .from('companies')
-        .select('name, growth_score, job_creation_velocity')
-        .in('name', companyNames)
-
-      const companyMap = new Map((companiesData || []).map((c: any) => [c.name, c]))
-      const enrichedJobs = jobsList.map(j => {
-        if (j.company) {
-          const c = companyMap.get(j.company) as { growth_score?: number; job_creation_velocity?: number } | undefined
-          if (c) {
-            return {
-              ...j,
-              growth_score: c.growth_score,
-              hiring_momentum: c.job_creation_velocity
-            }
-          }
-        }
-        return j
-      })
-
-      setJobs(enrichedJobs)
+      setJobs(data as JobRow[])
     } catch (err) {
       console.error('Unexpected error loading jobs', err)
       setJobsError('Something went wrong while loading jobs.')
@@ -246,22 +184,8 @@ export default function JobsPage() {
     } finally {
       setJobsLoading(false)
     }
-  }, [
-    search,
-    locationFilter,
-    remoteOnlyBrowse,
-    sourceKey,
-    employmentType,
-    postedSince,
-    minSalaryBrowse,
-    page,
-    activePersona,
-  ])
+  }, [sourceKey, employmentType, postedSince, remoteOnly, minSalary, page])
 
-  // Networking connections
-  const { companies: networkingCompanies, companyCounts } = useNetworkingCompanies()
-
-  // saved jobs for current user
   const loadSavedJobs = useCallback(async () => {
     if (!user) {
       setSavedJobIds([])
@@ -286,6 +210,10 @@ export default function JobsPage() {
     }
   }, [user])
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // ACTIONS
+  // ─────────────────────────────────────────────────────────────────────────
+
   const toggleSavedJob = useCallback(
     async (jobId: string) => {
       if (!user) {
@@ -304,13 +232,12 @@ export default function JobsPage() {
             .eq('job_id', jobId)
 
           if (error) {
-            console.warn('Failed to unsave job', error)
             showToast('Failed to remove job', 'error', 3000)
             return
           }
 
           setSavedJobIds((prev) => prev.filter((id) => id !== jobId))
-          showToast('Removed from saved jobs', 'info', 2500)
+          showToast('Removed from saved', 'info', 2500)
         } else {
           const { error } = await supabase.from('saved_jobs').insert({
             user_id: user.id,
@@ -318,431 +245,434 @@ export default function JobsPage() {
           })
 
           if (error) {
-            console.warn('Failed to save job', error)
             showToast('Failed to save job', 'error', 3000)
             return
           }
 
           setSavedJobIds((prev) => (prev.includes(jobId) ? prev : [...prev, jobId]))
-          showToast('Saved to My Jobs → Discovered', 'success', 3000)
+          showToast('Saved', 'success', 2500)
         }
       } catch (err) {
-        console.warn('Unexpected error toggling saved job', err)
         showToast('Something went wrong', 'error', 3000)
       }
     },
     [user, savedJobIds, showToast]
   )
 
-  const handleClearFilters = useCallback(() => {
-    setSearch('')
-    setLocationFilter('')
-    setSourceKey('')
-    setEmploymentType('')
-    setPostedSince('')
-    setMinSalaryBrowse(0)
-    setRemoteOnlyBrowse(false)
-    setSortBy('recent')
-    setPage(0)
+  const copyJobLink = useCallback(
+    (url: string) => {
+      navigator.clipboard.writeText(url)
+      showToast('Link copied', 'info', 2000)
+    },
+    [showToast]
+  )
+
+  const toggleExpansion = useCallback((jobId: string) => {
+    setExpandedJobId((prev) => (prev === jobId ? null : jobId))
   }, [])
 
-  // sorted view of jobs for rendering
-  const sortedJobs = useMemo(() => {
-    if (jobs.length === 0) return jobs
-
-    if (sortBy === 'recent') {
-      // already ordered by posted_date desc from DB
-      return jobs
-    }
-
-    const copy = [...jobs]
-
-    if (sortBy === 'company') {
-      copy.sort((a, b) => (a.company || '').localeCompare(b.company || ''))
-      return copy
-    }
-
-    if (sortBy === 'match') {
-      copy.sort((a, b) => (b.match_score ?? 0) - (a.match_score ?? 0))
-      return copy
-    }
-
-    if (sortBy === 'salary-high' || sortBy === 'salary-low') {
-      const sign = sortBy === 'salary-high' ? -1 : 1
-      copy.sort((a, b) => {
-        const aVal = (a.salary_max ?? a.salary_min ?? 0) as number
-        const bVal = (b.salary_max ?? b.salary_min ?? 0) as number
-        if (aVal === bVal) return 0
-        return aVal < bVal ? sign : -sign
-      })
-      return copy
-    }
-
-    return jobs
-  }, [jobs, sortBy])
+  // ─────────────────────────────────────────────────────────────────────────
+  // EFFECTS
+  // ─────────────────────────────────────────────────────────────────────────
 
   useEffect(() => {
     fetchSources()
   }, [fetchSources])
 
-
+  useEffect(() => {
+    fetchJobs()
+  }, [fetchJobs])
 
   useEffect(() => {
     loadSavedJobs()
   }, [loadSavedJobs])
 
-  const renderFeed = () => {
-    return (
-      <div className="feed-stack">
-        {activePersona && (
-          <div className="feed-header-explainer">
-            <p className="subtitle">
-              Jobs ranked by AI using your <strong>{activePersona.name}</strong> job target.
-              {!personas.length && ' Create a job target to personalize your results.'}
-            </p>
-          </div>
-        )}
-        {!activePersona && (
-          <div className="feed-header-explainer">
-            <p className="subtitle">
-              Showing all available jobs. <a href="/settings?section=targeting" className="text-accent hover:underline">Set up a job target</a> to get AI-powered personalized rankings.
-            </p>
-          </div>
-        )}
+  // ─────────────────────────────────────────────────────────────────────────
+  // HELPERS
+  // ─────────────────────────────────────────────────────────────────────────
 
-        {/* Relevance Tuner with Feed Filters */}
-        <RelevanceTuner 
-          onWeightsChange={() => {
-            // Weights are saved to DB. Trigger feed refresh.
-            setRefreshKey(prev => prev + 1)
-          }}
-          minSalary={minSalaryFeed}
-          setMinSalary={setMinSalaryFeed}
-          remoteOnly={remoteOnlyFeed}
-          setRemoteOnly={setRemoteOnlyFeed}
-          source={sourceFeed}
-          setSource={setSourceFeed}
-          employmentType={employmentTypeFeed}
-          setEmploymentType={setEmploymentTypeFeed}
-          availableSources={sources}
-        />
+  const formatRelativeDate = (dateStr: string | null | undefined): string => {
+    if (!dateStr) return ''
+    const date = new Date(dateStr)
+    if (isNaN(date.getTime())) return ''
 
-        {/* Auto-Tune Suggestions - Concierge mode */}
-        <AutoTuneSuggestions />
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
 
-        {/* Job Feed */}
-        <div className="jobs-feed-container">
-          <RelevntFeedPanel 
-            minSalary={minSalaryFeed}
-            remoteOnly={remoteOnlyFeed}
-            source={sourceFeed}
-            employmentType={employmentTypeFeed}
-            refreshKey={refreshKey}
-          />
-        </div>
-      </div>
-    )
+    if (diffDays === 0) return 'Today'
+    if (diffDays === 1) return '1d ago'
+    if (diffDays < 7) return `${diffDays}d ago`
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
   }
 
-  const renderBrowseTab = () => {
-    return (
-      <div className="jobs-browse-layout">
-        <aside className="jobs-sidebar">
-          <div>
-            <h3 className="filter-section-title">Search & Source</h3>
-            <div className="form-group">
-              <label className="form-label">Job Title or Keyword</label>
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value)
-                  setPage(0)
-                }}
-                placeholder="Product designer, marketing…"
-                className="form-input"
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Location</label>
-              <input
-                type="text"
-                value={locationFilter}
-                onChange={(e) => {
-                  setLocationFilter(e.target.value)
-                  setPage(0)
-                }}
-                placeholder="Remote, New York, Europe…"
-                className="form-input"
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Source</label>
-              <select
-                value={sourceKey}
-                onChange={(e) => {
-                  setSourceKey(e.target.value)
-                  setPage(0)
-                }}
-                className="form-select"
-              >
-                <option value="">All sources</option>
-                {sources.map((s) => (
-                  <option key={s.id} value={s.source_key}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <h3 className="filter-section-title">Refine</h3>
-            <div className="form-group">
-              <label className="form-label">Employment type</label>
-              <select
-                value={employmentType}
-                onChange={(e) => {
-                  setEmploymentType(e.target.value)
-                  setPage(0)
-                }}
-                className="form-select"
-              >
-                <option value="">Any</option>
-                <option value="full-time">Full time</option>
-                <option value="part-time">Part time</option>
-                <option value="contract">Contract</option>
-                <option value="temporary">Temporary</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Posted within</label>
-              <select
-                value={postedSince}
-                onChange={(e) => {
-                  setPostedSince(e.target.value as '7d' | '30d' | '90d' | '')
-                  setPage(0)
-                }}
-                className="form-select"
-              >
-                <option value="">Anytime</option>
-                <option value="7d">Last 7 days</option>
-                <option value="30d">Last 30 days</option>
-                <option value="90d">Last 90 days</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Min salary (USD)</label>
-              <input
-                type="number"
-                min={0}
-                step={5000}
-                value={minSalaryBrowse}
-                onChange={(e) => {
-                  const raw = e.target.value
-                  const numeric = raw.replace(/[^\d]/g, '')
-                  const num = numeric === '' ? 0 : Number(numeric)
-                  const next = num <= 0 ? 0 : num
-                  setMinSalaryBrowse(next)
-                  setPage(0)
-                }}
-                className="form-input text-right"
-              />
-            </div>
-
-            <div className="form-group">
-              <div className="feed-remote-filter">
-                <input
-                  id="browse-remote-only"
-                  type="checkbox"
-                  className="form-checkbox"
-                  checked={remoteOnlyBrowse}
-                  onChange={(e) => {
-                    setRemoteOnlyBrowse(e.target.checked)
-                    setPage(0)
-                  }}
-                />
-                <label htmlFor="browse-remote-only" className="text-sm">Remote friendly roles</label>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Sort by</label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as SortBy)}
-                className="form-select"
-              >
-                <option value="recent">Most recent</option>
-                <option value="salary-high">Salary, high to low</option>
-                <option value="salary-low">Salary, low to high</option>
-                <option value="match">Best match</option>
-                <option value="company">Company name</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="form-actions">
-            <Button type="button" variant="primary" onClick={() => fetchJobs()}>
-              Refresh jobs
-            </Button>
-            <Button type="button" variant="secondary" onClick={handleClearFilters}>
-              Clear filters
-            </Button>
-          </div>
-        </aside>
-
-        <main className="jobs-list">
-          {jobsLoading && <div className="muted">Loading jobs…</div>}
-          {!jobsLoading && jobsError && <div className="error-text">{jobsError}</div>}
-          {!jobsLoading && !jobsError && sortedJobs.length === 0 && (
-            <EmptyState
-              type="jobs"
-              title="No opportunities found yet"
-              description={
-                search || locationFilter || sourceKey || employmentType || postedSince || minSalaryBrowse > 0 || remoteOnlyBrowse
-                  ? "Try adjusting your filters to see more opportunities."
-                  : "Your perfect role may be on its way. We're continuously searching."
-              }
-              
-            />
-          )}
-
-          {!jobsLoading && !jobsError && sortedJobs.length > 0 && (
-            <div className="card-grid-3col">
-              {sortedJobs.map((job) => {
-                const salaryMin = job.salary_min || null
-                const salaryMax = job.salary_max || null
-                let salaryLabel = ''
-                if (salaryMin && salaryMax && salaryMin !== salaryMax) {
-                  salaryLabel = `$${salaryMin.toLocaleString()} – $${salaryMax.toLocaleString()}`
-                } else if (salaryMin || salaryMax) {
-                  const n = salaryMin || salaryMax
-                  salaryLabel = `$${Number(n).toLocaleString()}`
-                }
-
-                const isRemote =
-                  job.remote_type === 'remote' ||
-                  (job.location || '').toLowerCase().includes('remote')
-
-                const isSaved = savedJobIds.includes(job.id)
-                const matchScore =
-                  typeof job.match_score === 'number' ? Math.round(job.match_score) : null
-
-                let postedLabel = ''
-                if (job.posted_date) {
-                  const parsed = new Date(job.posted_date)
-                  if (!Number.isNaN(parsed.getTime())) {
-                    postedLabel = parsed.toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                    })
-                  }
-                }
-
-                return (
-                  <div key={job.id} className="card card-job-grid">
-                    <div className="card-header">
-                      <h3>{job.title}</h3>
-                    </div>
-
-                    <div className="card-company">
-                      {job.company || 'Unknown Company'} {job.location ? `• ${job.location}` : ''}
-                    </div>
-
-                    <div className="card-meta">
-                      {salaryLabel && (
-                        <span className="meta-item">
-                          {salaryLabel}
-                        </span>
-                      )}
-                      {job.employment_type && (
-                        <span className="meta-item">
-                          {job.employment_type.replace('_', ' ')}
-                        </span>
-                      )}
-                      {postedLabel && (
-                        <span className="meta-item">
-                          {postedLabel}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="card-tags">
-                      {isRemote && <span className="tag tag-remote">Remote</span>}
-                      {job.source_slug && <span className="tag">{job.source_slug}</span>}
-                    </div>
-
-                    <div className="card-footer">
-                      {job.external_url && (
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => job.external_url && window.open(job.external_url, '_blank', 'noreferrer')}
-                        >
-                          View
-                        </Button>
-                      )}
-                      <Button
-                        type="button"
-                        onClick={() => toggleSavedJob(job.id)}
-                        variant={isSaved ? 'secondary' : 'ghost'}
-                        size="sm"
-                        aria-label={isSaved ? 'Remove from saved' : 'Save job'}
-                      >
-                        {isSaved ? 'Saved' : 'Save'}
-                      </Button>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </main>
-      </div>
-    )
+  const formatSalary = (min: number | null | undefined, max: number | null | undefined): string => {
+    if (!min && !max) return ''
+    if (min && max && min !== max) {
+      return `$${min.toLocaleString()} – $${max.toLocaleString()}`
+    }
+    const val = min || max
+    return val ? `$${val.toLocaleString()}` : ''
   }
+
+  const handleRowKeyDown = (e: React.KeyboardEvent, jobId: string) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      toggleExpansion(jobId)
+    }
+  }
+
+  // Filter labels
+  const sourceLabel = sourceKey
+    ? sources.find((s) => s.source_key === sourceKey)?.name || 'All sources'
+    : 'All sources'
+  const postedLabel =
+    postedSince === '7d'
+      ? 'Last 7 days'
+      : postedSince === '30d'
+      ? 'Last 30 days'
+      : postedSince === '90d'
+      ? 'Last 90 days'
+      : 'Anytime'
+  const typeLabel =
+    employmentType === 'full-time'
+      ? 'Full-time'
+      : employmentType === 'part-time'
+      ? 'Part-time'
+      : employmentType === 'contract'
+      ? 'Contract'
+      : employmentType === 'temporary'
+      ? 'Temporary'
+      : 'Any type'
+  const salaryLabel = minSalary > 0 ? `$${minSalary.toLocaleString()}+` : '$0+'
+
+  // Close popover when clicking outside
+  const closePopover = useCallback(() => setActivePopover(null), [])
+  const togglePopover = useCallback((name: 'source' | 'posted' | 'type' | 'salary') => {
+    setActivePopover((prev) => (prev === name ? null : name))
+  }, [])
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // RENDER
+  // ─────────────────────────────────────────────────────────────────────────
 
   return (
-    <PageLayout
-      title="Relevnt Feed"
-      subtitle="Jobs matched to you, ranked by what matters most."
-      actions={
-        <button 
-          onClick={() => navigate('/settings?section=targeting')}
-          className="text-xs uppercase tracking-widest font-bold text-text-muted hover:text-text transition-colors flex items-center gap-2"
-        >
-          <Icon name="pocket-watch" size="sm" hideAccent />
-          Edit targeting
-        </button>
-      }
-    >
-      <div className="space-y-12">
-        {/* Job Target Selector */}
-        {personas.length > 0 && (
-          <div className="flex items-center gap-4 border-b border-border pb-6">
-            <Text muted className="uppercase tracking-widest text-[10px] font-bold">Current Target:</Text>
-            <select
-              className="bg-transparent border-none text-sm font-bold focus:ring-0 p-0 cursor-pointer"
-              value={activePersona?.id || ''}
-              onChange={(e) => setActivePersona(e.target.value)}
-            >
-              <option value="">All Jobs</option>
-              {personas.map(p => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
-          </div>
-        )}
+    <div className="jobs-page">
+      {/* ═══════════════════════════════════════════════════════════════════
+          ZONE 1: MASTHEAD
+          ═══════════════════════════════════════════════════════════════════ */}
+      <header className="jobs-masthead">
+        <h1 className="jobs-masthead__title">Opportunities</h1>
 
-        {/* Unified Feed */}
-        {renderFeed()}
-      </div>
-    </PageLayout>
+        <nav className="jobs-masthead__filters">
+          {/* Source Filter */}
+          <div className="jobs-filter-wrapper">
+            <button
+              type="button"
+              className={`jobs-filter-link ${sourceKey ? 'jobs-filter-link--active' : ''}`}
+              onClick={() => togglePopover('source')}
+              aria-expanded={activePopover === 'source'}
+            >
+              {sourceLabel}
+            </button>
+            {activePopover === 'source' && (
+              <div className="jobs-filter-popover">
+                <button
+                  type="button"
+                  className={`jobs-filter-option ${!sourceKey ? 'jobs-filter-option--active' : ''}`}
+                  onClick={() => { setSourceKey(''); setPage(0); closePopover() }}
+                >
+                  All sources
+                </button>
+                {sources.map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    className={`jobs-filter-option ${sourceKey === s.source_key ? 'jobs-filter-option--active' : ''}`}
+                    onClick={() => { setSourceKey(s.source_key); setPage(0); closePopover() }}
+                  >
+                    {s.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <span className="jobs-filter-sep">·</span>
+
+          {/* Posted Filter */}
+          <div className="jobs-filter-wrapper">
+            <button
+              type="button"
+              className={`jobs-filter-link ${postedSince ? 'jobs-filter-link--active' : ''}`}
+              onClick={() => togglePopover('posted')}
+              aria-expanded={activePopover === 'posted'}
+            >
+              {postedLabel}
+            </button>
+            {activePopover === 'posted' && (
+              <div className="jobs-filter-popover">
+                {(['', '7d', '30d', '90d'] as const).map((val) => (
+                  <button
+                    key={val || 'any'}
+                    type="button"
+                    className={`jobs-filter-option ${postedSince === val ? 'jobs-filter-option--active' : ''}`}
+                    onClick={() => { setPostedSince(val); setPage(0); closePopover() }}
+                  >
+                    {val === '' ? 'Anytime' : val === '7d' ? 'Last 7 days' : val === '30d' ? 'Last 30 days' : 'Last 90 days'}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <span className="jobs-filter-sep">·</span>
+
+          {/* Type Filter */}
+          <div className="jobs-filter-wrapper">
+            <button
+              type="button"
+              className={`jobs-filter-link ${employmentType ? 'jobs-filter-link--active' : ''}`}
+              onClick={() => togglePopover('type')}
+              aria-expanded={activePopover === 'type'}
+            >
+              {typeLabel}
+            </button>
+            {activePopover === 'type' && (
+              <div className="jobs-filter-popover">
+                {([['', 'Any type'], ['full-time', 'Full-time'], ['part-time', 'Part-time'], ['contract', 'Contract'], ['temporary', 'Temporary']] as const).map(([val, label]) => (
+                  <button
+                    key={val || 'any'}
+                    type="button"
+                    className={`jobs-filter-option ${employmentType === val ? 'jobs-filter-option--active' : ''}`}
+                    onClick={() => { setEmploymentType(val); setPage(0); closePopover() }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <span className="jobs-filter-sep">·</span>
+
+          {/* Salary Filter */}
+          <div className="jobs-filter-wrapper">
+            <button
+              type="button"
+              className={`jobs-filter-link ${minSalary > 0 ? 'jobs-filter-link--active' : ''}`}
+              onClick={() => togglePopover('salary')}
+              aria-expanded={activePopover === 'salary'}
+            >
+              {salaryLabel}
+            </button>
+            {activePopover === 'salary' && (
+              <div className="jobs-filter-popover">
+                {[0, 50000, 75000, 100000, 150000].map((val) => (
+                  <button
+                    key={val}
+                    type="button"
+                    className={`jobs-filter-option ${minSalary === val ? 'jobs-filter-option--active' : ''}`}
+                    onClick={() => { setMinSalary(val); setPage(0); closePopover() }}
+                  >
+                    {val === 0 ? '$0+' : `$${val.toLocaleString()}+`}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <span className="jobs-filter-sep">·</span>
+
+          {/* Remote Checkbox */}
+          <label className="jobs-filter-checkbox">
+            <input
+              type="checkbox"
+              checked={remoteOnly}
+              onChange={(e) => { setRemoteOnly(e.target.checked); setPage(0) }}
+            />
+            <span>Remote</span>
+          </label>
+        </nav>
+      </header>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          ZONE 2: LEDGER
+          ═══════════════════════════════════════════════════════════════════ */}
+      {jobsLoading && <div className="jobs-loading">Loading opportunities…</div>}
+
+      {!jobsLoading && jobsError && <div className="jobs-error">{jobsError}</div>}
+
+      {!jobsLoading && !jobsError && jobs.length === 0 && (
+        <div className="jobs-empty">
+          <p className="jobs-empty__title">No opportunities found</p>
+          <p className="jobs-empty__desc">
+            Try adjusting your filters, or check back later.
+          </p>
+        </div>
+      )}
+
+      {!jobsLoading && !jobsError && jobs.length > 0 && (
+        <ul className="jobs-ledger" role="list">
+          {jobs.map((job) => {
+            const isSaved = savedJobIds.includes(job.id)
+            const isExpanded = expandedJobId === job.id
+            const location = job.location || ''
+            const isRemote =
+              job.remote_type === 'remote' || location.toLowerCase().includes('remote')
+            const displayLocation = isRemote ? 'Remote' : location
+
+            // Expansion details
+            const salaryStr = formatSalary(job.salary_min, job.salary_max)
+            const matchScore = typeof job.match_score === 'number' ? Math.round(job.match_score) : null
+            const empType = job.employment_type?.replace('_', ' ') || ''
+
+            return (
+              <li
+                key={job.id}
+                className={`jobs-ledger__row ${isExpanded ? 'jobs-ledger__row--expanded' : ''}`}
+                role="listitem"
+              >
+                {/* Row header (collapsed view) */}
+                <div
+                  className="jobs-ledger__header"
+                  role="button"
+                  tabIndex={0}
+                  aria-expanded={isExpanded}
+                  aria-controls={`job-details-${job.id}`}
+                  onClick={() => toggleExpansion(job.id)}
+                  onKeyDown={(e) => handleRowKeyDown(e, job.id)}
+                >
+                  <div className="jobs-ledger__info">
+                    <span className="jobs-ledger__title">{job.title}</span>
+                    <span className="jobs-ledger__meta">
+                      {job.company || 'Unknown'}
+                      {displayLocation && ` · ${displayLocation}`}
+                    </span>
+                    <span className="jobs-ledger__date">
+                      {formatRelativeDate(job.posted_date)}
+                    </span>
+                  </div>
+
+                  <div className="jobs-ledger__actions">
+                    {/* Secondary actions — hidden until hover/focus */}
+                    <div className="jobs-ledger__secondary-actions">
+                      <button
+                        type="button"
+                        className="jobs-ledger__secondary-btn"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          toggleSavedJob(job.id)
+                        }}
+                        title={isSaved ? 'Unsave' : 'Save'}
+                      >
+                        {isSaved ? '★ Saved' : '☆ Save'}
+                      </button>
+                      {job.external_url && (
+                        <button
+                          type="button"
+                          className="jobs-ledger__secondary-btn"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            copyJobLink(job.external_url!)
+                          }}
+                          title="Copy link"
+                        >
+                          Copy
+                        </button>
+                      )}
+                      <a
+                        href={`/insights?job=${job.id}`}
+                        className="jobs-ledger__secondary-btn"
+                        onClick={(e) => e.stopPropagation()}
+                        title="Check resume fit for this job"
+                      >
+                        Check Fit
+                      </a>
+                    </div>
+
+                    {/* Primary action — always visible */}
+                    {job.external_url ? (
+                      <a
+                        href={job.external_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="jobs-ledger__primary-action"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        View →
+                      </a>
+                    ) : (
+                      <span className="jobs-ledger__primary-action" style={{ opacity: 0.4 }}>
+                        View →
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Inline expansion — details only */}
+                <div
+                  id={`job-details-${job.id}`}
+                  className="jobs-ledger__expansion"
+                  role="region"
+                  aria-hidden={!isExpanded}
+                >
+                  <dl className="jobs-ledger__details">
+                    {job.is_direct && (
+                      <>
+                        <dt>Apply</dt>
+                        <dd>Direct to company</dd>
+                      </>
+                    )}
+                    {salaryStr && (
+                      <>
+                        <dt>Salary</dt>
+                        <dd>{salaryStr}</dd>
+                      </>
+                    )}
+                    {matchScore !== null && (
+                      <>
+                        <dt>Match</dt>
+                        <dd>{matchScore}%</dd>
+                      </>
+                    )}
+                    {empType && (
+                      <>
+                        <dt>Type</dt>
+                        <dd>{empType}</dd>
+                      </>
+                    )}
+                    {isRemote && (
+                      <>
+                        <dt>Work</dt>
+                        <dd>Remote</dd>
+                      </>
+                    )}
+                    {job.source_slug && (
+                      <>
+                        <dt>Source</dt>
+                        <dd>{job.source_slug}</dd>
+                      </>
+                    )}
+                  </dl>
+                </div>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          ZONE 3: FOOTNOTE
+          ═══════════════════════════════════════════════════════════════════ */}
+      {!jobsLoading && !jobsError && jobs.length > 0 && (
+        <footer className="jobs-footnote">
+          {jobs.length < PAGE_SIZE
+            ? 'End of results'
+            : `Showing ${jobs.length} opportunities`}
+        </footer>
+      )}
+    </div>
   )
 }

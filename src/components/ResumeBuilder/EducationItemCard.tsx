@@ -1,7 +1,6 @@
 // src/pages/ResumeBuilder/components/EducationItemCard.tsx
 import React, { ChangeEvent } from 'react'
 import { ResumeEducationItem } from '../../types/resume-builder.types' // adjust if needed
-import { Button } from '../ui/Button'
 import { inputClass, itemCardClass, labelClass } from './sectionStyles'
 
 interface EducationItemCardProps {
@@ -49,7 +48,7 @@ export const EducationItemCard: React.FC<EducationItemCardProps> = ({
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2 mt-4">
         <div>
           <label className={labelClass}>Field of study</label>
           <input
@@ -70,7 +69,7 @@ export const EducationItemCard: React.FC<EducationItemCardProps> = ({
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2 mt-4">
         <div>
           <label className={labelClass}>Start</label>
           <input
@@ -91,14 +90,15 @@ export const EducationItemCard: React.FC<EducationItemCardProps> = ({
         </div>
       </div>
 
-      <Button
+      <button
         type="button"
-        variant="destructive"
-        size="sm"
+        className="action-remove mt-4"
         onClick={onRemove}
+        aria-label="Remove education"
       >
-        ✕ Remove education
-      </Button>
+        Remove education
+      </button>
     </div>
   )
 }
+

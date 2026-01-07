@@ -4,8 +4,9 @@ import { ResumeExperienceItem } from '../../types/resume-builder.types'
 import { AIButton } from './AIButton'
 import { useAITask } from '../../hooks/useAITask'
 import { useState } from 'react'
-import { Button } from '../ui/Button'
 import { inputClass, itemCardClass, labelClass, textareaClass } from './sectionStyles'
+import { InlineQuestionHelper } from '../Applications/InlineQuestionHelper'
+
 
 interface ExperienceItemCardProps {
   item: ResumeExperienceItem
@@ -121,7 +122,7 @@ export const ExperienceItemCard: React.FC<ExperienceItemCardProps> = ({
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2 mt-4">
         <div>
           <label className={labelClass}>Location</label>
           <input
@@ -153,10 +154,10 @@ export const ExperienceItemCard: React.FC<ExperienceItemCardProps> = ({
         </div>
       </div>
 
-      <div>
+      <div className="mt-4">
         <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
           <label className={labelClass}>Highlights / Impact</label>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
             <AIButton
               label="Generate Bullets"
               onClick={handleGenerateBullets}
@@ -178,17 +179,23 @@ export const ExperienceItemCard: React.FC<ExperienceItemCardProps> = ({
           onChange={handleFieldChange('bullets')}
           placeholder="Use bullet-style lines, quantified impact, systems you built…"
         />
+        <InlineQuestionHelper
+          questionText={`Describe your key accomplishments and impact as ${item.title || 'this role'} at ${item.company || 'this company'}.`}
+          fieldValue={item.bullets || ''}
+          onInsert={(text) => onChange({ ...item, bullets: text })}
+        />
         {error && <div className="text-xs text-rose-600">{error.message}</div>}
       </div>
 
-      <Button
+      <button
         type="button"
-        variant="destructive"
-        size="sm"
+        className="action-remove mt-4"
         onClick={onRemove}
+        aria-label="Remove experience"
       >
-        ✕ Remove experience
-      </Button>
-    </div >
+        Remove experience
+      </button>
+    </div>
   )
 }
+

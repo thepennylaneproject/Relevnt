@@ -4,7 +4,6 @@ import { SectionCard } from './SectionCard'
 import { ExperienceItemCard } from './ExperienceItemCard'
 import { ResumeExperienceItem } from '../../types/resume-builder.types'
 import { RelevntColors } from '../../hooks/useRelevntColors'
-import { Button } from '../ui/Button'
 import { Briefcase } from "lucide-react"
 
 interface ExperienceSectionProps {
@@ -60,15 +59,15 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
           />
         ))}
 
-        <Button
+        <button
           type="button"
-          variant="secondary"
-          size="sm"
+          className="action-add"
           onClick={addItem}
         >
           + Add experience
-        </Button>
+        </button>
       </div>
     </SectionCard>
   )
 }
+

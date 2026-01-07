@@ -1,0 +1,475 @@
+/* ============================================
+   SETTINGS PAGE - Calm Editorial Reference Sheet
+   A document of facts, not a form to complete.
+   ============================================ */
+
+.settings-page {
+    max-width: 580px;
+    margin: 0 auto;
+    padding: 0 1.5rem 6rem;
+    position: relative;
+}
+
+/* Quiet status indicator - top right, nearly invisible */
+.settings-status {
+    position: fixed;
+    top: 4.5rem;
+    right: 1.5rem;
+    font-size: 0.625rem;
+    color: var(--text-muted);
+    opacity: 0.5;
+    letter-spacing: 0.02em;
+}
+
+/* ============================================
+   SECTIONS - Editorial small caps headers
+   ============================================ */
+.settings-section {
+    margin-bottom: var(--space-10);
+}
+
+.settings-section-header {
+    font-size: var(--type-section-size);     /* 9px — match Documents rail labels */
+    font-weight: var(--type-section-weight);         /* Match Documents */
+    color: var(--text-muted);
+    letter-spacing: var(--type-section-spacing);   /* Match Documents */
+    text-transform: uppercase;
+    margin: 0 0 var(--space-5) 0;
+    opacity: 0.7;
+}
+
+.settings-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0 0 var(--space-10) 0;
+}
+
+/* ============================================
+   FIELDS - Facts displayed as rows
+   Label subdued, value primary
+   ============================================ */
+.settings-fields {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.settings-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.settings-field-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+/* Labels: subdued, secondary — UPPERCASE to match Documents */
+.settings-field-label {
+    font-size: var(--type-label-size);
+    font-weight: var(--type-label-weight);
+    color: var(--text-muted);
+    letter-spacing: var(--type-label-spacing);   /* Match Documents form-label */
+    text-transform: uppercase; /* Match Documents form-label */
+    opacity: 0.8;
+}
+
+.settings-field-label-sm {
+    font-size: 0.625rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    opacity: 0.7;
+}
+
+/* Values: primary, factual */
+.settings-field-value {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-size: var(--type-body-size);
+    color: var(--text);
+    font-weight: var(--type-body-weight);
+    line-height: var(--type-body-line-height);
+}
+
+/* ============================================
+   EDIT LINKS - Deliberate editorial annotations
+   Same voice as labels, not helper text
+   ============================================ */
+.settings-edit-link {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 0.5625rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;  /* Match label letter-spacing */
+    color: var(--text-muted);
+    opacity: 0.6;
+    cursor: pointer;
+    transition: opacity 150ms ease;
+}
+
+.settings-edit-link:hover {
+    opacity: 1;
+}
+
+/* ============================================
+   INLINE EDITING - Clean underlined input
+   Commit on blur/Enter, no buttons
+   ============================================ */
+.settings-field-edit {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.settings-input {
+    font-size: var(--type-body-size);
+    padding: var(--space-1) 0;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    outline: none;
+    width: 100%;
+}
+
+.settings-input:focus {
+    border-bottom-color: var(--text-muted);
+}
+
+/* ============================================
+   STATUS INDICATORS - Whisper quiet
+   ============================================ */
+.settings-saved-indicator {
+    font-size: 0.5625rem;
+    color: var(--text-muted);
+    opacity: 0.5;
+    letter-spacing: 0.02em;
+}
+
+.settings-confirmation {
+    font-size: 0.5625rem;
+    color: var(--text-muted);
+    opacity: 0.5;
+}
+
+.settings-error {
+    font-size: 0.625rem;
+    color: var(--error);
+    opacity: 0.9;
+}
+
+.settings-loading {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    opacity: 0.5;
+    padding: var(--space-4) 0;
+}
+
+.settings-empty {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    opacity: 0.5;
+}
+
+/* ============================================
+   INLINE OPTIONS - Plain text choices
+   Active option is ink, others are muted
+   ============================================ */
+.settings-options-inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    margin-top: 0.125rem;
+}
+
+.settings-option {
+    font-size: 0.8125rem;
+    padding: 0;
+    margin-right: 0.875rem;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    opacity: 0.5;
+    cursor: pointer;
+}
+
+.settings-option:hover {
+    opacity: 0.8;
+}
+
+.settings-option.active {
+    color: var(--text);
+    opacity: 1;
+    font-weight: 600;  /* Clear weight differentiation for legibility */
+}
+
+/* ============================================
+   TAGS - Minimal inline chips
+   ============================================ */
+.settings-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    align-items: center;
+    margin-top: 0.125rem;
+}
+
+.settings-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    padding: 0.125rem 0.5rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 0;
+    color: var(--text);
+}
+
+.settings-tag-remove {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 0.75rem;
+    line-height: 1;
+    color: var(--text-muted);
+    opacity: 0.4;
+    cursor: pointer;
+    margin-left: 0.125rem;
+}
+
+.settings-tag-remove:hover {
+    opacity: 0.7;
+}
+
+.settings-tag-input {
+    font-size: 0.75rem;
+    padding: 0.125rem 0;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    outline: none;
+    min-width: 50px;
+}
+
+.settings-tag-input::placeholder {
+    color: var(--text-muted);
+    opacity: 0.4;
+}
+
+/* ============================================
+   SUGGESTIONS - Minimal dropdown
+   ============================================ */
+.settings-suggestions {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0.25rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    max-height: 140px;
+    overflow-y: auto;
+}
+
+.settings-suggestion {
+    width: 100%;
+    text-align: left;
+    padding: 0.375rem 0.5rem;
+    border: none;
+    background: transparent;
+    font-size: 0.75rem;
+    color: var(--text);
+    cursor: pointer;
+}
+
+.settings-suggestion:hover {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+/* ============================================
+   SLIDER - Ultra-quiet range control
+   ============================================ */
+.settings-slider {
+    width: 100%;
+    margin: 0.5rem 0 0.25rem;
+    appearance: none;
+    height: 1px;
+    background: rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+}
+
+.settings-slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    cursor: pointer;
+}
+
+.settings-slider::-moz-range-thumb {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    cursor: pointer;
+    border: none;
+}
+
+.settings-slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.5625rem;
+    color: var(--text-muted);
+    opacity: 0.5;
+}
+
+.settings-value-display {
+    font-size: 0.8125rem;
+    color: var(--text);
+    font-weight: 400;
+}
+
+/* ============================================
+   TOGGLES - Text-based, not chrome switches
+   ============================================ */
+.settings-toggles {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    margin-top: 0.125rem;
+}
+
+.settings-toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.settings-checkbox {
+    width: 12px;
+    height: 12px;
+    accent-color: var(--text-muted);
+    opacity: 0.7;
+}
+
+.settings-toggle-label {
+    font-size: 0.8125rem;
+    color: var(--text);
+}
+
+/* ============================================
+   SUB-FIELD - Conditional, indented
+   ============================================ */
+.settings-sub-field {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin-top: 0.375rem;
+    padding-left: 1.375rem;
+}
+
+.settings-number-input {
+    width: 40px;
+    font-size: 0.75rem;
+    padding: 0.125rem 0.25rem;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    text-align: center;
+}
+
+.settings-number-input:focus {
+    outline: none;
+    border-bottom-color: var(--text-muted);
+}
+
+/* ============================================
+   FIELD HINTS & WARNINGS
+   ============================================ */
+.settings-field-hint {
+    font-size: 0.5625rem;
+    color: var(--text-muted);
+    opacity: 0.6;
+    letter-spacing: 0.02em;
+    margin-top: 0.25rem;
+}
+
+.settings-field-warning {
+    font-size: 0.625rem;
+    color: var(--error);
+    opacity: 0.9;
+    margin-top: 0.25rem;
+}
+
+.settings-field-sublabel {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    opacity: 0.7;
+    margin-bottom: 0.5rem;
+}
+
+.settings-field-value--empty {
+    opacity: 0.4;
+}
+
+/* ============================================
+   ELEVATED FIELDS - Automation section
+   Visually distinct from preferences
+   ============================================ */
+.settings-field--elevated {
+    margin-top: var(--space-6);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--border);
+}
+
+/* ============================================
+   AUTOMATION CONFIRMATION
+   ============================================ */
+.settings-automation-confirm {
+    background: rgba(0, 0, 0, 0.02);
+    padding: var(--space-4);
+    margin-top: 0.5rem;
+}
+
+.settings-automation-confirm-text {
+    font-size: 0.8125rem;
+    color: var(--text);
+    line-height: 1.5;
+    margin: 0 0 1rem 0;
+}
+
+.settings-automation-confirm-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.settings-automation-confirm-btn {
+    font-size: 0.6875rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.5rem 1rem;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: transparent;
+    color: var(--color-graphite, #666);
+    cursor: pointer;
+    transition: opacity 150ms ease;
+}
+
+.settings-automation-confirm-btn:hover {
+    opacity: 0.8;
+}
+
+.settings-automation-confirm-btn--primary {
+    background: var(--text);
+    color: var(--surface);
+    border-color: var(--text);
+}
+

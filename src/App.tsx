@@ -19,10 +19,10 @@ import { lazy, Suspense } from 'react'
 const Settings = lazy(() => import('./pages/Settings'))
 import ResumeWorkspacePage from './pages/ResumeWorkspacePage'
 import ResumeFullViewPage from './pages/ResumeFullViewPage'
+import InsightsPage from './pages/InsightsPage'
 import SharedAuditPage from './pages/SharedAuditPage'
-import SidebarMarginNav from './components/chrome/SidebarMarginNav'
+import MastheadNav from './components/layout/MastheadNav'
 import { OnboardingGate } from './components/onboarding'
-import './styles/margin-nav.css'
 
 import './App.css'
 
@@ -37,7 +37,7 @@ function AppInner() {
 
   return (
     <BrowserRouter>
-      <SidebarMarginNav />
+      <MastheadNav />
       <div className="app-content">
         <OnboardingGate>
           <WelcomeModal />
@@ -75,6 +75,10 @@ function AppInner() {
                 <Route
                   path="/resumes/:id/view"
                   element={isAuthed ? <ResumeFullViewPage /> : <Navigate to="/login" replace />}
+                />
+                <Route
+                  path="/insights"
+                  element={isAuthed ? <InsightsPage /> : <Navigate to="/login" replace />}
                 />
 
                 <Route

@@ -1,32 +1,31 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * BADGE COMPONENT — Semantic Labels
+ * RELEVNT BADGE COMPONENT
  * ═══════════════════════════════════════════════════════════════════════════
  * 
- * A badge is a semantic marker, like margin notes in a journal.
+ * Badge component for status indicators and labels.
  * 
- * NO decorative backgrounds. Border + text color only.
- * Sharp corners (rounded-none). Editorial spacing.
- * 
- * NO gold variant. Gold is not for badges.
- * 
- * Printable test: Would this look correct printed on paper? Yes.
+ * Usage:
+ *   <Badge>Default</Badge>
+ *   <Badge variant="success">Active</Badge>
+ *   <Badge variant="warning">Pending</Badge>
  * 
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import { ReactNode } from 'react';
+import React from 'react';
 
-type BadgeVariant = 'neutral' | 'success' | 'warning' | 'error';
+export type BadgeVariant = 'primary' | 'success' | 'warning' | 'error' | 'neutral';
 
-interface BadgeProps {
-  variant?: BadgeVariant;
-  children: ReactNode;
-  className?: string;
-}
+export type BadgeProps = React.HTMLAttributes<HTMLSpanElement> & {
+    variant?: BadgeVariant;
+    children: React.ReactNode;
+    className?: string;
+};
 
 export const Badge = ({ variant = 'neutral', children, className = '' }: BadgeProps) => {
   const variants = {
+    primary: 'border-accent text-accent',
     neutral: 'border-border text-text-muted',
     success: 'border-success text-success',
     warning: 'border-warning text-warning',

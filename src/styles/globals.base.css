@@ -33,15 +33,14 @@
   --accent-glow: rgba(199, 165, 106, 0.15); /* subtle glow for focus/hover */
 
   /* Semantic (3) */
-  --success: #4D7C4D;      /* muted green */
-  --warning: #B8860B;      /* warm amber */
+  --success: #4D7C4D;      /* muted green */  --warning: #B8860B;      /* warm amber */
   --error: #A65D5D;        /* muted red */
 
   /* System (6) */
   --shadow: 0 1px 3px rgba(51, 51, 51, 0.04);  /* minimal shadow — barely perceptible */
   --radius: 0.25rem;       /* 4px MAXIMUM — sharp corners, editorial */
-  --font-display: 'Fraunces', Georgia, serif;
-  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Fraunces', georgia, serif;
+  --font-body: 'Inter', -apple-system, blinkmacsystemfont, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
   --transition: 200ms ease-out;
 }
@@ -54,21 +53,18 @@
   --text: #E8E2D7;         /* warm chalk */
   --text-muted: #A3A097;   /* muted chalk */
   --border: #2A2825;       /* subtle border */
-
   --accent: #C7A56A;       /* gold unchanged */
   --accent-hover: #B8965B;
   --accent-glow: rgba(199, 165, 106, 0.08);
-
   --success: #4D7C4D;
   --warning: #B8860B;
   --error: #A65D5D;
-
   --shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
   /* radius, fonts, transition unchanged */
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not(.light):not([data-theme="light"]) {
+  :root:not(.light, [data-theme="light"]) {
     --bg: #11100E;
     --surface: #1A1917;
     --surface-2: #252320;
@@ -97,7 +93,6 @@
   --color-surface: var(--surface);
   --color-surface-elevated: var(--surface);
   --color-surface-hover: var(--surface-2);
-  
   --color-text-primary: var(--text);
   --color-text-secondary: var(--text-muted);
   --color-text-tertiary: var(--text-muted);
@@ -105,21 +100,18 @@
   --color-ink-secondary: var(--text-muted);
   --color-ink-tertiary: var(--text-muted);
   --text-subtle: var(--text-muted);
-  
   --color-border: var(--border);
   --color-border-strong: var(--text-muted);
   --color-border-subtle: var(--border);
   --border-subtle: var(--border);
   --border-default: 1px solid var(--border);
   --color-graphite-faint: var(--border);
-  
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
   --color-accent-glow: var(--accent-glow);
   --color-accent-bg: var(--accent-glow);
   --color-accent-secondary: var(--accent-hover);
   --color-secondary-accent: var(--accent-hover);
-  
   --color-success: var(--success);
   --color-success-bg: rgba(77, 124, 77, 0.1);
   --color-warning: var(--warning);
@@ -128,7 +120,8 @@
   --color-error-bg: rgba(166, 93, 93, 0.1);
   --color-info: var(--accent);
   --color-info-bg: var(--accent-glow);
-  
+  --color-white: #fff;
+  --color-ink-inverse: var(--color-white);
   /* Old spacing → Use Tailwind instead, but provide fallback */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -141,13 +134,23 @@
   --space-12: 3rem;
   --space-16: 4rem;
   
+  /* Modern Density scale */
+  --space-dense-v: 0.1875rem;   /* 3px */
+  --space-dense-gap: 0.375rem;  /* 6px */
+  --space-logo-gap: 0.625rem;   /* 10px */
+  --space-nav-target: 0.875rem; /* 14px */
+  
   /* Old radius → Use var(--radius) instead */
+  --space-tiny: 0.125rem;    /* 2px */
+  --radius-xs: 2px;
   --radius-sm: calc(var(--radius) * 0.5);
   --radius-md: var(--radius);
   --radius-lg: calc(var(--radius) * 1.5);
   --radius-xl: calc(var(--radius) * 2);
   --radius-2xl: calc(var(--radius) * 3);
   --radius-card: calc(var(--radius) * 1.5);
+  --radius-card-inner: 0.875rem; /* 14px */
+  --radius-control: 0.625rem;    /* 10px */
   --radius-full: 9999px;
   
   /* Old shadows */
@@ -155,6 +158,17 @@
   --shadow-md: var(--shadow);
   --shadow-lg: 0 4px 16px rgba(51, 51, 51, 0.08);
   --shadow-glow: var(--shadow);
+  
+  /* Scrim and Interaction shadows */
+  --shadow-scrim-heavy: 0 18px 45px rgba(15, 18, 20, 0.35);
+  --shadow-accent-glow: 0 4px 12px var(--accent-glow);
+  --shadow-accent-outline: 0 0 0 1px rgba(var(--color-accent), 0.15);
+  --shadow-nav-inner: inset -8px 0 24px -12px rgba(0, 0, 0, 0.04);
+  --shadow-card-hover: 0 2px 12px rgba(0, 0, 0, 0.08);
+  --shadow-focus-ring: 0 0 0 3px var(--color-focus-ring);
+  
+  /* Z-Index Tiers */
+  --z-overlay-max: 1001;
   
   /* Old transitions */
   --transition-fast: var(--transition);
@@ -167,27 +181,32 @@
   --text-base: 1rem;
   --text-lg: 1.125rem;
   --text-xl: 1.25rem;
-  --text-2xl: 1.5rem;
+  --text-2xl: 1.5rem;   /* 24px */
+  
+  /* Semantic Typography Tiers */
+  --text-nano: 0.6875rem;        /* 11px */
+  --text-input: 0.8125rem;       /* 13px */
+  --text-body-strong: 0.9375rem; /* 15px */
+  --text-micro: 0.5625rem;       /* 9px */
+  --text-tiny: 0.625rem;         /* 10px */
   --text-3xl: 2rem;
   --text-4xl: 2.5rem;
-  
   --leading-tight: 1.2;
   --leading-snug: 1.35;
   --leading-normal: 1.5;
   --leading-relaxed: 1.65;
-  
   --font-regular: 400;
   --font-medium: 500;
   --font-semibold: 600;
   --font-bold: 700;
   
   /* Layout spacing (route-specific, delete when migrated) */
-  --layout-gap-section: 2rem;
-  --space-section-gap: 1.5rem;
-  --space-section-gap-large: 2rem;
-  --space-component-pad: 1.5rem;
-  --space-row-gap: 1rem;
-  --space-element-gap: 0.75rem;
+  --layout-gap-section: 3rem;      /* increased from 2rem for breathing */
+  --space-section-gap: 2.5rem;     /* increased from 1.5rem */
+  --space-section-gap-large: 3.5rem; /* increased from 2rem */
+  --space-component-pad: 2rem;     /* increased from 1.5rem */
+  --space-row-gap: 1.25rem;        /* increased from 1rem */
+  --space-element-gap: 1rem;       /* increased from 0.75rem */
 }
 
 .dark, [data-theme="dark"] {
@@ -195,6 +214,115 @@
   --color-bg-secondary: var(--surface);
   --color-surface-hover: var(--surface-2);
   --shadow-lg: 0 4px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TYPOGRAPHY RAMP — LOCKED API (5 TIERS ONLY)
+   ═══════════════════════════════════════════════════════════════════════════
+   
+   FORWARD CONTRACT: All future UI (including Application Question Helper) 
+   must use this ramp. No new typography variants may be introduced without 
+   modifying this section.
+   
+   PROHIBITED:
+   ✗ Component-level font-size overrides
+   ✗ Inline styles for typography
+   ✗ Tailwind one-offs (text-[14px], etc.)
+   ✗ Color changes except via semantic tokens
+   ✗ New heading levels
+   ✗ "Just this once" font tweaks
+   ✗ Page-specific typography
+   
+   USAGE RULES:
+   • Page Title      → Route-level titles ONLY (one per page)
+   • Section Anchor  → Conceptual block separators (never inside cards/forms)
+   • Functional Label → Field labels ONLY (never values or prose)
+   • Primary Content → Values, inputs, editable text, main prose
+   • Meta/Helper    → Timestamps, hints, secondary info (never critical)
+   
+   If an element doesn't fit a tier, the element is wrong.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Page Title — 40px, used once per route */
+  --type-page-title-size: 2.5rem;
+  --type-page-title-weight: 600;
+  --type-page-title-line-height: 1.3;
+  --type-page-title-spacing: -0.01em;
+  --type-page-title-color: var(--text);
+  
+  /* Section Anchor — 9px uppercase, calm authority */
+  --type-section-size: 0.5625rem;
+  --type-section-weight: 700;
+  --type-section-line-height: 1.4;
+  --type-section-spacing: 0.15em;
+  --type-section-color: var(--text-muted);
+  
+  /* Functional Label — 11px uppercase, low emphasis */
+  --type-label-size: 0.6875rem;
+  --type-label-weight: 400;
+  --type-label-line-height: 1.4;
+  --type-label-spacing: 0.08em;
+  --type-label-color: var(--text-muted);
+  
+  /* Primary Content — 15px, highest density */
+  --type-body-size: 0.9375rem;
+  --type-body-weight: 400;
+  --type-body-line-height: 1.5;
+  --type-body-spacing: normal;
+  --type-body-color: var(--text);
+  
+  /* Meta / Helper — 12px, subdued */
+  --type-meta-size: 0.75rem;
+  --type-meta-weight: 400;
+  --type-meta-line-height: 1.4;
+  --type-meta-spacing: normal;
+  --type-meta-color: var(--text-muted);
+}
+
+/* Utility Classes — Use these, not ad-hoc styles */
+.type-page-title {
+  font-family: var(--font-display);
+  font-size: var(--type-page-title-size);
+  font-weight: var(--type-page-title-weight);
+  line-height: var(--type-page-title-line-height);
+  letter-spacing: var(--type-page-title-spacing);
+  color: var(--type-page-title-color);
+}
+
+.type-section {
+  font-family: var(--font-body);
+  font-size: var(--type-section-size);
+  font-weight: var(--type-section-weight);
+  line-height: var(--type-section-line-height);
+  letter-spacing: var(--type-section-spacing);
+  color: var(--type-section-color);
+  text-transform: uppercase;
+}
+
+.type-label {
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  line-height: var(--type-label-line-height);
+  letter-spacing: var(--type-label-spacing);
+  color: var(--type-label-color);
+  text-transform: uppercase;
+}
+
+.type-body {
+  font-size: var(--type-body-size);
+  font-weight: var(--type-body-weight);
+  line-height: var(--type-body-line-height);
+  letter-spacing: var(--type-body-spacing);
+  color: var(--type-body-color);
+}
+
+.type-meta {
+  font-size: var(--type-meta-size);
+  font-weight: var(--type-meta-weight);
+  line-height: var(--type-meta-line-height);
+  letter-spacing: var(--type-meta-spacing);
+  color: var(--type-meta-color);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -228,7 +356,10 @@ body {
 }
 
 .dark body, [data-theme="dark"] body {
-  background-image: none; /* Remove texture in dark mode */
+  /* Warm paper texture in dark mode — very subtle charcoal noise */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.02'/%3E%3C/svg%3E");
+  background-blend-mode: overlay;
+  background-size: 150px;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -238,21 +369,22 @@ body {
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
   font-weight: 600;
-  line-height: 1.2;
+  line-height: 1.3;          /* loosened from 1.2 for breathing */
   color: var(--text);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;   /* softened from -0.02em */
   margin: 0;
   font-variation-settings: 'wonk' 1, 'SOFT' 50;
 }
 
-h1 { font-size: 2.5rem; margin-bottom: 1rem; font-weight: 700; }
-h2 { font-size: 1.5rem; margin-bottom: 1rem; }
-h3 { font-size: 1.25rem; margin-bottom: 0.75rem; }
-h4 { font-size: 1.125rem; margin-bottom: 0.5rem; }
+h1 { font-size: 2.5rem; margin-bottom: 1.25rem; font-weight: 700; }
+h2 { font-size: 1.5rem; margin-bottom: 1.25rem; }
+h3 { font-size: 1.25rem; margin-bottom: 1rem; }
+h4 { font-size: 1.125rem; margin-bottom: 0.75rem; }
 
 p {
-  margin: 0 0 1rem 0;
+  margin: 0 0 1.25rem 0;
   color: var(--text-muted);
+  line-height: 1.7;          /* added for softer reading */
 }
 
 a {
@@ -362,14 +494,14 @@ pre {
 }
 
 .btn--primary {
-  background-color: var(--accent);
-  color: var(--bg);
+  background-color: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
 }
 
 .btn--primary:hover:not(:disabled) {
-  background-color: var(--accent-hover);
-  box-shadow: 0 4px 12px var(--accent-glow);
-  transform: translateY(-1px);
+  background-color: var(--accent);
+  color: var(--bg);
 }
 
 .btn--secondary {
@@ -610,8 +742,66 @@ pre {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   THE NOTEBOOK GRID — Nuclear Overrides
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* 1. Fix the "Mustard Slab" Button */
+.sketch-button {
+  background: transparent !important; /* Force transparency */
+  color: var(--ink);
+  border: 2px solid var(--accent); /* The gold pencil line */
+  /* The "Wobbly" Border Radius */
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px; 
+  padding: 0.8rem 2.5rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sketch-button:hover {
+  background: rgba(199, 165, 106, 0.08) !important; /* Faint gold wash */
+  transform: translateY(-2px);
+  box-shadow: 2px 4px 0 rgba(199, 165, 106, 0.3); /* Pencil shading shadow */
+}
+
+/* 2. The "Notebook Card" Container */
+.notebook-card {
+  background: rgba(255, 255, 255, 0.6); /* Translucent vellum */
+  border: 1px solid var(--rule);
+  padding: 2.5rem;
+  position: relative;
+  /* Subtle "drawn" border feel */
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.03); 
+}
+
+.dark .notebook-card {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(232, 226, 215, 0.2);
+}
+
+/* 3. Typography Fixes */
+.hand-headline {
+  font-family: var(--font-display);
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+
+.hand-subhead {
+  font-family: var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    END OF GLOBAL FOUNDATION
-   Line count: ~380 lines (under 500-line hard cap ✓)
-   Token count: 18 per scope ✓
-   Page-specific styles: 0 ✓
    ═══════════════════════════════════════════════════════════════════════════ */

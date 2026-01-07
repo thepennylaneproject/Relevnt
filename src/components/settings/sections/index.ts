@@ -1,3 +1,3 @@
-export { TargetingSection } from './TargetingSection'
-export { ProfileSection } from './ProfileSection'
-export { SystemSection } from './SystemSection'
+export { AccountSection } from './AccountSection'
+export { JobSearchSection } from './JobSearchSection'
+export { PreferencesSection } from './PreferencesSection'

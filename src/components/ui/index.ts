@@ -17,6 +17,13 @@ export type { IconName, IconSize, IconProps } from './Icon';
 export { EmptyState } from './EmptyState';
 export type { EmptyStateType, EmptyStateAction, EmptyStateProps } from './EmptyState';
 
+// Alert component
+export { Alert } from './Alert';
+export type { AlertVariant, AlertProps } from './Alert';
+
+// Badge component
+export { Badge } from './Badge';
+
 // Button component
 export { Button } from './Button';
 export type { ButtonVariant, ButtonSize, ButtonProps } from './Button';
@@ -29,9 +36,12 @@ export type { InputProps } from './Input';
 export { Card } from './Card';
 export type { CardProps } from './Card';
 
-// Alert component
-export { Alert } from './Alert';
-export type { AlertVariant, AlertProps } from './Alert';
+// Section component
+export { Section } from './Section';
+export type { SectionProps } from './Section';
+
+// CustomIcon component
+export { CustomIcon } from './CustomIcon';
 
 // Re-export copy for convenience
 export { copy } from '../../lib/copy';

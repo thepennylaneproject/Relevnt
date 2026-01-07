@@ -15,9 +15,10 @@ export function AIButton({ label, onClick, disabled, loading }: AIButtonProps) {
       type="button"
       onClick={onClick}
       disabled={isDisabled}
-      className={`btn btn-primary btn-sm ${isDisabled ? 'opacity-60' : ''}`}
+      className="action-helper"
     >
       {loading ? 'Thinking…' : label}
     </button>
   )
 }
+

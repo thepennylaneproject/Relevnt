@@ -27,8 +27,6 @@ module.exports = {
   // These files ARE the token definitions - they must use raw values
   // ─────────────────────────────────────────────────────────────────────────
   ignoreFiles: [
-    // Token source of truth - must contain raw values
-    'src/styles/design-tokens.css',
     // Build outputs
     'dist/**/*',
     'build/**/*',
@@ -36,6 +34,20 @@ module.exports = {
     'node_modules/**/*',
     // Third-party CSS
     'src/styles/vendor/**/*',
+  ],
+
+  overrides: [
+    {
+      files: ['src/styles/globals.base.css'],
+      rules: {
+        // token source must be allowed to contain raw values
+        'declaration-property-value-allowed-list': null,
+        'declaration-property-value-disallowed-list': null,
+        'color-no-hex': null,
+        'color-named': null,
+        // do NOT disable declaration-block-no-duplicate-custom-properties
+      },
+    },
   ],
 
   rules: {
@@ -70,10 +82,14 @@ module.exports = {
         '/^margin/': [
           '/^var\\(--/',    // CSS variables
           '/^0/',           // Zero values
+          '/^1$/',          // Allow unitless 1 (flex/line-height/z-index)
           'auto',
           'inherit',
           'initial',
           'unset',
+          'none',
+          'transparent',
+          'currentColor',
           '/^-?var\\(--/',  // Negative CSS variables
         ],
         // Padding: only allow token values
@@ -83,6 +99,9 @@ module.exports = {
           'inherit',
           'initial',
           'unset',
+          'none',
+          'transparent',
+          'currentColor',
         ],
         // Gap: only allow token values
         'gap': [
@@ -131,8 +150,10 @@ module.exports = {
           'inherit',
           'initial',
           'unset',
+          '0',
+          '1',
           // Allow common z-index values that should eventually be tokenized
-          '-1', '0', '1', '10', '20', '30', '40', '50', '60', '100', '999', '1000',
+          '-1', '0', '1', '10', '20', '30', '40', '50', '60', '100', '999', '1000', '1001',
         ],
       },
       {

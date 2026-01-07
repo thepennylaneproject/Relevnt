@@ -1,8 +1,9 @@
 // src/pages/ResumeBuilder/components/ProjectItemCard.tsx
 import React, { ChangeEvent } from 'react'
 import { ResumeProjectItem } from '../../types/resume-builder.types'
-import { Button } from '../ui/Button'
 import { inputClass, itemCardClass, labelClass, textareaClass } from './sectionStyles'
+import { InlineQuestionHelper } from '../Applications/InlineQuestionHelper'
+
 
 interface ProjectItemCardProps {
   item: ResumeProjectItem
@@ -62,7 +63,7 @@ export const ProjectItemCard: React.FC<ProjectItemCardProps> = ({
         </div>
       </div>
 
-      <div>
+      <div className="mt-4">
         <label className={labelClass}>Project link (optional)</label>
         <input
           className={inputClass}
@@ -72,7 +73,7 @@ export const ProjectItemCard: React.FC<ProjectItemCardProps> = ({
         />
       </div>
 
-      <div>
+      <div className="mt-4">
         <label className={labelClass}>Highlights/Impact</label>
         <textarea
           className={textareaClass}
@@ -81,9 +82,14 @@ export const ProjectItemCard: React.FC<ProjectItemCardProps> = ({
           onChange={handleFieldChange('description')}
           placeholder="Built full stack architecture, integrated LLM APIs, drove 200%+ IG growth…"
         />
+        <InlineQuestionHelper
+          questionText={`Describe the impact and highlights of ${(item.name as string) || 'this project'}.`}
+          fieldValue={(item.description as string) || ''}
+          onInsert={(text) => onChange({ ...item, description: text })}
+        />
       </div>
 
-      <div>
+      <div className="mt-4">
         <label className={labelClass}>Technologies (comma separated)</label>
         <input
           className={inputClass}
@@ -93,14 +99,15 @@ export const ProjectItemCard: React.FC<ProjectItemCardProps> = ({
         />
       </div>
 
-      <Button
+      <button
         type="button"
-        variant="destructive"
-        size="sm"
+        className="action-remove mt-4"
         onClick={onRemove}
+        aria-label="Remove project"
       >
-        ✕ Remove project
-      </Button>
+        Remove project
+      </button>
     </div>
   )
 }
+

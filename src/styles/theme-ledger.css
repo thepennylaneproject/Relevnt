@@ -1,0 +1,800 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * LEDGER SYSTEM FOUNDATION
+ * ═══════════════════════════════════════════════════════════════════════════
+ * 
+ * Minimal, editorial design foundation.
+ * Philosophy: "Ink on ivory paper" — restrained, coherent, mature.
+ * 
+ * Rules:
+ * - No default card shells, raised panels, or shadows for layout grouping
+ * - Single 1px hairline rule for structure
+ * - Champagne gold is SACRED (active states + hero action only)
+ * - No pure black (#000), use graphite ink
+ * - No dashed borders
+ * - Radius: 0-2px maximum
+ * 
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MASTHEAD SPACING SCALE — Consistent vertical rhythm
+   ═══════════════════════════════════════════════════════════════════════════
+   
+   Masthead Stack:
+   1. Title (tagline/lead)
+   2. Primary CTA (if present)
+   3. Filter phrase (if present)
+   
+   Spacing tokens for consistent notebook feel.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Masthead internal spacing */
+  --masthead-title-gap: var(--space-5);       /* Title to CTA/next element */
+  --masthead-cta-gap: var(--space-4);            /* CTA to filter line */
+  --masthead-filter-gap: var(--space-3);      /* Filter internal spacing */
+  
+  /* Masthead to body spacing */
+  --masthead-to-body: var(--space-10);          /* Gap from masthead to first content */
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   VISUAL GRAMMAR — Sketched / Hand-drawn feel
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.sketch-button {
+  background: transparent;
+  color: var(--ink);
+  border: 2px solid var(--champagne);
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  padding: var(--space-3) var(--space-8);
+  font-family: var(--font-display);
+  font-weight: 700;
+  box-shadow: 2px 2px 0 var(--accent-glow);
+  transition: all 200ms ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.sketch-button:hover {
+  background: var(--champagne);
+  color: var(--color-white);
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--accent-glow);
+}
+
+.pencil-rule {
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    var(--rule) 15%, 
+    var(--rule) 85%, 
+    transparent 100%
+  );
+  margin: var(--space-8) 0;
+  position: relative;
+  opacity: 0.6;
+}
+
+.pencil-rule::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: var(--rule);
+  transform: rotate(0.2deg);
+  opacity: 0.4;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   NOTEBOOK WORKSPACE — Visual Objects
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.notebook-paper {
+  position: relative;
+  min-height: 100vh;
+  padding-left: var(--space-16); /* Space for margin */
+}
+
+/* Vertical margin line */
+.notebook-paper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--space-12);
+  width: 1px;
+  background: var(--rule);
+  box-shadow: 1px 0 0 var(--border);
+  opacity: 0.6;
+}
+
+.ledger-card {
+  background: var(--surface-2);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  box-shadow: 
+    1px 4px 12px var(--shadow),
+    -1px -1px 0 rgba(255, 255, 255, 0.8) inset;
+  padding: var(--space-10);
+  position: relative;
+  transition: transform 300ms ease;
+  overflow: hidden;
+}
+
+.ledger-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: var(--space-10);
+  height: var(--space-10);
+  background: linear-gradient(135deg, transparent 50%, var(--shadow) 50%);
+}
+
+.sticky-note {
+  background: #FEF9C3; /* Pale yellow */
+  color: #713F12;
+  padding: 1.5rem;
+  box-shadow: 2px 4px 8px var(--shadow);
+  transform: rotate(-1deg);
+  font-family: var(--font-display);
+  border-radius: 1px;
+  border-bottom-right-radius: 20px 2px;
+  position: relative;
+}
+
+.dark .sticky-note {
+  background: #3F2E0E;
+  color: #FEF9C3;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.pencil-divider {
+  height: 1px;
+  background: var(--rule);
+  margin: var(--space-16) 0;
+  position: relative;
+  overflow: visible;
+}
+
+.pencil-divider::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--rule);
+  transform: rotate(0.1deg);
+  opacity: 0.4;
+}
+
+.handwritten {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+.marginalia {
+  position: absolute;
+  left: -12rem;
+  width: 10rem;
+  font-size: 0.8rem;
+  opacity: 0.6;
+  text-align: right;
+  line-height: 1.4;
+}
+
+@media (max-width: 1200px) {
+  .marginalia {
+    position: static;
+    width: 100%;
+    text-align: left;
+    margin-bottom: var(--space-8);
+  }
+}
+
+.doodle-anchor {
+  opacity: 0.15;
+  filter: grayscale(1);
+  transition: all 500ms ease;
+  transform-origin: center;
+}
+
+.doodle-anchor:hover {
+  opacity: 0.4;
+  filter: grayscale(0);
+  transform: scale(1.05) rotate(2deg);
+}
+
+.margin-note {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--champagne);
+  opacity: 0.8;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LEDGER TOKENS — 8 core tokens
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Surface + Ink (3) */
+  --bg-paper: #F8F4ED;         /* warm ivory page background */
+  --ink: #333333;              /* graphite text, NOT pure black */
+  --ink-muted: #78716C;        /* subdued ink for secondary text */
+  
+  /* Structure (1) */
+  --rule: #E7E2D9;             /* 1px hairline divider color */
+  
+  /* Accent (1) — SACRED, use sparingly */
+  --champagne: #C7A56A;        /* sacred gold accent */
+  
+  /* System (3) */
+  --radius: 2px;               /* sharp editorial corners (0-2px max) */
+  --focus: var(--champagne);   /* focus ring color for accessibility */
+  --paper-texture: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* Dark mode overrides */
+.dark, [data-theme="dark"] {
+  --bg-paper: #11100E;         /* warm charcoal */
+  --ink: #E8E2D7;              /* warm chalk */
+  --ink-muted: #A3A097;        /* muted chalk */
+  --rule: #2A2825;             /* subtle dark rule */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light, [data-theme="light"]) {
+    --bg-paper: #11100E;
+    --ink: #E8E2D7;
+    --ink-muted: #A3A097;
+    --rule: #2A2825;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BASE ELEMENT STYLES — Ledger-specific overrides
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Body: paper background with subtle texture */
+body {
+  background-color: var(--bg-paper);
+  color: var(--ink);
+  background-image: var(--paper-texture);
+  background-blend-mode: soft-light;
+  background-size: 150px;
+  background-attachment: fixed;
+}
+
+.dark body,
+[data-theme="dark"] body {
+  background-image: none; /* Remove texture in dark mode */
+}
+
+/* Typography: restrained, editorial */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+a {
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-bottom-color 200ms ease;
+}
+
+a:hover {
+  border-bottom-color: var(--champagne);
+}
+
+/* Hairline rule */
+hr,
+.divider,
+.hairline {
+  border: none;
+  border-top: 1px solid var(--rule);
+  margin: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BUTTON STYLES — Ledger System
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Hero button: transparent with champagne border (notebook energy, MAX 1 per page) */
+.btn--hero,
+.btn--primary {
+  background-color: transparent;
+  color: var(--champagne);
+  border: 1px solid var(--champagne);
+  border-radius: var(--radius);
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 200ms ease, color 200ms ease;
+  box-shadow: none;
+}
+
+.btn--hero:hover:not(:disabled),
+.btn--primary:hover:not(:disabled) {
+  background-color: var(--champagne);
+  color: var(--bg-paper);
+  transform: none;
+  box-shadow: none;
+}
+
+/* Link button: text-only, underline on hover */
+.btn--link,
+.btn--secondary,
+.btn--ghost {
+  background: transparent;
+  color: var(--ink);
+  border: none;
+  border-bottom: 1px solid transparent;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-bottom-color 200ms ease;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.btn--link:hover:not(:disabled),
+.btn--secondary:hover:not(:disabled),
+.btn--ghost:hover:not(:disabled) {
+  border-bottom-color: var(--ink);
+  background: transparent;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Destructive: text link with red ink */
+.btn--destructive {
+  background: transparent;
+  color: var(--error);
+  border: none;
+  border-bottom: 1px solid transparent;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-bottom-color 200ms ease;
+}
+
+.btn--destructive:hover:not(:disabled) {
+  border-bottom-color: var(--error);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   INPUT STYLES — Baseline-only (no filled rectangles)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.input,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="url"],
+input[type="tel"],
+textarea {
+  background: transparent;
+  color: var(--ink);
+  border: none;
+  border-bottom: 1px solid var(--rule);
+  border-radius: 0;
+  padding: 0.5rem 0;
+  font-family: inherit;
+  font-size: 1rem;
+  transition: border-bottom-color 200ms ease;
+}
+
+.input::placeholder,
+input::placeholder,
+textarea::placeholder {
+  color: var(--ink-muted);
+  opacity: 0.7;
+}
+
+.input:hover,
+input:hover,
+textarea:hover {
+  border-bottom-color: var(--ink-muted);
+}
+
+.input:focus,
+input:focus,
+textarea:focus {
+  outline: none;
+  border-bottom-color: var(--champagne);
+  box-shadow: none;
+}
+
+.input--error,
+input[aria-invalid="true"] {
+  border-bottom-color: var(--error);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CARD STYLES — Transparent default, no chrome
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.card {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0;
+}
+
+/* Elevated card: ONLY for modals, popovers (rare) */
+.card--elevated {
+  background-color: var(--bg-paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: var(--space-6);
+  box-shadow: 0 2px 12px var(--shadow);
+}
+
+.dark .card--elevated,
+[data-theme="dark"] .card--elevated {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+}
+
+/* Hoverable card: only border change on hover */
+.card--hoverable:hover {
+  box-shadow: none;
+  border-color: var(--ink-muted);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FOCUS STATES — Champagne outline for accessibility
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:focus-visible {
+  outline: 2px solid var(--focus) !important;
+  outline-offset: 2px !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CARD PADDING UTILITIES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.card--padding-sm {
+  padding: 0.75rem;
+}
+
+.card--padding-md {
+  padding: 1.5rem;
+}
+
+.card--padding-lg {
+  padding: var(--space-8);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SECTION PATTERN — Spacing + optional hairline dividers
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.section {
+  margin: 0;
+  padding: var(--space-8) 0;
+}
+
+.section--divider-top {
+  border-top: 1px solid var(--rule);
+  padding-top: 2rem;
+}
+
+.section--divider-bottom {
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 2rem;
+}
+
+.section--divider-both {
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  padding: var(--space-8) 0;
+}
+
+.section--spacing-sm {
+  padding: var(--space-4) 0;
+}
+
+.section--spacing-lg {
+  padding: var(--space-12) 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LEDGER ROWS — Case File Ledger pattern
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ledger-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: 0.875rem 0;
+  border-bottom: 1px solid var(--rule);
+  transition: background-color 150ms ease;
+}
+
+.ledger-row:hover {
+  background-color: var(--surface-2);
+}
+
+.ledger-row__left {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ledger-row__title {
+  font-weight: 600;
+  color: var(--ink);
+  font-size: 0.9375rem;
+}
+
+.ledger-row__secondary-text {
+  font-size: 0.875rem;
+  color: var(--ink-muted);
+}
+
+.ledger-row__tertiary-text {
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  opacity: 0.8;
+}
+
+.ledger-row__right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.ledger-row__status {
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+/* Secondary actions: hidden until row hover/focus-within */
+.ledger-row__secondary-actions {
+  display: flex;
+  gap: 0.5rem;
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+.ledger-row:hover .ledger-row__secondary-actions,
+.ledger-row:focus-within .ledger-row__secondary-actions {
+  opacity: 1;
+}
+
+.ledger-row__secondary-action {
+  background: transparent;
+  border: none;
+  color: var(--ink-muted);
+  padding: 0.25rem;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: color 150ms ease;
+}
+
+.ledger-row__secondary-action:hover {
+  color: var(--ink);
+}
+
+.ledger-row__secondary-action--danger:hover {
+  color: var(--error);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   STATUS POPOVER — Inline status update menu
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.status-popover-container {
+  position: relative;
+}
+
+.status-popover-trigger {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--champagne);
+  color: var(--champagne);
+  padding: 0.25rem 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: opacity 150ms ease;
+}
+
+.status-popover-trigger:hover {
+  opacity: 0.8;
+}
+
+.status-popover {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  background: var(--bg-paper);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  min-width: 140px;
+  z-index: 100;
+  padding: 0.25rem 0;
+}
+
+.dark .status-popover,
+[data-theme="dark"] .status-popover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+.status-popover__option {
+  display: block;
+  width: 100%;
+  background: transparent;
+  border: none;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color 100ms ease;
+}
+
+.status-popover__option:hover {
+  background-color: var(--surface-2);
+}
+
+.status-popover__option--active {
+  color: var(--champagne);
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   INLINE FILTER PHRASE — Text-only filter for ledger pages
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.inline-filter {
+  font-size: 0.875rem;
+  color: var(--ink-muted);
+  margin-bottom: var(--space-6);
+}
+
+.inline-filter__link {
+  background: transparent;
+  border: none;
+  color: var(--ink-muted);
+  padding: 0;
+  font-size: inherit;
+  cursor: pointer;
+  border-bottom: 1px solid transparent;
+  transition: border-bottom-color 150ms ease, color 150ms ease;
+}
+
+.inline-filter__link:hover {
+  border-bottom-color: var(--ink-muted);
+}
+
+.inline-filter__link--active {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   STATUS FILTER PHRASE — Minimal inline filter for applications
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.status-filter-phrase {
+  font-size: 0.875rem;
+  color: var(--ink-muted);
+  margin-top: var(--masthead-cta-gap, 1rem);
+  margin-bottom: var(--masthead-to-body, 2.5rem);
+}
+
+.status-filter-phrase__trigger-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.status-filter-phrase__trigger {
+  background: transparent;
+  border: none;
+  color: var(--ink);
+  font-weight: 600;
+  font-size: inherit;
+  padding: 0;
+  cursor: pointer;
+  border-bottom: 1px dotted var(--ink-muted);
+  transition: border-bottom-color 150ms ease;
+}
+
+.status-filter-phrase__trigger:hover {
+  border-bottom-color: var(--champagne);
+}
+
+.status-filter-phrase__menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 120px;
+  background: var(--bg-paper);
+  border: 1px solid var(--rule);
+  padding: 0.25rem 0;
+  z-index: 50;
+}
+
+.status-filter-phrase__option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: background-color 100ms ease, color 100ms ease;
+}
+
+.status-filter-phrase__option:hover {
+  background-color: var(--surface-2);
+  color: var(--ink);
+}
+
+.status-filter-phrase__option--active {
+  color: var(--champagne);
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FOOTER MARGINALIA — Penciled note at the page edge
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.footer-marginalia {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem 1.5rem;
+  margin-top: 6rem;            /* Generous whitespace above */
+  padding: var(--space-8) var(--space-6) var(--space-12);
+  font-size: var(--type-label-size);
+  font-style: italic;
+  color: var(--ink-muted);
+  opacity: 0.5;
+  text-align: center;
+  /* No background, no border, no divider — penciled note feel */
+}
+
+.footer-marginalia__brand {
+  font-weight: 500;
+  font-style: normal;
+}
+
+/* Hide old footer class if still referenced anywhere */
+.footer {
+  display: none;
+}

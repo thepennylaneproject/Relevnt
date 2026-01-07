@@ -37,6 +37,9 @@ export type JobRow = {
   probability_estimate?: number | null
   growth_score?: number | null
   hiring_momentum?: number | null
+
+  // URL enrichment fields
+  is_direct?: boolean | null
 }
 
 export type MatchResult = {

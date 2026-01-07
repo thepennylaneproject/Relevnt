@@ -1,6 +1,5 @@
 // src/components/layout/AppLayout.tsx
 import React, { ReactNode } from 'react'
-import { Header } from './Header'
 import { Footer } from './Footer'
 
 export interface AppLayoutProps {
@@ -8,6 +7,11 @@ export interface AppLayoutProps {
   showFooter?: boolean
 }
 
+/**
+ * AppLayout — Main content wrapper.
+ * Navigation is handled by MastheadNav in App.tsx (single global nav).
+ * This component provides the main content area + optional Footer.
+ */
 export function AppLayout({ children, showFooter = true }: AppLayoutProps) {
   const container: React.CSSProperties = {
     minHeight: '100vh',
@@ -15,15 +19,6 @@ export function AppLayout({ children, showFooter = true }: AppLayoutProps) {
     flexDirection: 'column',
     backgroundColor: 'var(--bg)',
     color: 'var(--text)',
-  }
-
-  const headerStyle: React.CSSProperties = {
-    flexShrink: 0,
-    borderBottom: '1px solid var(--border-subtle)',
-    backgroundColor: 'var(--bg)',
-    position: 'sticky',
-    top: 0,
-    zIndex: 50,
   }
 
   const mainStyle: React.CSSProperties = {
@@ -36,13 +31,9 @@ export function AppLayout({ children, showFooter = true }: AppLayoutProps) {
 
   return (
     <div style={container}>
-      <header style={headerStyle}>
-        <Header />
-      </header>
-
       <main style={mainStyle}>{children}</main>
-
       {showFooter && <Footer />}
     </div>
   )
 }
+

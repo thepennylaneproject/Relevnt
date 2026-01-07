@@ -6,6 +6,8 @@ import { useResumes } from '../../hooks/useResumes'
 import { useCoverLetters } from '../../hooks/useCoverLetters'
 import { useAuth } from '../../contexts/AuthContext'
 import { type Application } from '../../hooks/useApplications'
+import { InlineQuestionHelper } from './InlineQuestionHelper'
+
 
 interface CoverLetterGeneratorProps {
     application: Application
@@ -147,12 +149,20 @@ export function CoverLetterGenerator({ application }: CoverLetterGeneratorProps)
 
                     <div className="relative">
                         {isEditing ? (
+                            <>
                             <textarea
                                 value={content}
                                 onChange={(e) => setContent(e.target.value)}
                                 className="w-full h-64 p-3 text-xs bg-surface border border-subtle rounded-lg focus:ring-1 focus:ring-accent outline-none"
                                 placeholder="Professional cover letter content..."
                             />
+                            <InlineQuestionHelper
+                                questionText={`Write a cover letter for the ${application.position} role at ${application.company}.`}
+                                fieldValue={content}
+                                onInsert={(text) => setContent(text)}
+                                jobDescription={(application.job as any)?.description || application.notes || ''}
+                            />
+                            </>
                         ) : (
                             <div className="w-full h-64 p-3 text-xs bg-surface/50 border border-transparent rounded-lg overflow-y-auto whitespace-pre-wrap leading-relaxed">
                                 {content}

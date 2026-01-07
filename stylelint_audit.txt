@@ -1,0 +1,309 @@
+
+src/App.css
+    9:8   ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   17:8   ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   33:8   ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   45:8   ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   46:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   62:8   ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   67:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   68:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   73:8   ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   86:8   ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   92:14  ⚠  Hard-coded font-size px values are not allowed. Use CSS variable: var(--text-*)       declaration-property-value-disallowed-list
+  101:8   ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  106:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  110:14  ⚠  Hard-coded font-size px values are not allowed. Use CSS variable: var(--text-*)       declaration-property-value-disallowed-list
+  126:8   ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  127:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  131:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  135:14  ⚠  Hard-coded font-size px values are not allowed. Use CSS variable: var(--text-*)       declaration-property-value-disallowed-list
+  141:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  142:17  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  147:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  149:8   ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  176:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  180:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  181:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  188:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  195:8   ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  201:14  ⚠  Hard-coded font-size px values are not allowed. Use CSS variable: var(--text-*)       declaration-property-value-disallowed-list
+  204:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  214:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  215:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  219:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  223:17  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  224:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  229:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  241:14  ⚠  Hard-coded font-size px values are not allowed. Use CSS variable: var(--text-*)       declaration-property-value-disallowed-list
+  243:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  254:14  ⚠  Hard-coded font-size px values are not allowed. Use CSS variable: var(--text-*)       declaration-property-value-disallowed-list
+  265:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+
+src/pages/DashboardPage.css
+  208:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  286:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  291:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+
+src/styles/apply.css
+   10:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   14:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   20:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   33:8   ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   45:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   46:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   55:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   56:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   71:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   87:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  102:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  113:8   ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  114:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  120:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  138:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+
+src/styles/documents-workspace.css
+  457:10  ⚠  Named colors (red, blue, etc.) are not allowed. Use CSS variable: var(--color-*)                color-named
+  543:14  ⚠  Hard-coded font-size px values are not allowed. Use CSS variable: var(--text-*)                 declaration-property-value-disallowed-list
+  683:34  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+  720:34  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+  730:28  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+
+src/styles/globals.base.css
+   23:9   ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+   24:14  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+   25:16  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+   26:11  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+   27:17  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+   28:13  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+   31:13  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+   32:19  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+   36:14  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+   36:58  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+   37:12  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+   50:9   ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+   51:14  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+   52:16  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+   53:11  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+   54:17  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+   55:13  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+   57:3   ✖  Unexpected empty line before custom property                                                    custom-property-empty-line-before
+   57:13  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+   58:19  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+   60:14  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+   61:14  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+   62:12  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+   69:11  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+   70:16  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+   71:18  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+   72:13  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+   73:19  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+   74:15  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+   98:3   ✖  Unexpected empty line before custom property                                                    custom-property-empty-line-before
+  309:14  ⚠  Hard-coded font-size px values are not allowed. Use CSS variable: var(--text-*)                 declaration-property-value-disallowed-list
+  351:40  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  352:40  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  353:41  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  375:17  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  386:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  392:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  424:8   ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  432:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  438:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  525:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  537:11  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  552:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  557:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  559:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  571:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  576:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  586:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  598:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  620:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  625:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  726:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  742:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  749:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  752:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  773:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+
+src/styles/icon-kit.css
+  108:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+
+src/styles/margin-nav.css
+   21:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   31:5   ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   59:8   ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   66:8   ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   71:14  ⚠  Hard-coded font-size px values are not allowed. Use CSS variable: var(--text-*)       declaration-property-value-disallowed-list
+   75:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   96:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   99:14  ⚠  Hard-coded font-size px values are not allowed. Use CSS variable: var(--text-*)       declaration-property-value-disallowed-list
+  122:5   ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  135:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  149:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  177:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  214:8   ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  221:16  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  234:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  313:10  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  314:14  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  320:14  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  321:16  ⚠  Hard-coded font-size px values are not allowed. Use CSS variable: var(--text-*)       declaration-property-value-disallowed-list
+  325:10  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  348:16  ⚠  Hard-coded font-size px values are not allowed. Use CSS variable: var(--text-*)       declaration-property-value-disallowed-list
+
+src/styles/masthead.css
+  132:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  137:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  165:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  186:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  224:10  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  243:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  256:16  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  261:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+
+src/styles/notification-center.css
+  42:14  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+
+src/styles/settings-hub.css
+   56:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  118:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  135:14  ⚠  Hard-coded font-size px values are not allowed. Use CSS variable: var(--text-*)       declaration-property-value-disallowed-list
+  238:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  256:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  284:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+
+src/styles/settings.css
+  170:14  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  374:19  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  427:17  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  428:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  437:14  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  461:34  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+
+src/styles/theme-ledger.css
+   50:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+   54:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+   65:10  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+   67:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  114:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  121:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  123:5   ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  142:15  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+  143:10  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+  144:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  145:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  148:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  154:15  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+  155:10  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+  156:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  232:15  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+  233:10  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+  234:16  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+  237:11  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+  240:16  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+  250:15  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+  251:10  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+  252:16  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+  253:11  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+  258:17  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+  259:12  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+  260:18  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+  261:13  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+  366:23  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+  377:37  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+  426:37  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+  447:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  452:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  479:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  497:16  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  502:19  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  512:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  527:8   ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  606:23  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+  643:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  651:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  683:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  782:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  783:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+
+src/components/insights/InsightsEmptyState.css
+  13:14  ⚠  Hard-coded font-size px values are not allowed. Use CSS variable: var(--text-*)  declaration-property-value-disallowed-list
+
+src/components/insights/RecommendationCard.css
+  15:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css            declaration-property-value-allowed-list
+  23:47  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+  27:44  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+  68:31  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+  73:28  ⚠  Hard-coded hex colors are not allowed. Use CSS variable: var(--color-*). See design-tokens.css  color-no-hex
+
+src/components/layout/header.css
+    7:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   11:8   ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   18:8   ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   24:8   ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   38:14  ⚠  Hard-coded font-size px values are not allowed. Use CSS variable: var(--text-*)       declaration-property-value-disallowed-list
+   47:8   ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   59:14  ⚠  Hard-coded font-size px values are not allowed. Use CSS variable: var(--text-*)       declaration-property-value-disallowed-list
+   69:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   71:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  121:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  126:14  ⚠  Hard-coded font-size px values are not allowed. Use CSS variable: var(--text-*)       declaration-property-value-disallowed-list
+  137:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  138:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  149:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  159:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  160:14  ⚠  Hard-coded font-size px values are not allowed. Use CSS variable: var(--text-*)       declaration-property-value-disallowed-list
+  172:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+
+src/components/onboarding/onboarding-wizard.css
+   12:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   25:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   50:8   ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   51:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   75:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+   96:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  111:14  ⚠  Hard-coded font-size px values are not allowed. Use CSS variable: var(--text-*)       declaration-property-value-disallowed-list
+  115:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  119:14  ⚠  Hard-coded font-size px values are not allowed. Use CSS variable: var(--text-*)       declaration-property-value-disallowed-list
+  123:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  128:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  133:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  134:14  ⚠  Hard-coded font-size px values are not allowed. Use CSS variable: var(--text-*)       declaration-property-value-disallowed-list
+  141:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  144:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  146:14  ⚠  Hard-coded font-size px values are not allowed. Use CSS variable: var(--text-*)       declaration-property-value-disallowed-list
+  153:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  161:14  ⚠  Hard-coded font-size px values are not allowed. Use CSS variable: var(--text-*)       declaration-property-value-disallowed-list
+  163:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  171:8   ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  177:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  180:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  200:14  ⚠  Hard-coded font-size px values are not allowed. Use CSS variable: var(--text-*)       declaration-property-value-disallowed-list
+  203:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  207:14  ⚠  Hard-coded font-size px values are not allowed. Use CSS variable: var(--text-*)       declaration-property-value-disallowed-list
+  215:8   ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  216:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  222:8   ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  223:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  226:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  227:14  ⚠  Hard-coded font-size px values are not allowed. Use CSS variable: var(--text-*)       declaration-property-value-disallowed-list
+  237:14  ⚠  Hard-coded font-size px values are not allowed. Use CSS variable: var(--text-*)       declaration-property-value-disallowed-list
+  252:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  253:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  258:14  ⚠  Hard-coded font-size px values are not allowed. Use CSS variable: var(--text-*)       declaration-property-value-disallowed-list
+  260:18  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  266:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  275:14  ⚠  Hard-coded font-size px values are not allowed. Use CSS variable: var(--text-*)       declaration-property-value-disallowed-list
+  280:14  ⚠  Hard-coded font-size px values are not allowed. Use CSS variable: var(--text-*)       declaration-property-value-disallowed-list
+  290:12  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  301:14  ⚠  Hard-coded font-size px values are not allowed. Use CSS variable: var(--text-*)       declaration-property-value-disallowed-list
+  303:15  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  309:14  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  313:14  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+  317:14  ⚠  Hard-coded values are not allowed. Use design token: var(--*). See design-tokens.css  declaration-property-value-allowed-list
+
+✖ 273 problems (2 errors, 271 warnings)
+  2 errors potentially fixable with the "--fix" option.
+

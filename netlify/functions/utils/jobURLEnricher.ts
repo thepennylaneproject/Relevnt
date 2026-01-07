@@ -48,6 +48,27 @@ function isDirectCompanyURL(url: string | null, companyName: string | null): boo
 
   const urlLower = url.toLowerCase()
 
+  // Known aggregators - these are NOT direct company URLs
+  // Return false immediately to allow ATS detection to find actual company URLs
+  if (urlLower.includes('jooble.org')) return false
+  if (urlLower.includes('himalayas.app')) return false
+  if (urlLower.includes('remotive.com')) return false
+  if (urlLower.includes('remoteok.com')) return false
+  if (urlLower.includes('findwork.dev')) return false
+  if (urlLower.includes('arbeitnow.com')) return false
+  if (urlLower.includes('themuse.com')) return false
+  if (urlLower.includes('reed.co.uk')) return false
+  if (urlLower.includes('indeed.com')) return false
+  if (urlLower.includes('linkedin.com')) return false
+  if (urlLower.includes('glassdoor.com')) return false
+  if (urlLower.includes('ziprecruiter.com')) return false
+  if (urlLower.includes('monster.com')) return false
+  if (urlLower.includes('careerbuilder.com')) return false
+  if (urlLower.includes('dice.com')) return false
+  if (urlLower.includes('stackoverflow.com/jobs')) return false
+  if (urlLower.includes('angel.co')) return false
+  if (urlLower.includes('wellfound.com')) return false
+
   // URLs from ATS platforms are ALWAYS direct (no aggregator middleman)
   if (urlLower.includes('jobs.lever.co')) return true
   if (urlLower.includes('lever.co/')) return true
@@ -56,35 +77,16 @@ function isDirectCompanyURL(url: string | null, companyName: string | null): boo
   if (urlLower.includes('workday.com')) return true
   if (urlLower.includes('myworkdayjobs.com')) return true
 
-  // Known job boards - skip ATS detection (they're already aggregators, not direct)
-  // We treat these as "direct enough" to avoid expensive HTTP probing
-  if (urlLower.includes('jooble.org')) return true
-  if (urlLower.includes('himalayas.app')) return true
-  if (urlLower.includes('remotive.com')) return true
-  if (urlLower.includes('remoteok.com')) return true
-  if (urlLower.includes('findwork.dev')) return true
-  if (urlLower.includes('arbeitnow.com')) return true
-  if (urlLower.includes('themuse.com')) return true
-  if (urlLower.includes('reed.co.uk')) return true
-  if (urlLower.includes('indeed.com')) return true
-  if (urlLower.includes('linkedin.com')) return true
-  if (urlLower.includes('glassdoor.com')) return true
-  if (urlLower.includes('ziprecruiter.com')) return true
-  if (urlLower.includes('monster.com')) return true
-  if (urlLower.includes('careerbuilder.com')) return true
-  if (urlLower.includes('dice.com')) return true
-  if (urlLower.includes('stackoverflow.com/jobs')) return true
-  if (urlLower.includes('angel.co')) return true
-  if (urlLower.includes('wellfound.com')) return true
-
-  // Career page patterns
+  // Career page patterns (on company domains, not aggregators)
   if (urlLower.includes('/careers')) return true
   if (urlLower.includes('/jobs')) return true
 
   // Company name match (if available)
   if (companyName) {
-    const companyLower = companyName.toLowerCase()
-    if (urlLower.includes(companyLower)) return true
+    const companyLower = companyName.toLowerCase().replace(/[^a-z0-9]/g, '')
+    // Only match if the URL domain contains company name (not just path)
+    const urlDomain = urlLower.split('/')[2] || ''
+    if (urlDomain.includes(companyLower)) return true
   }
 
   return false
@@ -105,21 +107,10 @@ export async function enrichJobURL(
   companyRegistry?: Map<string, Company>
 ): Promise<EnrichedJobURL> {
   const originalUrl = job.external_url
+  const isAggregatorSource = job.source_slug && AGGREGATOR_SOURCES.has(job.source_slug)
 
   try {
-    // Step 0: Skip enrichment for aggregator sources - they already provide working URLs
-    // This avoids expensive HTTP probing that causes function timeouts
-    if (job.source_slug && AGGREGATOR_SOURCES.has(job.source_slug)) {
-      return {
-        original_url: originalUrl,
-        enriched_url: originalUrl,
-        is_direct: false, // URLs from aggregators are not "direct" company URLs
-        enrichment_confidence: 0.8, // High confidence but not direct
-        enrichment_method: 'fallback',
-      }
-    }
-
-    // Step 1: Check if already direct
+    // Step 1: Check if already direct (ATS URL or company careers page)
     if (isDirectCompanyURL(originalUrl, job.company)) {
       return {
         original_url: originalUrl,
@@ -129,7 +120,7 @@ export async function enrichJobURL(
       }
     }
 
-    // Step 2: Try registry lookup (cached ATS info)
+    // Step 2: Try registry lookup (fast, no HTTP) - works for all sources
     if (companyRegistry && job.company) {
       const registryKey = job.company.toLowerCase().trim()
       const cachedCompany = companyRegistry.get(registryKey)
@@ -146,7 +137,19 @@ export async function enrichJobURL(
       }
     }
 
-    // Step 3: ATS detection from URL and domain
+    // Step 3: For aggregator sources, skip expensive HTTP probing
+    // The aggregator URL is functional, just not "direct"
+    if (isAggregatorSource) {
+      return {
+        original_url: originalUrl,
+        enriched_url: originalUrl,
+        is_direct: false,
+        enrichment_confidence: 0.8,
+        enrichment_method: 'fallback',
+      }
+    }
+
+    // Step 4: ATS detection from URL and domain (HTTP probing)
     const detected = await detectATS(originalUrl, job.company, job.company)
 
     if (detected && detected.careersUrl) {

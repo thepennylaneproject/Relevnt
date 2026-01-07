@@ -1,0 +1,369 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ * JOBS PAGE — Running Logbook Blueprint
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * Physical metaphor: A running logbook of opportunities — each row a single
+ * pencil entry on a ruled page, read top to bottom without browsing or swiping.
+ *
+ * Three Zones:
+ * 1. Masthead (fixed) — page title + inline text filters
+ * 2. Ledger (scrollable) — continuous list of job rows
+ * 3. Footnote (bottom edge) — end-of-results marker
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ZONE 1: MASTHEAD — Fixed header with title + filters
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.jobs-masthead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg);
+  padding: var(--space-6) 0 var(--space-4); /* Reduced: global spacing handles breathing room */
+  border-bottom: 1px solid var(--rule);
+}
+
+.jobs-masthead__title {
+  font-family: var(--font-display);
+  font-size: var(--type-page-title-size);         /* 40px — match Settings/Documents h1 */
+  line-height: 3.25rem;      /* 52px — match Settings/Documents */
+  font-weight: 600;          /* Match Settings/Documents */
+  color: var(--text);
+  margin: 0 0 var(--masthead-title-gap, var(--space-5)) 0;
+  letter-spacing: -0.01em;
+}
+
+.jobs-masthead__filters {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+}
+
+.jobs-filter-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: color 200ms ease;
+}
+
+.jobs-filter-link:hover {
+  color: var(--ink);
+}
+
+.jobs-filter-link--active {
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.jobs-filter-sep {
+  color: var(--rule);
+  user-select: none;
+}
+
+/* Filter wrapper for popover positioning */
+.jobs-filter-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+/* Minimal inline popover */
+.jobs-filter-popover {
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  left: 0;
+  min-width: 140px;
+  background: var(--bg);
+  border: 1px solid var(--rule);
+  padding: var(--space-1) 0;
+  z-index: 20;
+}
+
+.jobs-filter-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: var(--space-1) var(--space-3);
+  font: inherit;
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: color 150ms ease, background-color 150ms ease;
+}
+
+.jobs-filter-option:hover {
+  background-color: var(--accent-glow);
+  color: var(--ink);
+}
+
+.jobs-filter-option--active {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* Remote checkbox */
+.jobs-filter-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: color 150ms ease;
+}
+
+.jobs-filter-checkbox:hover {
+  color: var(--ink);
+}
+
+.jobs-filter-checkbox input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  accent-color: var(--champagne);
+  cursor: pointer;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ZONE 2: LEDGER — Scrollable list of job rows
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.jobs-ledger {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.jobs-ledger__row {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+/* Row header: clickable area for expanding */
+.jobs-ledger__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.jobs-ledger__header:hover,
+.jobs-ledger__header:focus-visible {
+  background-color: var(--accent-glow);
+}
+
+.jobs-ledger__header:focus-visible {
+  outline: 2px solid var(--champagne);
+  outline-offset: -2px;
+}
+
+/* Left side: job info */
+.jobs-ledger__info {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  min-width: 0;
+  flex: 1;
+}
+
+.jobs-ledger__title {
+  font-weight: 600;
+  font-size: var(--type-body-size);
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-bottom-color 200ms ease;
+}
+
+.jobs-ledger__title:hover {
+  border-bottom-color: var(--champagne);
+}
+
+.jobs-ledger__meta {
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+}
+
+.jobs-ledger__date {
+  font-size: var(--type-meta-size);
+  color: var(--ink-muted);
+}
+
+/* Right side: actions */
+.jobs-ledger__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-shrink: 0;
+}
+
+.jobs-ledger__primary-action {
+  font-size: var(--text-xs);
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 500;
+  border-bottom: 1px solid transparent;
+  transition: border-bottom-color 200ms ease;
+  white-space: nowrap;
+}
+
+.jobs-ledger__primary-action:hover {
+  border-bottom-color: var(--champagne);
+}
+
+.jobs-ledger__secondary-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 150ms ease, visibility 150ms ease;
+}
+
+.jobs-ledger__header:hover .jobs-ledger__secondary-actions,
+.jobs-ledger__header:focus-within .jobs-ledger__secondary-actions,
+.jobs-ledger__row:focus-within .jobs-ledger__secondary-actions {
+  opacity: 1;
+  visibility: visible;
+}
+
+.jobs-ledger__secondary-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: var(--type-label-size);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: color 200ms ease;
+}
+
+.jobs-ledger__secondary-btn:hover {
+  color: var(--champagne);
+}
+
+/* Inline expansion container (details only) */
+.jobs-ledger__expansion {
+  display: none;
+  padding: 0 0 var(--space-4) 0;
+  margin-left: 0;
+}
+
+.jobs-ledger__row--expanded .jobs-ledger__expansion {
+  display: block;
+}
+
+/* Details list: quiet, muted styling */
+.jobs-ledger__details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-6);
+  margin: 0;
+  padding: var(--space-3) 0 0 0;
+  border-top: 1px dashed var(--rule);
+  font-size: var(--type-meta-size);
+}
+
+.jobs-ledger__details dt {
+  color: var(--ink-muted);
+  font-weight: 400;          /* Match Documents functional label */
+  text-transform: uppercase;
+  letter-spacing: 0.08em;    /* Match Documents form-label */
+  font-size: var(--type-label-size);      /* 11px — match Documents */
+  margin: 0;
+}
+
+.jobs-ledger__details dd {
+  color: var(--ink-muted);
+  margin: 0 0 var(--space-2) 0;
+  font-size: var(--text-xs);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ZONE 3: FOOTNOTE — End-of-results marker
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.jobs-footnote {
+  padding: var(--space-8) 0;
+  text-align: center;
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+  font-style: italic;
+}
+
+.jobs-footnote::before {
+  content: '—';
+  margin-right: var(--space-2);
+}
+
+.jobs-footnote::after {
+  content: '—';
+  margin-left: var(--space-2);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LOADING & EMPTY STATES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.jobs-loading {
+  padding: var(--space-8) 0;
+  font-size: var(--text-sm);
+  color: var(--ink-muted);
+  font-style: italic;
+}
+
+.jobs-error {
+  padding: var(--space-4) 0;
+  font-size: var(--text-sm);
+  color: var(--error);
+}
+
+.jobs-empty {
+  padding: var(--space-12) 0;
+  text-align: center;
+}
+
+.jobs-empty__title {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 var(--space-2);
+}
+
+.jobs-empty__desc {
+  font-size: 0.875rem;
+  color: var(--ink-muted);
+  margin: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PAGE CONTAINER
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.jobs-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 var(--space-4) var(--space-16); /* Global top spacing handled by .app-content */
+}

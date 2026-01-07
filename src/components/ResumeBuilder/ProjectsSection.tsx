@@ -4,7 +4,6 @@ import { SectionCard } from './SectionCard'
 import { ProjectItemCard } from './ProjectItemCard'
 import { ResumeProjectItem } from '../../types/resume-builder.types'
 import { RelevntColors } from '../../hooks/useRelevntColors'
-import { Button } from '../ui/Button'
 import { FolderOpen } from "lucide-react"
 
 interface ProjectsSectionProps {
@@ -63,15 +62,15 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
           />
         ))}
 
-        <Button
+        <button
           type="button"
-          variant="secondary"
-          size="sm"
+          className="action-add"
           onClick={addItem}
         >
           + Add project
-        </Button>
+        </button>
       </div>
     </SectionCard>
   )
 }
+

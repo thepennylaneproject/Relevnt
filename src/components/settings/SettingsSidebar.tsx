@@ -1,15 +1,14 @@
 import { useEffect, useState } from 'react'
 
 const sections = [
-    { id: 'targeting', label: 'Targeting' },
-    { id: 'profile', label: 'Profile & Voice' },
-    { id: 'system', label: 'System & Auto-Apply' },
+    { id: 'account', label: 'Account' },
+    { id: 'jobsearch', label: 'Job Search' },
+    { id: 'preferences', label: 'Preferences' },
 ]
 
 export function SettingsSidebar() {
-    const [activeSection, setActiveSection] = useState('targeting')
+    const [activeSection, setActiveSection] = useState('account')
 
-    // Track scroll position to highlight active section
     useEffect(() => {
         const observer = new IntersectionObserver(
             (entries) => {
@@ -20,7 +19,7 @@ export function SettingsSidebar() {
                 })
             },
             {
-                rootMargin: '-20% 0px -70% 0px', // Trigger when section is in top 30% of viewport
+                rootMargin: '-20% 0px -70% 0px',
                 threshold: 0,
             }
         )
@@ -33,7 +32,8 @@ export function SettingsSidebar() {
         return () => observer.disconnect()
     }, [])
 
-    const scrollToSection = (id: string) => {
+    const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+        e.preventDefault()
         const element = document.getElementById(id)
         if (element) {
             element.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -41,23 +41,17 @@ export function SettingsSidebar() {
     }
 
     return (
-        <nav className="space-y-6">
-            <h3 className="text-[10px] uppercase tracking-[0.2em] font-bold text-text-muted px-3">
-                Jump to
-            </h3>
-            <ul className="flex flex-col gap-1">
+        <nav className="settings-nav">
+            <ul className="settings-nav-list">
                 {sections.map(({ id, label }) => (
                     <li key={id}>
-                        <button
-                            onClick={() => scrollToSection(id)}
-                            className={`w-full text-left px-3 py-2 text-sm transition-colors rounded-none ${
-                                activeSection === id 
-                                    ? 'text-text font-bold border-l-2 border-accent -ml-[2px]' 
-                                    : 'text-text-muted hover:text-text hover:bg-black/[0.02]'
-                            }`}
+                        <a
+                            href={`#${id}`}
+                            onClick={(e) => scrollToSection(e, id)}
+                            className={`settings-nav-link ${activeSection === id ? 'active' : ''}`}
                         >
                             {label}
-                        </button>
+                        </a>
                     </li>
                 ))}
             </ul>

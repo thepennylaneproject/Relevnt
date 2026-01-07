@@ -22,38 +22,41 @@ export default function InsightsEmptyState({
 
   return (
     <div className="insights-empty-state">
-      <div className="empty-state-icon">📊</div>
-      <h3>Building Your Insights</h3>
-      <p className="muted">
-        We need a bit more data to generate meaningful recommendations.
-        Track at least {requiredCount} applications to unlock AI-powered insights.
+      <h3 className="text-lg font-display mb-3">Insights loading...</h3>
+      <p className="muted mb-6 italic">
+        Once you've logged {requiredCount} applications, we'll show you patterns—what's working, 
+        what to try differently, and where to focus next.
+      </p>
+      <p className="text-sm text-text-muted mb-6">
+        You don't need to rush this.
       </p>
 
-      <div className="progress-container">
-        <div className="progress-bar">
-          <div className="progress-fill" style={{ width: `${progress}%` }} />
-        </div>
-        <div className="progress-label">
-          {currentCount} / {requiredCount} applications
-        </div>
+      {/* Visual tally instead of numeric fraction */}
+      <div className="flex gap-1 mb-8">
+        {Array.from({ length: requiredCount }).map((_, i) => (
+          <div 
+            key={i} 
+            className={`w-2 h-6 border ${i < currentCount ? 'bg-text border-text' : 'border-border/50'}`}
+            title={i < currentCount ? 'Logged' : 'Pending'}
+          />
+        ))}
       </div>
 
-      <div className="empty-state-tips">
-        <h4>What we'll analyze:</h4>
-        <ul>
-          <li>Interview rates by job type, company size, and industry</li>
-          <li>Skills correlated with successful applications</li>
-          <li>Timing patterns and response rates</li>
-          <li>Specific improvements for your resume and targeting</li>
+      <div className="empty-state-tips mb-8">
+        <h4 className="text-sm font-medium mb-2">What we'll look for:</h4>
+        <ul className="text-sm text-text-muted space-y-1">
+          <li>— Patterns in your interview rates</li>
+          <li>— Skills that get responses</li>
+          <li>— Timing that works for you</li>
         </ul>
       </div>
 
-      <div className="empty-state-cta">
-        <a href="/jobs" className="btn btn-primary">
-          Browse Jobs
+      <div className="space-y-4 pt-2">
+        <a href="/applications" className="block text-sm font-bold underline decoration-accent/30 hover:decoration-accent transition-all">
+          Log an application
         </a>
-        <a href="/applications" className="btn btn-link">
-          Log Applications
+        <a href="/jobs" className="block text-[10px] uppercase tracking-widest font-bold opacity-60 hover:opacity-100 transition-opacity">
+          Browse roles
         </a>
       </div>
     </div>

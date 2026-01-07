@@ -36,6 +36,7 @@ export type ThemePreference = 'system' | 'light' | 'dark'
 export type LayoutDensity = 'cozy' | 'compact'
 
 export interface ProfileSettings {
+  email: string
   fullName: string
   preferredName: string
   location: string
@@ -61,6 +62,7 @@ const normalizeLayout = (value: ProfileRow['layout_density']): LayoutDensity => 
 }
 
 const mapRowToSettings = (row: ProfileRow): ProfileSettings => ({
+  email: row.email ?? '',
   fullName: row.full_name ?? '',
   preferredName: row.preferred_name ?? '',
   location: row.location ?? '',
@@ -98,6 +100,7 @@ export interface UseProfileSettingsReturn {
   saveError: string | null
   refresh: () => Promise<void>
   saveSettings: (patch: Partial<ProfileSettings>) => Promise<boolean>
+  updateEmail: (email: string) => Promise<{ success: boolean; error?: string }>
 }
 
 export function useProfileSettings(): UseProfileSettingsReturn {
@@ -105,11 +108,13 @@ export function useProfileSettings(): UseProfileSettingsReturn {
   const [settings, setSettings] = useState<ProfileSettings | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [isUpdatingEmail, setIsUpdatingEmail] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
 
   const defaults: ProfileSettings = useMemo(
     () => ({
+      email: user?.email ?? '',
       fullName: '',
       preferredName: '',
       location: '',
@@ -184,13 +189,33 @@ export function useProfileSettings(): UseProfileSettingsReturn {
     [user, settings, defaults]
   )
 
+  const updateEmail = useCallback(
+    async (email: string) => {
+      if (!user) return { success: false, error: 'User not authenticated' }
+      setIsUpdatingEmail(true)
+
+      const { error: supaError } = await supabase.auth.updateUser({ email })
+
+      if (supaError) {
+        console.error('Failed to update email', supaError)
+        setIsUpdatingEmail(false)
+        return { success: false, error: supaError.message }
+      }
+
+      setIsUpdatingEmail(false)
+      return { success: true }
+    },
+    [user]
+  )
+
   return {
     settings,
     isLoading,
-    saving,
+    saving: saving || isUpdatingEmail,
     error,
     saveError,
     refresh,
     saveSettings,
+    updateEmail,
   }
 }

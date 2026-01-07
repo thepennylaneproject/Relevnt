@@ -105,18 +105,17 @@ export const ContactSection: React.FC<Props> = ({ contact, onChange, colors }) =
             />
           </div>
         </div>
-
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
+        {/* Links subsection — quiet rows */}
+        <div className="links-subsection">
+          <div className="links-subsection__header">
             <label className={labelClass}>Links (optional)</label>
-            <Button
+            <button
               type="button"
-              variant="secondary"
-              size="sm"
+              className="links-subsection__add"
               onClick={addLink}
             >
               + Add link
-            </Button>
+            </button>
           </div>
 
           {(contact.links ?? []).length === 0 ? (
@@ -124,33 +123,32 @@ export const ContactSection: React.FC<Props> = ({ contact, onChange, colors }) =
               Add LinkedIn, portfolio, GitHub, or other high value links.
             </p>
           ) : (
-            <div className="space-y-2">
+            <div className="links-subsection__list">
               {(contact.links ?? []).map((link, index) => (
                 <div
                   key={index}
-                  className="flex flex-col gap-2 sm:flex-row sm:items-center"
+                  className="links-subsection__row"
                 >
                   <input
-                    className={`${inputClass} sm:flex-1`}
+                    className={`${inputClass} links-subsection__label-input`}
                     value={link.label}
                     onChange={handleLinkLabelChange(index)}
                     placeholder="LinkedIn"
                   />
                   <input
-                    className={`${inputClass} sm:flex-[2]`}
+                    className={`${inputClass} links-subsection__url-input`}
                     value={link.url}
                     onChange={handleLinkUrlChange(index)}
                     placeholder="https://linkedin.com/in/you"
                   />
-                  <Button
+                  <button
                     type="button"
-                    variant="destructive"
-                    size="sm"
+                    className="links-subsection__remove"
                     onClick={() => removeLink(index)}
                     aria-label="Remove link"
                   >
-                    ✕ Remove
-                  </Button>
+                    Remove
+                  </button>
                 </div>
               ))}
             </div>

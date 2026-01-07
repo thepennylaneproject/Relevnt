@@ -1,10 +1,10 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * RELEVNT INPUT COMPONENT
+ * RELEVNT INPUT COMPONENT — Ledger System
  * ═══════════════════════════════════════════════════════════════════════════
  * 
- * Input component with consistent styling and error states.
- * Uses design tokens for theming.
+ * Baseline-only input styling (no filled rectangles).
+ * Hairline rule at bottom, champagne focus state.
  * 
  * Usage:
  *   <Input placeholder="Enter your name" />
