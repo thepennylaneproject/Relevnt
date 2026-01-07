@@ -1275,7 +1275,7 @@ export async function upsertJobs(jobs: NormalizedJob[]): Promise<UpsertResult> {
     }
 
     return {
-      source: j.source_slug,
+      source: j.source_slug || 'unknown', // GUARD: source must NEVER be null
       source_slug: j.source_slug,
       external_id: j.external_id,
       dedup_key: dedupKey,
@@ -1336,6 +1336,16 @@ export async function upsertJobs(jobs: NormalizedJob[]): Promise<UpsertResult> {
     }
   } catch (rpcErr) {
     console.warn('ingest_jobs: RPC call failed, falling back to direct upsert:', rpcErr)
+  }
+
+  // Validate all jobs have source_slug BEFORE enrichment
+  const jobsWithoutSource = enrichedJobs.filter(j => !j.source_slug || j.source_slug.length === 0)
+  if (jobsWithoutSource.length > 0) {
+    console.error(`ingest_jobs: CRITICAL - ${jobsWithoutSource.length} jobs missing source_slug, rejecting batch:`)
+    jobsWithoutSource.slice(0, 3).forEach(j => {
+      console.error(`  - external_id=${j.external_id}, title="${j.title}", source_slug="${j.source_slug}"`)
+    })
+    throw new Error(`Ingestion validation failed: ${jobsWithoutSource.length} jobs have NULL source_slug`)
   }
 
   // Safety net: Ensure every job has dedup_key before upserting
