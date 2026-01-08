@@ -14,10 +14,8 @@ import { runIngestion } from './ingest_jobs'
 const REMAINING_SOURCES = [
   'usajobs',
   'fantastic',
-  'jobdatafeeds',
-  'careerjet',
   'whatjobs',
-  'theirstack',
+  // Note: jobdatafeeds (403), careerjet (403), theirstack (402) removed - see sourceConfig.ts
 ]
 
 export const handler: Handler = async (

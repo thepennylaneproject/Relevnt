@@ -34,6 +34,7 @@ import {
 import { fetchCompaniesInParallel, fetchFromMultiplePlatforms } from './utils/concurrent-fetcher'
 import { fetchAndParseRSSFeed } from './utils/rssParser'
 import { enrichJobURL, enrichJobURLs } from './utils/jobURLEnricher'
+import { shouldMakeCall, recordCall } from './utils/ingestionRouting'
 
 export type IngestResult = {
   source: string;
@@ -796,9 +797,9 @@ async function fetchJson(
 // ============================================================================
 // COMPANY REGISTRY FUNCTIONS
 // ============================================================================
-
 /**
  * Get companies from registry for a given platform
+ * Prioritizes companies not synced recently (null or >12h ago) for better rotation.
  */
 async function getCompaniesFromRegistry(
   supabase: ReturnType<typeof createAdminClient>,
@@ -811,6 +812,11 @@ async function getCompaniesFromRegistry(
         : process.env.GREENHOUSE_MAX_BOARDS_PER_RUN || String(DEFAULT_GREENHOUSE_MAX_BOARDS_PER_RUN),
       10
     );
+
+    // Calculate 12 hour cutoff for rotation
+    const syncCutoff = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString()
+    const syncField = platform === 'lever' ? 'last_synced_at_lever' : 'last_synced_at_greenhouse'
+    const platformField = platform === 'lever' ? 'lever_slug' : 'greenhouse_board_token'
 
     // Try to use priority queue view if available, fall back to table query
     let companies: any[] = [];
@@ -828,28 +834,40 @@ async function getCompaniesFromRegistry(
       console.log('Priority queue view not available, using table query');
     }
 
-    // Fallback: query companies table directly
+    // Fallback: query companies table directly with rotation logic
     if (companies.length === 0) {
-      const platformField = platform === 'lever' ? 'lever_slug' : 'greenhouse_board_token';
-      const { data, error } = await supabase
+      // First: get companies that haven't been synced recently (or ever)
+      const { data: staleCompanies, error: staleError } = await supabase
         .from('companies')
         .select('*')
         .eq('is_active', true)
         .not(platformField, 'is', null)
-        .order(
-          'job_creation_velocity',
-          { ascending: false, nullsFirst: false }
-        )
+        .or(`${syncField}.is.null,${syncField}.lt.${syncCutoff}`)
+        .order('job_creation_velocity', { ascending: false, nullsFirst: false })
         .order('growth_score', { ascending: false })
         .limit(maxCompanies);
 
-      if (error) {
-        console.error(`Failed to query ${platform} companies:`, error);
-        // Fall back to JSON config for backwards compatibility
-        return platform === 'lever' ? getLeverSourcesAsCompanies() : [];
-      }
+      if (!staleError && staleCompanies && staleCompanies.length > 0) {
+        companies = staleCompanies;
+        console.log(`ingest_jobs: got ${companies.length} ${platform} companies due for rotation (not synced in 12h)`);
+      } else {
+        // Fallback: all active companies if rotation filter returns nothing
+        const { data, error } = await supabase
+          .from('companies')
+          .select('*')
+          .eq('is_active', true)
+          .not(platformField, 'is', null)
+          .order('job_creation_velocity', { ascending: false, nullsFirst: false })
+          .order('growth_score', { ascending: false })
+          .limit(maxCompanies);
 
-      companies = data || [];
+        if (error) {
+          console.error(`Failed to query ${platform} companies:`, error);
+          return platform === 'lever' ? getLeverSourcesAsCompanies() : [];
+        }
+
+        companies = data || [];
+      }
     }
 
     console.log(
@@ -862,6 +880,7 @@ async function getCompaniesFromRegistry(
     return platform === 'lever' ? getLeverSourcesAsCompanies() : [];
   }
 }
+
 
 /**
  * Convert Lever JSON config to Company objects (backwards compatibility)
@@ -1094,6 +1113,23 @@ async function fetchFromAllCompaniesInParallel(
           total_jobs: totalJobs,
         })
       );
+
+      // Update sync timestamps for successfully fetched companies
+      const syncField = platform === 'lever' ? 'last_synced_at_lever' : 'last_synced_at_greenhouse'
+      const successCompanyIds = successfulResults.map(r => r.companyId).filter(Boolean)
+      
+      if (successCompanyIds.length > 0) {
+        const { error: syncUpdateError } = await supabase
+          .from('companies')
+          .update({ [syncField]: new Date().toISOString() })
+          .in('id', successCompanyIds)
+        
+        if (syncUpdateError) {
+          console.warn(`Failed to update ${platform} sync timestamps:`, syncUpdateError.message)
+        } else {
+          console.log(`ingest_jobs: updated ${platform} sync timestamps for ${successCompanyIds.length} companies`)
+        }
+      }
 
       for (const result of successfulResults) {
         allJobs[platform].push(...(result.jobs || []));
@@ -2580,6 +2616,8 @@ export const handler: Handler = async (event) => {
 /**
  * Queue-driven ingestion for a single source with dynamic parameters
  * Used by search_queue_cron.ts for diverse, targeted searches
+ * 
+ * Enforces 24h call signature tracking to prevent duplicate API calls.
  */
 export async function ingestFromSource(
   sourceSlug: string,
@@ -2600,16 +2638,38 @@ export async function ingestFromSource(
     return 0
   }
 
+  // 24h call signature tracking: skip if this exact call was made recently
+  const { shouldProceed, signature } = await shouldMakeCall(
+    supabase,
+    sourceSlug,
+    {
+      keywords: searchParams.keywords || 'software developer',
+      location: searchParams.location || 'US',
+      ...searchParams
+    },
+    24 // hours
+  )
+
+  if (!shouldProceed) {
+    console.log(`ingestFromSource: skipping ${sourceSlug} - same params called within 24h`)
+    return 0
+  }
+
   console.log(`ingestFromSource: ${sourceSlug} with params:`, searchParams)
 
   try {
     // Use existing ingest function (it handles state internally)
     const result = await ingest(source, undefined, searchParams)
 
+    // Record this call for 24h tracking
+    await recordCall(supabase, sourceSlug, signature, result.count)
+
     console.log(`ingestFromSource: ${sourceSlug} completed with ${result.count} jobs`)
     return result.count
   } catch (err) {
     console.error(`ingestFromSource: ${sourceSlug} failed:`, err)
+    // Still record the call to prevent retry storms on errors
+    await recordCall(supabase, sourceSlug, signature, 0)
     return 0
   }
 }

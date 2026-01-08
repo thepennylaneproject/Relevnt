@@ -269,11 +269,10 @@ export async function seedDefaultSearches(
         { keywords: 'analyst', location: 'remote' },
     ]
 
-    // All sources that support keyword-based searches
+    // All sources that support keyword-based searches (only enabled ones)
     const sources = [
         'jooble',           // Global aggregator with POST search
         'reed_uk',          // UK jobs with keyword search
-        'careerjet',        // Global aggregator
         'remoteok',         // Remote jobs
         'remotive',         // Remote jobs
         'himalayas',        // Remote jobs
@@ -281,10 +280,8 @@ export async function seedDefaultSearches(
         'arbeitnow',        // European jobs
         'themuse',          // US jobs
         'adzuna_us',        // US aggregator
-        'usajobs',          // Federal jobs
-        'careeronestop',    // US government aggregator
-        'jobdatafeeds',     // Global job aggregator with keyword support
-        'jobspy',           // ✅ Multi-board web scraper (when enabled)
+        'jobspy',           // Multi-board web scraper
+        // Note: careerjet, usajobs, careeronestop, jobdatafeeds disabled - see sourceConfig.ts
     ]
 
     const tasks: Partial<SearchTask>[] = []
@@ -335,10 +332,10 @@ export async function seedFromUserInterests(
         return 0
     }
 
+    // Only enabled sources (disabled: careerjet, usajobs, careeronestop)
     const sources = [
-        'jooble', 'reed_uk', 'careerjet', 'remoteok', 'remotive',
-        'himalayas', 'jobicy', 'arbeitnow', 'themuse', 'adzuna_us',
-        'usajobs', 'careeronestop'
+        'jooble', 'reed_uk', 'remoteok', 'remotive',
+        'himalayas', 'jobicy', 'arbeitnow', 'themuse', 'adzuna_us'
     ]
     const tasks: any[] = []
 
