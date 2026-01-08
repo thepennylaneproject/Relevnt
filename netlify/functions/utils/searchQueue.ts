@@ -40,12 +40,15 @@ export async function getNextSearchTasks(
 
     // Step 1: Clean up stuck "running" tasks (haven't been updated in 15 minutes)
     // This prevents deadlocks from failed/crashed executions
-    await supabase
+    const { error: cleanupError } = await supabase
         .from('search_queue')
         .update({ status: 'pending', updated_at: now })
         .eq('status', 'running')
         .lt('updated_at', lockTimeout)
-        .catch(err => console.warn('[SearchQueue] Cleanup failed:', err))
+
+    if (cleanupError) {
+        console.warn('[SearchQueue] Cleanup failed:', cleanupError)
+    }
 
     // Step 2: Fetch pending tasks (but skip ones currently being processed)
     const { data, error } = await supabase
