@@ -1,7 +1,7 @@
 // netlify/functions/ingest_remaining_sources.ts
 /**
  * Remaining/low-volume source ingestion
- * Runs: usajobs, fantastic, jobdatafeeds, careerjet, whatjobs, theirstack
+ * Runs: fantastic, whatjobs (all disabled sources removed)
  * These are lower-volume sources that don't need frequent updates
  * Runs every 6 hours via cron
  *
@@ -12,10 +12,9 @@ import type { Handler, HandlerEvent, HandlerContext } from '@netlify/functions'
 import { runIngestion } from './ingest_jobs'
 
 const REMAINING_SOURCES = [
-  'usajobs',
   'fantastic',
   'whatjobs',
-  // Note: jobdatafeeds (403), careerjet (403), theirstack (402) removed - see sourceConfig.ts
+  // Note: usajobs (401), jobdatafeeds (403), careerjet (403), theirstack (402) removed - see sourceConfig.ts
 ]
 
 export const handler: Handler = async (

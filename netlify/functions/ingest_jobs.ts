@@ -35,6 +35,7 @@ import { fetchCompaniesInParallel, fetchFromMultiplePlatforms } from './utils/co
 import { fetchAndParseRSSFeed } from './utils/rssParser'
 import { enrichJobURL, enrichJobURLs } from './utils/jobURLEnricher'
 import { shouldMakeCall, recordCall } from './utils/ingestionRouting'
+import { updateAdaptiveState } from './utils/ingestionAdaptive'
 
 export type IngestResult = {
   source: string;
@@ -1243,19 +1244,36 @@ export async function upsertJobs(jobs: NormalizedJob[]): Promise<UpsertResult> {
 
   // 🔹 De-dupe by (source_slug, external_id) so Postgres does not try to
   // update the same row twice in a single ON CONFLICT command.
-  const seen = new Set<string>()
+  // Also de-dupe by computed dedup_key to prevent processing the same
+  // logical job multiple times in one batch (cross-source within batch).
+  const seenSourceExternal = new Set<string>()
+  const seenDedupKey = new Set<string>()
+  let filteredSourceExternal = 0
+  let filteredDedupKey = 0
+
   const uniqueJobs = jobs.filter((j) => {
-    const key = `${j.source_slug}::${j.external_id}`
-    if (seen.has(key)) {
+    // First check source_slug::external_id
+    const sourceKey = `${j.source_slug}::${j.external_id}`
+    if (seenSourceExternal.has(sourceKey)) {
+      filteredSourceExternal++
       return false
     }
-    seen.add(key)
+    seenSourceExternal.add(sourceKey)
+
+    // Then check dedup_key to skip same logical job from different sources in same batch
+    const dedupKey = computeDedupKey(j.title, j.company, j.location)
+    if (dedupKey && seenDedupKey.has(dedupKey)) {
+      filteredDedupKey++
+      return false
+    }
+    if (dedupKey) seenDedupKey.add(dedupKey)
+
     return true
   })
 
-  if (uniqueJobs.length < jobs.length) {
-    console.warn(
-      `ingest_jobs: filtered ${jobs.length - uniqueJobs.length} duplicate jobs before upsert`
+  if (filteredSourceExternal > 0 || filteredDedupKey > 0) {
+    console.log(
+      `ingest_jobs: pre-filtered ${filteredSourceExternal} source/id dupes, ${filteredDedupKey} cross-source dupes before upsert`
     )
   }
 
@@ -1434,7 +1452,7 @@ export async function upsertJobs(jobs: NormalizedJob[]): Promise<UpsertResult> {
   const { data, error, count } = await supabase
     .from('jobs')
     .upsert(safeJobs, {
-      onConflict: 'source_slug,external_id',
+      onConflict: 'dedup_key',  // Cross-source deduplication
       ignoreDuplicates: false,  // Update existing jobs with fresh data
       count: 'exact',
     })
@@ -1617,6 +1635,8 @@ async function ingestGreenhouseBoards(
   const runStartedAt = new Date().toISOString()
   let totalNormalized = 0
   let totalInserted = 0
+  let totalUpdated = 0
+  let totalNoop = 0
   let totalDuplicates = 0
   let totalStaleFiltered = 0
   let sourceStatus: 'success' | 'failed' = 'success'
@@ -1734,6 +1754,8 @@ async function ingestGreenhouseBoards(
 
         const upsertResult = await upsertJobs(enrichedJobsToInsert)
         totalInserted += upsertResult.inserted
+        totalUpdated += upsertResult.updated
+        totalNoop += upsertResult.noop
         totalDuplicates += upsertResult.updated + upsertResult.noop
         console.log(
           `ingest_jobs: upserted ${upsertResult.inserted} new, ${upsertResult.updated} updated from Greenhouse board ${board.companyName}`
@@ -1795,6 +1817,8 @@ async function ingestGreenhouseBoards(
         page_end: 1,
         normalized_count: totalNormalized,
         inserted_count: totalInserted,
+        updated_count: totalUpdated,
+        noop_count: totalNoop,
         duplicate_count: totalDuplicates,
         error_message: sourceError,
         cursor_out: { page: 1, since: runStartedAt },
@@ -1809,6 +1833,8 @@ async function ingestGreenhouseBoards(
     last_counts: {
       normalized: totalNormalized,
       inserted: totalInserted,
+      updated: totalUpdated,
+      noop: totalNoop,
       duplicates: totalDuplicates,
       staleFiltered: totalStaleFiltered,
       freshnessRatio,
@@ -1828,6 +1854,9 @@ async function ingestGreenhouseBoards(
   }
 
   await supabase.from('job_source_health').upsert(ghHealthUpdate, { onConflict: 'source' })
+
+  // Update adaptive cooldown state based on run performance
+  await updateAdaptiveState(source.slug, totalInserted, totalUpdated, totalNoop)
 
   // Persist state
   await persistIngestionState(
@@ -1902,6 +1931,8 @@ async function ingest(
   const runStartedAt = new Date().toISOString()
   let totalNormalized = 0
   let totalInserted = 0
+  let totalUpdated = 0
+  let totalNoop = 0
   let totalDuplicates = 0
   let totalStaleFiltered = 0
   let sourceStatus: 'success' | 'failed' = 'success'
@@ -2013,6 +2044,8 @@ async function ingest(
 
       const upsertResult = await upsertJobs(enrichedFresh)
       totalInserted = upsertResult.inserted
+      totalUpdated = upsertResult.updated
+      totalNoop = upsertResult.noop
       totalDuplicates = upsertResult.updated + upsertResult.noop
 
       console.log(`ingest_jobs: finished RSS ingest: ${totalInserted} inserted, ${upsertResult.updated} updated, ${upsertResult.noop} unchanged`)
@@ -2102,6 +2135,8 @@ async function ingest(
 
       const upsertResult = await upsertJobs(enrichedFresh)
       totalInserted = upsertResult.inserted
+      totalUpdated = upsertResult.updated
+      totalNoop = upsertResult.noop
       totalDuplicates = upsertResult.updated + upsertResult.noop
 
       console.log(`ingest_jobs: finished ${platform} ingest: ${totalInserted} inserted, ${upsertResult.updated} updated, ${upsertResult.noop} unchanged`)
@@ -2205,6 +2240,8 @@ async function ingest(
 
         const upsertResult = await upsertJobs(enrichedFresh)
         totalInserted += upsertResult.inserted
+        totalUpdated += upsertResult.updated
+        totalNoop += upsertResult.noop
         totalDuplicates += upsertResult.updated + upsertResult.noop
         console.log(
           `ingest_jobs: upserted ${upsertResult.inserted} new, ${upsertResult.updated} updated from ${source.slug} on page ${page}`
@@ -2262,12 +2299,11 @@ async function ingest(
         page_end: page,
         normalized_count: totalNormalized,
         inserted_count: totalInserted,
+        updated_count: totalUpdated,
+        noop_count: totalNoop,
         duplicate_count: totalDuplicates,
         error_message: sourceError,
         cursor_out: { page, since: runStartedAt },
-        // New fields for freshness tracking (will be ignored if columns don't exist yet)
-        // stale_filtered_count: totalStaleFiltered,
-        // freshness_ratio: freshnessRatio,
       })
       .eq('id', sourceRunId)
   }
@@ -2281,6 +2317,8 @@ async function ingest(
     last_counts: {
       normalized: totalNormalized,
       inserted: totalInserted,
+      updated: totalUpdated,
+      noop: totalNoop,
       duplicates: totalDuplicates,
       staleFiltered: totalStaleFiltered,
       freshnessRatio,
@@ -2300,6 +2338,9 @@ async function ingest(
   }
 
   await supabase.from('job_source_health').upsert(healthUpdate, { onConflict: 'source' })
+
+  // Update adaptive cooldown state based on run performance
+  await updateAdaptiveState(source.slug, totalInserted, totalUpdated, totalNoop)
 
   await persistIngestionState(
     supabase,
