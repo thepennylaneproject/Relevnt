@@ -1352,6 +1352,9 @@ export async function upsertJobs(jobs: NormalizedJob[]): Promise<UpsertResult> {
       description: j.description,
       is_active: true,
 
+      // FRESHNESS TRACKING - always set to now() for proper cleanup decisions
+      last_seen_at: new Date().toISOString(),
+
       // URL enrichment fields (from jobURLEnricher)
       is_direct: urlEnrichment?.is_direct ?? false,
       ats_type: urlEnrichment?.ats_type ?? null,

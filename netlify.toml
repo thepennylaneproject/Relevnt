@@ -65,10 +65,12 @@
 [functions."search_queue_cron"]
   schedule = "*/15 * * * *"
 
-# Jobs table cleanup - runs daily at 3am UTC
-# Deletes jobs older than 90 days to maintain database size and performance
-[functions."cleanup_jobs-background"]
-  schedule = "0 3 * * *"
+# Jobs table cleanup - DISABLED until freshness tracking is fixed
+# The cleanup was deleting jobs based on posted_date (original posting date)
+# instead of last_seen_at (last ingestion date), causing table shrinkage.
+# TODO: Re-enable after last_seen_at is added and upserts update it.
+# [functions."cleanup_jobs-background"]
+#   schedule = "0 3 * * *"
 
 # ============================================
 # HIGH-VOLUME JOB INGESTION SCHEDULES
