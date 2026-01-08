@@ -4,6 +4,7 @@ import { PageLayout } from '../components/layout/PageLayout'
 import { AccountSection } from '../components/settings/sections/AccountSection'
 import { JobSearchSection } from '../components/settings/sections/JobSearchSection'
 import { PreferencesSection } from '../components/settings/sections/PreferencesSection'
+import { IntentSummary } from '../components/ui/IntentSummary'
 import type { AutoSaveStatus } from '../hooks/useSettingsAutoSave'
 
 /**
@@ -31,6 +32,11 @@ export default function Settings(): JSX.Element {
                 {statusText && (
                     <div className="settings-status">{statusText}</div>
                 )}
+
+                {/* Intent Summary - shows current search configuration at a glance */}
+                <section className="settings-section" style={{ paddingBottom: '1rem', borderBottom: '1px solid var(--border-subtle)' }}>
+                    <IntentSummary variant="detailed" showSettingsLink={false} />
+                </section>
 
                 {/* Identity */}
                 <section className="settings-section">

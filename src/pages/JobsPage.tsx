@@ -21,11 +21,14 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { useToast } from '../components/ui/Toast'
+import { useSessionContext } from '../hooks/useSessionContext'
+import { useHelperSettingsSummary } from '../hooks/useHelperSettingsSummary'
+import { IntentSummary, buildMatchReason } from '../components/ui/IntentSummary'
 import type { JobRow } from '../shared/types'
 import './JobsPage.css'
 
@@ -52,19 +55,48 @@ export default function JobsPage() {
   const { user } = useAuth()
   const { showToast } = useToast()
   const [searchParams, setSearchParams] = useSearchParams()
+  const { loaded: sessionLoaded, getJobsFilters, setJobsFilters, setLastRoute } = useSessionContext()
+  const { summary: settingsSummary } = useHelperSettingsSummary()
+  const filtersInitialized = useRef(false)
 
   // Job data state
   const [jobs, setJobs] = useState<JobRow[]>([])
   const [jobsLoading, setJobsLoading] = useState(false)
   const [jobsError, setJobsError] = useState<string | null>(null)
 
-  // Filter state - initialized from URL params if present
+  // Filter state - initialized from URL params, then session context, then defaults
   const [sourceKey, setSourceKey] = useState<string | ''>(searchParams.get('source') || '')
   const [employmentType, setEmploymentType] = useState<string | ''>(searchParams.get('type') || '')
   const [postedSince, setPostedSince] = useState<'7d' | '30d' | '90d' | ''>((searchParams.get('posted') as any) || '')
   const [remoteOnly, setRemoteOnly] = useState(searchParams.get('remote') === 'true')
   const [minSalary, setMinSalary] = useState(parseInt(searchParams.get('minSalary') || '0', 10))
   const [page, setPage] = useState(parseInt(searchParams.get('page') || '0', 10))
+
+  // Initialize filters from session context if URL has no params
+  useEffect(() => {
+    if (!sessionLoaded || filtersInitialized.current) return
+    filtersInitialized.current = true
+
+    // If URL has params, use them. Otherwise, restore from session context.
+    const hasUrlParams = searchParams.has('source') || searchParams.has('type') ||
+      searchParams.has('posted') || searchParams.has('remote') || searchParams.has('minSalary')
+
+    if (!hasUrlParams) {
+      const savedFilters = getJobsFilters()
+      if (savedFilters) {
+        if (savedFilters.source) setSourceKey(savedFilters.source)
+        if (savedFilters.type) setEmploymentType(savedFilters.type)
+        if (savedFilters.posted) setPostedSince(savedFilters.posted as any)
+        if (savedFilters.remote) setRemoteOnly(savedFilters.remote)
+        if (savedFilters.minSalary > 0) setMinSalary(savedFilters.minSalary)
+      }
+    }
+  }, [sessionLoaded, searchParams, getJobsFilters])
+
+  // Record this route as last visited
+  useEffect(() => {
+    setLastRoute('/jobs')
+  }, [setLastRoute])
 
   // Update URL params when filters change
   useEffect(() => {
@@ -75,9 +107,20 @@ export default function JobsPage() {
     if (remoteOnly) params.remote = 'true'
     if (minSalary > 0) params.minSalary = minSalary.toString()
     if (page > 0) params.page = page.toString()
-    
+
     setSearchParams(params, { replace: true })
-  }, [sourceKey, employmentType, postedSince, remoteOnly, minSalary, page, setSearchParams])
+
+    // Also persist filters to session context for return visits
+    if (filtersInitialized.current) {
+      setJobsFilters({
+        source: sourceKey,
+        posted: postedSince,
+        type: employmentType,
+        minSalary,
+        remote: remoteOnly,
+      })
+    }
+  }, [sourceKey, employmentType, postedSince, remoteOnly, minSalary, page, setSearchParams, setJobsFilters])
 
   // Popover state for filter menus
   const [activePopover, setActivePopover] = useState<'source' | 'posted' | 'type' | 'salary' | null>(null)
@@ -322,6 +365,47 @@ export default function JobsPage() {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
   }
 
+  /**
+   * Check if a job is considered stale (older than maxAgeDays)
+   */
+  const isJobStale = (dateStr: string | null | undefined, maxAgeDays: number = 45): boolean => {
+    if (!dateStr) return false
+    const date = new Date(dateStr)
+    if (isNaN(date.getTime())) return false
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+    return diffDays > maxAgeDays
+  }
+
+  /**
+   * Format source slug to a readable name
+   */
+  const formatSourceName = (sourceSlug: string): string => {
+    const sourceNames: Record<string, string> = {
+      greenhouse: 'Greenhouse',
+      lever: 'Lever',
+      remoteok: 'RemoteOK',
+      remotive: 'Remotive',
+      himalayas: 'Himalayas',
+      adzuna_us: 'Adzuna',
+      usajobs: 'USAJobs',
+      jobicy: 'Jobicy',
+      arbeitnow: 'Arbeitnow',
+      jooble: 'Jooble',
+      themuse: 'The Muse',
+      theirstack: 'TheirStack',
+      careeronestop: 'CareerOneStop',
+      rss: 'RSS Feed',
+      reed_uk: 'Reed',
+      careerjet: 'Careerjet',
+      whatjobs: 'WhatJobs',
+      fantastic: 'FantasticJobs',
+      jobdatafeeds: 'JobDataFeeds',
+    }
+    return sourceNames[sourceSlug] || sourceSlug
+  }
+
   const formatSalary = (min: number | null | undefined, max: number | null | undefined): string => {
     if (!min && !max) return ''
     if (min && max && min !== max) {
@@ -379,6 +463,9 @@ export default function JobsPage() {
           ═══════════════════════════════════════════════════════════════════ */}
       <header className="jobs-masthead">
         <h1 className="jobs-masthead__title">Opportunities</h1>
+
+        {/* Intent Summary - shows current search preferences */}
+        <IntentSummary variant="compact" showSettingsLink={true} className="jobs-masthead__intent" />
 
         <nav className="jobs-masthead__filters">
           {/* Source Filter */}
@@ -543,6 +630,14 @@ export default function JobsPage() {
             const matchScore = typeof job.match_score === 'number' ? Math.round(job.match_score) : null
             const empType = job.employment_type?.replace('_', ' ') || ''
 
+            // Build match reason text based on user settings
+            const matchReason = settingsSummary?.settings_configured
+              ? buildMatchReason(job, settingsSummary.hard_constraints)
+              : null
+
+            // Check if job is stale (older than 45 days)
+            const stale = isJobStale(job.posted_date, 45)
+
             return (
               <li
                 key={job.id}
@@ -565,8 +660,18 @@ export default function JobsPage() {
                       {job.company || 'Unknown'}
                       {displayLocation && ` · ${displayLocation}`}
                     </span>
+                    {matchReason && (
+                      <span className="jobs-ledger__match-reason" title="Why this job matches your preferences">
+                        {matchReason}
+                      </span>
+                    )}
                     <span className="jobs-ledger__date">
                       {formatRelativeDate(job.posted_date)}
+                      {job.source_slug && (
+                        <span className="jobs-ledger__source" title={`Source: ${job.source_slug}`}>
+                          {' via '}{formatSourceName(job.source_slug)}
+                        </span>
+                      )}
                     </span>
                   </div>
 
@@ -667,7 +772,15 @@ export default function JobsPage() {
                     {job.source_slug && (
                       <>
                         <dt>Source</dt>
-                        <dd>{job.source_slug}</dd>
+                        <dd>{formatSourceName(job.source_slug)}</dd>
+                      </>
+                    )}
+                    {stale && (
+                      <>
+                        <dt>Notice</dt>
+                        <dd className="jobs-ledger__stale-notice">
+                          Older listing - verify on company site
+                        </dd>
                       </>
                     )}
                   </dl>

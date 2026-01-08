@@ -206,7 +206,8 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
             </div>
             <h2>Welcome to Relevnt</h2>
             <p className="step-description">
-              Let's set up your job target. This helps our AI find the most relevant opportunities for you.
+              Setting up a job target helps us find the most relevant opportunities for you.
+              You can browse all jobs without this, but matches will be more accurate with it.
             </p>
             <div className="form-group">
               <label className="form-label">Name your job target</label>
@@ -480,7 +481,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
               variant="ghost"
               onClick={handleSkip}
             >
-              Skip for now
+              Browse jobs first
             </Button>
           ) : (
             <Button
