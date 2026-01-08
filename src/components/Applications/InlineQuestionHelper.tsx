@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useHelperSettingsSummary } from '../../hooks/useHelperSettingsSummary'
@@ -12,7 +12,10 @@ interface InlineQuestionHelperProps {
   personaId?: string
 }
 
-type HelperState = 'idle' | 'loading' | 'active' | 'blocked'
+type HelperState = 'idle' | 'loading' | 'active' | 'blocked' | 'timeout' | 'error'
+
+// AI request timeout in milliseconds (30 seconds)
+const AI_REQUEST_TIMEOUT = 30000
 
 export function InlineQuestionHelper({
   questionText,
@@ -55,12 +58,21 @@ export function InlineQuestionHelper({
     setDraft('')
   }
 
+  // Abort controller for cancelling in-flight requests
+  const abortControllerRef = useRef<AbortController | null>(null)
+
   const handleActivate = async () => {
     // Gate: block if settings not configured
     if (!summary?.settings_configured) {
       setState('blocked')
       return
     }
+
+    // Cancel any existing request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
+    abortControllerRef.current = new AbortController()
 
     setState('loading')
 
@@ -73,7 +85,12 @@ export function InlineQuestionHelper({
         return
       }
 
-      const res = await fetch('/.netlify/functions/application_helper', {
+      // Create timeout promise
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('timeout')), AI_REQUEST_TIMEOUT)
+      })
+
+      const fetchPromise = fetch('/.netlify/functions/application_helper', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -86,9 +103,12 @@ export function InlineQuestionHelper({
           resumeContext: fieldValue || '',
           personaId: personaId || '',
           settingsSummary: summary,
-        })
+        }),
+        signal: abortControllerRef.current.signal,
       })
 
+      // Race between fetch and timeout
+      const res = await Promise.race([fetchPromise, timeoutPromise])
       const data = await res.json()
 
       // Handle incomplete settings response from server
@@ -98,14 +118,23 @@ export function InlineQuestionHelper({
       }
 
       if (!res.ok || !data.ok) {
-        dismiss()
+        setState('error')
         return
       }
 
       setDraft(data.output?.answer || '')
       setState('active')
-    } catch {
-      dismiss()
+    } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        // User cancelled - stay in idle
+        dismiss()
+        return
+      }
+      if (err instanceof Error && err.message === 'timeout') {
+        setState('timeout')
+        return
+      }
+      setState('error')
     }
   }
 
@@ -206,21 +235,91 @@ export function InlineQuestionHelper({
     )
   }
 
-  // Blocked state: settings not configured
+  // Timeout state: AI request took too long
+  if (state === 'timeout') {
+    return (
+      <div className="type-meta" style={{ padding: '0.5rem', background: 'var(--surface-warning)', borderRadius: 'var(--radius-sm)' }}>
+        <strong>Taking longer than expected</strong>
+        <p style={{ margin: '0.25rem 0', opacity: 0.9 }}>
+          This is taking longer than expected. Your data is safe.
+        </p>
+        <span style={{ display: 'flex', gap: '0.75rem' }}>
+          <span
+            style={{ cursor: 'pointer', textDecoration: 'underline' }}
+            onClick={handleActivate}
+          >
+            Try again
+          </span>
+          <span
+            style={{ cursor: 'pointer', textDecoration: 'underline', opacity: 0.7 }}
+            onClick={dismiss}
+          >
+            Cancel
+          </span>
+        </span>
+      </div>
+    )
+  }
+
+  // Error state: something went wrong
+  if (state === 'error') {
+    return (
+      <div className="type-meta">
+        <span style={{ opacity: 0.8 }}>
+          Something went wrong.{' '}
+          <span
+            style={{ cursor: 'pointer', textDecoration: 'underline' }}
+            onClick={handleActivate}
+          >
+            Try again
+          </span>
+        </span>
+      </div>
+    )
+  }
+
+  // Blocked state: settings not configured - improved with suggestions
   if (state === 'blocked' || (state === 'idle' && summary && !summary.settings_configured)) {
     const missingLabels = (summary?.missing ?? [])
       .map(key => MISSING_SETTING_LABELS[key])
-      .join(', ')
+      .filter(Boolean)
+
+    // Provide quick suggestions for common missing fields
+    const hasMissingPersona = summary?.missing?.includes('persona')
+    const hasMissingSeniority = summary?.missing?.includes('seniority_levels')
+    const hasMissingRemote = summary?.missing?.includes('remote_preference')
 
     return (
-      <div className="type-meta">
-        <strong>Quick setup needed</strong>
-        <p style={{ margin: '0.25rem 0' }}>
-          To give reliable help, I need a couple settings first: {missingLabels || 'some settings'}. 
-          Once those are set, I can answer without guessing.
+      <div className="type-meta" style={{ padding: '0.5rem', background: 'var(--surface-subtle)', borderRadius: 'var(--radius-sm)' }}>
+        <strong style={{ display: 'block', marginBottom: '0.25rem' }}>Quick setup needed</strong>
+        <p style={{ margin: '0.25rem 0', opacity: 0.9 }}>
+          To give helpful answers, I need: {missingLabels.join(', ') || 'some preferences'}.
         </p>
-        <Link to="/settings#search-strategy" style={{ textDecoration: 'underline' }}>
-          Go to Settings
+
+        {/* Quick action suggestions */}
+        <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+          {hasMissingPersona && (
+            <span className="type-meta" style={{ opacity: 0.8 }}>
+              <strong>Tip:</strong> Create a job target (e.g., "Frontend Engineer Search")
+            </span>
+          )}
+          {hasMissingSeniority && (
+            <span className="type-meta" style={{ opacity: 0.8 }}>
+              <strong>Tip:</strong> Select your target level (e.g., Senior, Lead)
+            </span>
+          )}
+          {hasMissingRemote && (
+            <span className="type-meta" style={{ opacity: 0.8 }}>
+              <strong>Tip:</strong> Set your remote preference (Remote / Hybrid / On-site)
+            </span>
+          )}
+        </div>
+
+        <Link
+          to="/settings#search-strategy"
+          style={{ display: 'inline-block', marginTop: '0.5rem', textDecoration: 'underline', fontWeight: 500 }}
+        >
+          Complete setup (1-2 min)
         </Link>
       </div>
     )

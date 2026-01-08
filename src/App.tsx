@@ -81,6 +81,7 @@ function AppInner() {
                   element={isAuthed ? <InsightsPage /> : <Navigate to="/login" replace />}
                 />
 
+                {/* Jobs page is accessible without full onboarding - allows exploration */}
                 <Route
                   path="/jobs"
                   element={isAuthed ? <JobsPage /> : <Navigate to="/login" replace />}

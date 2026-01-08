@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
 import { PageBackground } from '../components/shared/PageBackground'
 import { Container } from '../components/shared/Container'
 import { useAuth } from '../contexts/AuthContext'
@@ -61,9 +62,11 @@ type JobSourceRow = {
 
 export default function AdminDashboard(): JSX.Element {
   const { user, loading: authLoading } = useAuth()
+  const navigate = useNavigate()
   const [profile, setProfile] = useState<ProfileRow | null>(null)
   const [activeTab, setActiveTab] = useState<TabKey>('overview')
   const [gateError, setGateError] = useState<string | null>(null)
+  const [redirectCountdown, setRedirectCountdown] = useState<number | null>(null)
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -88,6 +91,25 @@ export default function AdminDashboard(): JSX.Element {
     return profile.plan_tier === 'admin' || profile.tier === 'admin' || (profile as any).is_admin === true || (profile as any).admin_level === 'super'
   }, [profile])
 
+  // Auto-redirect non-admins to dashboard after 5 seconds
+  useEffect(() => {
+    if (authLoading) return
+    if (!user || (profile && !isAdmin)) {
+      setRedirectCountdown(5)
+      const interval = setInterval(() => {
+        setRedirectCountdown((prev) => {
+          if (prev === null) return null
+          if (prev <= 1) {
+            navigate('/dashboard', { replace: true })
+            return null
+          }
+          return prev - 1
+        })
+      }, 1000)
+      return () => clearInterval(interval)
+    }
+  }, [authLoading, user, profile, isAdmin, navigate])
+
   if (authLoading) {
     return (
       <PageBackground>
@@ -102,10 +124,27 @@ export default function AdminDashboard(): JSX.Element {
     return (
       <PageBackground>
         <Container maxWidth="lg" padding="md">
-          <div style={{ minHeight: '50vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', textAlign: 'center' }}>
-            <Icon name="alert-triangle" size="xl" className="color-error" />
-            <h2 style={{ fontSize: 18, margin: '16px 0', color: 'var(--text)' }}>Access Denied</h2>
-            <p>{gateError || 'You do not have access to the admin dashboard.'}</p>
+          <div style={{ minHeight: '50vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', textAlign: 'center', gap: '1rem' }}>
+            <Icon name="alert-triangle" size="xl" className="color-warning" />
+            <h2 style={{ fontSize: 18, margin: '16px 0', color: 'var(--text)' }}>Admin Area</h2>
+            <p style={{ maxWidth: '400px' }}>
+              {gateError || 'This page is for administrators only. You will be redirected to your dashboard.'}
+            </p>
+            {redirectCountdown !== null && (
+              <p style={{ fontSize: '0.875rem', opacity: 0.7 }}>
+                Redirecting in {redirectCountdown} seconds...
+              </p>
+            )}
+            <Link
+              to="/dashboard"
+              style={{
+                marginTop: '0.5rem',
+                color: 'var(--accent)',
+                textDecoration: 'underline',
+              }}
+            >
+              Go to dashboard now
+            </Link>
           </div>
         </Container>
       </PageBackground>
