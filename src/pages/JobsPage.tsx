@@ -22,6 +22,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { useToast } from '../components/ui/Toast'
@@ -50,19 +51,33 @@ const PAGE_SIZE = 50
 export default function JobsPage() {
   const { user } = useAuth()
   const { showToast } = useToast()
+  const [searchParams, setSearchParams] = useSearchParams()
 
   // Job data state
   const [jobs, setJobs] = useState<JobRow[]>([])
   const [jobsLoading, setJobsLoading] = useState(false)
   const [jobsError, setJobsError] = useState<string | null>(null)
 
-  // Filter state
-  const [sourceKey, setSourceKey] = useState<string | ''>('')
-  const [employmentType, setEmploymentType] = useState<string | ''>('')
-  const [postedSince, setPostedSince] = useState<'7d' | '30d' | '90d' | ''>('')
-  const [remoteOnly, setRemoteOnly] = useState(false)
-  const [minSalary, setMinSalary] = useState(0)
-  const [page, setPage] = useState(0)
+  // Filter state - initialized from URL params if present
+  const [sourceKey, setSourceKey] = useState<string | ''>(searchParams.get('source') || '')
+  const [employmentType, setEmploymentType] = useState<string | ''>(searchParams.get('type') || '')
+  const [postedSince, setPostedSince] = useState<'7d' | '30d' | '90d' | ''>((searchParams.get('posted') as any) || '')
+  const [remoteOnly, setRemoteOnly] = useState(searchParams.get('remote') === 'true')
+  const [minSalary, setMinSalary] = useState(parseInt(searchParams.get('minSalary') || '0', 10))
+  const [page, setPage] = useState(parseInt(searchParams.get('page') || '0', 10))
+
+  // Update URL params when filters change
+  useEffect(() => {
+    const params: Record<string, string> = {}
+    if (sourceKey) params.source = sourceKey
+    if (employmentType) params.type = employmentType
+    if (postedSince) params.posted = postedSince
+    if (remoteOnly) params.remote = 'true'
+    if (minSalary > 0) params.minSalary = minSalary.toString()
+    if (page > 0) params.page = page.toString()
+    
+    setSearchParams(params, { replace: true })
+  }, [sourceKey, employmentType, postedSince, remoteOnly, minSalary, page, setSearchParams])
 
   // Popover state for filter menus
   const [activePopover, setActivePopover] = useState<'source' | 'posted' | 'type' | 'salary' | null>(null)

@@ -12,7 +12,7 @@
  * 6. Confirmation
  */
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Icon } from '../ui/Icon'
 import { Button } from '../ui/Button'
@@ -26,6 +26,8 @@ interface OnboardingWizardProps {
   onComplete?: () => void
   onSkip?: () => void
 }
+
+const ONBOARDING_STATE_KEY = 'relevnt_onboarding_state'
 
 export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) {
   const navigate = useNavigate()
@@ -45,6 +47,39 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
   const [minSalary, setMinSalary] = useState<number | null>(null)
   const [skills, setSkills] = useState<string[]>([])
   const [skillInput, setSkillInput] = useState('')
+
+  // Hydrate state from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem(ONBOARDING_STATE_KEY)
+    if (saved) {
+      try {
+        const data = JSON.parse(saved)
+        if (data.step) setStep(data.step)
+        if (data.personaName) setPersonaName(data.personaName)
+        if (data.jobTitles) setJobTitles(data.jobTitles)
+        if (data.locations) setLocations(data.locations)
+        if (data.remotePreference) setRemotePreference(data.remotePreference)
+        if (data.minSalary !== undefined) setMinSalary(data.minSalary)
+        if (data.skills) setSkills(data.skills)
+      } catch (e) {
+        console.error('Failed to load onboarding state', e)
+      }
+    }
+  }, [])
+
+  // Persist state to localStorage whenever it changes
+  useEffect(() => {
+    const state = {
+      step,
+      personaName,
+      jobTitles,
+      locations,
+      remotePreference,
+      minSalary,
+      skills
+    }
+    localStorage.setItem(ONBOARDING_STATE_KEY, JSON.stringify(state))
+  }, [step, personaName, jobTitles, locations, remotePreference, minSalary, skills])
 
   const totalSteps = 6
 
@@ -119,6 +154,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
       }
 
       await createPersona(personaData)
+      localStorage.removeItem(ONBOARDING_STATE_KEY)
       
       if (onComplete) {
         onComplete()
@@ -133,6 +169,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
   }
 
   const handleSkip = () => {
+    localStorage.removeItem(ONBOARDING_STATE_KEY)
     if (onSkip) {
       onSkip()
     } else {

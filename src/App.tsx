@@ -1,7 +1,7 @@
 // src/App.tsx
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { RelevntThemeProvider } from './contexts/RelevntThemeProvider'
-import { useAuth } from './contexts/AuthContext'
+import { useAuth, isUserAdmin } from './contexts/AuthContext'
 
 import { AppLayout } from './components/layout/AppLayout'
 import { ErrorBoundary } from './components/ui/ErrorBoundary'
@@ -129,7 +129,7 @@ function AppInner() {
 
                 <Route
                   path="/admin"
-                  element={isAuthed ? <AdminDashboard /> : <Navigate to="/login" replace />}
+                  element={isAuthed && isUserAdmin(user) ? <AdminDashboard /> : <Navigate to="/dashboard" replace />}
                 />
 
                 {/* Redirects for deprecated/moved routes */}

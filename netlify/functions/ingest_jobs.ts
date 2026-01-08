@@ -36,6 +36,7 @@ import { fetchAndParseRSSFeed } from './utils/rssParser'
 import { enrichJobURL, enrichJobURLs } from './utils/jobURLEnricher'
 import { shouldMakeCall, recordCall } from './utils/ingestionRouting'
 import { updateAdaptiveState, shouldSkipDueToAdaptiveCooldown } from './utils/ingestionAdaptive'
+import { resolveCompanyId } from './utils/companyResolver'
 
 export type IngestResult = {
   source: string;
@@ -1210,9 +1211,9 @@ async function persistIngestionState(
  * Compute a dedup_key for cross-source deduplication
  * Uses MD5 hash of normalized title + company + location
  */
-function computeDedupKey(title: string | null, company: string | null, location: string | null): string {
+function computeDedupKey(title: string | null, company: string | null, location: string | null, companyId?: string | null): string {
   const normalizedTitle = (title || '').toLowerCase().trim()
-  const normalizedCompany = (company || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+  const normalizedCompany = companyId || (company || '').toLowerCase().replace(/[^a-z0-9]/g, '')
   const normalizedLocation = (location || '').toLowerCase().replace(/[^a-z0-9]/g, '')
 
   // Simple hash function (same logic as SQL function)
@@ -1261,7 +1262,7 @@ export async function upsertJobs(jobs: NormalizedJob[]): Promise<UpsertResult> {
     seenSourceExternal.add(sourceKey)
 
     // Then check dedup_key to skip same logical job from different sources in same batch
-    const dedupKey = computeDedupKey(j.title, j.company, j.location)
+    const dedupKey = computeDedupKey(j.title, j.company, j.location, (j as any).company_id)
     if (dedupKey && seenDedupKey.has(dedupKey)) {
       filteredDedupKey++
       return false
@@ -1746,10 +1747,14 @@ async function ingestGreenhouseBoards(
           `ingest_jobs: normalized ${normalized.length} → ${jobsToInsert.length} fresh jobs from Greenhouse board ${board.companyName}`
         )
 
-        // Enrich jobs with dedup_key before upsert
-        const enrichedJobsToInsert = jobsToInsert.map((j) => ({
-          ...j,
-          dedup_key: computeDedupKey(j.title, j.company, j.location),
+        // Resolve company_id and enrich jobs with dedup_key before upsert
+        const enrichedJobsToInsert = await Promise.all(jobsToInsert.map(async (j) => {
+          const companyId = await resolveCompanyId(j.company)
+          return {
+            ...j,
+            company_id: companyId,
+            dedup_key: computeDedupKey(j.title, j.company, j.location, companyId),
+          }
         }))
 
         const upsertResult = await upsertJobs(enrichedJobsToInsert)
@@ -2036,10 +2041,14 @@ async function ingest(
 
       console.log(`ingest_jobs: upserting ${fresh.length} fresh RSS jobs`)
 
-      // Enrich jobs with dedup_key before upsert
-      const enrichedFresh = fresh.map((j) => ({
-        ...j,
-        dedup_key: computeDedupKey(j.title, j.company, j.location),
+      // Resolve company_id and enrich jobs with dedup_key before upsert
+      const enrichedFresh = await Promise.all(fresh.map(async (j) => {
+        const companyId = await resolveCompanyId(j.company)
+        return {
+          ...j,
+          company_id: companyId,
+          dedup_key: computeDedupKey(j.title, j.company, j.location, companyId),
+        }
       }))
 
       const upsertResult = await upsertJobs(enrichedFresh)
@@ -2127,10 +2136,14 @@ async function ingest(
 
       console.log(`ingest_jobs: upserting ${fresh.length} fresh ${platform} jobs`)
 
-      // Enrich jobs with dedup_key before upsert
-      const enrichedFresh = fresh.map((j) => ({
-        ...j,
-        dedup_key: computeDedupKey(j.title, j.company, j.location),
+      // Resolve company_id and enrich jobs with dedup_key before upsert
+      const enrichedFresh = await Promise.all(fresh.map(async (j) => {
+        const companyId = await resolveCompanyId(j.company)
+        return {
+          ...j,
+          company_id: companyId,
+          dedup_key: computeDedupKey(j.title, j.company, j.location, companyId),
+        }
       }))
 
       const upsertResult = await upsertJobs(enrichedFresh)
@@ -2232,10 +2245,14 @@ async function ingest(
           `ingest_jobs: normalized ${normalized.length} → ${fresh.length} fresh jobs from ${source.slug} on page ${page}`
         )
 
-        // Enrich jobs with dedup_key before upsert
-        const enrichedFresh = fresh.map((j) => ({
-          ...j,
-          dedup_key: computeDedupKey(j.title, j.company, j.location),
+        // Resolve company_id and enrich jobs with dedup_key before upsert
+        const enrichedFresh = await Promise.all(fresh.map(async (j) => {
+          const companyId = await resolveCompanyId(j.company)
+          return {
+            ...j,
+            company_id: companyId,
+            dedup_key: computeDedupKey(j.title, j.company, j.location, companyId),
+          }
         }))
 
         const upsertResult = await upsertJobs(enrichedFresh)
