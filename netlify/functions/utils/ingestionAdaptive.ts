@@ -5,7 +5,7 @@
  * get progressively longer cooldowns to reduce wasted API calls.
  */
 
-import { createClient as createAdminClient } from './supabaseAdmin'
+import { createAdminClient } from './supabase'
 
 /**
  * Threshold for considering a run "high noop"

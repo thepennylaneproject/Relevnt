@@ -35,7 +35,7 @@ import { fetchCompaniesInParallel, fetchFromMultiplePlatforms } from './utils/co
 import { fetchAndParseRSSFeed } from './utils/rssParser'
 import { enrichJobURL, enrichJobURLs } from './utils/jobURLEnricher'
 import { shouldMakeCall, recordCall } from './utils/ingestionRouting'
-import { updateAdaptiveState } from './utils/ingestionAdaptive'
+import { updateAdaptiveState, shouldSkipDueToAdaptiveCooldown } from './utils/ingestionAdaptive'
 
 export type IngestResult = {
   source: string;
@@ -1908,9 +1908,9 @@ async function ingest(
   const sourceConfig = getSourceConfig(source.slug)
   const state = await loadIngestionState(supabase, source.slug)
 
-  // Check cooldown
-  if (state.last_run_at && shouldSkipDueToCooldown(source.slug, new Date(state.last_run_at))) {
-    console.log(`[Ingest: ${source.slug}] Skipping due to cooldown`)
+  // Check adaptive cooldown
+  if (state.last_run_at && await shouldSkipDueToAdaptiveCooldown(source.slug, sourceConfig.cooldownMinutes, new Date(state.last_run_at))) {
+    console.log(`[Ingest: ${source.slug}] Skipping due to adaptive cooldown`)
     return {
       source: source.slug,
       count: 0,
