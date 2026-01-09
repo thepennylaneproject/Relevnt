@@ -204,9 +204,9 @@ export const HimalayasSource: JobSource = {
 
     return rows
       .filter(row => {
-        // Validate that we have at least an ID or a slug
-        if (!row.id && !row.slug) {
-          console.warn('HimalayasSource: filtering job missing both id and slug')
+        // Validate that we have some kind of stable ID
+        if (!row.id && !row.slug && !row.guid && !row.applicationLink) {
+          console.warn('HimalayasSource: filtering job missing stable identifiers')
           return false
         }
         return true
@@ -222,8 +222,8 @@ export const HimalayasSource: JobSource = {
         row.company_name ??
         null
 
-      // Use slug as primary ID, fall back to numeric id, use title+company hash as last resort
-      const externalId = row.slug || row.id || `${row.title}:${companyName}`
+      // Use slug or guid as primary ID, fall back to numeric id or link, use title+company hash as last resort
+      const externalId = row.slug || row.guid || row.id || row.applicationLink || `${row.title}:${companyName}`
 
       return {
         source_slug: 'himalayas',

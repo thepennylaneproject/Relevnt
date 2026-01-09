@@ -116,9 +116,10 @@ export async function completeTask(
         .single()
 
     if (fetchError || !task) {
-        console.warn(`[SearchQueue] Could not fetch task ${taskId} for feedback update:`, fetchError)
+        console.warn(`[SearchQueue] Could not fetch task ${taskId} for feedback update. error:`, fetchError?.message || 'No row found')
         // Fallback to basic update
-        const nextRun = new Date(now.getTime() + cooldownMinutes * 60 * 1000)
+        const nextRun = new Date(now.getTime() + (cooldownMinutes || 720) * 60 * 1000)
+        console.log(`[SearchQueue] Falling back to basic update for task ${taskId}. cooldown: ${cooldownMinutes}, fallback used: ${cooldownMinutes || 720}, nextRun: ${nextRun.toISOString()}`)
         await supabase
             .from('search_queue')
             .update({
