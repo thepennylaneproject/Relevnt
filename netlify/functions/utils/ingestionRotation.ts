@@ -101,7 +101,7 @@ export async function getEligibleCompanyTargets(
 
 /**
  * Update a company target after successful ingestion.
- * Uses the SQL RPC function for atomic update.
+ * Uses the SQL RPC function for atomic update with cooling/warming.
  */
 export async function updateCompanyTargetSuccess(
   supabase: SupabaseClient,
@@ -109,7 +109,7 @@ export async function updateCompanyTargetSuccess(
   newJobsCount: number
 ): Promise<void> {
   try {
-    const { error } = await supabase.rpc('update_company_target_success', {
+    const { data, error } = await supabase.rpc('update_company_target_success', {
       p_target_id: targetId,
       p_new_jobs_count: newJobsCount,
     })
@@ -119,7 +119,15 @@ export async function updateCompanyTargetSuccess(
       return
     }
 
-    console.log(`[IngestionRotation] Updated target ${targetId} success: ${newJobsCount} new jobs`)
+    if (data && data.length > 0) {
+      const result = data[0]
+      console.log(
+        `[IngestionRotation] Updated target ${targetId}: ${newJobsCount} new jobs, ` +
+        `interval=${result.new_interval_minutes}m, consecutive_empty=${result.new_consecutive_empty}`
+      )
+    } else {
+      console.log(`[IngestionRotation] Updated target ${targetId} success: ${newJobsCount} new jobs`)
+    }
   } catch (err) {
     console.error(`[IngestionRotation] Exception updating target success:`, err)
   }

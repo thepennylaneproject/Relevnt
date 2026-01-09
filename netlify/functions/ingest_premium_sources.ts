@@ -1,18 +1,23 @@
 // netlify/functions/ingest_premium_sources.ts
 /**
- * Premium source ingestion (Greenhouse only)
+ * Premium source ingestion using rotation system
+ *
+ * Uses runRotationIngestion() which:
+ * - Rotates through company_targets (Greenhouse/Lever)
+ * - Implements per-company backoff (cooling after 3 empty runs)
+ * - Processes search_slices with adaptive intervals
  *
  * NOTE: Lever has been moved to ingest_lever-background.ts
  * because it requires a longer timeout (15 min) due to large job volumes
  *
- * Greenhouse completes in <30 seconds, so uses standard function timeout
+ * Greenhouse completes in <30 seconds via rotation queue
  * Runs every 30 minutes via cron
  *
  * Expected duration: 5-30 seconds
  */
 
 import type { Handler, HandlerEvent, HandlerContext } from '@netlify/functions'
-import { runIngestion } from './ingest_jobs'
+import { runRotationIngestion } from './ingest_jobs'
 
 export const handler: Handler = async (
   event: HandlerEvent,
@@ -21,28 +26,26 @@ export const handler: Handler = async (
   const workerId = Math.random().toString(36).substring(7)
   const startTime = Date.now()
 
-  console.log(`[PremiumIngest:${workerId}] Starting premium source ingestion (Greenhouse only)`)
+  console.log(`[PremiumIngest:${workerId}] Starting rotation-based ingestion`)
 
   try {
-    // Run only Greenhouse here (Lever moved to background function)
-    const results = await Promise.all([
-      runIngestion('greenhouse', 'schedule'),
-    ])
+    // Use rotation system for intelligent company target selection
+    const results = await runRotationIngestion('schedule')
 
-    const flatResults = results.flat()
-    const totalInserted = flatResults.reduce((sum, r) => sum + r.count, 0)
+    const totalInserted = results.reduce((sum, r) => sum + r.count, 0)
     const duration = Date.now() - startTime
 
-    console.log(`[PremiumIngest:${workerId}] Completed in ${duration}ms - Inserted: ${totalInserted} jobs`)
+    console.log(`[PremiumIngest:${workerId}] Completed in ${duration}ms - ${results.length} sources, ${totalInserted} jobs inserted`)
 
     return {
       statusCode: 200,
       body: JSON.stringify({
         success: true,
-        message: 'Premium source ingestion completed',
-        sources: ['greenhouse'],
+        message: 'Rotation ingestion completed',
+        sources: results.map(r => r.source),
         totalInserted,
         durationMs: duration,
+        results,
       }),
     }
   } catch (err) {
