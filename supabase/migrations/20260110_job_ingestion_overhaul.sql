@@ -44,6 +44,61 @@ COMMENT ON COLUMN company_targets.total_jobs_found IS 'Total jobs found across a
 COMMENT ON COLUMN company_targets.avg_jobs_per_run IS 'Average jobs found per run.';
 
 -- ============================================================================
+-- TASK 1.2b: UPDATE company_targets success RPC to track consecutive_empty_runs
+-- ============================================================================
+-- Override the existing function to add feedback loop tracking
+
+CREATE OR REPLACE FUNCTION update_company_target_success(
+  p_target_id UUID,
+  p_new_jobs_count INTEGER
+) RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_interval INTEGER;
+  v_current_total INTEGER;
+  v_current_run_count INTEGER;
+BEGIN
+  SELECT min_interval_minutes, COALESCE(total_jobs_found, 0),
+         COALESCE((SELECT COUNT(*) FROM company_targets WHERE id = p_target_id AND last_success_at IS NOT NULL), 0)
+  INTO v_interval, v_current_total, v_current_run_count
+  FROM company_targets
+  WHERE id = p_target_id;
+
+  IF NOT FOUND THEN
+    RETURN;
+  END IF;
+
+  UPDATE company_targets
+  SET
+    last_success_at = NOW(),
+    next_allowed_at = NOW() + (v_interval || ' minutes')::interval,
+    fail_count = 0,
+    last_error = NULL,
+    new_jobs_last = p_new_jobs_count,
+    -- Track consecutive empty runs for cooling logic
+    consecutive_empty_runs = CASE
+      WHEN p_new_jobs_count > 0 THEN 0
+      ELSE COALESCE(consecutive_empty_runs, 0) + 1
+    END,
+    -- Track total jobs for avg calculation
+    total_jobs_found = COALESCE(total_jobs_found, 0) + p_new_jobs_count,
+    -- Calculate avg (approximation using run count from timestamps)
+    avg_jobs_per_run = CASE
+      WHEN v_current_run_count + 1 > 0
+      THEN (v_current_total + p_new_jobs_count)::NUMERIC / (v_current_run_count + 1)
+      ELSE 0
+    END
+  WHERE id = p_target_id;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION update_company_target_success TO service_role;
+
+COMMENT ON FUNCTION update_company_target_success IS 'Update company target after successful scrape. Tracks consecutive_empty_runs for cooling logic.';
+
+-- ============================================================================
 -- TASK 1.3: RPC FUNCTION - increment_empty_runs for search_queue
 -- ============================================================================
 

@@ -271,5 +271,5 @@ export const handler: Handler = async (event) => {
 
 // Also export as background function for longer timeout
 export const config: Config = {
-  schedule: '30 * * * *' // Every hour at :30
+  schedule: '30 */2 * * *' // Every 2 hours at :30 (conservative to avoid rate limits)
 }
