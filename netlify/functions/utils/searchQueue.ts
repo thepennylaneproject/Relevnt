@@ -98,6 +98,7 @@ export async function markTaskRunning(
 
 /**
  * Complete a task and schedule next run
+ * Now with feedback loop: tracks consecutive empty runs and total jobs found
  */
 export async function completeTask(
     supabase: SupabaseClient,
@@ -106,7 +107,48 @@ export async function completeTask(
     cooldownMinutes: number
 ): Promise<void> {
     const now = new Date()
-    const nextRun = new Date(now.getTime() + cooldownMinutes * 60 * 1000)
+
+    // First, get current task state for feedback loop calculations
+    const { data: task, error: fetchError } = await supabase
+        .from('search_queue')
+        .select('consecutive_empty_runs, total_jobs_found, run_count, min_interval_minutes')
+        .eq('id', taskId)
+        .single()
+
+    if (fetchError || !task) {
+        console.warn(`[SearchQueue] Could not fetch task ${taskId} for feedback update:`, fetchError)
+        // Fallback to basic update
+        const nextRun = new Date(now.getTime() + cooldownMinutes * 60 * 1000)
+        await supabase
+            .from('search_queue')
+            .update({
+                status: 'pending',
+                last_run_at: now.toISOString(),
+                next_run_after: nextRun.toISOString(),
+                last_result_count: resultCount,
+                updated_at: now.toISOString()
+            })
+            .eq('id', taskId)
+        return
+    }
+
+    // Calculate new values for feedback loop
+    const currentEmptyRuns = task.consecutive_empty_runs || 0
+    const currentTotalJobs = task.total_jobs_found || 0
+    const currentRunCount = task.run_count || 0
+    const minIntervalMinutes = task.min_interval_minutes || 720
+
+    // Use min_interval_minutes if larger than provided cooldown
+    const effectiveCooldown = Math.max(cooldownMinutes, minIntervalMinutes)
+    const nextRun = new Date(now.getTime() + effectiveCooldown * 60 * 1000)
+
+    // Update consecutive_empty_runs based on result
+    const newEmptyRuns = resultCount > 0 ? 0 : currentEmptyRuns + 1
+    const newTotalJobs = currentTotalJobs + resultCount
+    const newRunCount = currentRunCount + 1
+
+    // Calculate average jobs per run
+    const avgJobsPerRun = newRunCount > 0 ? newTotalJobs / newRunCount : 0
 
     await supabase
         .from('search_queue')
@@ -115,9 +157,18 @@ export async function completeTask(
             last_run_at: now.toISOString(),
             next_run_after: nextRun.toISOString(),
             last_result_count: resultCount,
+            run_count: newRunCount,
+            consecutive_empty_runs: newEmptyRuns,
+            total_jobs_found: newTotalJobs,
+            avg_jobs_per_run: parseFloat(avgJobsPerRun.toFixed(2)),
             updated_at: now.toISOString()
         })
         .eq('id', taskId)
+
+    // Log feedback loop status
+    if (newEmptyRuns >= 3) {
+        console.log(`[SearchQueue] Task ${taskId} has ${newEmptyRuns} consecutive empty runs - candidate for cooling`)
+    }
 }
 
 
