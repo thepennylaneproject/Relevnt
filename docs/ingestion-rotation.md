@@ -45,26 +45,127 @@ recordCall(supabase, source, signature, resultCount);
 
 ## Company Rotation (Greenhouse/Lever)
 
-### How It Works
+### How It Works (Updated Architecture)
 
-Companies are selected for sync based on their `last_synced_at_*` timestamp:
-
-- Companies not synced in 12+ hours get priority
-- Ordered by `job_creation_velocity` and `growth_score`
-
-### Database Fields
+Companies are now managed in the `company_targets` table for explicit scheduling:
 
 ```sql
--- On companies table
-last_synced_at_greenhouse TIMESTAMPTZ
-last_synced_at_lever TIMESTAMPTZ
+company_targets
+├── platform: 'lever' | 'greenhouse'
+├── company_slug: the identifier for the company
+├── next_allowed_at: when this target can be fetched again
+├── min_interval_minutes: base cooldown (default 24h)
+├── priority: lower = higher priority
+└── new_jobs_last: tracks productivity per company
+```
+
+**Selection Query:**
+
+```sql
+SELECT * FROM company_targets
+WHERE status = 'active'
+  AND (next_allowed_at IS NULL OR next_allowed_at <= now())
+ORDER BY priority ASC, last_success_at ASC NULLS FIRST
+LIMIT :max_targets;
 ```
 
 ### After Successful Fetch
 
-The sync timestamp is updated so the company won't be selected again for 12 hours.
+The target is updated with:
+
+- `last_success_at = now()`
+- `next_allowed_at = now() + min_interval_minutes`
+- `new_jobs_last = upsertResult.inserted` (true new count)
+
+### After Failed Fetch
+
+Exponential backoff is applied:
+
+- `fail_count++`
+- `next_allowed_at = now() + (min_interval_minutes * 2^fail_count)`
+- After 5 failures, status changes to `'bad'`
+
+### Migration
+
+The new `company_targets` table is seeded from the existing `companies` registry.
 
 ---
+
+## Search Slices (Aggregators) - NEW
+
+### Overview
+
+Search slices replace `job_search_profiles` with adaptive cooling/warming:
+
+```sql
+search_slices
+├── source: 'jooble', 'reed_uk', etc.
+├── query_hash: MD5 of normalized params
+├── params_json: { keywords, location, days_back, ... }
+├── next_allowed_at: when this slice can run again
+├── min_interval_minutes: base cooldown (default 12h)
+├── consecutive_empty_runs: for cooling logic
+└── new_jobs_last: true new job count
+```
+
+### Cooling/Warming Logic
+
+**Cooling (unproductive slices):**
+
+- If `new_jobs_last = 0` for 3 consecutive runs
+- Double `min_interval_minutes` (cap at 24h)
+
+**Warming (productive slices):**
+
+- If `new_jobs_last > 0`
+- Halve `min_interval_minutes` (floor at 6h)
+
+### Selection Query
+
+```sql
+SELECT * FROM search_slices
+WHERE status = 'active'
+  AND (next_allowed_at IS NULL OR next_allowed_at <= now())
+ORDER BY last_success_at ASC NULLS FIRST
+LIMIT :max_slices;
+```
+
+---
+
+## Entry Points
+
+### New Rotation Entry Point (Recommended)
+
+```typescript
+// Use this for scheduled ingestion
+import { runRotationIngestion } from "./ingest_jobs";
+
+await runRotationIngestion("schedule");
+```
+
+This processes:
+
+1. Lever company targets (up to `MAX_COMPANY_TARGETS_PER_RUN`)
+2. Greenhouse company targets (up to `MAX_COMPANY_TARGETS_PER_RUN`)
+3. Search slices (up to `MAX_SEARCH_SLICES_PER_RUN`)
+
+### Individual Queue Functions
+
+```typescript
+// Process only ATS targets
+await ingestFromCompanyTargets("lever");
+await ingestFromCompanyTargets("greenhouse");
+
+// Process only aggregator slices
+await ingestFromSearchSlices();
+```
+
+### Legacy Entry Point
+
+The original `runIngestion()` still works for:
+
+- Single-source manual triggers
+- Admin-triggered full syncs
 
 ## Search Profile Rotation (Aggregators + JobSpy)
 

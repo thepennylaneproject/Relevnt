@@ -37,6 +37,16 @@ import { enrichJobURL, enrichJobURLs } from './utils/jobURLEnricher'
 import { shouldMakeCall, recordCall } from './utils/ingestionRouting'
 import { updateAdaptiveState, shouldSkipDueToAdaptiveCooldown } from './utils/ingestionAdaptive'
 import { resolveCompanyId } from './utils/companyResolver'
+import {
+  getEligibleCompanyTargets,
+  updateCompanyTargetSuccess,
+  updateCompanyTargetFailure,
+  getEligibleSearchSlices,
+  updateSearchSliceSuccess,
+  updateSearchSliceFailure,
+  type CompanyTarget,
+  type SearchSlice,
+} from './utils/ingestionRotation'
 
 export type IngestResult = {
   source: string;
@@ -86,6 +96,10 @@ const DEFAULT_MAX_PAGES_PER_RUN = 3
 const DEFAULT_GREENHOUSE_MAX_BOARDS_PER_RUN = 50
 const DEFAULT_GREENHOUSE_MAX_JOBS_PER_BOARD = 200
 const DEFAULT_LEVER_MAX_COMPANIES_PER_RUN = 50
+
+// Rotation system budget limits (per scheduler run)
+const MAX_COMPANY_TARGETS_PER_RUN = parseInt(process.env.MAX_COMPANY_TARGETS_PER_RUN || '10', 10)
+const MAX_SEARCH_SLICES_PER_RUN = parseInt(process.env.MAX_SEARCH_SLICES_PER_RUN || '5', 10)
 
 const SOURCE_PAGINATION: Record<string, PaginationConfig> = {
   remoteok: { pageParam: 'page', pageSizeParam: 'limit', pageSize: 50 },
@@ -2427,6 +2441,286 @@ async function ingest(
     status: sourceStatus,
     error: sourceError || undefined,
   }
+}
+
+// =============================================================================
+// ROTATION-BASED INGESTION FUNCTIONS
+// =============================================================================
+
+/**
+ * Ingest from company targets (Lever/Greenhouse) using rotation queue.
+ * Replaces implicit company selection with explicit scheduling via company_targets table.
+ */
+export async function ingestFromCompanyTargets(
+  platform: 'lever' | 'greenhouse',
+  runId?: string
+): Promise<IngestResult> {
+  const supabase = createAdminClient()
+  const source = ALL_SOURCES.find(s => s.slug === platform)
+  
+  if (!source) {
+    console.error(`[IngestRotation] Source not found: ${platform}`)
+    return {
+      source: platform,
+      count: 0,
+      normalized: 0,
+      duplicates: 0,
+      staleFiltered: 0,
+      status: 'failed',
+      error: `Source not found: ${platform}`,
+    }
+  }
+
+  const sourceConfig = getSourceConfig(platform)
+  const maxTargets = platform === 'lever' 
+    ? MAX_COMPANY_TARGETS_PER_RUN 
+    : MAX_COMPANY_TARGETS_PER_RUN
+
+  console.log(`[IngestRotation] Getting eligible ${platform} targets (max ${maxTargets})`)
+  const targets = await getEligibleCompanyTargets(supabase, maxTargets, platform)
+
+  if (!targets.length) {
+    console.log(`[IngestRotation] No eligible ${platform} targets found`)
+    return {
+      source: platform,
+      count: 0,
+      normalized: 0,
+      duplicates: 0,
+      staleFiltered: 0,
+      status: 'success',
+    }
+  }
+
+  console.log(`[IngestRotation] Processing ${targets.length} ${platform} targets`)
+
+  let totalNormalized = 0
+  let totalInserted = 0
+  let totalUpdated = 0
+  let totalNoop = 0
+  let totalStaleFiltered = 0
+  let failedCount = 0
+
+  for (const target of targets) {
+    try {
+      console.log(`[IngestRotation] Fetching ${platform}: ${target.company_slug}`)
+
+      // Build company object for existing fetch functions
+      const company: Company = {
+        id: target.company_id || target.id,
+        name: target.company_slug,
+        lever_slug: platform === 'lever' ? target.company_slug : undefined,
+        greenhouse_board_token: platform === 'greenhouse' ? target.company_slug : undefined,
+        is_active: true,
+      }
+
+      // Use existing fetch functions
+      const jobs = platform === 'lever'
+        ? await fetchLeverJobsForCompany(company)
+        : await fetchGreenhouseJobsForCompany(company)
+
+      if (!jobs.length) {
+        console.log(`[IngestRotation] No jobs from ${platform}: ${target.company_slug}`)
+        await updateCompanyTargetSuccess(supabase, target.id, 0)
+        continue
+      }
+
+      // Normalize jobs
+      const raw = platform === 'lever' ? jobs : { jobs }
+      let normalized: NormalizedJob[] = []
+      try {
+        const normalizedResult = await Promise.resolve(source.normalize(raw))
+        normalized = normalizedResult || []
+      } catch (err) {
+        console.error(`[IngestRotation] Normalize failed for ${target.company_slug}:`, err)
+        await updateCompanyTargetFailure(supabase, target.id, err instanceof Error ? err.message : String(err))
+        failedCount++
+        continue
+      }
+
+      totalNormalized += normalized.length
+
+      // Apply freshness filter
+      const { fresh, staleCount } = filterByFreshness(normalized, sourceConfig)
+      totalStaleFiltered += staleCount
+
+      if (!fresh.length) {
+        console.log(`[IngestRotation] All jobs stale for ${target.company_slug}`)
+        await updateCompanyTargetSuccess(supabase, target.id, 0)
+        continue
+      }
+
+      // Enrich with company name from target
+      const enrichedJobs = fresh.map(j => ({
+        ...j,
+        company: j.company || target.company_slug,
+      }))
+
+      // Upsert jobs
+      const upsertResult = await upsertJobs(enrichedJobs)
+      totalInserted += upsertResult.inserted
+      totalUpdated += upsertResult.updated
+      totalNoop += upsertResult.noop
+
+      // Update target with true new count (not normalized, not updated)
+      await updateCompanyTargetSuccess(supabase, target.id, upsertResult.inserted)
+
+      console.log(`[IngestRotation] ${platform}:${target.company_slug} - ${upsertResult.inserted} new, ${upsertResult.updated} updated`)
+    } catch (err) {
+      console.error(`[IngestRotation] Error processing target ${target.company_slug}:`, err)
+      await updateCompanyTargetFailure(supabase, target.id, err instanceof Error ? err.message : String(err))
+      failedCount++
+    }
+  }
+
+  return {
+    source: platform,
+    count: totalInserted,
+    normalized: totalNormalized,
+    duplicates: totalUpdated + totalNoop,
+    updated: totalUpdated,
+    noop: totalNoop,
+    staleFiltered: totalStaleFiltered,
+    status: failedCount === targets.length ? 'failed' : 'success',
+    error: failedCount > 0 ? `${failedCount}/${targets.length} targets failed` : undefined,
+  }
+}
+
+/**
+ * Ingest from search slices (aggregators) using rotation queue.
+ * Uses params_json to build search queries with adaptive cooling/warming.
+ */
+export async function ingestFromSearchSlices(
+  runId?: string
+): Promise<IngestResult[]> {
+  const supabase = createAdminClient()
+
+  console.log(`[IngestRotation] Getting eligible search slices (max ${MAX_SEARCH_SLICES_PER_RUN})`)
+  const slices = await getEligibleSearchSlices(supabase, MAX_SEARCH_SLICES_PER_RUN)
+
+  if (!slices.length) {
+    console.log('[IngestRotation] No eligible search slices found')
+    return []
+  }
+
+  console.log(`[IngestRotation] Processing ${slices.length} search slices`)
+  const results: IngestResult[] = []
+
+  for (const slice of slices) {
+    try {
+      const source = ALL_SOURCES.find(s => s.slug === slice.source)
+      if (!source) {
+        console.warn(`[IngestRotation] Source not found for slice: ${slice.source}`)
+        await updateSearchSliceFailure(supabase, slice.id, `Source not found: ${slice.source}`)
+        continue
+      }
+
+      const sourceConfig = getSourceConfig(slice.source)
+      const params = slice.params_json
+
+      console.log(`[IngestRotation] Running slice: ${slice.source} (${params.keywords || 'all'} in ${params.location || 'any'})`)
+
+      // Run ingest with search params from slice
+      const result = await ingest(source, runId, {
+        keywords: params.keywords,
+        location: params.location,
+        ...params,
+      })
+
+      results.push(result)
+
+      // Update slice with results - use inserted count for accurate "new" tracking
+      const newJobsCount = result.count - (result.duplicates || 0)
+      await updateSearchSliceSuccess(
+        supabase,
+        slice.id,
+        result.normalized,
+        newJobsCount
+      )
+
+      console.log(`[IngestRotation] Slice ${slice.source}: ${result.normalized} normalized, ${newJobsCount} new`)
+    } catch (err) {
+      console.error(`[IngestRotation] Error processing slice ${slice.source}:`, err)
+      await updateSearchSliceFailure(supabase, slice.id, err instanceof Error ? err.message : String(err))
+      results.push({
+        source: slice.source,
+        count: 0,
+        normalized: 0,
+        duplicates: 0,
+        staleFiltered: 0,
+        status: 'failed',
+        error: err instanceof Error ? err.message : String(err),
+      })
+    }
+  }
+
+  return results
+}
+
+/**
+ * Run rotation-based ingestion for all queues.
+ * This is the recommended entry point for scheduled ingestion.
+ * Combines ATS targets and aggregator slices with budget limits.
+ */
+export async function runRotationIngestion(
+  triggeredBy: 'schedule' | 'manual' | 'admin' = 'schedule'
+): Promise<IngestResult[]> {
+  const startTime = Date.now()
+  console.log(`[IngestRotation] Starting rotation ingestion (triggered by ${triggeredBy})`)
+
+  const results: IngestResult[] = []
+
+  // 1. Process Lever company targets
+  try {
+    const leverResult = await ingestFromCompanyTargets('lever')
+    results.push(leverResult)
+    console.log(`[IngestRotation] Lever complete: ${leverResult.count} jobs, ${leverResult.status}`)
+  } catch (err) {
+    console.error('[IngestRotation] Lever targets failed:', err)
+    results.push({
+      source: 'lever',
+      count: 0,
+      normalized: 0,
+      duplicates: 0,
+      staleFiltered: 0,
+      status: 'failed',
+      error: err instanceof Error ? err.message : String(err),
+    })
+  }
+
+  // 2. Process Greenhouse company targets
+  try {
+    const greenhouseResult = await ingestFromCompanyTargets('greenhouse')
+    results.push(greenhouseResult)
+    console.log(`[IngestRotation] Greenhouse complete: ${greenhouseResult.count} jobs, ${greenhouseResult.status}`)
+  } catch (err) {
+    console.error('[IngestRotation] Greenhouse targets failed:', err)
+    results.push({
+      source: 'greenhouse',
+      count: 0,
+      normalized: 0,
+      duplicates: 0,
+      staleFiltered: 0,
+      status: 'failed',
+      error: err instanceof Error ? err.message : String(err),
+    })
+  }
+
+  // 3. Process aggregator search slices
+  try {
+    const sliceResults = await ingestFromSearchSlices()
+    results.push(...sliceResults)
+    console.log(`[IngestRotation] Search slices complete: ${sliceResults.length} slices processed`)
+  } catch (err) {
+    console.error('[IngestRotation] Search slices failed:', err)
+  }
+
+  const duration = Date.now() - startTime
+  const totalJobs = results.reduce((sum, r) => sum + r.count, 0)
+  const successCount = results.filter(r => r.status === 'success').length
+
+  console.log(`[IngestRotation] Complete in ${duration}ms: ${totalJobs} jobs from ${successCount}/${results.length} sources`)
+
+  return results
 }
 
 export async function runIngestion(

@@ -22,8 +22,21 @@ export interface AuthContextType {
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function isUserAdmin(profile: any) {
-  return profile?.is_admin === true || profile?.admin_level === 'super';
+export function isUserAdmin(user: any) {
+  if (!user) return false;
+  
+  // Check profile fields (if profile data is fetched)
+  if (user.is_admin === true || user.admin_level === 'super') return true;
+  
+  // Check user_metadata from Supabase auth signup
+  const meta = user.user_metadata || {};
+  if (meta.is_admin === true || meta.admin_level === 'super') return true;
+
+  // Temporary: allow specific admin emails until profile fetching is implemented
+  const adminEmails = ['sarah@thepennylaneproject.org'];
+  if (user.email && adminEmails.includes(user.email.toLowerCase())) return true;
+
+  return false;
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
