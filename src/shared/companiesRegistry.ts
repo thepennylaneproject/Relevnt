@@ -7,7 +7,8 @@ export type FundingStage = 'pre-seed' | 'seed' | 'series_a' | 'series_b' | 'seri
 export type PriorityTier = 'high' | 'standard' | 'low';
 export type DiscoveryMethod = 'yc' | 'crunchbase' | 'manual' | 'careers_page' | 'user_submit';
 
-export type ATSType = 'lever' | 'greenhouse' | 'workday' | 'unknown'
+export type ATSType = 'lever' | 'greenhouse' | 'workday' | 'ashby' | 'smartrecruiters' | 'recruitee' | 'breezyhr' | 'jazzhr' | 'personio' | 'unknown';
+export type ATSConfidence = 'low' | 'medium' | 'high';
 
 export interface Company {
   id: string;
@@ -17,9 +18,17 @@ export interface Company {
   // Platform integrations
   lever_slug?: string;
   greenhouse_board_token?: string;
+  ashby_slug?: string;
+  smartrecruiters_slug?: string;
+  workday_tenant_url?: string;
+  recruitee_slug?: string;
+  breezyhr_slug?: string;
+  jazzhr_slug?: string;
+  personio_slug?: string;
 
   // ATS detection (auto-discovered or manual)
   ats_type?: ATSType;
+  ats_confidence_score?: ATSConfidence;
   careers_page_url?: string; // Direct URL to company's careers page
   ats_detected_at?: string; // Timestamp when ATS was last detected/verified
 
@@ -28,6 +37,7 @@ export interface Company {
   funding_stage?: FundingStage;
   employee_count?: number;
   industry?: string;
+  discovery_metadata?: Record<string, any>;
 
   // Sync state
   last_synced_at?: string;
@@ -108,6 +118,19 @@ export function calculateGrowthScore(
   // This is done by query logic based on last_synced_at
 
   return Math.min(score, 100);
+}
+
+/**
+ * Check if a company meets the high-value thresholds (50+ employees or >$10M revenue)
+ */
+export function isHighValueCompany(company: Partial<Company>): boolean {
+  if (company.employee_count && company.employee_count >= 50) return true;
+  
+  // Checking revenue from discovery_metadata if available
+  const revenue = company.discovery_metadata?.original_revenue || 0;
+  if (revenue >= 10000000) return true;
+
+  return false;
 }
 
 /**
