@@ -17,6 +17,9 @@ COMMENT ON COLUMN company_targets.consecutive_empty_runs IS
 -- 2. UPDATE SUCCESS FUNCTION WITH COOLING/WARMING
 -- =============================================================================
 
+-- Drop existing function since we're changing the return type
+DROP FUNCTION IF EXISTS update_company_target_success(UUID, INTEGER);
+
 CREATE OR REPLACE FUNCTION update_company_target_success(
   p_target_id UUID,
   p_new_jobs_count INTEGER
