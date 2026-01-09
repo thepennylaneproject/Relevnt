@@ -10,8 +10,12 @@ import type { Database } from '../types/supabase'
 import { AlertsPanel } from '../components/admin/AlertsPanel'
 import { IngestionActivityFeed } from '../components/admin/IngestionActivityFeed'
 import { SourcePerformanceMetrics } from '../components/admin/SourcePerformanceMetrics'
+import { RunTimeline } from '../components/admin/ingestion/RunTimeline'
+import { CompanyTargetsTable } from '../components/admin/ingestion/CompanyTargetsTable'
+import { SearchSlicesTable } from '../components/admin/ingestion/SearchSlicesTable'
+import { RotationConfig } from '../components/admin/controls/RotationConfig'
 
-type TabKey = 'overview' | 'users' | 'sources' | 'ingestion' | 'system'
+type TabKey = 'overview' | 'users' | 'sources' | 'ingestion' | 'rotation' | 'system'
 
 // ============================================================
 // HELPERS
@@ -156,6 +160,7 @@ export default function AdminDashboard(): JSX.Element {
     { id: 'users', label: 'Users' },
     { id: 'sources', label: 'Sources & APIs' },
     { id: 'ingestion', label: 'Ingestion' },
+    { id: 'rotation', label: 'Rotation' },
     { id: 'system', label: 'System' },
   ] as { id: TabKey; label: string }[]
 
@@ -211,6 +216,7 @@ export default function AdminDashboard(): JSX.Element {
               {activeTab === 'users' && <UsersTab />}
               {activeTab === 'sources' && <SourcesTab />}
               {activeTab === 'ingestion' && <IngestionTab />}
+              {activeTab === 'rotation' && <RotationTab />}
               {activeTab === 'system' && <SystemTab />}
             </div>
           </div>
@@ -1828,6 +1834,77 @@ function IngestionTab() {
           <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--text)' }}>{loading ? '...' : (healthData?.sourceHealth?.length || 0)}</div>
           <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Monitored Sources</div>
         </div>
+      </div>
+    </div>
+  )
+}
+
+/* Rotation */
+function RotationTab() {
+  const [adminSecret, setAdminSecret] = useState<string>(() => {
+    return localStorage.getItem('admin_secret') || ''
+  })
+  const [showSecretModal, setShowSecretModal] = useState(!adminSecret)
+  const [secretInput, setSecretInput] = useState('')
+
+  const saveAdminSecret = () => {
+    localStorage.setItem('admin_secret', secretInput)
+    setAdminSecret(secretInput)
+    setShowSecretModal(false)
+    setSecretInput('')
+  }
+
+  if (!adminSecret) {
+    return (
+      <div className="page-stack">
+        {/* Admin Secret Required */}
+        <div className="surface-card" style={{ textAlign: 'center', padding: 40 }}>
+          <Icon name="key" size="lg" />
+          <h3 style={{ fontSize: 18, fontWeight: 600, marginTop: 16 }}>Admin Secret Required</h3>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: 24 }}>
+            Enter your admin secret to access rotation controls.
+          </p>
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', alignItems: 'center' }}>
+            <input
+              type="password"
+              value={secretInput}
+              onChange={(e) => setSecretInput(e.target.value)}
+              placeholder="Admin secret"
+              style={{
+                padding: '8px 12px',
+                border: '1px solid var(--border)',
+                borderRadius: 6,
+                width: 250,
+              }}
+              onKeyDown={(e) => e.key === 'Enter' && saveAdminSecret()}
+            />
+            <Button type="button" variant="primary" onClick={saveAdminSecret}>
+              Unlock
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="page-stack" style={{ gap: 32 }}>
+      {/* Run Timeline */}
+      <div className="surface-card">
+        <RunTimeline adminSecret={adminSecret} />
+      </div>
+
+      {/* Rotation Config */}
+      <RotationConfig adminSecret={adminSecret} />
+
+      {/* Company Targets */}
+      <div className="surface-card">
+        <CompanyTargetsTable adminSecret={adminSecret} />
+      </div>
+
+      {/* Search Slices */}
+      <div className="surface-card">
+        <SearchSlicesTable adminSecret={adminSecret} />
       </div>
     </div>
   )
