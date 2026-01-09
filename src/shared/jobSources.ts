@@ -212,12 +212,15 @@ export const HimalayasSource: JobSource = {
         return true
       })
       .map((row): NormalizedJob => {
-      const location = (row.location as string | undefined) ?? null
+      // Location is usually an array locationRestrictions in Himalayas
+      const rawLocation = row.location || (Array.isArray(row.locationRestrictions) ? row.locationRestrictions[0] : null)
+      const location = (rawLocation as string | undefined) ?? null
 
       const remote_type: RemoteType =
         inferRemoteTypeFromLocation(location ?? 'remote')
 
       const companyName =
+        row.companyName ??
         row.company?.name ??
         row.company_name ??
         null
@@ -225,25 +228,26 @@ export const HimalayasSource: JobSource = {
       // Use slug or guid as primary ID, fall back to numeric id or link, use title+company hash as last resort
       const externalId = row.slug || row.guid || row.id || row.applicationLink || `${row.title}:${companyName}`
 
+
       return {
         source_slug: 'himalayas',
         external_id: String(externalId),
 
-        title: row.role ?? row.title ?? '',
+        title: row.title ?? row.role ?? '',
         company: companyName,
         location,
-        employment_type: row.employment_type ?? null,
+        employment_type: row.employmentType ?? row.employment_type ?? null,
         remote_type,
 
-        posted_date: row.published_at ?? row.created_at ?? null,
+        posted_date: row.pubDate ? new Date(row.pubDate * 1000).toISOString() : (row.published_at ?? row.created_at ?? null),
         created_at: nowIso,
-        external_url: row.url ?? row.apply_url ?? null,
+        external_url: row.applicationLink || row.guid || row.url || row.apply_url || null,
 
-        salary_min: parseNumber(row.salary_min),
-        salary_max: parseNumber(row.salary_max),
+        salary_min: parseNumber(row.salary_min || row.minSalary),
+        salary_max: parseNumber(row.salary_max || row.maxSalary),
         competitiveness_level: null,
 
-        description: row.description ?? null,
+        description: row.description ?? row.excerpt ?? null,
 
         data_raw: row,
       }
