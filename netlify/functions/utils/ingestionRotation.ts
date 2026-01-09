@@ -19,7 +19,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 export interface CompanyTarget {
   id: string
-  platform: 'lever' | 'greenhouse'
+  platform: 'lever' | 'greenhouse' | 'ashby'
   company_slug: string
   company_id: string | null
   status: 'active' | 'paused' | 'bad'
@@ -30,6 +30,8 @@ export interface CompanyTarget {
   fail_count: number
   last_error: string | null
   new_jobs_last: number
+  consecutive_empty_runs: number
+  total_jobs_found: number
 }
 
 export interface SearchSlice {

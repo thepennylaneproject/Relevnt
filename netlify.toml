@@ -110,6 +110,30 @@
 [functions."jobspy_ingest-background"]
   schedule = "0 */6 * * *"
 
+# ============================================
+# ADAPTIVE SCHEDULING & ATS EXPANSION
+# ============================================
+
+# Adjust intervals - daily at 3am UTC
+# Warms up productive slices, cools down empty ones
+[functions."adjust-intervals"]
+  schedule = "0 3 * * *"
+
+# Ashby ATS scraper - runs every hour at :30
+# Scrapes jobs from companies using Ashby ATS
+[functions."scrape-ashby"]
+  schedule = "30 * * * *"
+
+# ATS detection - runs every 2 hours
+# Detects ATS platforms for newly discovered companies
+[functions."detect-ats"]
+  schedule = "0 */2 * * *"
+
+# Title promotion - runs weekly on Sunday at 4am UTC
+# Promotes popular job titles to the search deck
+[functions."promote-titles"]
+  schedule = "0 4 * * 0"
+
 
 # =====================================================
 # ENVIRONMENT VARIABLES (set in Netlify dashboard)

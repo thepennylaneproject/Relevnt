@@ -47,6 +47,11 @@ import {
   type CompanyTarget,
   type SearchSlice,
 } from './utils/ingestionRotation'
+import {
+  trackObservedTitles,
+  canMakeRequest,
+  recordRequest,
+} from './utils/jobDiscovery'
 
 export type IngestResult = {
   source: string;
@@ -1384,6 +1389,14 @@ export async function upsertJobs(jobs: NormalizedJob[]): Promise<UpsertResult> {
       industry: atsEnrichment.industry,
     }
   })
+
+  // Track observed titles for learning (async, non-blocking)
+  const titles = enrichedJobs.map(j => j.title).filter(Boolean)
+  if (titles.length > 0) {
+    trackObservedTitles(supabase, titles).catch(err => {
+      console.warn('ingest_jobs: Failed to track observed titles:', err)
+    })
+  }
 
   // Try using the RPC function for accurate counts
   try {
