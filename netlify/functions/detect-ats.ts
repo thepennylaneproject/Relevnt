@@ -1,330 +1,382 @@
 // netlify/functions/detect-ats.ts
-/**
- * ATS Detection
- *
- * Processes the ats_detection_queue to detect which ATS platform a company uses.
- * When detected, creates a company_target entry for automatic job ingestion.
- *
- * Supported ATS platforms:
- * - Greenhouse: boards.greenhouse.io/{company} or /embed/job_board
- * - Lever: jobs.lever.co/{company}
- * - Ashby: jobs.ashbyhq.com/{company}
- *
- * This enables the "growth flywheel" - new companies discovered from aggregator
- * results get their ATS detected and added to direct scraping.
- */
 import type { Config, Handler } from '@netlify/functions'
 import { createAdminClient } from './utils/supabase'
 
-const MAX_ITEMS_PER_RUN = 20
-const REQUEST_TIMEOUT = 5000 // 5 seconds
-
 interface ATSDetectionResult {
-  ats: 'greenhouse' | 'lever' | 'ashby' | null
-  slug: string | null
-  url: string | null
+  ats: string
+  slug: string
+  url: string
 }
 
-interface DetectionQueueItem {
-  id: string
-  company_id: string
-  domain: string
-  status: string
+interface ATSDetector {
+  ats: string
+  columnName: string
+  detect: (domain: string, companyName: string) => Promise<ATSDetectionResult | null>
 }
 
-/**
- * Attempt to detect ATS from domain
- */
-async function detectATS(domain: string): Promise<ATSDetectionResult> {
-  // Extract company name from domain (e.g., "stripe.com" -> "stripe")
-  const companyName = domain.replace(/\.(com|io|co|org|net|ai|app|dev)$/, '').split('.').pop() || domain
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
-  // Try each ATS pattern
-  const patterns = [
-    {
-      ats: 'greenhouse' as const,
-      url: `https://boards.greenhouse.io/${companyName}`,
-      slugExtractor: (url: string) => url.split('/').pop() || null
-    },
-    {
-      ats: 'lever' as const,
-      url: `https://jobs.lever.co/${companyName}`,
-      slugExtractor: (url: string) => url.split('/').pop() || null
-    },
-    {
-      ats: 'ashby' as const,
-      url: `https://jobs.ashbyhq.com/${companyName}`,
-      slugExtractor: (url: string) => url.split('/').pop() || null
-    }
-  ]
-
-  for (const pattern of patterns) {
-    try {
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT)
-
-      const response = await fetch(pattern.url, {
-        method: 'HEAD', // HEAD request to check existence without downloading body
-        redirect: 'follow',
-        signal: controller.signal
-      })
-
-      clearTimeout(timeoutId)
-
-      if (response.ok) {
-        // Found the ATS
-        const slug = pattern.slugExtractor(pattern.url)
-        console.log(`[DetectATS] Found ${pattern.ats} for ${domain}: ${pattern.url}`)
-        return {
-          ats: pattern.ats,
-          slug,
-          url: pattern.url
-        }
-      }
-    } catch (err) {
-      // Network error or timeout - continue to next pattern
-      continue
-    }
-  }
-
-  // Also try common URL patterns on the company's own domain
-  const ownDomainPatterns = [
-    { url: `https://${domain}/careers`, atsIndicator: 'greenhouse' as const },
-    { url: `https://careers.${domain}`, atsIndicator: null },
-    { url: `https://jobs.${domain}`, atsIndicator: null }
-  ]
-
-  for (const pattern of ownDomainPatterns) {
-    try {
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT)
-
-      const response = await fetch(pattern.url, {
-        method: 'GET', // GET to check for ATS indicators in HTML
-        redirect: 'follow',
-        signal: controller.signal
-      })
-
-      clearTimeout(timeoutId)
-
-      if (response.ok) {
-        const html = await response.text()
-
-        // Check for ATS indicators in the HTML
-        if (html.includes('boards.greenhouse.io') || html.includes('greenhouse.io/embed')) {
-          // Extract Greenhouse board token from embed URL
-          const match = html.match(/boards\.greenhouse\.io\/embed\/job_board\?for=([a-zA-Z0-9]+)/)
-            || html.match(/boards\.greenhouse\.io\/([a-zA-Z0-9]+)/)
-          if (match) {
-            console.log(`[DetectATS] Found Greenhouse (embedded) for ${domain}: ${match[1]}`)
-            return {
-              ats: 'greenhouse',
-              slug: match[1],
-              url: `https://boards.greenhouse.io/${match[1]}`
-            }
-          }
-        }
-
-        if (html.includes('jobs.lever.co')) {
-          const match = html.match(/jobs\.lever\.co\/([a-zA-Z0-9-]+)/)
-          if (match) {
-            console.log(`[DetectATS] Found Lever (embedded) for ${domain}: ${match[1]}`)
-            return {
-              ats: 'lever',
-              slug: match[1],
-              url: `https://jobs.lever.co/${match[1]}`
-            }
-          }
-        }
-
-        if (html.includes('jobs.ashbyhq.com')) {
-          const match = html.match(/jobs\.ashbyhq\.com\/([a-zA-Z0-9-]+)/)
-          if (match) {
-            console.log(`[DetectATS] Found Ashby (embedded) for ${domain}: ${match[1]}`)
-            return {
-              ats: 'ashby',
-              slug: match[1],
-              url: `https://jobs.ashbyhq.com/${match[1]}`
-            }
-          }
-        }
-      }
-    } catch (err) {
-      // Continue to next pattern
-      continue
-    }
-  }
-
-  return { ats: null, slug: null, url: null }
+function sanitizeSlug(input?: string) {
+  if (!input) return null
+  return input.toLowerCase().replace(/[^a-z0-9]/g, '')
 }
 
-export const handler: Handler = async (event) => {
-  const startedAt = Date.now()
-  const supabase = createAdminClient()
+function extractDomainRoot(domain: string) {
+  return domain.replace(/^www\./i, '').split('.')[0] || domain
+}
 
-  console.log('[DetectATS] Starting ATS detection')
+const detectors: ATSDetector[] = [
+  {
+    ats: 'greenhouse',
+    columnName: 'greenhouse_board_token',
+    detect: async (domain, companyName) => {
+      const root = extractDomainRoot(domain)
+      const candidates = [
+        root,
+        sanitizeSlug(companyName),
+        companyName.toLowerCase().replace(/\s+/g, '')
+      ].filter(Boolean) as string[]
 
-  try {
-    // Get pending items from queue
-    const { data: queueItems, error: queueError } = await supabase
-      .from('ats_detection_queue')
-      .select('*')
-      .eq('status', 'pending')
-      .limit(MAX_ITEMS_PER_RUN)
-
-    if (queueError) {
-      throw new Error(`Failed to fetch queue: ${queueError.message}`)
-    }
-
-    if (!queueItems || queueItems.length === 0) {
-      console.log('[DetectATS] No pending items in queue')
-      return {
-        statusCode: 200,
-        body: JSON.stringify({
-          success: true,
-          message: 'No pending items',
-          processed: 0
-        })
+      for (const slug of candidates) {
+        const url = `https://boards.greenhouse.io/${slug}`
+        try {
+          const response = await fetch(url, { method: 'HEAD' })
+          if (response.ok) {
+            return { ats: 'greenhouse', slug, url }
+          }
+        } catch {
+          continue
+        }
+        await delay(100)
       }
+      return null
     }
+  },
+  {
+    ats: 'lever',
+    columnName: 'lever_slug',
+    detect: async (domain, companyName) => {
+      const root = extractDomainRoot(domain)
+      const candidates = [
+        root,
+        sanitizeSlug(companyName)
+      ].filter(Boolean) as string[]
 
-    console.log(`[DetectATS] Processing ${queueItems.length} items`)
-
-    const results: Array<{ domain: string; status: string; ats?: string }> = []
-    let detected = 0
-    let notFound = 0
-    let errors = 0
-
-    for (const item of queueItems as DetectionQueueItem[]) {
-      if (!item.domain) {
-        // No domain - mark as error
-        await supabase
-          .from('ats_detection_queue')
-          .update({
-            status: 'error',
-            error_message: 'No domain provided',
-            last_checked_at: new Date().toISOString()
-          })
-          .eq('id', item.id)
-
-        errors++
-        results.push({ domain: item.domain || 'unknown', status: 'error' })
-        continue
+      for (const slug of candidates) {
+        const url = `https://jobs.lever.co/${slug}`
+        try {
+          const response = await fetch(url)
+          if (response.ok) {
+            return { ats: 'lever', slug, url }
+          }
+        } catch {
+          continue
+        }
+        await delay(100)
       }
+      return null
+    }
+  },
+  {
+    ats: 'ashby',
+    columnName: 'ashby_slug',
+    detect: async (domain, companyName) => {
+      const root = extractDomainRoot(domain)
+      const candidates = [
+        root,
+        sanitizeSlug(companyName),
+        companyName.toLowerCase().replace(/\s+/g, '')
+      ].filter(Boolean) as string[]
 
+      for (const slug of candidates) {
+        const url = `https://jobs.ashbyhq.com/${slug}`
+        try {
+          const response = await fetch(url)
+          if (response.ok) {
+            return { ats: 'ashby', slug, url }
+          }
+        } catch {
+          continue
+        }
+        await delay(100)
+      }
+      return null
+    }
+  },
+  {
+    ats: 'smartrecruiters',
+    columnName: 'smartrecruiters_slug',
+    detect: async (domain, companyName) => {
+      const root = extractDomainRoot(domain)
+      const candidates = [
+        root,
+        sanitizeSlug(companyName),
+        companyName
+      ].filter(Boolean) as string[]
+
+      for (const slug of candidates) {
+        const url = `https://jobs.smartrecruiters.com/api/v1/companies/${slug}/jobs?limit=1`
+        try {
+          const response = await fetch(url, { headers: { Accept: 'application/json' } })
+          if (response.ok) {
+            return {
+              ats: 'smartrecruiters',
+              slug,
+              url: `https://jobs.smartrecruiters.com/${slug}`
+            }
+          }
+        } catch {
+          continue
+        }
+        await delay(100)
+      }
+      return null
+    }
+  },
+  {
+    ats: 'recruitee',
+    columnName: 'recruitee_slug',
+    detect: async (domain) => {
+      const slug = extractDomainRoot(domain)
+      const url = `https://${slug}.recruitee.com/api/offers`
       try {
-        const detection = await detectATS(item.domain)
-
-        if (detection.ats && detection.slug) {
-          // Found ATS - update company and create target
-          const updateFields: Record<string, any> = {
-            ats_type: detection.ats,
-            careers_page_url: detection.url,
-            ats_detected_at: new Date().toISOString()
-          }
-
-          // Add platform-specific slug
-          if (detection.ats === 'greenhouse') {
-            updateFields.greenhouse_board_token = detection.slug
-          } else if (detection.ats === 'lever') {
-            updateFields.lever_slug = detection.slug
-          } else if (detection.ats === 'ashby') {
-            updateFields.ashby_slug = detection.slug
-          }
-
-          // Update company
-          await supabase
-            .from('companies')
-            .update(updateFields)
-            .eq('id', item.company_id)
-
-          // Create company_target for ingestion
-          await supabase.from('company_targets').upsert({
-            platform: detection.ats,
-            company_slug: detection.slug,
-            company_id: item.company_id,
-            status: 'active',
-            min_interval_minutes: 1440, // 24 hours
-            priority: 100
-          }, {
-            onConflict: 'platform,company_slug',
-            ignoreDuplicates: false
-          })
-
-          // Update queue
-          await supabase
-            .from('ats_detection_queue')
-            .update({
-              status: 'detected',
-              detected_ats: detection.ats,
-              detected_slug: detection.slug,
-              last_checked_at: new Date().toISOString()
-            })
-            .eq('id', item.id)
-
-          detected++
-          results.push({ domain: item.domain, status: 'detected', ats: detection.ats })
-
-        } else {
-          // No ATS found
-          await supabase
-            .from('ats_detection_queue')
-            .update({
-              status: 'not_found',
-              last_checked_at: new Date().toISOString()
-            })
-            .eq('id', item.id)
-
-          notFound++
-          results.push({ domain: item.domain, status: 'not_found' })
+        const response = await fetch(url)
+        if (!response.ok) return null
+        const data = await response.json()
+        if (Array.isArray(data.offers)) {
+          return { ats: 'recruitee', slug, url: `https://${slug}.recruitee.com` }
         }
+      } catch {}
+      return null
+    }
+  },
+  {
+    ats: 'breezyhr',
+    columnName: 'breezyhr_slug',
+    detect: async (domain) => {
+      const slug = extractDomainRoot(domain)
+      const url = `https://${slug}.breezy.hr/json`
+      try {
+        const response = await fetch(url)
+        if (!response.ok) return null
+        const data = await response.json()
+        if (Array.isArray(data)) {
+          return { ats: 'breezyhr', slug, url: `https://${slug}.breezy.hr` }
+        }
+      } catch {}
+      return null
+    }
+  },
+  {
+    ats: 'personio',
+    columnName: 'personio_slug',
+    detect: async (domain) => {
+      const slug = extractDomainRoot(domain)
+      const jsonUrl = `https://${slug}.jobs.personio.com/search.json`
+      try {
+        const response = await fetch(jsonUrl)
+        if (response.ok) {
+          return { ats: 'personio', slug, url: `https://${slug}.jobs.personio.com` }
+        }
+      } catch {}
+      try {
+        const xmlUrl = `https://${slug}.jobs.personio.com/xml`
+        const response = await fetch(xmlUrl)
+        if (response.ok && response.headers.get('content-type')?.includes('xml')) {
+          return { ats: 'personio', slug, url: `https://${slug}.jobs.personio.com` }
+        }
+      } catch {}
+      return null
+    }
+  },
+  {
+    ats: 'jazzhr',
+    columnName: 'jazzhr_slug',
+    detect: async (domain) => {
+      const slug = extractDomainRoot(domain)
+      const url = `https://${slug}.applytojob.com/apply/jobs`
+      try {
+        const response = await fetch(url)
+        if (response.ok) {
+          return { ats: 'jazzhr', slug, url: `https://${slug}.applytojob.com` }
+        }
+      } catch {}
+      return null
+    }
+  },
+  {
+    ats: 'workday',
+    columnName: 'workday_tenant_url',
+    detect: async (domain, companyName) => {
+      const variations = [
+        extractDomainRoot(domain),
+        sanitizeSlug(companyName)
+      ]
+        .filter(Boolean)
+        .map((value) => value!.toLowerCase())
 
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : String(err)
-
-        await supabase
-          .from('ats_detection_queue')
-          .update({
-            status: 'error',
-            error_message: errorMessage,
-            last_checked_at: new Date().toISOString()
-          })
-          .eq('id', item.id)
-
-        errors++
-        results.push({ domain: item.domain, status: 'error' })
+      const wdNumbers = ['1', '5', '12']
+      const boards = ['External', 'Careers', 'External_Career_Site']
+      if (companyName) {
+        boards.push(`${sanitizeSlug(companyName)}_Careers`)
       }
+
+      for (const variation of variations) {
+        for (const wd of wdNumbers) {
+          for (const board of boards) {
+            const boardUrl = `https://${variation}.wd${wd}.myworkdayjobs.com/en-US/${board}`
+            try {
+              const response = await fetch(`${boardUrl}/jobs`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ limit: 1, offset: 0, searchText: '' })
+              })
+              if (response.ok) {
+                return { ats: 'workday', slug: variation, url: boardUrl }
+              }
+            } catch {}
+            await delay(150)
+          }
+        }
+      }
+      return null
+    }
+  }
+]
+
+async function detectATS(domain: string, companyName: string): Promise<ATSDetectionResult | null> {
+  for (const detector of detectors) {
+    try {
+      const result = await detector.detect(domain, companyName)
+      if (result) {
+        return result
+      }
+    } catch (error) {
+      console.error(`DetectATS error for ${detector.ats}:`, error)
+    }
+    await delay(100)
+  }
+  return null
+}
+
+async function processQueue() {
+  const supabase = createAdminClient()
+  const { data: queue, error } = await supabase
+    .from('ats_detection_queue')
+    .select('*, companies(name)')
+    .eq('status', 'pending')
+    .limit(20)
+
+  if (error || !queue?.length) {
+    return { processed: 0 }
+  }
+
+  let detected = 0
+  let notFound = 0
+  let errors = 0
+
+  for (const item of queue) {
+    const domain = item.domain || ''
+    const companyName = item.companies?.name || ''
+
+    if (!domain) {
+      await supabase
+        .from('ats_detection_queue')
+        .update({
+          status: 'error',
+          error_message: 'No domain provided',
+          last_checked_at: new Date().toISOString()
+        })
+        .eq('id', item.id)
+      errors++
+      continue
     }
 
-    const durationMs = Date.now() - startedAt
-    console.log(`[DetectATS] Completed: ${detected} detected, ${notFound} not found, ${errors} errors in ${durationMs}ms`)
+    const detection = await detectATS(domain, companyName)
 
+    if (detection) {
+      const detector = detectors.find((d) => d.ats === detection.ats)
+      const columnName = detector?.columnName || `${detection.ats}_slug`
+      const columnValue =
+        detection.ats === 'workday' ? detection.url : detection.slug
+
+      await supabase
+        .from('companies')
+        .update({
+          [columnName]: columnValue,
+          ats_type: detection.ats,
+          careers_page_url: detection.url,
+          ats_detected_at: new Date().toISOString()
+        })
+        .eq('id', item.company_id)
+
+      await supabase.from('company_targets').upsert(
+        {
+          platform: detection.ats,
+          company_slug: detection.slug,
+          company_id: item.company_id,
+          status: 'active',
+          min_interval_minutes: detection.ats === 'workday' ? 2880 : 1440,
+          priority: 100
+        },
+        {
+          onConflict: 'platform,company_slug',
+          ignoreDuplicates: false
+        }
+      )
+
+      await supabase
+        .from('ats_detection_queue')
+        .update({
+          status: 'detected',
+          detected_ats: detection.ats,
+          detected_slug: detection.slug,
+          last_checked_at: new Date().toISOString()
+        })
+        .eq('id', item.id)
+
+      detected++
+    } else {
+      await supabase
+        .from('ats_detection_queue')
+        .update({
+          status: 'not_found',
+          last_checked_at: new Date().toISOString()
+        })
+        .eq('id', item.id)
+
+      notFound++
+    }
+
+    await delay(500)
+  }
+
+  return {
+    processed: queue.length,
+    detected,
+    notFound,
+    errors
+  }
+}
+
+export const handler: Handler = async () => {
+  try {
+    const result = await processQueue()
     return {
       statusCode: 200,
-      body: JSON.stringify({
-        success: true,
-        durationMs,
-        processed: queueItems.length,
-        detected,
-        notFound,
-        errors,
-        results
-      })
+      body: JSON.stringify(result)
     }
-
-  } catch (err) {
-    console.error('[DetectATS] Fatal error:', err)
+  } catch (error) {
+    console.error('[DetectATS] Fatal error:', error)
     return {
       statusCode: 500,
-      body: JSON.stringify({
-        success: false,
-        error: err instanceof Error ? err.message : String(err)
-      })
+      body: JSON.stringify({ error: 'Detection failed' })
     }
   }
 }
 
-// Run every 2 hours
 export const config: Config = {
   schedule: '0 */2 * * *'
 }

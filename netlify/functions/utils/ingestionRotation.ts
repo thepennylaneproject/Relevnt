@@ -19,7 +19,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 export interface CompanyTarget {
   id: string
-  platform: 'lever' | 'greenhouse' | 'ashby'
+  platform: 'lever' | 'greenhouse' | 'ashby' | 'smartrecruiters' | 'workday' | 'recruitee' | 'breezyhr' | 'jazzhr' | 'personio'
   company_slug: string
   company_id: string | null
   status: 'active' | 'paused' | 'bad'
@@ -68,7 +68,7 @@ export interface SearchSlice {
 export async function getEligibleCompanyTargets(
   supabase: SupabaseClient,
   maxTargets: number,
-  platform?: 'lever' | 'greenhouse'
+  platform?: CompanyTarget['platform']
 ): Promise<CompanyTarget[]> {
   try {
     let query = supabase

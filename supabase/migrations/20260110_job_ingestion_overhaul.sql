@@ -776,14 +776,21 @@ DECLARE
 BEGIN
   FOREACH v_slug IN ARRAY v_company_slugs
   LOOP
-    -- Try to update existing company
-    UPDATE companies
-    SET ashby_slug = v_slug,
-        ats_type = 'ashby',
-        careers_page_url = 'https://jobs.ashbyhq.com/' || v_slug
+    -- Find a matching company (limit to 1 to avoid multi-row error)
+    SELECT id INTO v_company_id
+    FROM companies
     WHERE LOWER(name) = v_slug
       OR domain ILIKE '%' || v_slug || '.%'
-    RETURNING id INTO v_company_id;
+    LIMIT 1;
+
+    -- Try to update existing company if found
+    IF v_company_id IS NOT NULL THEN
+      UPDATE companies
+      SET ashby_slug = v_slug,
+          ats_type = 'ashby',
+          careers_page_url = 'https://jobs.ashbyhq.com/' || v_slug
+      WHERE id = v_company_id;
+    END IF;
 
     -- Create company_target if company was updated
     IF v_company_id IS NOT NULL THEN

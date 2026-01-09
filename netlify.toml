@@ -125,6 +125,30 @@
 [functions."scrape-ashby"]
   schedule = "30 */2 * * *"
 
+# SmartRecruiters scraper - runs hourly at :45
+[functions."scrape-smartrecruiters"]
+  schedule = "45 * * * *"
+
+# Workday scraper - runs every 2 hours on the hour
+[functions."scrape-workday"]
+  schedule = "0 */2 * * *"
+
+# Recruitee scraper - runs hourly at :20
+[functions."scrape-recruitee"]
+  schedule = "20 * * * *"
+
+# BreezyHR scraper - runs hourly at :35
+[functions."scrape-breezyhr"]
+  schedule = "35 * * * *"
+
+# JazzHR scraper - runs hourly at :50
+[functions."scrape-jazzhr"]
+  schedule = "50 * * * *"
+
+# Personio scraper - runs hourly at :25
+[functions."scrape-personio"]
+  schedule = "25 * * * *"
+
 # ATS detection - runs every 2 hours
 # Detects ATS platforms for newly discovered companies
 [functions."detect-ats"]
