@@ -1281,7 +1281,7 @@ export async function upsertJobs(jobs: NormalizedJob[]): Promise<UpsertResult> {
     seenSourceExternal.add(sourceKey)
 
     // Then check dedup_key to skip same logical job from different sources in same batch
-    const dedupKey = computeDedupKey(j.title, j.company, j.location, (j as any).company_id)
+    const dedupKey = computeDedupKey(j.title, j.company, j.location, j.company_id)
     if (dedupKey && seenDedupKey.has(dedupKey)) {
       filteredDedupKey++
       return false
@@ -1478,56 +1478,40 @@ export async function upsertJobs(jobs: NormalizedJob[]): Promise<UpsertResult> {
     return { inserted: 0, updated: 0, noop: 0 }
   }
 
-  // Fallback: Direct upsert (counts will be inaccurate because we can't distinguish inserts from updates)
+  // Direct upsert with dedup_key (counts will be inaccurate because we can't distinguish inserts from updates)
   console.log(`ingest_jobs: FALLBACK - upserting ${safeJobs.length} jobs without RPC accuracy`)
 
-  const conflictTargets = ['dedup_key', 'source_slug,external_id'] as const
-  let lastError: unknown = null
+  const { data, error, count } = await supabase
+    .from('jobs')
+    .upsert(safeJobs, {
+      onConflict: 'dedup_key',
+      ignoreDuplicates: false,
+      count: 'exact',
+    })
+    .select('id')
 
-  for (const onConflict of conflictTargets) {
-    const { data, error, count } = await supabase
-      .from('jobs')
-      .upsert(safeJobs, {
-        onConflict,
-        ignoreDuplicates: false,
-        count: 'exact',
-      })
-      .select('id')
-
-    if (!error) {
-      console.log(
-        `ingest_jobs: fallback upsert succeeded with onConflict=${onConflict} (data.length=${data?.length}, count=${count})`
-      )
-
-      // CRITICAL: This count includes BOTH inserts and updates
-      // We cannot distinguish between them without RPC, so table growth will appear stalled
-      // if most jobs are updates of existing records
-      const upsertedCount = data?.length ?? count ?? safeJobs.length
-      console.error(
-        `ingest_jobs: CRITICAL - Reported ${upsertedCount} "inserted" but this includes updates. Actual new inserts unknown (RPC unavailable)`
-      )
-
-      return { inserted: upsertedCount, updated: 0, noop: 0 }
-    }
-
-    lastError = error
+  if (error) {
     const message = (error as Error)?.message || String(error)
     console.error(
-      `ingest_jobs: fallback upsert failed with onConflict=${onConflict}`,
+      `ingest_jobs: fallback upsert (dedup_key) failed`,
       message
     )
-
-    const isConstraintMismatch =
-      message.includes('no unique or exclusion constraint matching the ON CONFLICT specification') ||
-      message.includes('duplicate key value violates unique constraint')
-
-    if (!isConstraintMismatch) {
-      break
-    }
+    throw error
   }
 
-  console.error('ingest_jobs: fallback upsert error', lastError)
-  throw lastError
+  console.log(
+    `ingest_jobs: fallback upsert succeeded (data.length=${data?.length}, count=${count})`
+  )
+
+  // CRITICAL: This count includes BOTH inserts and updates
+  // We cannot distinguish between them without RPC, so table growth will appear stalled
+  // if most jobs are updates of existing records
+  const upsertedCount = data?.length ?? count ?? safeJobs.length
+  console.error(
+    `ingest_jobs: CRITICAL - Reported ${upsertedCount} "inserted" but this includes updates. Actual new inserts unknown (RPC unavailable)`
+  )
+
+  return { inserted: upsertedCount, updated: 0, noop: 0 }
 }
 
 /**

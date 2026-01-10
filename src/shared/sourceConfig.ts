@@ -228,13 +228,13 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
     careeronestop: {
         slug: 'careeronestop',
         mode: 'wide-capped',
-        enabled: false, // DISABLED - consistently returns 401 Unauthorized
+        enabled: false, // DISABLED - 401 Unauthorized
         maxAgeDays: 30,
-        maxPagesPerRun: 10,
+        maxPagesPerRun: 15,
         resetPaginationEachRun: false,
         trustLevel: 'high',
         trackFreshnessRatio: true,
-        notes: 'CareerOneStop disabled - returns 401 Unauthorized on every run. Credentials invalid or API changed.',
+        notes: 'CareerOneStop disabled - returns 401 Unauthorized. API key likely expired or invalid.',
     },
 
     // =========================================================================
@@ -291,13 +291,13 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
     fantastic: {
         slug: 'fantastic',
         mode: 'wide-capped',
-        enabled: false, // DISABLED - returns 404 Not Found
-        maxAgeDays: 30,
-        maxPagesPerRun: 20,
-        resetPaginationEachRun: false,
-        trustLevel: 'medium',
-        trackFreshnessRatio: true,
-        notes: 'Fantastic Jobs disabled - endpoint returns 404 Not Found. Service may no longer be available.',
+        enabled: false, // DISABLED - 404 Not Found
+        maxAgeDays: 14,
+        maxPagesPerRun: 15,
+        resetPaginationEachRun: true,
+        trustLevel: 'low',
+        trackFreshnessRatio: false,
+        notes: 'Fantastic Jobs disabled - endpoint returns 404. Service may be down or API changed.',
     },
 
     // =========================================================================
