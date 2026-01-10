@@ -2628,6 +2628,13 @@ export async function ingestFromSearchSlices(
       }
 
       const sourceConfig = getSourceConfig(slice.source)
+
+      // Skip if source is disabled in config
+      if (!sourceConfig.enabled) {
+        console.log(`[IngestRotation] Skipping disabled source: ${slice.source}`)
+        continue
+      }
+
       const params = slice.params_json
 
       console.log(`[IngestRotation] Running slice: ${slice.source} (${params.keywords || 'all'} in ${params.location || 'any'})`)
