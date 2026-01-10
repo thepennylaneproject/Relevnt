@@ -61,9 +61,10 @@
 [functions."job_alerts"]
   schedule = "0 9 * * *"
 
-# Search queue processor - runs every 15 minutes for diverse, fresh job ingestion
-[functions."search_queue_cron"]
-  schedule = "*/15 * * * *"
+# DISABLED - Search queue now handled by rotation system (search_slices)
+# The rotation system provides better interval control with cooling/warming
+# [functions."search_queue_cron"]
+#   schedule = "*/15 * * * *"
 
 # Jobs table cleanup - DISABLED until freshness tracking is fixed
 # The cleanup was deleting jobs based on posted_date (original posting date)
@@ -89,15 +90,14 @@
 [functions."ingest_lever-background"]
   schedule = "*/30 * * * *"
 
-# Aggregators (remotive, himalayas, arbeitnow, etc.) - runs every 1 hour
-# Duration: 5-10 minutes | Potential: 20K+ jobs/day
-[functions."ingest_aggregators"]
-  schedule = "0 * * * *"
+# DISABLED - Aggregators now handled by rotation system (ingest_premium_sources)
+# The rotation system uses search_slices with adaptive cooling/warming
+# [functions."ingest_aggregators"]
+#   schedule = "0 * * * *"
 
-# Remaining sources (usajobs, fantastic, etc.) - runs every 2 hours
-# Duration: 5-10 minutes | Potential: 30K+ jobs/day (fantastic alone is 10M/month)
-[functions."ingest_remaining_sources"]
-  schedule = "0 */2 * * *"
+# DISABLED - Remaining sources now handled by rotation system
+# [functions."ingest_remaining_sources"]
+#   schedule = "0 */2 * * *"
 
 # Ingestion healer - runs every 10 minutes for faster recovery
 # Duration: <1 minute
