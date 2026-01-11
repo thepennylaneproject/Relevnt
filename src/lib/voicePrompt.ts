@@ -2,6 +2,12 @@
 
 // Unified voice / tone capsule for all AI tasks in Relevnt
 
+import {
+    buildHumanSignalPrompt,
+    mapTaskToDocType,
+    type NormalizationMode,
+} from './humanSignalNormalizer';
+
 export type VoicePreset =
     | 'natural'
     | 'professional_warm'
@@ -34,6 +40,14 @@ export type VoiceTaskType =
 export type VoicePromptOptions = {
     taskType?: VoiceTaskType;
     language?: string;           // default: English
+    /**
+     * Human signal normalization mode:
+     * - 'off': No normalization
+     * - 'lite': Entropy + anti-formula + directness (good for short messages)
+     * - 'full': All rules including voice drift and micro-imprecision
+     * - undefined: Auto-detect based on taskType
+     */
+    normalizeHumanSignal?: NormalizationMode;
 };
 
 /**
@@ -118,6 +132,8 @@ export function buildUserVoiceSystemPrompt(
         `- Use first person "I" when the user is speaking about themselves, unless otherwise specified.`,
         `- Make sure the content fits the expected length and format for the task.`,
         `- For any job specific content, align with the job description but do not mirror it word for word. Paraphrase and integrate its language naturally.`,
+        // Human signal normalization layer
+        buildHumanSignalBlock(taskType, options.normalizeHumanSignal),
     ]
         .filter(Boolean)
         .join('\n');
@@ -209,4 +225,29 @@ function clamp(value: number | null | undefined, min: number, max: number): numb
 function sanitizeSample(text: string): string {
     // Simple protection so the sample does not accidentally break formatting
     return text.replace(/[`]/g, '"');
+}
+
+/**
+ * Build human signal normalization block for the system prompt.
+ * Maps the voice task type to a normalizable doc type and generates
+ * appropriate constraints.
+ */
+function buildHumanSignalBlock(
+    taskType: VoiceTaskType,
+    mode?: NormalizationMode
+): string {
+    const { docType, warning } = mapTaskToDocType(taskType);
+
+    // Log warning for unknown task types (helps debug mapping issues)
+    if (warning) {
+        console.warn(`[humanSignal] ${warning}`);
+    }
+
+    // No normalization if we can't determine doc type or mode is off
+    if (!docType || mode === 'off') {
+        return '';
+    }
+
+    const prompt = buildHumanSignalPrompt(docType, mode);
+    return prompt ? `\n\n${prompt}` : '';
 }

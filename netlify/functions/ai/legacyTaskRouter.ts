@@ -75,7 +75,7 @@ const LEGACY_CONFIG: Record<string, LegacyTaskConfig> = {
     quality: 'high',
   },
   'refine-bullet-points': {
-    instructions: 'Rewrite each original bullet into stronger, quantified bullet points.',
+    instructions: 'Rewrite each original bullet into stronger bullet points. CONSTRAINTS: Vary sentence lengths (mix short with medium). Do NOT start consecutive bullets with the same verb structure. Metrics are allowed but not in every bullet. One bullet per role may be contextual/explanatory rather than achievement-focused. Avoid stacking multiple metrics in one bullet.',
     requiresJson: true,
     schema: {
       success: 'boolean',
@@ -141,7 +141,7 @@ const LEGACY_CONFIG: Record<string, LegacyTaskConfig> = {
     },
   },
   'generate-cover-letter': {
-    instructions: 'Analyze the resume and job description to identify the top 3 strengths that align with the job instructions. Write a convincing cover letter that emphasizes these strengths. Also return a "strategy" string explaining the angle taken (e.g. "Emphasized X and Y to address requirement Z") and "matchingPoints" array of key alignments.',
+    instructions: 'Analyze the resume and job description to identify the top 3 strengths that align with the job. Write a convincing cover letter. IMPORTANT CONSTRAINTS: Do NOT open with enthusiasm statements like "I am excited to apply". Do NOT close with "I look forward to hearing from you". Open with context or motivation instead. End with grounded intent. Use variable sentence lengths. Avoid parallel paragraph structures. Also return a "strategy" string explaining the angle taken and "matchingPoints" array of key alignments.',
     requiresJson: true,
     schema: {
       success: 'boolean',
@@ -244,7 +244,7 @@ const LEGACY_CONFIG: Record<string, LegacyTaskConfig> = {
     },
   },
   'generate-career-narrative': {
-    instructions: 'Craft a compelling 3-5 sentence career narrative based on the user profile and voice settings. Return versions for origin, pivot, value, and future formats.',
+    instructions: 'Craft a 3-5 sentence career narrative based on the user profile and voice settings. CONSTRAINTS: Avoid polished mini-essay format. Use fragmented statements or sparse structure where appropriate. Tell a real story with texture, not a highlight reel. Variable sentence lengths are required. Return versions for origin, pivot, value, and future formats.',
     requiresJson: true,
     schema: {
       success: 'boolean',
@@ -273,7 +273,7 @@ const LEGACY_CONFIG: Record<string, LegacyTaskConfig> = {
     quality: 'high',
   },
   'networking-draft': {
-    instructions: 'Draft a personalized outreach message to a networking contact regarding a specific job application. Consider the contact\'s role, the company, and the job title. Keep it professional, warm, and brief.',
+    instructions: 'Draft a personalized outreach message to a networking contact regarding a specific job application. CONSTRAINTS: Sound human, respectful, and direct. Avoid needy or salesy language. No formulaic openings or closings. Keep it brief and easy to respond to. Do not use: "I hope this finds you well", "I wanted to reach out", "I look forward to connecting".',
     requiresJson: true,
     schema: {
       success: 'boolean',
@@ -334,7 +334,7 @@ const LEGACY_CONFIG: Record<string, LegacyTaskConfig> = {
     quality: 'high',
   },
   'application-question-answer': {
-    instructions: 'Draft a high-quality answer for an application question using the provided resume context. Do not invent facts. If information is missing, use placeholders and provide warnings.',
+    instructions: 'Draft a high-quality answer for an application question using the provided resume context. CONSTRAINTS: Answer the question directly first, then add context. Do not use motivational clichés or future-fantasy language. Sound like the response was written quickly but thoughtfully. Avoid: "I am passionate about", "I look forward to", "dynamic team". Do not invent facts. If information is missing, use placeholders and provide warnings.',
     requiresJson: true,
     schema: {
       success: 'boolean',
