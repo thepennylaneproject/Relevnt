@@ -17,12 +17,14 @@
 2. **CAREERONESTOP_API_KEY** - Your bearer token/API key (goes in Authorization header)
 
 **Code Changes**:
+
 - Line 212-213: Now reads both `CAREERONESTOP_USER_ID` and `CAREERONESTOP_API_KEY`
 - Line 242: Uses `userId` in the API URL path
 - Line 342-351: Uses `apiKey` as the Bearer token in Authorization header
 - **Commit**: f44a2e6 (replaces previous 79e0c87)
 
 **Environment Variables to Set** (Updated):
+
 ```
 CAREERONESTOP_USER_ID=<your-user-id>
 CAREERONESTOP_API_KEY=<your-bearer-token>
@@ -40,7 +42,7 @@ FINDWORK_API_KEY=<your-key>
 REED_API_KEY=<your-key>
 JOOBLE_API_KEY=<your-key>
 USAJOBS_API_KEY=<your-key>
-USAJOBS_USER_AGENT=MyJobApp/1.0 (Contact: your-email@example.com)
+USAJOBS_USER_AGENT=<your-user-agent-string>
 THE_MUSE_API_KEY=<your-key>
 REMOTIVE_API_KEY=<your-key>
 
@@ -58,10 +60,12 @@ THEIRSTACK_API_KEY=<your-key>
 ## What's Been Completed
 
 ### Code Fixes (2 Commits)
+
 - ✅ **TheirStack** - Fixed HTTP 422 validation error (commit 5df2928)
 - ✅ **CareerOneStop** - Fixed HTTP 401 auth error with TWO separate credentials (commit f44a2e6)
 
 ### Documentation (6 Documents)
+
 1. ✅ **DEPLOYMENT_CHECKLIST_FINAL.md** - Step-by-step deployment guide with 10 environment variables
 2. ✅ **ADMIN_CONSOLE_SOURCE_MANAGEMENT.md** - Complete guide to admin console source management
 3. ✅ **API_KEYS_SETUP_GUIDE.md** - Status of all 11 API sources
@@ -70,6 +74,7 @@ THEIRSTACK_API_KEY=<your-key>
 6. ✅ **NEXT_STEPS_PRIORITY_ACTION_PLAN.md** - Roadmap to 40k+ jobs
 
 ### Admin Console Features
+
 - ✅ All 16 job sources fully configured and documented
 - ✅ Manual source triggering capability
 - ✅ Per-source monitoring and logging
@@ -98,6 +103,7 @@ All changes committed and pushed. No uncommitted files.
 ## Next Immediate Actions
 
 ### Step 1: Verify Your CareerOneStop Credentials
+
 - Do you have both a **User ID** and a **Bearer Token/API Key**?
 - These are TWO separate values
 - User ID example: `abc123xyz`
@@ -106,6 +112,7 @@ All changes committed and pushed. No uncommitted files.
 ### Step 2: Set Netlify Environment Variables
 
 In Netlify Dashboard:
+
 1. Go to **Site Settings** → **Environment**
 2. Add all 10 environment variables from the list above
 3. **For CareerOneStop specifically**:
@@ -113,10 +120,12 @@ In Netlify Dashboard:
    - `CAREERONESTOP_API_KEY` = your bearer token
 
 ### Step 3: Redeploy
+
 1. Click **Trigger Deploy** in Netlify
 2. Wait for build to complete
 
 ### Step 4: Test Sources via Admin Console
+
 1. Go to **Sources & APIs** tab
 2. Click **▶ Trigger** on each source individually:
    - CareerOneStop (newly fixed)
@@ -130,6 +139,7 @@ In Netlify Dashboard:
 ## Job Source Status After Deployment
 
 ### ✅ FULLY ENABLED (10 sources)
+
 - Findwork - 300 jobs/run
 - Reed UK - 152 jobs/run
 - Jooble - 95 jobs/run
@@ -143,15 +153,18 @@ In Netlify Dashboard:
 - **SUBTOTAL: 1,000-1,300 jobs/run**
 
 ### ❌ BLOCKED (3 sources - network proxy)
+
 - RemoteOK (HTTP 403 - disabled)
 - Adzuna (HTTP 403 - disabled)
 - Jobicy (dead source - disabled)
 
 ### ⏸️ AWAITING CONFIG (2 sources)
+
 - Greenhouse (needs GREENHOUSE_BOARDS_JSON)
 - Lever (needs LEVER_SOURCES_JSON)
 
 ### ❓ NOT YET INTEGRATED (4 sources)
+
 - Lightcast Open, Coursera, Fantastic Jobs, SerpiApp
 
 ---
@@ -159,16 +172,19 @@ In Netlify Dashboard:
 ## Expected Revenue Impact
 
 ### Current
+
 - Jobs per run: 707
 - Jobs per day (3 runs): ~2,100
 - Monthly total: ~63,000
 
 ### After Setting 10 Environment Variables
+
 - Jobs per run: 1,000-1,300 (+41-84%)
 - Jobs per day (3 runs): ~3,000-4,000
 - Monthly total: ~90,000-120,000
 
 ### Long-term (Phase 2+)
+
 - Add 4 non-integrated sources: +500-1,400 jobs/run
 - Deploy Greenhouse+Lever: +5,000-30,000 jobs/run
 - Potential total: 35,000-57,000+ total jobs
@@ -177,12 +193,12 @@ In Netlify Dashboard:
 
 ## Key Documents Reference
 
-| Document | What It Contains |
-|----------|---|
-| `DEPLOYMENT_CHECKLIST_FINAL.md` | Step-by-step deployment with all 10 env vars |
-| `ADMIN_CONSOLE_SOURCE_MANAGEMENT.md` | How to use admin console source features |
-| `API_KEYS_SETUP_GUIDE.md` | Status of all 11 API sources you have keys for |
-| `SESSION_SUMMARY_ADMIN_SOURCE_MANAGEMENT.md` | Complete summary of all work done |
+| Document                                     | What It Contains                               |
+| -------------------------------------------- | ---------------------------------------------- |
+| `DEPLOYMENT_CHECKLIST_FINAL.md`              | Step-by-step deployment with all 10 env vars   |
+| `ADMIN_CONSOLE_SOURCE_MANAGEMENT.md`         | How to use admin console source features       |
+| `API_KEYS_SETUP_GUIDE.md`                    | Status of all 11 API sources you have keys for |
+| `SESSION_SUMMARY_ADMIN_SOURCE_MANAGEMENT.md` | Complete summary of all work done              |
 
 ---
 
@@ -203,13 +219,13 @@ If you still get HTTP 401 after setting both variables:
 
 ## Status Summary
 
-| Item | Status |
-|------|--------|
-| Code fixes | ✅ Complete |
-| Documentation | ✅ Complete |
-| Tests | ✅ Verified |
-| Ready to deploy | ✅ Yes |
-| Awaiting | Environment variables in Netlify |
+| Item            | Status                           |
+| --------------- | -------------------------------- |
+| Code fixes      | ✅ Complete                      |
+| Documentation   | ✅ Complete                      |
+| Tests           | ✅ Verified                      |
+| Ready to deploy | ✅ Yes                           |
+| Awaiting        | Environment variables in Netlify |
 
 ---
 
@@ -225,4 +241,3 @@ Total time: **~20 minutes**
 ---
 
 **Next Step**: Set the 10 environment variables in your Netlify dashboard, with special attention to the TWO CareerOneStop credentials (USER_ID and API_KEY).
-
