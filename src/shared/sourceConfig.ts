@@ -377,10 +377,76 @@ export const SOURCE_CONFIGS: Record<string, SourceConfig> = {
 };
 
 /**
+ * In-memory cache for source configurations
+ */
+let configCache: Record<string, SourceConfig> | null = null;
+let lastCacheUpdate = 0;
+const CACHE_TTL_MS = 60 * 1000; // 1 minute
+
+/**
+ * Initialize config from DB if needed
+ */
+export async function syncSourceConfigs(supabase: any) {
+  // Check cache validity
+  if (configCache && Date.now() - lastCacheUpdate < CACHE_TTL_MS) {
+    return;
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('aggregator_sources')
+      .select('*');
+
+    if (error) {
+      console.warn('JobSourceConfig: Failed to load from DB, using defaults', error);
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      return;
+    }
+
+    // Initialize cache with hardcoded defaults to ensure we have baseline
+    configCache = { ...SOURCE_CONFIGS };
+
+    // Overlay DB values
+    data.forEach((row: any) => {
+      const existing = configCache![row.slug] || {
+        slug: row.slug,
+        mode: 'wide-capped',
+        trustLevel: 'low',
+        maxAgeDays: GUARDRAIL_DEFAULTS.MAX_AGE_DAYS,
+        maxPagesPerRun: GUARDRAIL_DEFAULTS.MAX_PAGES_PER_RUN,
+        resetPaginationEachRun: GUARDRAIL_DEFAULTS.RESET_PAGINATION,
+        trackFreshnessRatio: GUARDRAIL_DEFAULTS.TRACK_FRESHNESS,
+        enabled: true,
+        notes: ''
+      };
+
+      configCache![row.slug] = {
+        ...existing,
+        enabled: row.is_active ?? existing.enabled,
+        notes: `Loaded from DB. ${existing.notes || ''}`
+      };
+      
+      // Update rate limits if present in DB (custom logic if needed)
+      // row.rate_limit_per_hour
+    });
+
+    lastCacheUpdate = Date.now();
+    console.log(`JobSourceConfig: Loaded ${data.length} configs from DB`);
+  } catch (err) {
+    console.warn('JobSourceConfig: Unexpected error loading from DB', err);
+  }
+}
+
+/**
  * Get configuration for a source, with defaults for unknown sources
  */
 export function getSourceConfig(slug: string): SourceConfig {
-    const config = SOURCE_CONFIGS[slug];
+    // specific checking for cache
+    const configs = configCache || SOURCE_CONFIGS;
+    const config = configs[slug];
     if (config) {
         return config;
     }
@@ -403,7 +469,8 @@ export function getSourceConfig(slug: string): SourceConfig {
  * Get all enabled sources
  */
 export function getEnabledSourceSlugs(): string[] {
-    return Object.values(SOURCE_CONFIGS)
+    const configs = configCache || SOURCE_CONFIGS;
+    return Object.values(configs)
         .filter((config) => config.enabled)
         .map((config) => config.slug);
 }
@@ -415,7 +482,8 @@ export function shouldSkipDueToCooldown(
     slug: string,
     lastRunAt: Date | null
 ): boolean {
-    const config = SOURCE_CONFIGS[slug];
+    const configs = configCache || SOURCE_CONFIGS;
+    const config = configs[slug];
     if (!config?.cooldownMinutes || !lastRunAt) {
         return false;
     }

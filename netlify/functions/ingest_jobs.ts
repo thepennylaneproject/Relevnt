@@ -23,6 +23,7 @@ import { enrichJob } from '../../src/lib/scoring/jobEnricher'
 import {
   getSourceConfig,
   shouldSkipDueToCooldown,
+  syncSourceConfigs,
   type SourceConfig,
 } from '../../src/shared/sourceConfig'
 import {
@@ -79,6 +80,52 @@ type FetchErr = {
   sourceSlug?: string
 }
 type FetchResult = FetchOk | FetchErr
+
+// Structured failure classification types
+type FailureStage = 'fetch' | 'normalize' | 'dedup' | 'upsert' | 'post-filter'
+type FailureType = 'timeout' | 'schema_mismatch' | 'duplicate_key' | 'validation' | 'rate_limit' | 'auth' | 'unknown'
+
+interface ClassifiedError {
+  failure_stage: FailureStage
+  failure_type: FailureType
+  failure_message: string
+  failure_batch_context?: { job_count?: number; stale_count?: number; insert_attempts?: number }
+}
+
+/**
+ * Classify an ingestion error for structured logging
+ */
+function classifyIngestionError(
+  error: unknown,
+  stage: FailureStage,
+  batchContext?: { job_count?: number; stale_count?: number; insert_attempts?: number }
+): ClassifiedError {
+  const message = error instanceof Error ? error.message : String(error)
+  const lowerMsg = message.toLowerCase()
+  
+  let failure_type: FailureType = 'unknown'
+  
+  if (lowerMsg.includes('timeout') || lowerMsg.includes('timed out') || lowerMsg.includes('econnreset')) {
+    failure_type = 'timeout'
+  } else if (lowerMsg.includes('401') || lowerMsg.includes('403') || lowerMsg.includes('unauthorized') || lowerMsg.includes('forbidden')) {
+    failure_type = 'auth'
+  } else if (lowerMsg.includes('429') || lowerMsg.includes('rate limit') || lowerMsg.includes('too many requests')) {
+    failure_type = 'rate_limit'
+  } else if (lowerMsg.includes('duplicate') || lowerMsg.includes('unique constraint') || lowerMsg.includes('conflict')) {
+    failure_type = 'duplicate_key'
+  } else if (lowerMsg.includes('schema') || lowerMsg.includes('column') || lowerMsg.includes('type mismatch')) {
+    failure_type = 'schema_mismatch'
+  } else if (lowerMsg.includes('validation') || lowerMsg.includes('invalid') || lowerMsg.includes('required')) {
+    failure_type = 'validation'
+  }
+  
+  return {
+    failure_stage: stage,
+    failure_type,
+    failure_message: message.slice(0, 500),
+    failure_batch_context: batchContext,
+  }
+}
 
 type PaginationConfig = {
   pageParam?: string
@@ -2733,7 +2780,12 @@ export async function runIngestion(
 ): Promise<IngestResult[]> {
   const supabase = createAdminClient()
 
-  // Filter sources: if a specific slug is requested, use it; otherwise use all enabled sources
+  // Initialize source configs from DB
+  await syncSourceConfigs(supabase)
+
+  // 1. FILTER: Which sources to run?
+  // Only ingest "RemoteOK" if no specific source requested (example override)
+  // Or run only the requested slug.
   let sourcesToRun: JobSource[]
   const isSyncRequest = triggeredBy === 'manual' || triggeredBy === 'admin'
 
@@ -2924,8 +2976,22 @@ export async function runIngestion(
             total_failed_sources: failedSourceCount,
             started_at: startedAt,
             finished_at: finishedAt,
-            error_message: failedSourceCount > 0 ? `${failedSourceCount} sources failed` : undefined,
+            error_message: errorSummary || undefined,
+            // Structured failure classification (from first failed source)
+            ...(failedSources.length > 0 && failedSources[0].error ? (() => {
+              const classified = classifyIngestionError(
+                failedSources[0].error,
+                'fetch', // Default stage; could be refined per-source
+                { job_count: totalNormalized, stale_count: results.reduce((sum, r) => sum + r.staleFiltered, 0) }
+              )
+              return {
+                failure_stage: classified.failure_stage,
+                failure_type: classified.failure_type,
+                failure_batch_context: classified.failure_batch_context,
+              }
+            })() : {}),
           }),
+
         }).catch(err => {
           console.warn('ingest_jobs: failed to log to admin dashboard', {
             url: adminLogUrl,

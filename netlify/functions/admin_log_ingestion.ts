@@ -32,6 +32,10 @@ interface LogRequest {
   error_message?: string
   progress_percent?: number
   run_details?: Record<string, any>
+  // Structured failure classification
+  failure_stage?: 'fetch' | 'normalize' | 'dedup' | 'upsert' | 'post-filter'
+  failure_type?: 'timeout' | 'schema_mismatch' | 'duplicate_key' | 'validation' | 'rate_limit' | 'auth' | 'unknown'
+  failure_batch_context?: { job_count?: number; stale_count?: number; insert_attempts?: number }
 }
 
 interface LogResponse {
@@ -145,6 +149,10 @@ const handler: Handler = async (event) => {
               consecutive_failures: failureCount,
               last_failure_at: body.finished_at || new Date().toISOString(),
               last_failure_reason: body.error_message,
+              // Structured failure classification
+              failure_stage: body.failure_stage || null,
+              failure_type: body.failure_type || 'unknown',
+              failure_batch_context: body.failure_batch_context || null,
               updated_at: new Date().toISOString(),
               last_checked_at: new Date().toISOString(),
             },
