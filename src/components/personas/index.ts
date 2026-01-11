@@ -1,11 +1,7 @@
 /**
  * Personas Components
- * 
- * Components for managing user personas and their job search preferences.
+ *
+ * Note: Personas components have been moved to legacy/frontend/components/personas/
+ * These were scaffolding for a feature that was superseded by newer approaches.
+ * See legacy/ directory for historical reference.
  */
-
-export { PersonaSwitcher } from './PersonaSwitcher'
-export { PersonaEditor } from './PersonaEditor'
-
-export type { PersonaSwitcherProps } from './PersonaSwitcher'
-export type { PersonaEditorProps } from './PersonaEditor'
